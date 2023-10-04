@@ -6,10 +6,6 @@ This repository contains a starter pack of resources for CS310 and other, simila
 - GitHub Actions workflows for building each report and making them available as build artifacts.
 - Generic advice for writing the reports.
 
-## Getting started
-
-Click on the green "Use this template" button to fork the template to your account. You can customise a few settings, such as the repository name and visibility, during that process. You probably want to make the repository private.
-
 ### Continuous integration
 
 This repository is configured with [GitHub Actions](https://docs.github.com/en/actions) workflows which will build your reports every time you push changes to your fork of the repository. For example, if you change `specification/specification.tex` locally, commit your changes, and push them to GitHub, then the workflow defined in `.github/workflows/specification.yml` will run and build your specification for you. You will be able to find the corresponding job in the "Actions" tab on your repository. If the build is successful, the resulting PDF will be uploaded as a build artifact and can be downloaded from the summary page of the corresponding job.
@@ -25,16 +21,6 @@ To compile your reports locally, you can use `latexmk` or `pdflatex`. For exampl
 ```
 $ cd specification
 $ latexmk specification.tex -pdflatex -bibtex -latexoption=-shell-escape
-```
-
-### Compiling locally using Nix
-
-If you are using [the Nix package manager](https://nixos.org/download.html#download-nix) or are curious about using it, this repository comes with a `shell.nix` file which allows you to enter a Nix shell (using `nix-shell`) that will provide the environment needed to compile the reports. The `nix-shell` will take a little while to start up the first time you open it, because it will download and install all dependencies you need. Once loaded, you can navigate the file system as normal and run a suitable build command:
-
-```
-$ nix-shell
-[nix-shell:~/cs310]$ cd specification
-[nix-shell:~/cs310/specification]$ latexmk specification.tex -pdflatex -bibtex -latexoption=-shell-escape
 ```
 
 ## Advice for writing reports
