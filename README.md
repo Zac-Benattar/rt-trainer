@@ -21,7 +21,7 @@ Eventually this repository will be linked to a GitHub Pages page and continously
 
 ### Compiling locally
 
-You will need to have a LaTeX distribution, such as [TeX Live](https://www.tug.org/texlive/) installed for the platform you are working on. Tex Live is included in the official Arch repo:
+You will need to have a LaTeX distribution, such as [TeX Live](https://www.tug.org/texlive/) installed for the platform you are working on. `texlive` is included in the official Arch repo:
 
 ```
 $ sudo pacman -S texlive
