@@ -1,3 +1,5 @@
+# Not used, needs replacing with some form of make file not using Nix
+
 { pkgs ? import <nixpkgs> {} }:
 let
   python = pkgs.python3;
