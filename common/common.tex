@@ -1,41 +1,44 @@
+\documentclass[pdftex,11pt,a4paper,oneside]{article}
+%Can change the pt, papersize etc.
 
-\usepackage[]{geometry}
-\usepackage[latin1]{inputenc}
-\usepackage[UKenglish]{babel}
-\usepackage[UKenglish]{isodate}
-\usepackage{amsmath}
-\usepackage{amsfonts}
-\usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{graphicx}
-\usepackage{chngpage}
-\usepackage{calc}
-\PassOptionsToPackage{hyphens}{url}
-\usepackage{hyperref}
-\usepackage[nameinlink]{cleveref}
-\usepackage{fancyhdr}
-\usepackage{titletoc}
-\usepackage[explicit]{titlesec}
-\usepackage{natbib}
-\usepackage[dvipsnames]{xcolor}
-\usepackage[sc]{mathpazo}
-\linespread{1.05}
-\usepackage[T1]{fontenc}
-\usepackage[backend=biber,style=apa]{biblatex}
-%\usepackage{minted}
+\usepackage[utf8]{inputenc}
 
-\hypersetup{
-	colorlinks=true,
-	linkcolor=black,
-	urlcolor=black,
-	citecolor=black
-}
+\usepackage[a4paper, total={6.5in, 10.5in}]{geometry}
+
+\usepackage{amsmath} %For both in-line and equation mode
+\numberwithin{equation}{section} %Numbering of our equations per section
+\usepackage{fancyhdr} %For our headers
+\usepackage{fancyref}
+\usepackage{graphicx} %Inserting images
+\usepackage{setspace} %Spacing on the front page for crest and titles
+\usepackage[]{fncychap} % Styles can be Sonny, Lenny, Glenn, Conny, Rejne, Bjarne and Bjornstrup
+\usepackage[hyphens]{url} %Deals with hyphens in urls to make them clickable
+\usepackage{xcolor} %Great if you want coloured text
+\usepackage{tabularx}
+\usepackage{appendix} %Take a wild guess slick
+\usepackage{mwe} % Can't remeber what this does
+\usepackage{float}
+
+\usepackage[
+backend=biber,
+style=alphabetic,
+sorting=ynt
+]{biblatex}
+\addbibresource{../common/bibliography.bib}
+
+%KEEP THIS ONE LAST it's quite buggy, it allows you to click on links within the pdf and web links without changing the colour. The mouse cursor simply changes its icon to indicate to the user. Great tool - still awkward
+\usepackage[hidelinks]{hyperref}
+
+%This will tell the compiler to do the header style, page and spacing between the header and text
+\fancyhf{}
+\pagestyle{fancy}
+
+%KEEP THIS ONE LAST it's quite buggy, it allows you to click on links within the pdf and web links without changing the colour. The mouse cursor simply changes its icon to indicate to the user. Great tool - still awkward
+\usepackage[hidelinks]{hyperref}
 
 \setlength{\parindent}{0mm}
 \setlength{\parskip}{\medskipamount}
 \renewcommand\baselinestretch{1.2}
-
-\cleanlookdateon
 
 \makeatletter
 \newcommand{\@assignment}[0]{Assignment}
