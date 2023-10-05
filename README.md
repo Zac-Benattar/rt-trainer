@@ -19,20 +19,7 @@ This repository is configured with [GitHub Actions](https://docs.github.com/en/a
 
 Eventually this repository will be linked to a GitHub Pages page and continously deployed there in order to have accessible the current release version of the project
 
-### Compiling locally
+### LaTeX documents
 
-You will need to have a LaTeX distribution, such as [TeX Live](https://www.tug.org/texlive/) installed for the platform you are working on. `texlive` is included in the official Arch repo:
-
-```
-$ sudo pacman -S texlive
-```
-
-The template also supports syntax highlighting using the `minted` package, which requires [Pygments](https://pygments.org) to be installed using e.g. `pip install Pygments` or `pip3 install Pygments` (assuming your platform already has Python installed on it). If this causes you problems or you do not wish to use `minted` for syntax highlighting in your reports, you can remove `\usepackage{minted}` from `common/common.tex`. Alternatively, you can follow the instructions below.
-
-To compile your reports locally, you can use `latexmk` or `pdflatex`. For example, to compile the specification using `latexmk`:
-
-```
-$ cd specification
-$ latexmk specification.tex -pdflatex -bibtex -latexoption=-shell-escape
-```
+The TeX documents in this repository have all been written using Overleaf's online editor (https://www.overleaf.com/) for simplicity, and GitHub Sync (https://www.overleaf.com/learn/how-to/GitHub_Synchronization) has been used to keep the repository up to date. This can interfere with the GitHub actions compliation, as Overleaf is more compliant with errors and warnings. Hence it may be easier to view the TeX documents in Overleaf than try compile locally.
 
