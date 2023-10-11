@@ -1,5 +1,6 @@
 {
 	"/": [],
 	"/about": [],
-	"/profile": []
+	"/profile": [],
+	"/scenario/[scenarioId]": []
 }
