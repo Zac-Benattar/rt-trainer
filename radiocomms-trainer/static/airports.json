@@ -1,0 +1,200 @@
+{
+    "airports": {
+        "LHR": {
+            "name": "Heathrow Airport",
+            "code": "LHR",
+            "city": "London",
+            "latitude": 51.4775,
+            "longitude": -0.461389
+        },
+        "LGW": {
+            "name": "Gatwick Airport",
+            "code": "LGW",
+            "city": "London",
+            "latitude": 51.148056,
+            "longitude": -0.190278
+        },
+        "LCY": {
+            "name": "London City Airport",
+            "code": "LCY",
+            "city": "London",
+            "latitude": 51.505278,
+            "longitude": 0.055278
+        },
+        "STN": {
+            "name": "London Stansted Airport",
+            "code": "STN",
+            "city": "London",
+            "latitude": 51.885,
+            "longitude": 0.235
+        },
+        "LTN": {
+            "name": "London Luton Airport",
+            "code": "LTN",
+            "city": "London",
+            "latitude": 51.874722,
+            "longitude": -0.368333
+        },
+        "SEN": {
+            "name": "London Southend Airport",
+            "code": "SEN",
+            "city": "London",
+            "latitude": 51.571389,
+            "longitude": 0.695556
+        },
+        "BQH": {
+            "name": "London Biggin Hill Airport",
+            "code": "BQH",
+            "city": "London",
+            "latitude": 51.330833,
+            "longitude": 0.0325
+        },
+        "BHX": {
+            "name": "Birmingham Airport",
+            "code": "BHX",
+            "city": "Birmingham",
+            "latitude": 52.453889,
+            "longitude": -1.743507
+        },
+        "DSA": {
+            "name": "Doncaster Sheffield Airport",
+            "code": "DSA",
+            "city": "Doncaster",
+            "latitude": 53.4808,
+            "longitude": -1.010699
+        },
+        "GLA": {
+            "name": "Glasgow International Airport",
+            "code": "GLA",
+            "city": "Glasgow",
+            "latitude": 55.871944,
+            "longitude": -4.433056
+        },
+        "PIK": {
+            "name": "Glasgow Prestwick Airport",
+            "code": "PIK",
+            "city": "Glasgow",
+            "latitude": 55.509444,
+            "longitude": -4.586667
+        },
+        "EDI": {
+            "name": "Edinburgh Airport",
+            "code": "EDI",
+            "city": "Edinburgh",
+            "latitude": 55.95,
+            "longitude": -3.3725
+        },
+        "ABZ": {
+            "name": "Aberdeen International Airport",
+            "code": "ABZ",
+            "city": "Aberdeen",
+            "latitude": 57.201944,
+            "longitude": -2.197778
+        },
+        "INV": {
+            "name": "Inverness Airport",
+            "code": "INV",
+            "city": "Inverness",
+            "latitude": 57.5425,
+            "longitude": -4.0475
+        },
+        "NCL": {
+            "name": "Newcastle Airport",
+            "code": "NCL",
+            "city": "Newcastle",
+            "latitude": 55.0375,
+            "longitude": -1.691667
+        },
+        "MME": {
+            "name": "Durham Tees Valley Airport",
+            "code": "MME",
+            "city": "Teesside",
+            "latitude": 54.509189,
+            "longitude": -1.429406
+        },
+        "CWL": {
+            "name": "Cardiff Airport",
+            "code": "CWL",
+            "city": "Cardiff",
+            "latitude": 51.396667,
+            "longitude": -3.343333
+        },
+        "BRS": {
+            "name": "Bristol Airport",
+            "code": "BRS",
+            "city": "Bristol",
+            "latitude": 51.382669,
+            "longitude": -2.719089
+        },
+        "BOH": {
+            "name": "Bournemouth Airport",
+            "code": "BOH",
+            "city": "Bournemouth",
+            "latitude": 50.78,
+            "longitude": -1.8425
+        },
+        "SOU": {
+            "name": "Southampton Airport",
+            "code": "SOU",
+            "city": "Southampton",
+            "latitude": 50.950261,
+            "longitude": -1.356803
+        },
+        "EXT": {
+            "name": "Exeter International Airport",
+            "code": "EXT",
+            "city": "Exeter",
+            "latitude": 50.734444,
+            "longitude": -3.413889
+        },
+        "BHD": {
+            "name": "George Best Belfast City Airport",
+            "code": "BHD",
+            "city": "Belfast",
+            "latitude": 54.618056,
+            "longitude": -5.8725
+        },
+        "BFS": {
+            "name": "Belfast International Airport",
+            "code": "BFS",
+            "city": "Belfast",
+            "latitude": 54.6575,
+            "longitude": -6.215833
+        },
+        "LDY": {
+            "name": "City of Derry Airport",
+            "code": "LDY",
+            "city": "Derry",
+            "latitude": 55.042778,
+            "longitude": -7.161111
+        },
+        "MAN": {
+            "name": "Manchester Airport",
+            "code": "MAN",
+            "city": "Manchester",
+            "latitude": 53.353611,
+            "longitude": -2.274722
+        },
+        "LPL": {
+            "name": "Liverpool John Lennon Airport",
+            "code": "LPL",
+            "city": "Liverpool",
+            "latitude": 53.333611,
+            "longitude": -2.849722
+        },
+        "EMA": {
+            "name": "East Midlands Airport",
+            "code": "EMA",
+            "city": "East Midlands",
+            "latitude": 52.831111,
+            "longitude": -1.328056
+        },
+        "NWI": {
+            "name": "Norwich International Airport",
+            "code": "NWI",
+            "city": "Norwich",
+            "latitude": 52.675833,
+            "longitude": 1.282778
+        }
+    }
+}

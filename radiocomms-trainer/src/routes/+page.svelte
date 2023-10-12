@@ -6,9 +6,9 @@
     const enableRandomEventsElement = document.getElementById(
       "enable-random-events"
     ) as HTMLInputElement;
-    let enableRandomEvents : boolean = false;
+    let enableRandomEvents: boolean = false;
     if (enableRandomEventsElement != null) {
-        enableRandomEvents = enableRandomEventsElement.checked;
+      enableRandomEvents = enableRandomEventsElement.checked;
     }
     if (enableRandomEvents)
       goto("/scenario/" + exampleScenarioId + "?unexpectedEvents=True");
