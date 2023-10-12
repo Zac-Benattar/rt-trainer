@@ -11,5 +11,4 @@
 
 <p>RT Trainer is a web application that allows you to practice your radio communication skills.</p>
 <button on:click={handleClick}>Generate Scenario </button>
-<a href="/about">About</a>
 

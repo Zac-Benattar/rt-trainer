@@ -7,12 +7,20 @@ h1 {
     text-transform: capitalize;
 }
 
-.navbar ul {
+ul.top-navbar {
     list-style-type: none;
     margin: 0;
     padding: 0;
 }
 
-.navbar li{
+li.navbar {
     display: inline;
+}
+
+footer.info-footer {
+    position: fixed;
+    left: 0;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
 }

@@ -3,7 +3,7 @@
 </script>
 
 <nav>
-  <ul class="navbar">
+  <ul class="top-navbar">
     <li class="navbar">
       <a class="navbar" href="/">Home</a>
     </li>
@@ -14,3 +14,7 @@
 </nav>
 
 <slot />
+
+<footer class="info-footer">
+  <a class="footer-link" href="/about">About</a>
+</footer>
