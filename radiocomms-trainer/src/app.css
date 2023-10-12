@@ -1,26 +1,73 @@
 body {
-    padding: 2rem;
+  padding: 2rem;
 }
 
 h1 {
-    line-height: 1;
-    text-transform: capitalize;
+  line-height: 1;
+  text-transform: capitalize;
 }
 
 ul.top-navbar {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
 }
 
 li.navbar {
-    display: inline;
+  display: inline;
 }
 
 footer.info-footer {
-    position: fixed;
-    left: 0;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
+  position: fixed;
+  left: 0;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
 }
