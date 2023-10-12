@@ -1,0 +1,18 @@
+body {
+    padding: 2rem;
+}
+
+h1 {
+    line-height: 1;
+    text-transform: capitalize;
+}
+
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar li{
+    display: inline;
+}
