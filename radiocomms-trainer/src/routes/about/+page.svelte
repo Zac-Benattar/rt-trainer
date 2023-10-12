@@ -1,1 +1,6 @@
 <h1>About</h1>
+<p> <b>RT Trainer</b> - A web based training platform for future pilots to learn radio telephony (RT)
+skills required to pass the CAA RT exam in order to obtain a Flight Radiotelephony Operator's License (FRTOL).
+More information about the licence and exam can be found on the
+<a href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/">CAA's website</a>.</p>
+<p>This website was created as part of Zac Benattar's third year computer science project, with the GitHub repository is available <a href="https://github.com/Zac-Benattar/csproj">here</a>.</p>
