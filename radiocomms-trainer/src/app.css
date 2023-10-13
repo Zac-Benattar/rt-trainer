@@ -25,6 +25,14 @@ footer.info-footer {
   text-align: center;
 }
 
+button.radio-button {
+}
+
+button.active-button {
+  background-color: #afa548;
+  color: black;
+}
+
 /* Tooltip container */
 .tooltip {
   position: relative;
