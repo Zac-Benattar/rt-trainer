@@ -48,13 +48,13 @@
 
 <h1>Scenario {scenarioId}</h1>
 
-<div>
+<div class="radio-container-outer">
   <div>
     <div>
       <div class="radio-mode-selecter">
         <div class="position-relative">
-          <div class="radio-mode-wheel">
-            <div class="radio-mode-wheel-line" />
+          <div class="radio-mode-dial">
+            <div class="radio-mode-dial-line" />
           </div>
         </div>
         <div class="radio-modes-container">
@@ -67,28 +67,32 @@
         <div class="segmentdisplay radio-display-screen" />
         <div class="radio-display-buttons-container">
           <div class="radio-display-button-container">
-            <button class="radio-button" id="radio-button-com" on:click={handleCOMButtonClick}
-              >COM</button
+            <button
+              class="radio-button"
+              id="radio-button-com"
+              on:click={handleCOMButtonClick}>COM</button
             >
           </div>
           <div class="radio-display-button-container">
             <button class="radio-button" id="radio-button-swap">SWAP</button>
           </div>
           <div class="radio-display-button-container">
-            <button class="radio-button" id="radio-button-nav" on:click={handleNAVButtonClick}
-              >NAV</button
+            <button
+              class="radio-button"
+              id="radio-button-nav"
+              on:click={handleNAVButtonClick}>NAV</button
             >
           </div>
         </div>
       </div>
 
-      <div class="radio-frequency-selecter">
-        <div class="radio-frequency-wheel">
-          <div class="radio-frequency-wheel-left-outer">
-            <div class="radio-frequency-wheel-left-inner" />
+      <div class="radio-frequency-selecter position-relative">
+        <div class="radio-frequency-dial">
+          <div class="radio-frequency-dial-left-outer">
+            <div class="radio-frequency-dial-left-inner" />
           </div>
-          <div class="radio-frequency-wheel-right-outer">
-            <div class="radio-frequency-wheel-right-inner" />
+          <div class="radio-frequency-dial-right-outer">
+            <div class="radio-frequency-dial-right-inner" />
           </div>
         </div>
       </div>

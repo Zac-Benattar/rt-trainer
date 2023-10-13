@@ -33,6 +33,37 @@ button.active-button {
   color: black;
 }
 
+div.radio-container-outer {
+  background-color: rgb(65, 65, 65);
+  width: 1000px;
+  height: 240px;
+}
+
+div.transponder-container-outer {
+  background-color: rgb(65, 65, 65);
+  width: 1000px;
+  height: 240px;
+}
+
+div.radio-mode-dial {
+  width: 80px;
+  height: 80px;
+  border: 2px solid #FFF;
+  border-radius: 50%;
+  transform: rotate(0deg);
+  transition: all 0.35s ease-in-out 0s;
+}
+
+div.radio-mode-dial-line {
+  width: 2px;
+  height: 40px;
+  background: #FFF;
+}
+
+.position-relative {
+  position: relative !important;
+}
+
 /* Tooltip container */
 .tooltip {
   position: relative;
