@@ -1,6 +1,6 @@
 FROM node:20.8.0
 WORKDIR /app
-COPY package*.json ./
+COPY ./radiocomms-trainer/package*.json ./
 RUN npm install
 COPY . .
 EXPOSE 5173
