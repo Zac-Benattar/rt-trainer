@@ -1,0 +1,30 @@
+\section{Objectives}
+The following objectives have been developed to reflect the customer's requirements and sorted such that project success will be defined as the final product satisfying all high priority objectives. Some objectives rely on others and cannot be implemented until prerequisites are completed.
+
+\begin{center}
+    \begin{tabular}{ | c | m{22.7em} | c | c | }
+        \hline
+        \bf{Num} & \bf{Description} & \bf{Priority} & \bf{Prerequisites} \\
+        \hline
+        1 & The system will provide scenarios suitable for RT exam practice. & High & None \\
+        \hline
+        2 & The system will generate random scenarios with suitable random locations, events, and radio messages. & Medium & 1 \\
+        \hline
+        3 & The system will allow students to respond to radio calls via text input and provide feedback on responses correctly as defined in the CAP 413 RT manual \cite{CAP413}. For example if a call is correct but poorly ordered the response will be "say again" . & High & 1 \\
+        \hline
+        4 & The system will allow voice responses to radio calls using their system microphone, handled by a bespoke or pre-existing external API. & High & 3 \\
+        \hline
+        5 & The system will be web based with all features defined in other high priority objectives working on up to date modern browsers (Chrome \& Firefox). & High & 1 \\
+        \hline
+        6 & The system will allow students to view progress and statistics of their learning so that they can see areas to focus on. & Medium & 1, 3 \\
+        \hline
+        7 & The system will allow students to select smaller parts of scenarios to practice specifically as to not waste time on sections they are already confident with. & Medium & 1, 3 \\
+        \hline
+        8 & The system will allow students to select a support level ranging from fully guided scenarios to no guidance exam-like conditions. & Low & 1, 3 \\
+        \hline
+        9 & The system will allow students to save for later or share specific scenarios with other students by providing a seed for the random number generator used in scenario generation. & Low & 2 \\
+        \hline
+        10 & The system will have sub 5 second latency when responding to a user's voice input. & Low & 4 \\
+        \hline
+    \end{tabular}
+\end{center}

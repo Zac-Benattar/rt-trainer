@@ -1,0 +1,37 @@
+\documentclass[a4paper,fleqn,twoside,12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%
+
+\input{../common/common.tex}
+\input{../common/project.tex}
+
+\assignment{Progress report}
+
+%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{plain}
+\renewcommand{\headrulewidth}{0.0pt}
+
+\makeatletter
+\fancypagestyle{plain}{
+	\fancyhf{}
+	\fancyhead[LE]{\thepage}
+	\fancyhead[RE]{\textit{\@author}}
+	\fancyhead[RO]{\thepage}
+	\fancyhead[LO]{\textit{\@title}}
+}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\pagestyle{plain}
+\input{introduction.tex}
+\input{background.tex}
+\input{progress.tex}
+\input{project-management.tex}
+
+\printbibliography
+
+\end{document}

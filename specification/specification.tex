@@ -1,0 +1,40 @@
+\documentclass[a4paper,fleqn,12pt]{article}
+
+%%%%%%%%%%%%%%%%%%%%
+
+\input{../common/common.tex}
+\input{../common/project.tex}
+
+\setcounter{secnumdepth}{0} % disables section numbering
+
+\assignment{Project specification}
+
+%%%%%%%%%%%%%%%%%%%%
+
+\pagestyle{plain}
+\renewcommand{\headrulewidth}{0.0pt}
+
+% sets up header with name, project and footer with page num
+\makeatletter
+\fancypagestyle{plain}{
+	\fancyhf{}
+	\fancyhead[R]{\textit{\@title} - \textit{\@assignment}}
+    \fancyhead[L]{\textit{\@author}}
+    \fancyfoot[C]{\thepage}
+}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\pagestyle{plain}
+
+\input{introduction.tex}
+\input{background.tex}
+\input{objectives.tex}
+\input{project-management.tex}
+
+\printbibliography
+
+\end{document}
