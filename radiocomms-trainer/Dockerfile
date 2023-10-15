@@ -1,7 +1,0 @@
-FROM node:20.8.0
-WORKDIR /app
-COPY ./radiocomms-trainer/package*.json ./
-RUN npm install
-COPY . .
-EXPOSE 5173
-CMD ["npm", "run", "dev", "--open"]
