@@ -1,13 +1,19 @@
-name: Docker Image CI
+name: Build and Push to Docker Hub and Fly.io
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
+env:
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     
 jobs:
-  build:
+  build-and-push:
+    name: Build and Push
     runs-on: ubuntu-latest
     steps:
       -
@@ -30,3 +36,8 @@ jobs:
           file: ./radiocomms-trainer/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/clockbox:latest
+      -
+        name: Deploy to Fly.io
+        uses: superfly/flyctl-actions@master
+        run: flyctl deploy --remote-only
+
