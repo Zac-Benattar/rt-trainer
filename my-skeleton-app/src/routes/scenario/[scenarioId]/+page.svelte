@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Radio from './Radio.svelte';
+	import Simulator from './Radio.svelte';
 	import { page } from '$app/stores';
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
-	const scenarioId = $page.params.scenarioId;
+	var scenarioId = $page.params.scenarioId;
 
 	// check whether unexpected events are enabled
 	let unexpectedEvents: boolean = false;
@@ -42,5 +42,8 @@
 		<!-- Trigger -->
 		<button use:clipboard={{ element: 'scenarioLinkElement' }}>Copy</button>
 	</div>
-	<div><Radio /></div>
+	<div>
+		<!-- No seed value works for some reason -->
+		<Simulator seed={scenarioId}/>
+	</div>
 </div>
