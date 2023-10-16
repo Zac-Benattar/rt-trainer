@@ -3,7 +3,7 @@
 
 <div class="transponder-container-outer">
 	<div>
-		<div>
+		<div class="controls-container">
 			<div class="transponder-mode-selecter">
 				<div class="position-relative">
 					<div class="transponder-mode-dial">
@@ -53,6 +53,11 @@
 ```
 
 <style lang="postcss">
+	.transponder-container-outer {
+		display: flex;
+		flex-direction: row;
+	}
+
 	.transponder-button {
 		width: 50px;
 	}

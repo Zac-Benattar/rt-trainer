@@ -14,6 +14,6 @@
 <div>
 	<div>
 		<!-- No props can be passed without error -->
-		<Simulator {seed} {unexpectedEvents} />
+		<Simulator seed="wa234" {unexpectedEvents} />
 	</div>
 </div>

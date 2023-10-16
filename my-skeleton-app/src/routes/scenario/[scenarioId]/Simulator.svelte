@@ -4,7 +4,7 @@
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	export let unexpectedEvents: boolean = false;
-	export let seed = '0';
+	export let seed: string = "0";
 
 	// generate the link to the scenario
 	var scenarioLink = 'www.rt-trainer.com/scenario/' + seed;
@@ -41,3 +41,11 @@
 		<Transponder />
 	</div>
 </div>
+
+<style lang="postcss">
+	.radio-transponder-container {
+		display: flex;
+		flex-direction: columns;
+		justify-content: center;
+	}
+</style>
