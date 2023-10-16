@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Simulator from './Radio.svelte';
 	import { page } from '$app/stores';
-	var scenarioId = $page.params.scenarioId;
+	var seed = $page.params.scenarioId;
 
 	// check whether unexpected events are enabled
 	let unexpectedEvents: boolean = false;
@@ -13,7 +13,7 @@
 
 <div>
 	<div>
-		<!-- No seed value works for some reason -->
-		<Simulator seed={scenarioId} unexpectedEvents={unexpectedEvents}/>
+		<!-- No props can be passed without error -->
+		<Simulator {seed} {unexpectedEvents} />
 	</div>
 </div>

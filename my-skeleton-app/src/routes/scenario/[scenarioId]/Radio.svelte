@@ -43,7 +43,7 @@
 				</div>
 				<div class="radio-modes-container">
 					<div class="radio-mode-off">OFF</div>
-					<div class="radio-mode-standby">STANDBY</div>
+					<div class="radio-mode-standby">SBY</div>
 				</div>
 			</div>
 

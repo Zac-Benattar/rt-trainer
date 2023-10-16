@@ -76,6 +76,7 @@ declare module '$env/static/private' {
 	export const npm_lifecycle_script: string;
 	export const VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 	export const XKB_DEFAULT_LAYOUT: string;
+	export const npm_config_open: string;
 	export const npm_config_npm_version: string;
 	export const XDG_SESSION_CLASS: string;
 	export const TERM: string;
@@ -116,6 +117,7 @@ declare module '$env/static/private' {
 	export const XKB_DEFAULT_OPTIONS: string;
 	export const npm_node_execpath: string;
 	export const npm_config_engine_strict: string;
+	export const OLDPWD: string;
 	export const TERM_PROGRAM: string;
 	export const NODE_ENV: string;
 }
@@ -197,6 +199,7 @@ declare module '$env/dynamic/private' {
 		npm_lifecycle_script: string;
 		VSCODE_GIT_ASKPASS_EXTRA_ARGS: string;
 		XKB_DEFAULT_LAYOUT: string;
+		npm_config_open: string;
 		npm_config_npm_version: string;
 		XDG_SESSION_CLASS: string;
 		TERM: string;
@@ -237,6 +240,7 @@ declare module '$env/dynamic/private' {
 		XKB_DEFAULT_OPTIONS: string;
 		npm_node_execpath: string;
 		npm_config_engine_strict: string;
+		OLDPWD: string;
 		TERM_PROGRAM: string;
 		NODE_ENV: string;
 		[key: `PUBLIC_${string}`]: undefined;

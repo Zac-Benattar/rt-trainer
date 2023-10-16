@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
-    import { clipboard } from '@skeletonlabs/skeleton';
+	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	export let unexpectedEvents: boolean = false;
-    export let seed = "0";
+	export let seed = '0';
 
-    // generate the link to the scenario
+	// generate the link to the scenario
 	var scenarioLink = 'www.rt-trainer.com/scenario/' + seed;
 	if (unexpectedEvents) {
 		scenarioLink += '?unexpectedEvents=' + unexpectedEvents;
@@ -37,6 +37,7 @@
 		<button use:clipboard={{ element: 'scenarioLinkElement' }}>Copy</button>
 	</div>
 	<div class="radio-transponder-container">
-		<slot {Radio} {Transponder}/>
+		<Radio />
+		<Transponder />
 	</div>
 </div>
