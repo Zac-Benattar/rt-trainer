@@ -42,21 +42,6 @@
 			}
 		}
 	};
-
-	const handleRadioDialClick = () => {
-		const RadioModeDial = document.getElementById('radio-mode-dial') as HTMLDivElement;
-		if (RadioModeDial != null) {
-			if (radioDialMode === 'OFF') {
-				radioDialMode = 'SBY';
-				RadioModeDial.style.transform = 'rotate(0deg)';
-				RadioModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
-			} else {
-				radioDialMode = 'OFF';
-				RadioModeDial.style.transform = 'rotate(-150deg)';
-				RadioModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-			}
-		}
-	};
 </script>
 
 <div class="radio-container-outer relative">

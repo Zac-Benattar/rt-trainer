@@ -31,10 +31,10 @@
 				/>
 			</p>
 		</div>
-		<div class="radio-transponder-container relative">
+		<div class="radio-transponder-container flex flex-col">
 			<Radio />
-			<div style="min-height:50px; user-select: none;"></div>
 			<Transponder />
+			<div style="min-height:50px; user-select: none;"></div>
 			<Map />
 		</div>
 		<div class="relative">
@@ -49,8 +49,6 @@
 
 <style lang="postcss">
 	.radio-transponder-container {
-		display: flex;
-		flex-direction: columns;
 		justify-content: center;
 	}
 </style>
