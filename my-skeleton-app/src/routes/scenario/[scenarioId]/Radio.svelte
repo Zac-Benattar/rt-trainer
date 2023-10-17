@@ -47,13 +47,6 @@
 			}
 		}
 	};
-
-	const handleRadioDialLoad = () => {
-		// Setup of control
-		const RadioModeDial = document.getElementById('radio-mode-dial') as HTMLDivElement;
-		RadioModeDial.style.transform = 'rotate(-150deg)';
-		RadioModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-	};
 </script>
 
 <div class="radio-container-outer relative">
@@ -65,7 +58,11 @@
 					id="radio-mode-dial"
 					class="mode-dial flex"
 					on:click={handleRadioDialClick}
-					on:load={handleRadioDialLoad}
+					on:keydown={handleRadioDialClick}
+					aria-label="Radio Mode Dial"
+					tabindex="0"
+					role="button"
+					style="transform: rotate(-150deg);"
 				>
 					<div class="mode-dial-line center" />
 				</div>
@@ -157,24 +154,5 @@
 	:global(.active-button) {
 		background-color: #afa548;
 		color: black;
-	}
-
-	.mode-dial {
-		width: 80px;
-		height: 80px;
-		border: 2px solid #fff;
-		border-radius: 50%;
-		transform: rotate(0deg);
-		transition: all 0.35s ease-in-out 0s;
-		justify-content: center;
-		display: flex;
-		transform: rotateX('-150deg');
-		box-shadow: rgb(255, 255, 255) 0px 0px 20px -5px;
-	}
-
-	.mode-dial-line {
-		width: 2px;
-		height: 40px;
-		background: #fff;
 	}
 </style>
