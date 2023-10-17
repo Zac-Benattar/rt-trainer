@@ -28,7 +28,6 @@
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
 				}
 			} else {
-
 			}
 		}
 	};
@@ -49,19 +48,36 @@
 					ModeDial.style.transform = 'rotate(-150deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
 				}
+			} else {
+				const ModeIndex = Modes.indexOf(mode);
+				if (ModeIndex == 0) {
+					ModeDial.style.transform = 'rotate(0deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+				} else {
+					ModeDial.style.transform = 'rotate(' + ModeIndex * 30 + 'deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				}
 			}
-            else {
-                const ModeIndex = Modes.indexOf(mode);
-                if (ModeIndex == 0) {
-                    ModeDial.style.transform = 'rotate(0deg)';
-                    ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-                }
-                else {
-                    ModeDial.style.transform = 'rotate(' + (ModeIndex * 30) + 'deg)';
-                    ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
-                }
+		}
+	};
 
-            }
+	const handleDialArrowClick = (side: string) => {
+		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
+		if (ModeDial != null) {
+			const CurrentModeIndex = Modes.indexOf(CurrentMode);
+			if (side == 'left') {
+				if (CurrentModeIndex != 0) {
+					ModeDial.style.transform = 'rotate(' + (CurrentModeIndex - 1) * 30 + 'deg)';
+					if (CurrentModeIndex == 1)
+						ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+					else ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+				}
+			} else {
+				if (CurrentModeIndex != 0) {
+					ModeDial.style.transform = 'rotate(' + (CurrentModeIndex + 1) * 30 + 'deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				}
+			}
 		}
 	};
 
@@ -83,6 +99,46 @@
 	}
 
 	function addModes() {
+		// Add side based arrows if there are more than two modes
+		if (Modes.length > 2) {
+			var ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
+
+			// Add direction arrows
+			var LeftArrow = document.createElement('div');
+			var RightArrow = document.createElement('div');
+			var LeftArrowImg = document.createElement('svg');
+			var RightArrowImg = document.createElement('svg');
+			LeftArrow.setAttribute(
+				'style',
+				'position: absolute; left: 8px; top: 30%; width: 30%; pointer-events: none;'
+			);
+			RightArrow.setAttribute(
+				'style',
+				'position: absolute; right: 8px; top: 30%; width: 30%; pointer-events: none;'
+			);
+			LeftArrowImg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+			LeftArrowImg.setAttribute('viewBox', '0 0 2.7 6.25');
+			RightArrowImg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+			RightArrowImg.setAttribute('viewBox', '0 0 2.7 6.24');
+			ModeDial.appendChild(LeftArrow);
+			ModeDial.appendChild(RightArrow);
+			LeftArrow.appendChild(LeftArrowImg);
+			RightArrow.appendChild(RightArrowImg);
+
+			// Add direction divs
+			var LeftDiv = document.createElement('div');
+			var RightDiv = document.createElement('div');
+			LeftDiv.setAttribute('class', 'w-100 h-100');
+			RightDiv.setAttribute('class', 'w-100 h-100');
+			LeftDiv.setAttribute('style', 'width: 50%;');
+			RightDiv.setAttribute('style', 'width: 50%;');
+			LeftDiv.setAttribute('onclick', 'handleDialArrowClick(left)');
+			RightDiv.setAttribute('onclick', 'handleDialArrowClick(right)');
+			ModeDial.appendChild(LeftDiv);
+			ModeDial.appendChild(RightDiv);
+		}
+
+		// Add mode labels around dial
 		for (let i = 0; i < Modes.length; i++) {
 			// Probably not a good fix but can't see how it will break until it does...
 			if (Modes[i] != null) {
@@ -90,6 +146,8 @@
 			}
 		}
 	}
+
+	addModes();
 </script>
 
 <div class="mode-selecter-container relative">
