@@ -30,6 +30,8 @@
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
 				}
 			} else {
+                // Implement this!
+                console.log('Feature not implemented');
 			}
 		}
 	};
@@ -100,9 +102,10 @@
 	}
 
 	function addModes() {
+        console.log('Adding modes');
 		// Add side based arrows if there are more than two modes
 		if (Modes.length > 2) {
-			var ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
+			var DialContainer = document.getElementById('dial-container') as HTMLDivElement;
 
 			// Add direction arrows
 			var LeftArrow = document.createElement('div');
@@ -121,8 +124,8 @@
 			LeftArrowImg.setAttribute('viewBox', '0 0 2.7 6.25');
 			RightArrowImg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 			RightArrowImg.setAttribute('viewBox', '0 0 2.7 6.24');
-			ModeDial.appendChild(LeftArrow);
-			ModeDial.appendChild(RightArrow);
+			DialContainer.appendChild(LeftArrow);
+			DialContainer.appendChild(RightArrow);
 			LeftArrow.appendChild(LeftArrowImg);
 			RightArrow.appendChild(RightArrowImg);
 
@@ -135,8 +138,8 @@
 			RightDiv.setAttribute('style', 'width: 50%;');
 			LeftDiv.setAttribute('onclick', 'handleDialArrowClick(left)');
 			RightDiv.setAttribute('onclick', 'handleDialArrowClick(right)');
-			ModeDial.appendChild(LeftDiv);
-			ModeDial.appendChild(RightDiv);
+			DialContainer.appendChild(LeftDiv);
+			DialContainer.appendChild(RightDiv);
 		}
 
 		// Add mode labels around dial
@@ -153,8 +156,8 @@
     });
 </script>
 
-<div class="mode-selecter-container relative">
-	<div class="position-relative">
+<div id="dial-container" class="relative">
+	<div class="relative">
 		<div
 			id="mode-dial"
 			class="mode-dial flex"

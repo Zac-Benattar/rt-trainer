@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Simulator from './Radio.svelte';
+	import Simulator from './Simulator.svelte';
 	import { page } from '$app/stores';
 	var seed = $page.params.scenarioId;
 
@@ -14,6 +14,6 @@
 <div>
 	<div>
 		<!-- No props can be passed without error -->
-		<Simulator seed="wa234" {unexpectedEvents} />
+		<Simulator />
 	</div>
 </div>

@@ -15,11 +15,11 @@
 </script>
 
 <div class="relative flex">
-	<div class="columns-3xl">
+	<div class="flex flex-col gap-10">
 		<div class="relative">
 			<h1>Simulator</h1>
 		</div>
-		<div>
+		<div class="relative">
 			<p>
 				Unexpected events <SlideToggle
 					id="enable-random-events"
@@ -31,11 +31,17 @@
 				/>
 			</p>
 		</div>
-		<div class="radio-transponder-container flex flex-col">
-			<Radio />
-			<Transponder />
-			<div style="min-height:50px; user-select: none;"></div>
-			<Map />
+		<div class="radio-transponder-container flex flex-col gap-10">
+			<div>
+				<Radio />
+			</div>
+			<div>
+				<Transponder />
+			</div>
+			<div style="min-height:20px; user-select: none;" />
+			<div>
+				<Map />
+			</div>
 		</div>
 		<div class="relative">
 			<!-- Source -->
