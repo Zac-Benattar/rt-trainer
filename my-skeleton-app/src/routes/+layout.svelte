@@ -53,7 +53,7 @@
 			<ul>
 				<li><a href="/">Home</a></li>
 				<li><a href="/about">About</a></li>
-				<li><LightSwitch /></li>
+				<li><div><LightSwitch /></div></li>
 			</ul>
 		</nav>
 		<!-- --- -->
