@@ -1,8 +1,18 @@
 <script lang="ts">
+	import Dial from './Dial.svelte';
 	type RadioMode = 'NONE' | 'COM' | 'NAV';
-	type RadioDialMode = 'OFF' | 'SBY';
+	var RadioDialModes : ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
+	type ArrayMaxLength7MinLength2 = readonly [
+		string,
+		string,
+		string?,
+		string?,
+		string?,
+		string?,
+		string?
+	];
 	let radioMode: RadioMode = 'NONE';
-	let radioDialMode: RadioDialMode = 'OFF';
+	let radioDialMode: string = 'OFF';
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -51,24 +61,7 @@
 
 <div class="radio-container-outer relative">
 	<div class="mode-selecter absolute inset-y-0 left-0">
-		<div class="radio-modes-container relative">
-			<div class="dial-label relative top-0 left-6">SBY</div>
-			<div class="position-relative">
-				<div
-					id="radio-mode-dial"
-					class="mode-dial flex"
-					on:click={handleRadioDialClick}
-					on:keydown={handleRadioDialClick}
-					aria-label="Radio Mode Dial"
-					tabindex="0"
-					role="button"
-					style="transform: rotate(-150deg);"
-				>
-					<div class="mode-dial-line center" />
-				</div>
-			</div>
-			<div class="dial-label relative left-0 bottom-0">OFF</div>
-		</div>
+		<Dial Modes={RadioDialModes} CurrentModeIndex={0}/>
 	</div>
 
 	<div class="radio-display-panel relative">

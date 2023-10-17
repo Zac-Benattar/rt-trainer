@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
+
 	// Used to limit number of modes so that the dial doesn't get too crowded
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
@@ -10,7 +12,7 @@
 		string?
 	];
 	export let Modes: ArrayMaxLength7MinLength2;
-	export let CurrentMode: string;
+	export let CurrentModeIndex: number = 0;
 
 	const handleDialClick = () => {
 		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
@@ -18,12 +20,12 @@
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
 			if (Modes.length == 2) {
-				if (CurrentMode == Modes[0]) {
-					CurrentMode = Modes[1];
+				if (CurrentModeIndex == 0) {
+					CurrentModeIndex = 1;
 					ModeDial.style.transform = 'rotate(0deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
 				} else {
-					CurrentMode = Modes[0];
+					CurrentModeIndex = 0;
 					ModeDial.style.transform = 'rotate(-150deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
 				}
@@ -39,12 +41,12 @@
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
 			if (Modes.length == 2) {
-				if (CurrentMode == Modes[0]) {
-					CurrentMode = Modes[1];
+				if (CurrentModeIndex == 0) {
+					CurrentModeIndex = 1;
 					ModeDial.style.transform = 'rotate(0deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
 				} else {
-					CurrentMode = Modes[0];
+					CurrentModeIndex = 0;
 					ModeDial.style.transform = 'rotate(-150deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
 				}
@@ -64,7 +66,6 @@
 	const handleDialArrowClick = (side: string) => {
 		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
 		if (ModeDial != null) {
-			const CurrentModeIndex = Modes.indexOf(CurrentMode);
 			if (side == 'left') {
 				if (CurrentModeIndex != 0) {
 					ModeDial.style.transform = 'rotate(' + (CurrentModeIndex - 1) * 30 + 'deg)';
@@ -147,7 +148,9 @@
 		}
 	}
 
-	addModes();
+	onMount(() => {
+        addModes();
+    });
 </script>
 
 <div class="mode-selecter-container relative">
