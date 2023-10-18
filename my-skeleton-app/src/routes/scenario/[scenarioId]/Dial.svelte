@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 
 	// Used to limit number of modes so that the dial doesn't get too crowded
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -13,6 +14,10 @@
 	];
 	export let Modes: ArrayMaxLength7MinLength2;
 	export let CurrentModeIndex: number = 0;
+
+	const dispatch = createEventDispatcher();
+
+	$: dispatch('modeChange', CurrentModeIndex);
 
 	const handleDialClick = () => {
 		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
@@ -150,8 +155,6 @@
 		}
 
 		CurrentModeIndex = modeIndex;
-		// Notify listeners that mode has changed
-		dispatchEvent(new CustomEvent('modeChange', { detail: { mode: Modes[modeIndex] } }));
 	}
 
 	onMount(() => {

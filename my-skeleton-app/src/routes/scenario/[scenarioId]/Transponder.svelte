@@ -24,29 +24,33 @@
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
-		const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
-		if (IDENTModeButton != null) {
-			if (transponderMode != 'IDENT') {
-				if (transponderMode === 'VFR') {
-					const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
-					VFRModeButton.classList.remove('active-button');
+		if (transponderDialMode != 'OFF') {
+			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+			if (IDENTModeButton != null) {
+				if (transponderMode != 'IDENT') {
+					if (transponderMode === 'VFR') {
+						const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+						VFRModeButton.classList.remove('active-button');
+					}
+					transponderMode = 'IDENT';
+					IDENTModeButton.classList.add('active-button');
 				}
-				transponderMode = 'IDENT';
-				IDENTModeButton.classList.add('active-button');
 			}
 		}
 	};
 
 	const handleVFRButtonClick = () => {
-		const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
-		if (VFRModeButton != null) {
-			if (transponderMode != 'VFR') {
-				if (transponderMode === 'IDENT') {
-					const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
-					IDENTModeButton.classList.remove('active-button');
+		if (transponderDialMode != 'OFF') {
+			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+			if (VFRModeButton != null) {
+				if (transponderMode != 'VFR') {
+					if (transponderMode === 'IDENT') {
+						const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+						IDENTModeButton.classList.remove('active-button');
+					}
+					transponderMode = 'VFR';
+					VFRModeButton.classList.add('active-button');
 				}
-				transponderMode = 'VFR';
-				VFRModeButton.classList.add('active-button');
 			}
 		}
 	};
@@ -60,11 +64,34 @@
 		const BACKButton = document.getElementById('button-back') as HTMLInputElement;
 		const Display = document.getElementById('display-screen') as HTMLInputElement;
 	};
+
+	function onTransponderDialModeChange(event: Event) {
+		// Fix this hack
+		var newDialModeIndex = (<any>event).detail;
+		if (newDialModeIndex == 0) {
+			console.log('Dial set to off');
+			if (transponderMode != 'NONE') {
+				if (transponderMode === 'IDENT') {
+					const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
+					COMModeButton.classList.remove('active-button');
+				} else if (transponderMode === 'VFR') {
+					const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
+					NAVModeButton.classList.remove('active-button');
+				}
+			}
+			transponderMode = 'NONE';
+		}
+		transponderDialMode = TransponderDialModes[newDialModeIndex];
+	}
 </script>
 
 <div class="transponder-container-outer relative">
 	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={TransponderDialModes} CurrentModeIndex={0} />
+		<Dial
+			Modes={TransponderDialModes}
+			CurrentModeIndex={0}
+			on:modeChange={onTransponderDialModeChange}
+		/>
 	</div>
 
 	<div class="display-panel">
