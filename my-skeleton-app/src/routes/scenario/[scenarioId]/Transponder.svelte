@@ -72,11 +72,11 @@
 			console.log('Dial set to off');
 			if (transponderMode != 'NONE') {
 				if (transponderMode === 'IDENT') {
-					const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-					COMModeButton.classList.remove('active-button');
+					const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+					IDENTModeButton.classList.remove('active-button');
 				} else if (transponderMode === 'VFR') {
-					const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
-					NAVModeButton.classList.remove('active-button');
+					const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+					VFRModeButton.classList.remove('active-button');
 				}
 			}
 			transponderMode = 'NONE';
