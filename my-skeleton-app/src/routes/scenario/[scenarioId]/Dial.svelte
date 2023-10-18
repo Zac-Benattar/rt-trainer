@@ -20,15 +20,7 @@
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
 			if (Modes.length == 2) {
-				if (CurrentModeIndex == 0) {
-					CurrentModeIndex = 1;
-					ModeDial.style.transform = 'rotate(0deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
-				} else {
-					CurrentModeIndex = 0;
-					ModeDial.style.transform = 'rotate(-150deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-				}
+				setMode(CurrentModeIndex == 0 ? 1 : 0);
 			} else {
                 // Implement this!
                 console.log('Feature not implemented');
@@ -43,23 +35,11 @@
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
 			if (Modes.length == 2) {
-				if (CurrentModeIndex == 0) {
-					CurrentModeIndex = 1;
-					ModeDial.style.transform = 'rotate(0deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
-				} else {
-					CurrentModeIndex = 0;
-					ModeDial.style.transform = 'rotate(-150deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-				}
+				setMode(CurrentModeIndex == 0 ? 1 : 0);
 			} else {
 				const ModeIndex = Modes.indexOf(mode);
-				if (ModeIndex == 0) {
-					ModeDial.style.transform = 'rotate(0deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-				} else {
-					ModeDial.style.transform = 'rotate(' + ModeIndex * 30 + 'deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				if (ModeIndex != -1) {
+					setMode(ModeIndex);
 				}
 			}
 		}
@@ -70,15 +50,11 @@
 		if (ModeDial != null) {
 			if (side == 'left') {
 				if (CurrentModeIndex != 0) {
-					ModeDial.style.transform = 'rotate(' + (CurrentModeIndex - 1) * 30 + 'deg)';
-					if (CurrentModeIndex == 1)
-						ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
-					else ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+					setMode(CurrentModeIndex - 1);
 				}
 			} else {
-				if (CurrentModeIndex != 0) {
-					ModeDial.style.transform = 'rotate(' + (CurrentModeIndex + 1) * 30 + 'deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				if (CurrentModeIndex != Modes.length - 1) {
+					setMode(CurrentModeIndex + 1);
 				}
 			}
 		}
@@ -149,6 +125,33 @@
 				addModeLabel(Modes[i] as string, i);
 			}
 		}
+	}
+
+	function setMode(modeIndex: number) {
+		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
+		if (ModeDial != null) {
+			if (Modes.length == 2) {
+				if (modeIndex == 0) {
+					ModeDial.style.transform = 'rotate(-150deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+				} else {
+					ModeDial.style.transform = 'rotate(0deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				}
+			} else {
+				if (modeIndex == 0) {
+					ModeDial.style.transform = 'rotate(0deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+				} else {
+					ModeDial.style.transform = 'rotate(' + modeIndex * 30 + 'deg)';
+					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+				}
+			}
+		}
+
+		CurrentModeIndex = modeIndex;
+		// Notify listeners that mode has changed
+		dispatchEvent(new CustomEvent('modeChange', { detail: { mode: Modes[modeIndex] } }));
 	}
 
 	onMount(() => {
