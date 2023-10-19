@@ -1,4 +1,5 @@
 <script lang="ts">
+	import internal from 'stream';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -21,7 +22,6 @@
 	$: dispatch('modeChange', CurrentModeIndex);
 
 	const handleDialClick = () => {
-		console.log('Dial clicked');
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeDial != null) {
 			/* If there are only two modes no need to check the side of dial to 
@@ -39,7 +39,7 @@
 		var tgt = event.target as HTMLDivElement;
 		var mode = tgt.id.split('-')[1];
 		const ModeLabel = document.getElementById('mode-' + mode) as HTMLDivElement;
-		const ModeDial = document.getElementById('mode-dial') as HTMLDivElement;
+		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeLabel != null && ModeDial != null) {
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
@@ -47,7 +47,7 @@
 				setMode(CurrentModeIndex == 0 ? 1 : 0);
 			} else {
 				const ModeIndex = Modes.indexOf(mode);
-				if (ModeIndex != -1) {
+				if (ModeIndex > -1 && ModeIndex < Modes.length) {
 					setMode(ModeIndex);
 				}
 			}
@@ -70,24 +70,24 @@
 	}
 
 	function addModeLabel(label: string, index: number = 0) {
-		var ContainingDiv = document.getElementById('mode-selecter-container') as HTMLDivElement;
-		if (ContainingDiv != null) {
+		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
+		if (centerDiv != null) {
 			var ModeDiv = document.createElement('div');
-			var topMultiplier = Math.round(4 / Modes.length);
-			var leftMultiplier = Math.round(3 / Modes.length);
+			var topMultiplier = 40 / Modes.length;
+			var leftMultiplier = 30 / Modes.length;
 			ModeDiv.setAttribute(
-				'class',
-				'dial-label relative top-' + index * topMultiplier + ' left-' + index * leftMultiplier
+				'style',
+				'top:' + index * topMultiplier + 'px; left:' + index * leftMultiplier + 'px;'
 			);
+			ModeDiv.setAttribute('class', 'dial-label');
 			ModeDiv.setAttribute('id', 'mode-' + label);
 			ModeDiv.addEventListener('click', handleModeClick);
 			ModeDiv.textContent = label;
-			ContainingDiv.appendChild(ModeDiv);
+			centerDiv.appendChild(ModeDiv);
 		}
 	}
 
 	function addModes() {
-		console.log('Adding modes');
 		// Add side based arrows if there are more than two modes
 		if (Modes.length > 2) {
 			console.log('Adding arrows');
@@ -192,6 +192,7 @@
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeDial != null) {
 			if (Modes.length == 2) {
+				console.log('Setting mode' + modeIndex);
 				if (modeIndex == 0) {
 					ModeDial.style.transform = 'rotate(-150deg)';
 					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
@@ -219,7 +220,11 @@
 	});
 </script>
 
-<div id={'dial-and-modes-container-' + internalName} class="relative">
+<div
+	id={'dial-and-modes-container-' + internalName}
+	class="flex items-center justify-center h-screen"
+	style="width: 200px; height: 200px; justify-content: center;"
+>
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
 			id={'mode-dial-' + internalName}
@@ -235,6 +240,11 @@
 				id={'arrow-container-' + internalName}
 				class="absolute flex flex-row w-100 h-100"
 				style="top: 0px; left: 0px; width: 100%; height: 100%; transform: rotate(0deg);"
+			/>
+			<div
+				id={'mode-center-div-' + internalName}
+				class="w-0 h-0 absolute"
+				style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
 			/>
 			<div class="mode-dial-line center" />
 		</div>
@@ -256,5 +266,20 @@
 		width: 2px;
 		height: 40px;
 		background: #fff;
+	}
+
+	:global(.dial-label) {
+		position: absolute;
+		width: 40px;
+		height: 30px;
+		text-align: right;
+		display: flex;
+		-moz-box-pack: center;
+		justify-content: center;
+		-moz-box-align: center;
+		align-items: center;
+		transform: translateX(-50%) translateY(-50%);
+		cursor: pointer;
+		transform: rotate(150deg)
 	}
 </style>
