@@ -69,28 +69,6 @@
 		}
 	}
 
-	function addModeLabel(label: string, index: number = 0) {
-		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
-		if (centerDiv != null) {
-			var ModeDiv = document.createElement('div');
-			var topMultiplier = 40 / Modes.length;
-			var leftMultiplier = 30 / Modes.length;
-			ModeDiv.setAttribute(
-				'style',
-				'top:' +
-					(index * topMultiplier + 27.5) +
-					'px; left:' +
-					(index * leftMultiplier - 47.6) +
-					'px;'
-			);
-			ModeDiv.setAttribute('class', 'dial-label absolute');
-			ModeDiv.setAttribute('id', 'mode-' + label);
-			ModeDiv.addEventListener('click', handleModeClick);
-			ModeDiv.textContent = label;
-			centerDiv.appendChild(ModeDiv);
-		}
-	}
-
 	function addModes() {
 		// Add side based arrows if there are more than two modes
 		if (Modes.length > 2) {
@@ -182,12 +160,29 @@
 		}
 
 		// Add mode labels around dial
-		for (let i = 0; i < Modes.length; i++) {
-			// Probably not a good fix but can't see how it will break until it does...
-			if (Modes[i] != null) {
-				addModeLabel(Modes[i] as string, i);
+		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
+		var angle = 0.5;
+		var step = (0.83 * 2 * Math.PI) / Modes.length;
+		var radius = 60;
+		if (centerDiv != null) {
+			for (let i = 0; i < Modes.length; i++) {
+				// Probably not a good fix but can't see how it will break until it does...
+				if (Modes[i] != null) {
+					addMode(Modes[i], radius * Math.cos(angle), (radius + (Modes[i].length)) * -Math.sin(angle), centerDiv);
+					angle += step;
+				}
 			}
 		}
+	}
+
+	function addMode(mode: string, x: number, y: number, centerDiv: HTMLDivElement) {
+		var ModeDiv = document.createElement('div');
+		ModeDiv.setAttribute('style', 'top:' + x + 'px; left:' + y + 'px;');
+		ModeDiv.setAttribute('class', 'dial-label absolute');
+		ModeDiv.setAttribute('id', 'mode-' + mode);
+		ModeDiv.addEventListener('click', handleModeClick);
+		ModeDiv.textContent = mode;
+		centerDiv.appendChild(ModeDiv);
 	}
 
 	function setMode(modeIndex: number) {
