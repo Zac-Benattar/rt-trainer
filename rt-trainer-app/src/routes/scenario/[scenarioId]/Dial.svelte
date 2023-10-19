@@ -77,9 +77,13 @@
 			var leftMultiplier = 30 / Modes.length;
 			ModeDiv.setAttribute(
 				'style',
-				'top:' + index * topMultiplier + 'px; left:' + index * leftMultiplier + 'px;'
+				'top:' +
+					(index * topMultiplier + 27.5) +
+					'px; left:' +
+					(index * leftMultiplier - 47.6) +
+					'px;'
 			);
-			ModeDiv.setAttribute('class', 'dial-label');
+			ModeDiv.setAttribute('class', 'dial-label absolute');
 			ModeDiv.setAttribute('id', 'mode-' + label);
 			ModeDiv.addEventListener('click', handleModeClick);
 			ModeDiv.textContent = label;
@@ -227,6 +231,11 @@
 >
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
+			id={'mode-center-div-' + internalName}
+			class="w-0 h-0 absolute"
+			style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
+		/>
+		<div
 			id={'mode-dial-' + internalName}
 			class="mode-dial flex"
 			on:click={handleDialClick}
@@ -241,11 +250,7 @@
 				class="absolute flex flex-row w-100 h-100"
 				style="top: 0px; left: 0px; width: 100%; height: 100%; transform: rotate(0deg);"
 			/>
-			<div
-				id={'mode-center-div-' + internalName}
-				class="w-0 h-0 absolute"
-				style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
-			/>
+
 			<div class="mode-dial-line center" />
 		</div>
 	</div>
@@ -280,6 +285,5 @@
 		align-items: center;
 		transform: translateX(-50%) translateY(-50%);
 		cursor: pointer;
-		transform: rotate(150deg)
 	}
 </style>
