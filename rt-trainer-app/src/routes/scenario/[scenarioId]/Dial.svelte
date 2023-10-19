@@ -159,22 +159,22 @@
 			RightDiv.addEventListener('click', handleDialArrowClick);
 		}
 
-		// Add mode labels around dial
+		// Add mode labels around dial from -150 to 150 degrees
 		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
-		var angle = 0.5;
+		var angle = 0.33 * Math.PI;
 		var step = (0.83 * 2 * Math.PI) / Modes.length;
 		var radius = 60;
 		if (centerDiv != null) {
 			for (let i = 0; i < Modes.length; i++) {
-				// Probably not a good fix but can't see how it will break until it does...
 				if (Modes[i] != null) {
-					addMode(Modes[i], radius * Math.cos(angle), (radius + (Modes[i].length)) * -Math.sin(angle), centerDiv);
-					angle += step;
+					addMode(Modes[i], radius * Math.sin(angle), (radius + (Modes[i].length)) * -Math.cos(angle), centerDiv);
+					angle -= step;
 				}
 			}
 		}
 	}
 
+	// Add mode label to dial at given x and y coordinates
 	function addMode(mode: string, x: number, y: number, centerDiv: HTMLDivElement) {
 		var ModeDiv = document.createElement('div');
 		ModeDiv.setAttribute('style', 'top:' + x + 'px; left:' + y + 'px;');
