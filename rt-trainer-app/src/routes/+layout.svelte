@@ -33,7 +33,7 @@
 		burgerButton = 'block';
 	} else {
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'block';
+		burgerButton = 'hidden';
 	}
 </script>
 
@@ -42,11 +42,11 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
-<Drawer>
+<Drawer width="w-64">
 	<h2 class="p-4">Navigation</h2>
 	<hr />
-	<Navigation /></Drawer
->
+	<Navigation />
+</Drawer>
 
 <!-- App Shell -->
 <AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}">
