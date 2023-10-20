@@ -17,7 +17,7 @@ export default {
 			themes: {
 				preset: [
 					{
-						name: 'vintage',
+						name: 'skeleton',
 						enhancements: true,
 					},
 				],

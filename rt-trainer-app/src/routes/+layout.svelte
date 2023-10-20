@@ -20,13 +20,20 @@
 	function drawerOpen(): void {
 		drawerStore.open({});
 	}
-	
+
 	// Reactive Classes
 	$: classesSidebar = $page.url.pathname;
-	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/scenario')) {
+	$: burgerButton = $page.url.pathname;
+	$: if ($page.url.pathname === '/') {
 		classesSidebar = 'w-0';
-	}else {
+		burgerButton = 'hidden';
+	} else if ($page.url.pathname.includes('/scenario')) {
+		// Should also check if user is logged in
+		classesSidebar = 'w-0';
+		burgerButton = 'block';
+	} else {
 		classesSidebar = 'w-0 lg:w-64';
+		burgerButton = 'block';
 	}
 </script>
 
@@ -48,7 +55,7 @@
 		<AppBar>
 			<svelte:fragment slot="lead">
 				<div class="flex items-center">
-					<button class="lg:hidden btn btn-sm mr-4" on:click={drawerOpen}>
+					<button class="lg:{burgerButton} btn btn-sm mr-4" on:click={drawerOpen}>
 						<span>
 							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
 								<rect width="100" height="20" />

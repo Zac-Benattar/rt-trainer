@@ -11,9 +11,7 @@
 	}
 </script>
 
-<div>
-	<div>
-		<!-- No props can be passed without error -->
-		<Simulator />
-	</div>
+<div class='relative flex' style='justify-content: center;'>
+	<!-- No props can be passed without error -->
+	<Simulator />
 </div>
