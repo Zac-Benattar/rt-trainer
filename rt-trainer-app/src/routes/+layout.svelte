@@ -2,27 +2,65 @@
 	import '../app.postcss';
 	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
 	import { Avatar } from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
 	import { LightSwitch } from '@skeletonlabs/skeleton';
 	import { autoModeWatcher } from '@skeletonlabs/skeleton';
+	import Navigation from '$lib/Navigation/Navigation.svelte';
+	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
+	import { page } from '$app/stores';
 
 	// Floating UI for Popups
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+
+	initializeStores();
+
+	const drawerStore = getDrawerStore();
+
+	function drawerOpen(): void {
+		drawerStore.open({});
+	}
+	
+	// Reactive Classes
+	$: classesSidebar = $page.url.pathname;
+	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/scenario')) {
+		classesSidebar = 'w-0';
+	}else {
+		classesSidebar = 'w-0 lg:w-64';
+	}
 </script>
 
 <!-- Enable system theme -->
-<svelte:head>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head>
+<svelte:head
+	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
+>
+
+<Drawer>
+	<h2 class="p-4">Navigation</h2>
+	<hr />
+	<Navigation /></Drawer
+>
 
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 w-56 p-4">
+<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}">
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
 		<AppBar>
 			<svelte:fragment slot="lead">
-				<strong class="text-xl uppercase">RT Trainer</strong>
+				<div class="flex items-center">
+					<button class="lg:hidden btn btn-sm mr-4" on:click={drawerOpen}>
+						<span>
+							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
+								<rect width="100" height="20" />
+								<rect y="30" width="100" height="20" />
+								<rect y="60" width="100" height="20" />
+							</svg>
+						</span>
+					</button>
+					<strong class="text-xl uppercase">RT Trainer</strong>
+				</div>
 			</svelte:fragment>
+
 			<svelte:fragment slot="trail">
 				<a
 					class="btn btn-sm variant-ghost-surface"
@@ -48,15 +86,7 @@
 		</AppBar>
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
-		<!-- Insert the list: -->
-		<nav class="list-nav">
-			<ul>
-				<li><a href="/">Home</a></li>
-				<li><a href="/about">About</a></li>
-				<li><div><LightSwitch /></div></li>
-			</ul>
-		</nav>
-		<!-- --- -->
+		<Navigation />
 	</svelte:fragment>
 	<!-- Page Route Content -->
 	<slot />
