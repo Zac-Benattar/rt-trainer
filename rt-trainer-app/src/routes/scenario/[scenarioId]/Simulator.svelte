@@ -38,23 +38,29 @@
 			<div>
 				<Transponder />
 			</div>
-			<div style="min-height:20px; user-select: none;" />
 			<div>
 				<Map />
 			</div>
 		</div>
-		<div class="relative">
+		<div class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4">
 			<!-- Source -->
 			<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
 
 			<!-- Trigger -->
-			<button use:clipboard={{ element: 'scenarioLinkElement' }}>Copy</button>
+			<button use:clipboard={{ element: 'scenarioLinkElement' }} class='btn variant-filled'>Copy</button>
 		</div>
+		<div class="h-5"></div>
 	</div>
 </div>
 
 <style lang="postcss">
 	.radio-transponder-container {
+		justify-content: center;
+	}
+
+	.copy-link-div {
+		display: flex;
+		flex-direction: row;
 		justify-content: center;
 	}
 </style>

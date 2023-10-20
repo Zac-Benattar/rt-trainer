@@ -13,5 +13,5 @@
 
 <div class='relative flex' style='justify-content: center;'>
 	<!-- No props can be passed without error -->
-	<Simulator {unexpectedEvents}/>
+	<Simulator {seed} {unexpectedEvents}/>
 </div>
