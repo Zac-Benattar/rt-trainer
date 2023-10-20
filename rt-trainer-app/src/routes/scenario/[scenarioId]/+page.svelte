@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Simulator from './Simulator.svelte';
+	import Simulator from '../../../lib/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
 	var seed = $page.params.scenarioId;
 

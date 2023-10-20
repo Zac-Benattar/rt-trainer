@@ -72,9 +72,9 @@
 		<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 	</div>
 
-	<div class="display-panel relative">
-		<div class="segmentdisplay display-screen absolute inset-x-0 top-0" />
-		<div class="display-buttons-container absolute flex flex-row inset-x-0 bottom-0">
+	<div class="display-panel flex flex-col justify-center items-center">
+		<div class="segmentdisplay display-screen" />
+		<div class="display-buttons-container absolute flex flex-row">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
 			<button class="button" id="button-swap">⇆</button>
 			<button class="button" id="button-nav" on:click={handleNAVButtonClick}>NAV</button>

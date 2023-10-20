@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Dial from './Dial.svelte';
+	import TransponderDisplay from './TransponderDisplay.svelte';
 	type TransponderMode = 'NONE' | 'IDENT' | 'VFR';
 	var TransponderDialModes: ArrayMaxLength7MinLength2 = [
 		'OFF',
@@ -21,6 +22,7 @@
 	];
 	let transponderMode: TransponderMode = 'NONE';
 	let transponderDialMode: string = 'OFF';
+	let displayOn: boolean = false;
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
@@ -66,8 +68,7 @@
 	};
 
 	function onTransponderDialModeChange(event: Event) {
-		// Fix this hack
-		var newDialModeIndex = (<any>event).detail;
+		var newDialModeIndex = (<any>event).detail; // Fix this hack
 		if (newDialModeIndex == 0) {
 			console.log('Dial set to off');
 			if (transponderMode != 'NONE') {
@@ -80,6 +81,10 @@
 				}
 			}
 			transponderMode = 'NONE';
+			displayOn = false;
+		}
+		else {
+			displayOn = true;
 		}
 		transponderDialMode = TransponderDialModes[newDialModeIndex];
 	}
@@ -94,9 +99,9 @@
 		/>
 	</div>
 
-	<div class="display-panel">
-		<div class="segmentdisplay display-screen" />
-		<div class="display-buttons-container absolute">
+	<div class="display-panel flex flex-col justify-center items-center">
+		<TransponderDisplay {displayOn} mode={transponderDialMode} /> 
+		<div class="display-buttons-container">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
 			<button class="button" id="button-enter">ENT</button>

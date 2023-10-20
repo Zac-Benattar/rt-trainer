@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
-	import Map from './Map.svelte';
+	import Map from '../../routes/scenario/[scenarioId]/Map.svelte';
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	export let unexpectedEvents: boolean = false;
