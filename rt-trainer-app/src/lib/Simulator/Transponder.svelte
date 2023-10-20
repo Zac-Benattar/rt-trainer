@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Dial from './Dial.svelte';
+	import FrequencyDial from './FrequencyDial.svelte';
+import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
 	type TransponderMode = 'NONE' | 'IDENT' | 'VFR';
 	var TransponderDialModes: ArrayMaxLength7MinLength2 = [
@@ -21,12 +22,16 @@
 		string?
 	];
 	let transponderMode: TransponderMode = 'NONE';
-	let transponderDialMode: string = 'OFF';
+	let transponderDialModeIndex: number = 0;
 	let displayOn: boolean = false;
+	let transponderFrequency: number = 1000;
+
+	// Trigger onTransponderDialModeChange when transponderDialMode changes
+	$: onTransponderDialModeChange(transponderDialModeIndex);
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
-		if (transponderDialMode != 'OFF') {
+		if (transponderDialModeIndex != 0) {
 			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
 			if (IDENTModeButton != null) {
 				if (transponderMode != 'IDENT') {
@@ -42,7 +47,7 @@
 	};
 
 	const handleVFRButtonClick = () => {
-		if (transponderDialMode != 'OFF') {
+		if (transponderDialModeIndex != 0) {
 			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
 			if (VFRModeButton != null) {
 				if (transponderMode != 'VFR') {
@@ -59,17 +64,14 @@
 
 	const handleENTERButtonClick = () => {
 		const ENTERButton = document.getElementById('button-enter') as HTMLInputElement;
-		const Display = document.getElementById('display-screen') as HTMLInputElement;
 	};
 
 	const handleBACKButtonClick = () => {
 		const BACKButton = document.getElementById('button-back') as HTMLInputElement;
-		const Display = document.getElementById('display-screen') as HTMLInputElement;
 	};
 
-	function onTransponderDialModeChange(event: Event) {
-		var newDialModeIndex = (<any>event).detail; // Fix this hack
-		if (newDialModeIndex == 0) {
+	function onTransponderDialModeChange(newIndex: number) {
+		if (newIndex == 0) {
 			console.log('Dial set to off');
 			if (transponderMode != 'NONE') {
 				if (transponderMode === 'IDENT') {
@@ -86,7 +88,15 @@
 		else {
 			displayOn = true;
 		}
-		transponderDialMode = TransponderDialModes[newDialModeIndex];
+		console.log('displayOn:', displayOn);
+	}
+
+	function onTransponderFrequencyIncrease(event: Event) {
+		transponderFrequency += 1;
+	}
+
+	function onTransponderFrequencyReduce(event: Event) {
+		transponderFrequency -= 1;
 	}
 </script>
 
@@ -94,13 +104,12 @@
 	<div class="mode-selecter absolute inset-y-0 left-0">
 		<Dial
 			Modes={TransponderDialModes}
-			CurrentModeIndex={0}
-			on:modeChange={onTransponderDialModeChange}
+			bind:CurrentModeIndex={transponderDialModeIndex}
 		/>
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
-		<TransponderDisplay {displayOn} mode={transponderDialMode} /> 
+		<TransponderDisplay {displayOn} mode={TransponderDialModes[transponderDialModeIndex]} /> 
 		<div class="display-buttons-container">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
@@ -110,7 +119,7 @@
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
-		<!-- <Dial /> -->
+		<FrequencyDial on:dialAntiClockwiseTurn={onTransponderFrequencyReduce} on:dialClockwiseTurn={onTransponderFrequencyIncrease}/>
 	</div>
 </div>
 

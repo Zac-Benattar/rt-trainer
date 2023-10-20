@@ -167,7 +167,12 @@
 		if (centerDiv != null) {
 			for (let i = 0; i < Modes.length; i++) {
 				if (Modes[i] != null) {
-					addMode(Modes[i], radius * Math.sin(angle), (radius + (Modes[i].length)) * -Math.cos(angle), centerDiv);
+					addMode(
+						Modes[i],
+						radius * Math.sin(angle),
+						(radius + Modes[i].length) * -Math.cos(angle),
+						centerDiv
+					);
 					angle -= step;
 				}
 			}

@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Dial from './Dial.svelte';
+	import FrequencyDial from './FrequencyDial.svelte';
+import Dial from './ModeDial.svelte';
 	type RadioMode = 'NONE' | 'COM' | 'NAV';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -13,6 +14,7 @@
 	];
 	let radioMode: RadioMode = 'NONE';
 	let radioDialMode: string = 'OFF';
+	let radioFrequency: number = 1000;
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -65,6 +67,14 @@
 		}
 		radioDialMode = RadioDialModes[newDialModeIndex];
 	}
+
+	function onRadioFrequencyIncrease(event: Event) {
+		radioFrequency += 1;
+	}
+
+	function onRadioFrequencyReduce(event: Event) {
+		radioFrequency -= 1;
+	}
 </script>
 
 <div class="radio-container-outer relative">
@@ -82,7 +92,7 @@
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
-		<!-- <Dial /> -->
+		<FrequencyDial on:dialAntiClockwiseTurn={onRadioFrequencyReduce} on:dialClockwiseTurn={onRadioFrequencyIncrease}/>
 	</div>
 </div>
 
