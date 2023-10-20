@@ -26,14 +26,15 @@
 	$: burgerButton = $page.url.pathname;
 	$: if ($page.url.pathname === '/') {
 		classesSidebar = 'w-0';
-		burgerButton = 'hidden';
+		burgerButton = 'lg:hidden';
 	} else if ($page.url.pathname.includes('/scenario')) {
 		// Should also check if user is logged in
 		classesSidebar = 'w-0';
 		burgerButton = 'block';
 	} else {
+		console.log('else');
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'hidden';
+		burgerButton = 'lg:hidden';
 	}
 </script>
 
@@ -55,7 +56,7 @@
 		<AppBar>
 			<svelte:fragment slot="lead">
 				<div class="flex items-center">
-					<button class="lg:{burgerButton} btn btn-sm mr-4" on:click={drawerOpen}>
+					<button class="{burgerButton} btn btn-sm mr-4" on:click={drawerOpen}>
 						<span>
 							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
 								<rect width="100" height="20" />
