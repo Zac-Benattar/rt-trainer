@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 
+	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
 
 	const dispatch = createEventDispatcher();
 
 	const handleDialClick = () => {
+		if (!DialEnabled) return;
 		const frequencyDial = document.getElementById(
 			'frequency-dial-' + internalName
 		) as HTMLDivElement;
@@ -16,6 +18,7 @@
 	};
 
 	function handleDialArrowClick(event: Event) {
+		if (!DialEnabled) return;
 		var tgt = event.target as HTMLDivElement;
 		if (tgt.id == 'left-arrow-div-' + internalName) {
 			console.log('Left arrow clicked');

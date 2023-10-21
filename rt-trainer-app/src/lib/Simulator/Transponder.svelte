@@ -25,6 +25,8 @@ import Dial from './ModeDial.svelte';
 	let transponderDialModeIndex: number = 0;
 	let displayOn: boolean = false;
 	let transponderFrequency: number = 1000;
+	let frequencyDialEnabled: boolean = false;
+	let displayDigitSelected: number = 0;
 
 	// Trigger onTransponderDialModeChange when transponderDialMode changes
 	$: onTransponderDialModeChange(transponderDialModeIndex);
@@ -64,15 +66,27 @@ import Dial from './ModeDial.svelte';
 
 	const handleENTERButtonClick = () => {
 		const ENTERButton = document.getElementById('button-enter') as HTMLInputElement;
+		if (displayDigitSelected < 3) {
+			displayDigitSelected += 1;
+		}
+		else {
+			displayDigitSelected = 0;
+		}
 	};
 
 	const handleBACKButtonClick = () => {
 		const BACKButton = document.getElementById('button-back') as HTMLInputElement;
+		if (displayDigitSelected > 0) {
+			displayDigitSelected -= 1;
+		}
+		else {
+			displayDigitSelected = 3;
+		}
+
 	};
 
 	function onTransponderDialModeChange(newIndex: number) {
 		if (newIndex == 0) {
-			console.log('Dial set to off');
 			if (transponderMode != 'NONE') {
 				if (transponderMode === 'IDENT') {
 					const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
@@ -84,19 +98,20 @@ import Dial from './ModeDial.svelte';
 			}
 			transponderMode = 'NONE';
 			displayOn = false;
+			frequencyDialEnabled = false;
 		}
 		else {
 			displayOn = true;
+			frequencyDialEnabled = true;
 		}
-		console.log('displayOn:', displayOn);
 	}
 
 	function onTransponderFrequencyIncrease(event: Event) {
-		transponderFrequency += 1;
+		transponderFrequency += 10 ** (3 - displayDigitSelected);
 	}
 
 	function onTransponderFrequencyReduce(event: Event) {
-		transponderFrequency -= 1;
+		transponderFrequency -= 10 ** (3 - displayDigitSelected);
 	}
 </script>
 
@@ -109,17 +124,17 @@ import Dial from './ModeDial.svelte';
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
-		<TransponderDisplay {displayOn} mode={TransponderDialModes[transponderDialModeIndex]} /> 
+		<TransponderDisplay DisplayOn={displayOn} mode={TransponderDialModes[transponderDialModeIndex]} {transponderFrequency} DigitSelected={displayDigitSelected}/> 
 		<div class="display-buttons-container">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
-			<button class="button" id="button-enter">ENT</button>
-			<button class="button" id="button-back">BACK</button>
+			<button class="button" id="button-enter" on:click={handleENTERButtonClick}>ENT</button>
+			<button class="button" id="button-back" on:click={handleBACKButtonClick}>BACK</button>
 		</div>
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
-		<FrequencyDial on:dialAntiClockwiseTurn={onTransponderFrequencyReduce} on:dialClockwiseTurn={onTransponderFrequencyIncrease}/>
+		<FrequencyDial on:dialAntiClockwiseTurn={onTransponderFrequencyReduce} on:dialClockwiseTurn={onTransponderFrequencyIncrease} DialEnabled={frequencyDialEnabled} />
 	</div>
 </div>
 
