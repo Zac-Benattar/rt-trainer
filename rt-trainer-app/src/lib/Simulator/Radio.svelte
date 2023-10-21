@@ -1,6 +1,7 @@
 <script lang="ts">
 	import FrequencyDial from './FrequencyDial.svelte';
-import Dial from './ModeDial.svelte';
+	import Dial from './ModeDial.svelte';
+	import RadioDisplay from './RadioDisplay.svelte';
 	type RadioMode = 'NONE' | 'COM' | 'NAV';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -14,7 +15,11 @@ import Dial from './ModeDial.svelte';
 	];
 	let radioMode: RadioMode = 'NONE';
 	let radioDialMode: string = 'OFF';
-	let radioFrequency: number = 1000;
+	let radioSelectedFrequency: number = 1000;
+	let radioAlternateFrequency: number = 2000;
+	let radioTertiaryFrequency: number = 3000;
+	let displayOn: boolean = false;
+	let frequencyDialEnabled: boolean = false;
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -53,7 +58,6 @@ import Dial from './ModeDial.svelte';
 		// Fix this hack
 		var newDialModeIndex = (<any>event).detail;
 		if (newDialModeIndex == 0) {
-			console.log('Dial set to off');
 			if (radioMode != 'NONE') {
 				if (radioMode === 'COM') {
 					const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
@@ -64,16 +68,18 @@ import Dial from './ModeDial.svelte';
 				}
 			}
 			radioMode = 'NONE';
+			displayOn = false;
 		}
 		radioDialMode = RadioDialModes[newDialModeIndex];
+		displayOn = true;
 	}
 
 	function onRadioFrequencyIncrease(event: Event) {
-		radioFrequency += 1;
+		radioSelectedFrequency += 1;
 	}
 
 	function onRadioFrequencyReduce(event: Event) {
-		radioFrequency -= 1;
+		radioSelectedFrequency -= 1;
 	}
 </script>
 
@@ -83,8 +89,14 @@ import Dial from './ModeDial.svelte';
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
-		<div class="segmentdisplay display-screen" />
-		<div class="display-buttons-container absolute flex flex-row">
+		<RadioDisplay
+			DisplayOn={displayOn}
+			mode={radioMode}
+			{radioSelectedFrequency}
+			{radioAlternateFrequency}
+			{radioTertiaryFrequency}
+		/>
+		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
 			<button class="button" id="button-swap">⇆</button>
 			<button class="button" id="button-nav" on:click={handleNAVButtonClick}>NAV</button>
@@ -92,7 +104,10 @@ import Dial from './ModeDial.svelte';
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
-		<FrequencyDial on:dialAntiClockwiseTurn={onRadioFrequencyReduce} on:dialClockwiseTurn={onRadioFrequencyIncrease}/>
+		<FrequencyDial
+			on:dialAntiClockwiseTurn={onRadioFrequencyReduce}
+			on:dialClockwiseTurn={onRadioFrequencyIncrease}
+		/>
 	</div>
 </div>
 
