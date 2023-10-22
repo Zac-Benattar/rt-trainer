@@ -2,7 +2,7 @@
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
-	type RadioMode = 'NONE' | 'COM' | 'NAV';
+	type RadioMode = 'COM' | 'NAV';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
@@ -13,7 +13,7 @@
 		string?,
 		string?
 	];
-	let radioMode: RadioMode = 'NONE';
+	let radioMode: RadioMode = 'COM';
 	let radioDialMode: string = 'OFF';
 	let radioSelectedFrequency: number = 1000;
 	let radioAlternateFrequency: number = 2000;
@@ -58,20 +58,21 @@
 		// Fix this hack
 		var newDialModeIndex = (<any>event).detail;
 		if (newDialModeIndex == 0) {
-			if (radioMode != 'NONE') {
-				if (radioMode === 'COM') {
-					const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-					COMModeButton.classList.remove('active-button');
-				} else if (radioMode === 'NAV') {
-					const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
-					NAVModeButton.classList.remove('active-button');
-				}
+			if (radioMode === 'COM') {
+				const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
+				COMModeButton.classList.remove('active-button');
+			} else if (radioMode === 'NAV') {
+				const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
+				NAVModeButton.classList.remove('active-button');
+				radioMode = 'COM';
 			}
-			radioMode = 'NONE';
 			displayOn = false;
+		} else {
+			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
+			COMModeButton.classList.add('active-button');
+			displayOn = true;
 		}
 		radioDialMode = RadioDialModes[newDialModeIndex];
-		displayOn = true;
 	}
 
 	function onRadioFrequencyIncrease(event: Event) {
