@@ -98,6 +98,10 @@
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
+		<div class="active-standby-label-container flex flex-row">
+			<div class="active-standby-label" style="margin-right:130px;">STBY</div>
+			<div class="active-standby-label">ACTIVE</div>
+		</div>
 		<RadioDisplay
 			DisplayOn={displayOn}
 			mode={radioMode}
