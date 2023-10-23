@@ -2,8 +2,16 @@
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
-	type TransponderMode = 'COM' | 'NAV';
-	var transponderDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
+	type TransponderMode = 'NONE' | 'IDENT' | 'VFR';
+	var TransponderDialModes: ArrayMaxLength7MinLength2 = [
+		'OFF',
+		'SBY',
+		'GND',
+		'STBY',
+		'ON',
+		'ALT',
+		'TEST'
+	];
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
 		string,
@@ -13,113 +21,123 @@
 		string?,
 		string?
 	];
-	export let transponderMode: TransponderMode = 'COM';
-	export let transponderDialMode: string = 'OFF';
-	export let transponderSelectedFrequency: number = 126.410;
-	export let transponderAlternateFrequency: number = 123.170;
-	export let transponderTertiaryFrequency: number = 179.200;
-	export let displayOn: boolean = false;
-	export let frequencyDialEnabled: boolean = false;
+	let transponderMode: TransponderMode = 'NONE';
+	let transponderDialModeIndex: number = 0;
+	let displayOn: boolean = false;
+	let transponderFrequency: number = 1000;
+	let frequencyDialEnabled: boolean = false;
+	let displayDigitSelected: number = 0;
+
+	// Trigger onTransponderDialModeChange when transponderDialMode changes
+	$: onTransponderDialModeChange(transponderDialModeIndex);
 
 	// Click handlers
-	const handleCOMButtonClick = () => {
-		if (transponderDialMode != 'OFF') {
-			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-			if (COMModeButton != null) {
-				if (transponderMode != 'COM') {
-					if (transponderMode === 'NAV') {
-						const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
-						NAVModeButton.classList.remove('active-button');
+	const handleIDENTButtonClick = () => {
+		if (transponderDialModeIndex != 0) {
+			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+			if (IDENTModeButton != null) {
+				if (transponderMode != 'IDENT') {
+					if (transponderMode === 'VFR') {
+						const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+						VFRModeButton.classList.remove('active-button');
 					}
-					transponderMode = 'COM';
-					COMModeButton.classList.add('active-button');
+					transponderMode = 'IDENT';
+					IDENTModeButton.classList.add('active-button');
 				}
 			}
 		}
 	};
 
-	const handleNAVButtonClick = () => {
-		if (transponderDialMode != 'OFF') {
-			const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
-			if (NAVModeButton != null) {
-				if (transponderMode != 'NAV') {
-					if (transponderMode === 'COM') {
-						const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-						COMModeButton.classList.remove('active-button');
+	const handleVFRButtonClick = () => {
+		if (transponderDialModeIndex != 0) {
+			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+			if (VFRModeButton != null) {
+				if (transponderMode != 'VFR') {
+					if (transponderMode === 'IDENT') {
+						const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+						IDENTModeButton.classList.remove('active-button');
 					}
-					transponderMode = 'NAV';
-					NAVModeButton.classList.add('active-button');
+					transponderMode = 'VFR';
+					VFRModeButton.classList.add('active-button');
 				}
 			}
 		}
 	};
 
-	const handleSWAPButtonClick = () => {
-		if (transponderDialMode != 'OFF') {
-			let tempFrequency = transponderSelectedFrequency;
-			transponderSelectedFrequency = transponderAlternateFrequency;
-			transponderAlternateFrequency = tempFrequency;
-		}
-	}
-
-	function onDialModeChange(event: Event) {
-		// Fix this hack
-		var newDialModeIndex = (<any>event).detail;
-		if (newDialModeIndex == 0) {
-			if (transponderMode === 'COM') {
-				const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-				COMModeButton.classList.remove('active-button');
-			} else if (transponderMode === 'NAV') {
-				const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
-				NAVModeButton.classList.remove('active-button');
-				transponderMode = 'COM';
+	const handleENTERButtonClick = () => {
+		if (displayOn) {
+			if (displayDigitSelected < 3) {
+				displayDigitSelected += 1;
+			} else {
+				displayDigitSelected = 0;
 			}
+		}
+	};
+
+	const handleBACKButtonClick = () => {
+		if (displayOn) {
+			if (displayDigitSelected < 3) {
+				displayDigitSelected += 1;
+			} else {
+				displayDigitSelected = 0;
+			}
+		}
+	};
+
+	function onTransponderDialModeChange(newIndex: number) {
+		if (newIndex == 0) {
+			if (transponderMode != 'NONE') {
+				if (transponderMode === 'IDENT') {
+					const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+					IDENTModeButton.classList.remove('active-button');
+				} else if (transponderMode === 'VFR') {
+					const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
+					VFRModeButton.classList.remove('active-button');
+				}
+			}
+			transponderMode = 'NONE';
 			displayOn = false;
+			frequencyDialEnabled = false;
 		} else {
-			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
-			COMModeButton.classList.add('active-button');
 			displayOn = true;
+			frequencyDialEnabled = true;
 		}
-		transponderDialMode = transponderDialModes[newDialModeIndex];
 	}
 
-	function ontransponderFrequencyIncrease(event: Event) {
-		transponderSelectedFrequency += 1;
+	function onTransponderFrequencyIncrease(event: Event) {
+		transponderFrequency += 10 ** (3 - displayDigitSelected);
 	}
 
-	function ontransponderFrequencyReduce(event: Event) {
-		transponderSelectedFrequency -= 1;
+	function onTransponderFrequencyReduce(event: Event) {
+		transponderFrequency -= 10 ** (3 - displayDigitSelected);
 	}
 </script>
 
 <div class="transponder-container-outer relative">
 	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={transponderDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+		<Dial Modes={TransponderDialModes} bind:CurrentModeIndex={transponderDialModeIndex} />
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
-		<div class="active-standby-label-container flex flex-row">
-			<div class="active-standby-label" style="margin-right:130px;">STBY</div>
-			<div class="active-standby-label">ACTIVE</div>
-		</div>
 		<TransponderDisplay
 			DisplayOn={displayOn}
-			mode={transponderMode}
-			transponderPrimaryFrequency={transponderSelectedFrequency}
-			{transponderAlternateFrequency}
-			{transponderTertiaryFrequency}
+			mode={TransponderDialModes[transponderDialModeIndex]}
+			{transponderFrequency}
+			DigitSelected={displayDigitSelected}
 		/>
 		<div class="display-buttons-container">
-			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
-			<button class="button" id="button-swap" on:click={handleSWAPButtonClick}>⇆</button>
-			<button class="button" id="button-nav" on:click={handleNAVButtonClick}>NAV</button>
+			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
+			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
+			<button class="button" id="button-enter" on:click={handleENTERButtonClick}>ENT</button>
+			<button class="button" id="button-back" on:click={handleBACKButtonClick}>BACK</button>
 		</div>
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
 		<FrequencyDial
-			on:dialAntiClockwiseTurn={ontransponderFrequencyReduce}
-			on:dialClockwiseTurn={ontransponderFrequencyIncrease}
+			on:dialAntiClockwiseTurn={onTransponderFrequencyReduce}
+			on:dialClockwiseTurn={onTransponderFrequencyIncrease}
+			DialEnabled={frequencyDialEnabled}
 		/>
 	</div>
 </div>
