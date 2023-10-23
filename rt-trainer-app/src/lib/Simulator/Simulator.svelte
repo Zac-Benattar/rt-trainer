@@ -31,12 +31,12 @@
 				/>
 			</p>
 		</div>
-		<div class="radio-transponder-container flex flex-col gap-10">
-			<div>
-				<Radio />
-			</div>
+		<div class="transponder-radio-container flex flex-col gap-10">
 			<div>
 				<Transponder />
+			</div>
+			<div>
+				<Radio />
 			</div>
 			<div>
 				<Map />
