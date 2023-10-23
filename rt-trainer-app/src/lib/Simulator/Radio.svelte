@@ -13,13 +13,13 @@
 		string?,
 		string?
 	];
-	let radioMode: RadioMode = 'COM';
-	let radioDialMode: string = 'OFF';
-	let radioSelectedFrequency: number = 1000;
-	let radioAlternateFrequency: number = 2000;
-	let radioTertiaryFrequency: number = 3000;
-	let displayOn: boolean = false;
-	let frequencyDialEnabled: boolean = false;
+	export let radioMode: RadioMode = 'COM';
+	export let radioDialMode: string = 'OFF';
+	export let radioSelectedFrequency: number = 126.410;
+	export let radioAlternateFrequency: number = 123.170;
+	export let radioTertiaryFrequency: number = 179.200;
+	export let displayOn: boolean = false;
+	export let frequencyDialEnabled: boolean = false;
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -53,6 +53,14 @@
 			}
 		}
 	};
+
+	const handleSWAPButtonClick = () => {
+		if (radioDialMode != 'OFF') {
+			let tempFrequency = radioSelectedFrequency;
+			radioSelectedFrequency = radioAlternateFrequency;
+			radioAlternateFrequency = tempFrequency;
+		}
+	}
 
 	function onDialModeChange(event: Event) {
 		// Fix this hack
@@ -93,13 +101,13 @@
 		<RadioDisplay
 			DisplayOn={displayOn}
 			mode={radioMode}
-			{radioSelectedFrequency}
+			radioPrimaryFrequency={radioSelectedFrequency}
 			{radioAlternateFrequency}
 			{radioTertiaryFrequency}
 		/>
 		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
-			<button class="button" id="button-swap">⇆</button>
+			<button class="button" id="button-swap" on:click={handleSWAPButtonClick}>⇆</button>
 			<button class="button" id="button-nav" on:click={handleNAVButtonClick}>NAV</button>
 		</div>
 	</div>

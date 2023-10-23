@@ -4,12 +4,14 @@
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'COM';
 	export let DigitSelected: number = 0;
-	export let radioSelectedFrequency: number = 126.410;
-	export let radioAlternateFrequency: number = 123.170;
-	export let radioTertiaryFrequency: number = 179.200;
+	export let radioPrimaryFrequency: number = 126.41;
+	export let radioAlternateFrequency: number = 123.17;
+	export let radioTertiaryFrequency: number = 179.2;
 
 	let mounted: boolean = false;
-	let digitArr = [1, 0, 0, 0];
+	let PFDigitArr = ['0', '0', '0', '0', '0', '0'];
+	let AFDigitArr = ['0', '0', '0', '0', '0', '0'];
+	let TFDigitArr = ['0', '0', '0', '0', '0', '0'];
 
 	$: showDisplayText = DisplayOn ? '' : 'displayoff';
 	$: {
@@ -18,14 +20,61 @@
 		}
 	}
 	$: {
-		let newDigitArr = `${radioSelectedFrequency}`.split('').map(Number);
+		let split = radioPrimaryFrequency.toString().split('.');
+		let newDigitArrLeft = split[0].split('');
+		let newDigitArrRight = split[1].split('');
 		for (let i = 0; i < 4; i++) {
-			if (newDigitArr[i] != null) {
-				digitArr[i] = newDigitArr[i];
-			} else {
-				digitArr[i] = 0;
+			if (newDigitArrLeft[i] == null) {
+				newDigitArrLeft[i] = '0';
+			}
+			if (newDigitArrRight[i] == null) {
+				newDigitArrRight[i] = '0';
 			}
 		}
+		PFDigitArr[0] = newDigitArrLeft[0];
+		PFDigitArr[1] = newDigitArrLeft[1];
+		PFDigitArr[2] = newDigitArrLeft[2];
+		PFDigitArr[3] = newDigitArrRight[0];
+		PFDigitArr[4] = newDigitArrRight[1];
+		PFDigitArr[5] = newDigitArrRight[2];
+	}
+	$: {
+		let split = radioAlternateFrequency.toString().split('.');
+		let newDigitArrLeft = split[0].split('');
+		let newDigitArrRight = split[1].split('');
+		for (let i = 0; i < 4; i++) {
+			if (newDigitArrLeft[i] == null) {
+				newDigitArrLeft[i] = '0';
+			}
+			if (newDigitArrRight[i] == null) {
+				newDigitArrRight[i] = '0';
+			}
+		}
+		AFDigitArr[0] = newDigitArrLeft[0];
+		AFDigitArr[1] = newDigitArrLeft[1];
+		AFDigitArr[2] = newDigitArrLeft[2];
+		AFDigitArr[3] = newDigitArrRight[0];
+		AFDigitArr[4] = newDigitArrRight[1];
+		AFDigitArr[5] = newDigitArrRight[2];
+	}
+	$: {
+		let split = radioTertiaryFrequency.toString().split('.');
+		let newDigitArrLeft = split[0].split('');
+		let newDigitArrRight = split[1].split('');
+		for (let i = 0; i < 4; i++) {
+			if (newDigitArrLeft[i] == null) {
+				newDigitArrLeft[i] = '0';
+			}
+			if (newDigitArrRight[i] == null) {
+				newDigitArrRight[i] = '0';
+			}
+		}
+		TFDigitArr[0] = newDigitArrLeft[0];
+		TFDigitArr[1] = newDigitArrLeft[1];
+		TFDigitArr[2] = newDigitArrLeft[2];
+		TFDigitArr[3] = newDigitArrRight[0];
+		TFDigitArr[4] = newDigitArrRight[1];
+		TFDigitArr[5] = newDigitArrRight[2];
 	}
 
 	onMount(() => {
@@ -47,35 +96,35 @@
 		<div class="mode-icon">{mode}</div>
 	</div>
 	<div class="sevenSEG flex flex-row flex-wrap">
-		<div class="secondary-frequency flex flex-row">
-			<div id="secondary-rdigit-0" class="rdigit">{digitArr[0]}</div>
-			<div id="secondary-rdigit-1" class="rdigit">{digitArr[1]}</div>
-			<div id="secondary-rdigit-2" class="rdigit">{digitArr[2]}</div>
+		<div class="alternate-frequency flex flex-row">
+			<div id="alternate-rdigit-0" class="rdigit">{AFDigitArr[0]}</div>
+			<div id="alternate-rdigit-1" class="rdigit">{AFDigitArr[1]}</div>
+			<div id="alternate-rdigit-2" class="rdigit">{AFDigitArr[2]}</div>
 			<div class="rdecimal-point">.</div>
-			<div id="secondary-rdigit-dp-0" class="rdigit">{digitArr[0]}</div>
-			<div id="secondary-rdigit-dp-1" class="rdigit">{digitArr[1]}</div>
-			<div id="secondary-rdigit-dp-2" class="rdigit">{digitArr[2]}</div>
+			<div id="alternate-rdigit-dp-0" class="rdigit">{AFDigitArr[3]}</div>
+			<div id="alternate-rdigit-dp-1" class="rdigit">{AFDigitArr[4]}</div>
+			<div id="alternate-rdigit-dp-2" class="rdigit">0</div>
 		</div>
 		<div>
 			<div class="divider-pipe">|</div>
 		</div>
 		<div class="primary-frequency flex flex-row">
-			<div id="primary-rdigit-0" class="rdigit">{digitArr[0]}</div>
-			<div id="primary-rdigit-1" class="rdigit">{digitArr[1]}</div>
-			<div id="primary-rdigit-2" class="rdigit">{digitArr[2]}</div>
+			<div id="primary-rdigit-0" class="rdigit">{PFDigitArr[0]}</div>
+			<div id="primary-rdigit-1" class="rdigit">{PFDigitArr[1]}</div>
+			<div id="primary-rdigit-2" class="rdigit">{PFDigitArr[2]}</div>
 			<div class="rdecimal-point">.</div>
-			<div id="primary-rdigit-dp-0" class="rdigit">{digitArr[0]}</div>
-			<div id="primary-rdigit-dp-1" class="rdigit">{digitArr[1]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit">{digitArr[2]}</div>
+			<div id="primary-rdigit-dp-0" class="rdigit">{PFDigitArr[3]}</div>
+			<div id="primary-rdigit-dp-1" class="rdigit">{PFDigitArr[4]}</div>
+			<div id="primary-rdigit-dp-2" class="rdigit">0</div>
 		</div>
-		<div class="terniary-frequency flex flex-row">
-			<div id="terniary-rdigit-0" class="rdigit">{digitArr[0]}</div>
-			<div id="terniary-rdigit-1" class="rdigit">{digitArr[1]}</div>
-			<div id="terniary-rdigit-2" class="rdigit">{digitArr[2]}</div>
+		<div class="tertiary-frequency flex flex-row">
+			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
+			<div id="tertiary-rdigit-1" class="rdigit">{TFDigitArr[1]}</div>
+			<div id="tertiary-rdigit-2" class="rdigit">{TFDigitArr[2]}</div>
 			<div class="rdecimal-point">.</div>
-			<div id="terniary-rdigit-dp-0" class="rdigit">{digitArr[0]}</div>
-			<div id="terniary-rdigit-dp-1" class="rdigit">{digitArr[1]}</div>
-			<div id="terniary-rdigit-dp-2" class="rdigit">{digitArr[2]}</div>
+			<div id="tertiary-rdigit-dp-0" class="rdigit">{TFDigitArr[3]}</div>
+			<div id="tertiary-rdigit-dp-1" class="rdigit">{TFDigitArr[4]}</div>
+			<div id="tertiary-rdigit-dp-2" class="rdigit">0</div>
 		</div>
 	</div>
 </div>
@@ -104,10 +153,10 @@
 	}
 
 	.radio-segdisplay .sevenSEG {
-		font-size: 35px;
+		font-size: 30px;
 		opacity: 1;
 		margin-right: 40px;
-		width:70%
+		width: 70%;
 	}
 
 	.radio-segdisplay .rdigit {

@@ -7,7 +7,7 @@
 	export let DigitSelected: number = 0;
 
 	let mounted: boolean = false;
-	let digitArr = [1, 0, 0, 0];
+	let digitArr = [0, 0, 0, 0];
 
 	$: showDisplayText = DisplayOn ? '' : 'displayoff';
 	$: {
