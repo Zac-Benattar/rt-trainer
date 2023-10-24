@@ -18,9 +18,6 @@
 <div class="relative flex">
 	<div class="flex flex-col gap-10">
 		<div class="relative">
-			<h1>Simulator</h1>
-		</div>
-		<div class="relative">
 			<p>
 				Unexpected events <SlideToggle
 					id="enable-random-events"
