@@ -1,9 +1,10 @@
 <script lang="ts">
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
-	import Map from '../../routes/scenario/[scenarioId]/Map.svelte';
+	import Map from './Map.svelte';
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import Kneeboard from './Kneeboard.svelte';
 	export let unexpectedEvents: boolean = false;
 	export let seed: string = '0';
 
@@ -38,18 +39,27 @@
 			<div>
 				<Transponder />
 			</div>
-			<div>
-				<Map />
+			<div class="map-kneeboard-container flex flex-row gap-5">
+				<div>
+					<Map />
+				</div>
+				<div>
+					<Kneeboard />
+				</div>
 			</div>
 		</div>
-		<div class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4">
+		<div
+			class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
+		>
 			<!-- Source -->
 			<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
 
 			<!-- Trigger -->
-			<button use:clipboard={{ element: 'scenarioLinkElement' }} class='btn variant-filled'>Copy</button>
+			<button use:clipboard={{ element: 'scenarioLinkElement' }} class="btn variant-filled"
+				>Copy</button
+			>
 		</div>
-		<div class="h-5"></div>
+		<div class="h-5" />
 	</div>
 </div>
 
