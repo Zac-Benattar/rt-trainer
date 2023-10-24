@@ -65,20 +65,22 @@
 	};
 
 	const handleENTERButtonClick = () => {
-		const ENTERButton = document.getElementById('button-enter') as HTMLInputElement;
-		if (displayDigitSelected < 3) {
-			displayDigitSelected += 1;
-		} else {
-			displayDigitSelected = 0;
+		if (displayOn) {
+			if (displayDigitSelected < 3) {
+				displayDigitSelected += 1;
+			} else {
+				displayDigitSelected = 0;
+			}
 		}
 	};
 
 	const handleBACKButtonClick = () => {
-		const BACKButton = document.getElementById('button-back') as HTMLInputElement;
-		if (displayDigitSelected > 0) {
-			displayDigitSelected -= 1;
-		} else {
-			displayDigitSelected = 3;
+		if (displayOn) {
+			if (displayDigitSelected < 3) {
+				displayDigitSelected += 1;
+			} else {
+				displayDigitSelected = 0;
+			}
 		}
 	};
 
