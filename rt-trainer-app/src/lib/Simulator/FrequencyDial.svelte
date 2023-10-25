@@ -1,8 +1,19 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-
 	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
+	let mounted: boolean = false;
+
+	$: if (mounted) {
+		const frequencyDial = document.getElementById(
+			'frequency-dial-' + internalName
+		) as HTMLDivElement;
+		if (DialEnabled) {
+			frequencyDial.classList.add('enabled');
+		} else {
+			frequencyDial.classList.remove('enabled');
+		}
+	}
 
 	const dispatch = createEventDispatcher();
 
@@ -118,6 +129,7 @@
 	}
 
 	onMount(() => {
+		mounted = true;
 		addArrows();
 	});
 </script>
@@ -158,11 +170,16 @@
 		transition: all 0.35s ease-in-out 0s;
 		justify-content: center;
 		display: flex;
+		boxshadow: rgb(255, 255, 255) 0px 0px 20px -5px;
 	}
 
 	.frequency-dial-line {
 		width: 2px;
 		height: 40px;
 		background: #fff;
+	}
+
+	:global(.enabled) {
+		box-shadow: rgb(255, 255, 255) 0px 0px 20px -5px;
 	}
 </style>

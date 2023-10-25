@@ -15,9 +15,9 @@
 	];
 	export let radioMode: RadioMode = 'COM';
 	export let radioDialMode: string = 'OFF';
-	export let radioSelectedFrequency: number = 126.410;
-	export let radioAlternateFrequency: number = 123.170;
-	export let radioTertiaryFrequency: number = 179.200;
+	export let radioSelectedFrequency: number = 126.41;
+	export let radioAlternateFrequency: number = 123.17;
+	export let radioTertiaryFrequency: number = 179.2;
 	export let displayOn: boolean = false;
 	export let frequencyDialEnabled: boolean = false;
 
@@ -60,7 +60,7 @@
 			radioSelectedFrequency = radioAlternateFrequency;
 			radioAlternateFrequency = tempFrequency;
 		}
-	}
+	};
 
 	function onDialModeChange(event: Event) {
 		// Fix this hack
@@ -75,10 +75,12 @@
 				radioMode = 'COM';
 			}
 			displayOn = false;
+			frequencyDialEnabled = false;
 		} else {
 			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 			COMModeButton.classList.add('active-button');
 			displayOn = true;
+			frequencyDialEnabled = true;
 		}
 		radioDialMode = RadioDialModes[newDialModeIndex];
 	}
@@ -99,8 +101,8 @@
 
 	<div class="display-panel flex flex-col justify-center items-center">
 		<div class="active-standby-label-container flex flex-row">
-			<div class="active-standby-label" style="margin-right:130px;">STBY</div>
-			<div class="active-standby-label">ACTIVE</div>
+			<div class="active-standby-label" style="margin-right:130px;">ACTIVE</div>
+			<div class="active-standby-label">STANDBY</div>
 		</div>
 		<RadioDisplay
 			DisplayOn={displayOn}
@@ -118,6 +120,7 @@
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
 		<FrequencyDial
+			DialEnabled={frequencyDialEnabled}
 			on:dialAntiClockwiseTurn={onRadioFrequencyReduce}
 			on:dialClockwiseTurn={onRadioFrequencyIncrease}
 		/>

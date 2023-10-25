@@ -15,11 +15,22 @@
 	];
 	export let Modes: ArrayMaxLength7MinLength2;
 	export let CurrentModeIndex: number = 0;
+	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
+	let mounted: boolean = false;
 
 	const dispatch = createEventDispatcher();
 
 	$: dispatch('modeChange', CurrentModeIndex);
+
+	$: if (mounted) {
+		const modeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
+		if (DialEnabled) {
+			modeDial.classList.add('enabled');
+		} else {
+			modeDial.classList.remove('enabled');
+		}
+	}
 
 	const handleDialClick = () => {
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
@@ -199,19 +210,19 @@
 				console.log('Setting mode' + modeIndex);
 				if (modeIndex == 0) {
 					ModeDial.style.transform = 'rotate(-150deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+					DialEnabled = false;
 				} else {
 					ModeDial.style.transform = 'rotate(0deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+					DialEnabled = true;
 				}
 			} else {
 				if (modeIndex == 0) {
 					ModeDial.style.transform = 'rotate(-150deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 0px 0px';
+					DialEnabled = false;
 				} else {
 					var newRotation = modeIndex * modesMultiplier - 150;
 					ModeDial.style.transform = 'rotate(' + newRotation + 'deg)';
-					ModeDial.style.boxShadow = 'rgb(255, 255, 255) 0px 0px 20px -5px';
+					DialEnabled = true;
 				}
 			}
 		}
@@ -220,6 +231,7 @@
 	}
 
 	onMount(() => {
+		mounted = true;
 		addModes();
 	});
 </script>
@@ -285,5 +297,9 @@
 		align-items: center;
 		transform: translateX(-50%) translateY(-50%);
 		cursor: pointer;
+	}
+
+	:globa(.mode-dial .enabled) {
+		box-shadow: rgb(255, 255, 255) 0px 0px 20px -5px;
 	}
 </style>
