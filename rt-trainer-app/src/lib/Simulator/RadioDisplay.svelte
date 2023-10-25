@@ -103,7 +103,7 @@
 			<div class="rdecimal-point">.</div>
 			<div id="alternate-rdigit-dp-0" class="rdigit">{AFDigitArr[3]}</div>
 			<div id="alternate-rdigit-dp-1" class="rdigit">{AFDigitArr[4]}</div>
-			<div id="alternate-rdigit-dp-2" class="rdigit">0</div>
+			<div id="alternate-rdigit-dp-2" class="rdigit">{AFDigitArr[5]}</div>
 		</div>
 		<div>
 			<div class="divider-pipe">|</div>
@@ -115,7 +115,7 @@
 			<div class="rdecimal-point">.</div>
 			<div id="primary-rdigit-dp-0" class="rdigit">{PFDigitArr[3]}</div>
 			<div id="primary-rdigit-dp-1" class="rdigit">{PFDigitArr[4]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit">0</div>
+			<div id="primary-rdigit-dp-2" class="rdigit">{PFDigitArr[5]}</div>
 		</div>
 		<div class="tertiary-frequency flex flex-row">
 			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
@@ -124,7 +124,7 @@
 			<div class="rdecimal-point">.</div>
 			<div id="tertiary-rdigit-dp-0" class="rdigit">{TFDigitArr[3]}</div>
 			<div id="tertiary-rdigit-dp-1" class="rdigit">{TFDigitArr[4]}</div>
-			<div id="tertiary-rdigit-dp-2" class="rdigit">0</div>
+			<div id="tertiary-rdigit-dp-2" class="rdigit">{TFDigitArr[5]}</div>
 		</div>
 	</div>
 </div>

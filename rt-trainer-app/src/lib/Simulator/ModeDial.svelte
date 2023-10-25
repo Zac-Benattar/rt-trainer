@@ -1,5 +1,4 @@
 <script lang="ts">
-	import internal from 'stream';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -39,10 +38,8 @@
             / determine rotation direction */
 			if (Modes.length == 2) {
 				setMode(CurrentModeIndex == 0 ? 1 : 0);
-			} else {
-				// Implement this!
-				console.log('Feature not implemented');
 			}
+			// Otherwise the clickable divs either side of the dial line will handle rotation
 		}
 	};
 
@@ -52,125 +49,27 @@
 		const ModeLabel = document.getElementById('mode-' + mode) as HTMLDivElement;
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeLabel != null && ModeDial != null) {
-			/* If there are only two modes no need to check the side of dial to 
-            / determine rotation direction */
-			if (Modes.length == 2) {
-				setMode(CurrentModeIndex == 0 ? 1 : 0);
-			} else {
-				const ModeIndex = Modes.indexOf(mode);
-				if (ModeIndex > -1 && ModeIndex < Modes.length) {
-					setMode(ModeIndex);
-				}
+			const ModeIndex = Modes.indexOf(mode);
+			if (ModeIndex > -1 && ModeIndex < Modes.length) {
+				setMode(ModeIndex);
 			}
 		}
 	}
 
-	function handleDialArrowClick(event: Event) {
-		var tgt = event.target as HTMLDivElement;
-		if (tgt.id == 'left-arrow-div-' + internalName) {
-			console.log('Left arrow clicked');
-			if (CurrentModeIndex != 0) {
-				setMode(CurrentModeIndex - 1);
-			}
-		} else {
-			console.log('Right arrow clicked');
-			if (CurrentModeIndex != Modes.length - 1) {
-				setMode(CurrentModeIndex + 1);
-			}
+	const incrementMode = () => {
+		if (CurrentModeIndex != Modes.length - 1) {
+			setMode(CurrentModeIndex + 1);
 		}
-	}
+	};
+
+	const decrementMode = () => {
+		if (CurrentModeIndex != 0) {
+			setMode(CurrentModeIndex - 1);
+		}
+	};
 
 	function addModes() {
-		// Add side based arrows if there are more than two modes
-		if (Modes.length > 2) {
-			console.log('Adding arrows');
-			var DialAndModesContainer = document.getElementById(
-				'dial-and-modes-container-' + internalName
-			) as HTMLDivElement;
-			var ArrowContainer = document.getElementById(
-				'arrow-container-' + internalName
-			) as HTMLDivElement;
-
-			// Add direction arrows
-			var LeftArrow = document.createElement('div');
-			var RightArrow = document.createElement('div');
-			var LeftArrowImg = document.createElement('svg');
-			var RightArrowImg = document.createElement('svg');
-			var LeftArrowg = document.createElement('g');
-			var RightArrowg = document.createElement('g');
-			var LeftArrowLinePath = document.createElement('path');
-			var RightArrowLinePath = document.createElement('path');
-			var LeftArrowHeadPath = document.createElement('path');
-			var RightArrowHeadPath = document.createElement('path');
-
-			LeftArrow.setAttribute(
-				'style',
-				'position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;'
-			);
-			RightArrow.setAttribute(
-				'style',
-				'position: absolute; right: 8px; top: 30%; width: 14px; pointer-events: none;'
-			);
-
-			LeftArrowg.setAttribute('opacity', '0.25');
-			RightArrowg.setAttribute('opacity', '0.25');
-
-			LeftArrowHeadPath.setAttribute('data-name', 'X jog left arrow');
-			LeftArrowHeadPath.setAttribute('d', 'M2.7 3.55v2.7H0');
-			LeftArrowHeadPath.setAttribute('fill', '#fff');
-
-			RightArrowHeadPath.setAttribute('data-name', 'X jog right arrow');
-			RightArrowHeadPath.setAttribute('d', 'M1.82.15a6.62 6.62 0 01-.47 5.12');
-			RightArrowHeadPath.setAttribute('fill', 'none');
-			RightArrowHeadPath.setAttribute('stroke', '#fff');
-			RightArrowHeadPath.setAttribute('stroke-miterlimit', '10');
-
-			LeftArrowLinePath.setAttribute('data-name', 'X jog left line');
-			LeftArrowLinePath.setAttribute('d', 'M1.52 5.29A6.67 6.67 0 011.05.15');
-			LeftArrowLinePath.setAttribute('fill', 'none');
-			LeftArrowLinePath.setAttribute('stroke', '#fff');
-			LeftArrowLinePath.setAttribute('stroke-miterlimit', '10');
-
-			RightArrowLinePath.setAttribute('data-name', 'X jog right line');
-			RightArrowLinePath.setAttribute('d', 'M2.7 6.24H0v-2.7');
-			RightArrowLinePath.setAttribute('fill', '#fff');
-
-			LeftArrowImg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-			LeftArrowImg.setAttribute('viewBox', '0 0 2.7 6.25');
-
-			RightArrowImg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-			RightArrowImg.setAttribute('viewBox', '0 0 2.7 6.24');
-
-			DialAndModesContainer.appendChild(LeftArrow);
-			DialAndModesContainer.appendChild(RightArrow);
-			LeftArrow.appendChild(LeftArrowImg);
-			RightArrow.appendChild(RightArrowImg);
-			LeftArrowImg.appendChild(LeftArrowg);
-			RightArrowImg.appendChild(RightArrowg);
-			LeftArrowg.appendChild(LeftArrowLinePath);
-			LeftArrowg.appendChild(LeftArrowHeadPath);
-			RightArrowg.appendChild(RightArrowLinePath);
-			RightArrowg.appendChild(RightArrowHeadPath);
-
-			// Add direction divs
-			var LeftDiv = document.createElement('div');
-			var RightDiv = document.createElement('div');
-
-			LeftDiv.setAttribute('class', 'w-100 h-100');
-			RightDiv.setAttribute('class', 'w-100 h-100');
-			LeftDiv.setAttribute('style', 'width: 50%; height: 100%');
-			RightDiv.setAttribute('style', 'width: 50%; height: 100%');
-			LeftDiv.setAttribute('id', 'left-arrow-div-' + internalName);
-			RightDiv.setAttribute('id', 'right-arrow-div-' + internalName);
-
-			ArrowContainer.appendChild(LeftDiv);
-			ArrowContainer.appendChild(RightDiv);
-
-			LeftDiv.addEventListener('click', handleDialArrowClick);
-			RightDiv.addEventListener('click', handleDialArrowClick);
-		}
-
-		// Add mode labels around dial from -150 to 150 degrees
+		// Add mode clickable labels around dial from -150 to 150 degrees
 		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
 		var angle = 0.33 * Math.PI;
 		var step = (0.83 * 2 * Math.PI) / Modes.length;
@@ -257,13 +156,54 @@
 			role="button"
 			style="transform: rotate(-150deg);"
 		>
-			<div
-				id={'arrow-container-' + internalName}
-				class="absolute flex flex-row w-100 h-100"
-				style="top: 0px; left: 0px; width: 100%; height: 100%; transform: rotate(0deg);"
-			/>
+			{#if Modes.length > 2}
+				<div style="position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.25"
+						><g opacity="0.25"
+							><path
+								data-name="X jog left line"
+								d="M1.52 5.29A6.67 6.67 0 011.05.15"
+								fill="none"
+								stroke="#fff"
+								stroke-miterlimit="10"
+							/><path data-name="X jog left arrow" fill="#fff" d="M2.7 3.55v2.7H0" /></g
+						></svg
+					>
+				</div>
+				<div style="position: absolute; right: 8px; top: 30%; width: 14px; pointer-events: none;">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.24"
+						><g opacity="0.25"
+							><path
+								data-name="X jog right arrow"
+								d="M1.82.15a6.62 6.62 0 01-.47 5.12"
+								fill="none"
+								stroke="#fff"
+								stroke-miterlimit="10"
+							/><path data-name="X jog right line" fill="#fff" d="M2.7 6.24H0v-2.7" /></g
+						></svg
+					>
+				</div>
 
-			<div class="mode-dial-line center" />
+				<div class="flex w-100 h-100" style="top: 0px; left: 0px; width: 100%; height: 100%;">
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						class="w-100 h-100"
+						style="width: 50%; height: 100%;"
+						on:click={decrementMode}
+						on:keypress={decrementMode}
+					/>
+
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						class="w-100 h-100"
+						style="width: 50%; height: 100%"
+						on:click={incrementMode}
+						on:keypress={incrementMode}
+					/>
+				</div>
+				<div class="Transponder__ModeLine-bmz734-5 fsAVmj" />
+			{/if}
+			<div class="absolute mode-dial-line center" />
 		</div>
 	</div>
 </div>

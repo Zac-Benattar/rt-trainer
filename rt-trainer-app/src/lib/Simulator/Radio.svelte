@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FrequencyDial from './FrequencyDial.svelte';
+	import DoubleFrequencyDial from './DoubleFrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
 	type RadioMode = 'COM' | 'NAV';
@@ -15,9 +15,9 @@
 	];
 	export let radioMode: RadioMode = 'COM';
 	export let radioDialMode: string = 'OFF';
-	export let radioSelectedFrequency: number = 126.41;
-	export let radioAlternateFrequency: number = 123.17;
-	export let radioTertiaryFrequency: number = 179.2;
+	export let radioSelectedFrequency: number = 126.410;
+	export let radioAlternateFrequency: number = 123.170;
+	export let radioTertiaryFrequency: number = 179.200;
 	export let displayOn: boolean = false;
 	export let frequencyDialEnabled: boolean = false;
 
@@ -85,16 +85,24 @@
 		radioDialMode = RadioDialModes[newDialModeIndex];
 	}
 
-	function onRadioFrequencyIncrease(event: Event) {
+	function onRadioFrequencyIncreaseLarge(event: Event) {
 		radioSelectedFrequency += 1;
 	}
 
-	function onRadioFrequencyReduce(event: Event) {
+	function onRadioFrequencyReduceLarge(event: Event) {
 		radioSelectedFrequency -= 1;
+	}
+
+	function onRadioFrequencyIncreaseSmall(event: Event) {
+		radioSelectedFrequency += 0.005;
+	}
+
+	function onRadioFrequencyReduceSmall(event: Event) {
+		radioSelectedFrequency -= 0.005;
 	}
 </script>
 
-<div class="radio-container-outer relative">
+<div class="radio-container-outer relative card">
 	<div class="mode-selecter absolute inset-y-0 left-0">
 		<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 	</div>
@@ -119,10 +127,12 @@
 	</div>
 
 	<div class="frequency-selecter absolute inset-y-0 right-0">
-		<FrequencyDial
+		<DoubleFrequencyDial
 			DialEnabled={frequencyDialEnabled}
-			on:dialAntiClockwiseTurn={onRadioFrequencyReduce}
-			on:dialClockwiseTurn={onRadioFrequencyIncrease}
+			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceLarge}
+			on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseLarge}
+			on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceSmall}
+			on:dialOuterClockwiseTurn={onRadioFrequencyIncreaseSmall}
 		/>
 	</div>
 </div>

@@ -125,7 +125,7 @@
 	}
 </script>
 
-<div class="transponder-container-outer relative">
+<div class="transponder-container-outer relative card">
 	<div class="mode-selecter absolute inset-y-0 left-0">
 		<Dial Modes={TransponderDialModes} bind:CurrentModeIndex={transponderDialModeIndex} />
 	</div>
