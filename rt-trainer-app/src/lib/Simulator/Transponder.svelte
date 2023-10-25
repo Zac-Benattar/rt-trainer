@@ -24,7 +24,7 @@
 	let transponderMode: TransponderMode = 'NONE';
 	let transponderDialModeIndex: number = 0;
 	let displayOn: boolean = false;
-	let transponderFrequency: number = 1000;
+	let digitArr = [7, 0, 0, 0];
 	let frequencyDialEnabled: boolean = false;
 	let displayDigitSelected: number = 0;
 
@@ -76,10 +76,10 @@
 
 	const handleBACKButtonClick = () => {
 		if (displayOn) {
-			if (displayDigitSelected < 3) {
-				displayDigitSelected += 1;
+			if (displayDigitSelected > 0) {
+				displayDigitSelected -= 1;
 			} else {
-				displayDigitSelected = 0;
+				displayDigitSelected = 3;
 			}
 		}
 	};
@@ -104,12 +104,24 @@
 		}
 	}
 
+	function getFrequency(): number {
+		return parseInt(digitArr.join(''));
+	}
+
 	function onTransponderFrequencyIncrease(event: Event) {
-		transponderFrequency += 10 ** (3 - displayDigitSelected);
+		if (digitArr[displayDigitSelected] == 9) {
+			digitArr[displayDigitSelected] = 0;
+		} else {
+			digitArr[displayDigitSelected] += 1;
+		}
 	}
 
 	function onTransponderFrequencyReduce(event: Event) {
-		transponderFrequency -= 10 ** (3 - displayDigitSelected);
+		if (digitArr[displayDigitSelected] == 0) {
+			digitArr[displayDigitSelected] = 9;
+		} else {
+			digitArr[displayDigitSelected] -= 1;
+		}
 	}
 </script>
 
@@ -122,7 +134,7 @@
 		<TransponderDisplay
 			DisplayOn={displayOn}
 			mode={TransponderDialModes[transponderDialModeIndex]}
-			{transponderFrequency}
+			{digitArr}
 			DigitSelected={displayDigitSelected}
 		/>
 		<div class="display-buttons-container">

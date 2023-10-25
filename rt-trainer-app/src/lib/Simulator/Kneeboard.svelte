@@ -23,6 +23,7 @@
 		width: 100%;
 		min-width: 490px;
 		min-height: 360px;
+		max-height: 1000px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;

@@ -3,26 +3,15 @@
 
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'OFF';
-	export let transponderFrequency: number = 2000;
 	export let DigitSelected: number = 0;
+	export let digitArr = [0, 0, 0, 0];
 
 	let mounted: boolean = false;
-	let digitArr = [0, 0, 0, 0];
 
 	$: showDisplayText = DisplayOn ? '' : 'displayoff';
 	$: {
 		if (!DisplayOn) {
 			DigitSelected = 0;
-		}
-	}
-	$: {
-		let newDigitArr = `${transponderFrequency}`.split('').map(Number);
-		for (let i = 0; i < 4; i++) {
-			if (newDigitArr[i] != null) {
-				digitArr[i] = newDigitArr[i];
-			} else {
-				digitArr[i] = 0;
-			}
 		}
 	}
 	$: {
