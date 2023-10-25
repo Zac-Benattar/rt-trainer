@@ -12,6 +12,7 @@
 
 <div class="kneeboard">
 	<p contenteditable="true" class="input-box">
+		Take notes here
 		<img class="icon" src="/images/delete.png" on:click={handleDelete}/>
 	</p>
 </div>
@@ -21,7 +22,7 @@
 		position: relative;
 		width: 100%;
 		min-width: 490px;
-		min-height: 490px;
+		min-height: 360px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;

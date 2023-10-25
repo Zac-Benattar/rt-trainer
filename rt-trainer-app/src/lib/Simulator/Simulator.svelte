@@ -17,17 +17,16 @@
 
 <div class="relative flex">
 	<div class="flex flex-col gap-10">
-		<div class="relative">
-			<p>
-				Unexpected events <SlideToggle
-					id="enable-random-events"
-					name="slider-small"
-					checked={unexpectedEvents}
-					active="bg-primary-500"
-					size="sm"
-					on:click={() => (unexpectedEvents = !unexpectedEvents)}
-				/>
-			</p>
+		<div class="settings-container relative">
+			<SlideToggle
+				id="enable-random-events"
+				name="slider-small"
+				checked={unexpectedEvents}
+				active="bg-primary-500"
+				size="sm"
+				on:click={() => (unexpectedEvents = !unexpectedEvents)}
+				>Unexpected events
+			</SlideToggle>
 		</div>
 		<div class="radio-transponder-container flex flex-col gap-10">
 			<div>
@@ -61,6 +60,12 @@
 </div>
 
 <style lang="postcss">
+	.settings-container {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+	}
+
 	.radio-transponder-container {
 		justify-content: center;
 	}
