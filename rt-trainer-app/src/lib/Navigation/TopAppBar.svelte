@@ -4,54 +4,66 @@
 	import { createEventDispatcher } from 'svelte';
 
 	export let burgerButton: string;
-    export let enabled: boolean;
+	export let enabled: boolean;
 
 	const dispatch = createEventDispatcher();
 
-    const burgerButtonClicked = () => {
-        dispatch('burgerButtonClicked');
-    }
+	const burgerButtonClicked = () => {
+		dispatch('burgerButtonClicked');
+	};
 </script>
 
 <!-- Hide app bar if not enabled -->
 {#if enabled}
-<AppBar>
-	<svelte:fragment slot="lead">
-		<div class="flex items-center">
-			<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked}>
-				<span>
-					<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
-						<rect width="100" height="20" />
-						<rect y="30" width="100" height="20" />
-						<rect y="60" width="100" height="20" />
-					</svg>
-				</span>
-			</button>
-			<strong class="text-xl uppercase">RT Trainer</strong>
-		</div>
-	</svelte:fragment>
+	<AppBar>
+		<svelte:fragment slot="lead">
+			<div class="flex items-center">
+				<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked}>
+					<span>
+						<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
+							<rect width="100" height="20" />
+							<rect y="30" width="100" height="20" />
+							<rect y="60" width="100" height="20" />
+						</svg>
+					</span>
+				</button>
+				<strong class="text-xl uppercase">RT Trainer</strong>
+			</div>
+		</svelte:fragment>
 
-	<svelte:fragment slot="trail">
-		<a
-			class="btn btn-sm variant-ghost-surface"
-			href="https://github.com/Zac-Benattar/csproj/"
-			target="_blank"
-			rel="external"
-		>
-			GitHub
-		</a>
+		<svelte:fragment slot="trail">
+			<a
+				class="btn btn-sm variant-ghost-surface"
+				href="https://github.com/Zac-Benattar/csproj/"
+				target="_blank"
+				rel="external"
+			>
+				GitHub
+			</a>
 
-		<!-- on:click not working! -->
-		<a class="btn btn-sm variant-ghost-surface" href="/profile"
-			><Avatar
-				src="https://i.pravatar.cc/"
-				fallback="https://i.pravatar.cc/"
-				initials="ZB"
-				border="border-4 border-surface-300-600-token hover:!border-primary-500"
-				cursor="cursor-pointer"
-				data-sveltekit-preload-data="hover"
-			/></a
-		>
-	</svelte:fragment>
-</AppBar>
+			<!-- on:click not working! -->
+			<a class="btn btn-sm variant-ghost-surface" href="/profile"
+				><Avatar
+					src="https://i.pravatar.cc/"
+					fallback="https://i.pravatar.cc/"
+					initials="ZB"
+					border="border-4 border-surface-300-600-token hover:!border-primary-500"
+					cursor="cursor-pointer"
+					data-sveltekit-preload-data="hover"
+				/></a
+			>
+		</svelte:fragment>
+	</AppBar>
+{:else}
+	<div>
+		<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked}>
+			<span>
+				<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
+					<rect width="100" height="20" />
+					<rect y="30" width="100" height="20" />
+					<rect y="60" width="100" height="20" />
+				</svg>
+			</span>
+		</button>
+	</div>
 {/if}
