@@ -15,7 +15,7 @@ This repository is inspired by a starter pack repository of resources for CS310 
 
 - Clone the repo into a local folder.
 - Install Node.js (https://nodejs.org/en) and npm (should be installed with nodejs), you may need to restart your terminal to use npm.
-- Navigate to the "rt-trainer-app" subdirectory and run `npm install` to install all dependencies and `npm run dev --open` to run the webapp locally on localhost:5173/
+- Navigate to the "rt-trainer-app" subdirectory and run `npm install` to install all dependencies and `npm run dev --open` to run the webapp locally on `localhost:5173/`.
 
 ### Continuous Integration
 
