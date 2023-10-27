@@ -15,9 +15,9 @@
 	];
 	export let radioMode: RadioMode = 'COM';
 	export let radioDialMode: string = 'OFF';
-	export let radioSelectedFrequency: number = 126.410;
-	export let radioAlternateFrequency: number = 123.170;
-	export let radioTertiaryFrequency: number = 179.200;
+	export let activeFrequency: number = 126.41;
+	export let standbyFrequency: number = 123.17;
+	export let tertiaryFrequency: number = 177.2;
 	export let displayOn: boolean = false;
 	export let frequencyDialEnabled: boolean = false;
 
@@ -56,9 +56,9 @@
 
 	const handleSWAPButtonClick = () => {
 		if (radioDialMode != 'OFF') {
-			let tempFrequency = radioSelectedFrequency;
-			radioSelectedFrequency = radioAlternateFrequency;
-			radioAlternateFrequency = tempFrequency;
+			let tempFrequency = activeFrequency;
+			activeFrequency = standbyFrequency;
+			standbyFrequency = tempFrequency;
 		}
 	};
 
@@ -86,19 +86,19 @@
 	}
 
 	function onRadioFrequencyIncreaseLarge(event: Event) {
-		radioSelectedFrequency += 1;
+		activeFrequency += 1;
 	}
 
 	function onRadioFrequencyReduceLarge(event: Event) {
-		radioSelectedFrequency -= 1;
+		activeFrequency -= 1;
 	}
 
 	function onRadioFrequencyIncreaseSmall(event: Event) {
-		radioSelectedFrequency += 0.005;
+		activeFrequency += 0.005;
 	}
 
 	function onRadioFrequencyReduceSmall(event: Event) {
-		radioSelectedFrequency -= 0.005;
+		activeFrequency -= 0.005;
 	}
 </script>
 
@@ -115,9 +115,9 @@
 		<RadioDisplay
 			DisplayOn={displayOn}
 			mode={radioMode}
-			radioPrimaryFrequency={radioSelectedFrequency}
-			{radioAlternateFrequency}
-			{radioTertiaryFrequency}
+			{activeFrequency}
+			{standbyFrequency}
+			{tertiaryFrequency}
 		/>
 		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>

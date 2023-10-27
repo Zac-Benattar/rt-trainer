@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
-	export let DialEnabled: boolean = false;
-	let internalName = Math.random().toString(36).substring(7);
+	export let DialEnabled: boolean = false; // Dial not interactive if disabled
+	let internalName = Math.random().toString(36).substring(7); // like a uuid, useful if more than one instance used
 	let mounted: boolean = false;
 
+	// Ensures that dial is mounted before modifying its properties
 	$: if (mounted) {
 		const frequencyDial = document.getElementById(
 			'double-frequency-dial-outer-' + internalName

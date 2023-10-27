@@ -4,14 +4,16 @@
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'COM';
 	export let DigitSelected: number = 0;
-	export let radioPrimaryFrequency: number = 126.41;
-	export let radioAlternateFrequency: number = 123.17;
-	export let radioTertiaryFrequency: number = 179.2;
+	export let activeFrequency: number = 123.17;
+	export let standbyFrequency: number = 126.41;
+	export let tertiaryFrequency: number = 177.2;
 
 	let mounted: boolean = false;
-	let PFDigitArr = ['0', '0', '0', '0', '0', '0'];
-	let AFDigitArr = ['0', '0', '0', '0', '0', '0'];
-	let TFDigitArr = ['0', '0', '0', '0', '0', '0'];
+	
+	// Digit arrays hold the digits of frequencies
+	let SFDigitArr = ['0', '0', '0', '0', '0', '0']; // Standby frequency
+	let AFDigitArr = ['0', '0', '0', '0', '0', '0']; // Active frequency
+	let TFDigitArr = ['0', '0', '0', '0', '0', '0']; // Tertiary frequency
 
 	$: showDisplayText = DisplayOn ? '' : 'displayoff';
 	$: {
@@ -20,7 +22,7 @@
 		}
 	}
 	$: {
-		let split = radioPrimaryFrequency.toString().split('.');
+		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
 		for (let i = 0; i < 4; i++) {
@@ -31,15 +33,15 @@
 				newDigitArrRight[i] = '0';
 			}
 		}
-		PFDigitArr[0] = newDigitArrLeft[0];
-		PFDigitArr[1] = newDigitArrLeft[1];
-		PFDigitArr[2] = newDigitArrLeft[2];
-		PFDigitArr[3] = newDigitArrRight[0];
-		PFDigitArr[4] = newDigitArrRight[1];
-		PFDigitArr[5] = newDigitArrRight[2];
+		SFDigitArr[0] = newDigitArrLeft[0];
+		SFDigitArr[1] = newDigitArrLeft[1];
+		SFDigitArr[2] = newDigitArrLeft[2];
+		SFDigitArr[3] = newDigitArrRight[0];
+		SFDigitArr[4] = newDigitArrRight[1];
+		SFDigitArr[5] = newDigitArrRight[2];
 	}
 	$: {
-		let split = radioAlternateFrequency.toString().split('.');
+		let split = activeFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
 		for (let i = 0; i < 4; i++) {
@@ -58,7 +60,7 @@
 		AFDigitArr[5] = newDigitArrRight[2];
 	}
 	$: {
-		let split = radioTertiaryFrequency.toString().split('.');
+		let split = tertiaryFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
 		for (let i = 0; i < 4; i++) {
@@ -109,13 +111,13 @@
 			<div class="divider-pipe">|</div>
 		</div>
 		<div class="primary-frequency flex flex-row">
-			<div id="primary-rdigit-0" class="rdigit">{PFDigitArr[0]}</div>
-			<div id="primary-rdigit-1" class="rdigit">{PFDigitArr[1]}</div>
-			<div id="primary-rdigit-2" class="rdigit">{PFDigitArr[2]}</div>
+			<div id="primary-rdigit-0" class="rdigit">{SFDigitArr[0]}</div>
+			<div id="primary-rdigit-1" class="rdigit">{SFDigitArr[1]}</div>
+			<div id="primary-rdigit-2" class="rdigit">{SFDigitArr[2]}</div>
 			<div class="rdecimal-point">.</div>
-			<div id="primary-rdigit-dp-0" class="rdigit">{PFDigitArr[3]}</div>
-			<div id="primary-rdigit-dp-1" class="rdigit">{PFDigitArr[4]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit">{PFDigitArr[5]}</div>
+			<div id="primary-rdigit-dp-0" class="rdigit">{SFDigitArr[3]}</div>
+			<div id="primary-rdigit-dp-1" class="rdigit">{SFDigitArr[4]}</div>
+			<div id="primary-rdigit-dp-2" class="rdigit">{SFDigitArr[5]}</div>
 		</div>
 		<div class="tertiary-frequency flex flex-row">
 			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
