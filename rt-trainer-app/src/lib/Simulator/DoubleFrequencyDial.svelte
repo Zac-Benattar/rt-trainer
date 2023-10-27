@@ -47,14 +47,10 @@
 		<div
 			id={'frequency-center-div-' + internalName}
 			class="w-0 h-0 absolute"
-			style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
+			style="top: 50%; left: 50%; position: absolute; margin: auto;"
 		/>
-		<button
-			id={'frequency-dial-outer-' + internalName}
-			class="frequency-dial-outer flex"
-			style="transform: rotate(-150deg);"
-		>
-			<div class="absolute">
+		<button id={'frequency-dial-outer-' + internalName} class="frequency-dial-outer flex">
+			<div class="absolute" style="left: 8px; top: 26%; width: 12px; pointer-events: none;">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.97 9.43"
 					><g opacity="0.25"
 						><path
@@ -67,7 +63,7 @@
 					></svg
 				>
 			</div>
-			<div class="absolute">
+			<div class="absolute" style="right: 8px; top: 26%; width: 12px; pointer-events: none;">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.97 9.43"
 					><g opacity="0.25"
 						><path
@@ -83,7 +79,7 @@
 			<div
 				id={'click-container-' + internalName}
 				class="absolute flex flex-row w-100 h-100"
-				style="top: 0px; left: 0px; width: 100%; height: 100%; transform: rotate(0deg);"
+				style="top: 0px; left: 0px; width: 100%; height: 100%;"
 			>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -98,10 +94,9 @@
 			</div>
 			<button
 				id={'frequency-dial-inner-' + internalName}
-				class="frequency-dial-inner flex"
-				style="transform: rotate(-150deg);"
+				class="frequency-dial-inner absolute flex"
 			>
-				<div style="position: absolute; left: 8px; top: 26%; width: 12px; pointer-events: none;">
+				<div class="absolute" style="left: 8px; top: 26%; width: 12px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 5.92"
 						><g opacity="0.25"
 							><path
@@ -114,7 +109,7 @@
 						></svg
 					>
 				</div>
-				<div style="position: absolute; right: 8px; top: 26%; width: 12px; pointer-events: none;">
+				<div class="absolute" style="right: 8px; top: 26%; width: 12px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 5.92"
 						><g opacity="0.25"
 							><path
@@ -165,6 +160,7 @@
 	.frequency-dial-inner {
 		width: 50px;
 		height: 50px;
+		top: 25%;
 		border: 2px solid #fff;
 		border-radius: 50%;
 		transition: all 0.35s ease-in-out 0s;
