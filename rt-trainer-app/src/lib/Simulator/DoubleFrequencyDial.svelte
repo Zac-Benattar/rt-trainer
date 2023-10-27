@@ -6,7 +6,7 @@
 
 	$: if (mounted) {
 		const frequencyDial = document.getElementById(
-			'frequency-dial-' + internalName
+			'double-frequency-dial-outer-' + internalName
 		) as HTMLDivElement;
 		if (DialEnabled) {
 			frequencyDial.classList.add('enabled');
@@ -49,8 +49,8 @@
 			class="w-0 h-0 absolute"
 			style="top: 50%; left: 50%; position: absolute; margin: auto;"
 		/>
-		<button id={'frequency-dial-outer-' + internalName} class="frequency-dial-outer flex">
-			<div class="absolute" style="left: 8px; top: 26%; width: 12px; pointer-events: none;">
+		<button id={'double-frequency-dial-outer-' + internalName} class="double-frequency-dial-outer flex">
+			<div class="absolute" style="left: 8px; top: 30%; width: 12px; pointer-events: none;">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.97 9.43"
 					><g opacity="0.25"
 						><path
@@ -63,7 +63,7 @@
 					></svg
 				>
 			</div>
-			<div class="absolute" style="right: 8px; top: 26%; width: 12px; pointer-events: none;">
+			<div class="absolute" style="right: 8px; top: 30%; width: 12px; pointer-events: none;">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.97 9.43"
 					><g opacity="0.25"
 						><path
@@ -93,8 +93,8 @@
 				<div class="w-100 h-100" style="width: 50%;" on:click={onDialOuterClockwiseTurn} />
 			</div>
 			<button
-				id={'frequency-dial-inner-' + internalName}
-				class="frequency-dial-inner absolute flex"
+				id={'double-frequency-dial-inner-' + internalName}
+				class="double-frequency-dial-inner absolute flex"
 			>
 				<div class="absolute" style="left: 8px; top: 26%; width: 12px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 5.92"
@@ -147,7 +147,7 @@
 </div>
 
 <style lang="postcss">
-	.frequency-dial-outer {
+	.double-frequency-dial-outer {
 		width: 100px;
 		height: 100px;
 		border: 2px solid #fff;
@@ -157,7 +157,7 @@
 		display: flex;
 	}
 
-	.frequency-dial-inner {
+	.double-frequency-dial-inner {
 		width: 50px;
 		height: 50px;
 		top: 25%;
