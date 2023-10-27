@@ -11,15 +11,20 @@ This repository is inspired by a starter pack repository of resources for CS310 
 - GitHub Actions workflows for building each report and making them available as build artifacts.
 - Generic advice for writing the reports.
 
+## Developing and Running the WebApp
+
+- Clone the repo into a local folder.
+- Install Node.js (https://nodejs.org/en) and npm (should be installed with nodejs), you may need to restart your terminal to use npm.
+- Navigate to the "rt-trainer-app" subdirectory and run `npm install` to install all dependencies and `npm run dev --open` to run the webapp locally on localhost:5173/
+
 ### Continuous Integration
 
-This repository is configured with [GitHub Actions](https://docs.github.com/en/actions) workflows which will builds reports every time changes are pushed. For example, if you change `specification/specification.tex` locally, commit your changes, and push them to GitHub, then the workflow defined in `.github/workflows/specification.yml` will run and build your specification for you. If the build is successful, the resulting PDF will be uploaded as a build artifact and can be downloaded from the summary page of the corresponding job.
+This repository is configured with [GitHub Actions](https://docs.github.com/en/actions) workflows which will builds reports every time changes are pushed to main. For example, if you change `specification/specification.tex` locally, commit your changes, and push them to GitHub, then the workflow defined in `.github/workflows/specification.yml` will run and build your specification for you. If the build is successful, the resulting PDF will be uploaded as a build artifact and can be downloaded from the summary page of the corresponding job.
 
 ### Continuous Deployment
 
-Eventually this repository will be linked to a GitHub Pages page and continously deployed there in order to have accessible the current release version of the project
+Eventually this repository will be linked to a Fly.io url and continously deployed there in order to have accessible the current release version of the project.
 
 ### LaTeX documents
 
 The TeX documents in this repository have all been written using Overleaf's online editor (https://www.overleaf.com/) for simplicity, and GitHub Sync (https://www.overleaf.com/learn/how-to/GitHub_Synchronization) has been used to keep the repository up to date. This can interfere with the GitHub actions compliation, as Overleaf is more compliant with errors and warnings. Hence it may be easier to view the TeX documents in Overleaf than try compile locally.
-
