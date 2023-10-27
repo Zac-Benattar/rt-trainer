@@ -1,19 +1,23 @@
 <script lang="ts">
+	// Clears input box
 	const handleDelete = () => {
 		const inputBox = document.querySelector('.input-box') as HTMLInputElement;
         var deleteIcon = document.createElement('img');
+		// Create new inner html
         deleteIcon.setAttribute('class', 'icon');
         deleteIcon.setAttribute('src', '/images/delete.png');
         deleteIcon.addEventListener('click', handleDelete);
-		inputBox.innerHTML = '';
-        inputBox.appendChild(deleteIcon);
+		inputBox.innerHTML = ''; // Clear existing innerHTML
+        inputBox.appendChild(deleteIcon); // Add new innerHTML
 	};
 </script>
 
 <div class="kneeboard">
 	<p contenteditable="true" class="input-box">
 		Take notes here
-		<img class="icon" src="/images/delete.png" on:click={handleDelete}/>
+		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<img class="icon" src="/images/delete.png" on:click={handleDelete} on:keypress={handleDelete}/>
 	</p>
 </div>
 

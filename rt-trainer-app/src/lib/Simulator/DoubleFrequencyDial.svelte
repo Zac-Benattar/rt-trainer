@@ -88,7 +88,7 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					class="w-100 h-100 position-relative"
+					class="w-100 h-100 relative"
 					style="width: 50%;"
 					on:click={onDialOuterAntiClockwiseTurn}
 				/>
@@ -127,20 +127,23 @@
 						></svg
 					>
 				</div>
-				<div class="position-absolute d-flex w-100 h-100" style="top: 0px; left: 0px;">
+				<div
+					class="absolute flex flex-row w-100 h-100"
+					style="top: 0px; left: 0px; width:100%; height:100%;"
+				>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
+						class="w-100 h-100 relative"
 						style="width: 50%;"
-						on:click={onDialOuterAntiClockwiseTurn}
-						on:keypress={onDialOuterAntiClockwiseTurn}
+						on:click={onDialInnerAntiClockwiseTurn}
+						on:keypress={onDialInnerAntiClockwiseTurn}
 					/>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
+						class="w-100 h-100 relative"
 						style="width: 50%;"
-						on:click={onDialOuterClockwiseTurn}
-						on:keypress={onDialOuterClockwiseTurn}
+						on:click={onDialInnerClockwiseTurn}
+						on:keypress={onDialInnerClockwiseTurn}
 					/>
 				</div></button
 			>

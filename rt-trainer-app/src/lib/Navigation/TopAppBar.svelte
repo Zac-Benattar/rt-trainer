@@ -18,7 +18,7 @@
 	<AppBar>
 		<svelte:fragment slot="lead">
 			<div class="flex items-center">
-				<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked}>
+				<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked} on:keypress={burgerButtonClicked}>
 					<span>
 						<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
 							<rect width="100" height="20" />
@@ -41,11 +41,10 @@
 				GitHub
 			</a>
 
-			<!-- on:click not working! -->
 			<a class="btn btn-sm variant-ghost-surface" href="/profile"
 				><Avatar
 					src="https://i.pravatar.cc/"
-					fallback="https://i.pravatar.cc/"
+					fallback="/images/headshot.png"
 					initials="ZB"
 					border="border-4 border-surface-300-600-token hover:!border-primary-500"
 					cursor="cursor-pointer"
@@ -55,6 +54,7 @@
 		</svelte:fragment>
 	</AppBar>
 {:else}
+<!-- Show burger button if the appbar is not enabled -->
 	<div>
 		<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked}>
 			<span>
