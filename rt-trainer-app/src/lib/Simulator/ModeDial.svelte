@@ -143,8 +143,8 @@
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
 			id={'mode-center-div-' + internalName}
-			class="w-0 h-0"
-			style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
+			class="absolute"
+			style="top: 50%; left: 50%; margin: auto;"
 		/>
 		<div
 			id={'mode-dial-' + internalName}
@@ -157,7 +157,7 @@
 			style="transform: rotate(-150deg);"
 		>
 			{#if Modes.length > 2}
-				<div style="position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;">
+				<div class="absolute" style="left: 8px; top: 30%; width: 14px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.25"
 						><g opacity="0.25"
 							><path
@@ -170,7 +170,7 @@
 						></svg
 					>
 				</div>
-				<div style="position: absolute; right: 8px; top: 30%; width: 14px; pointer-events: none;">
+				<div class="absolute" style="right: 8px; top: 30%; width: 14px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.24"
 						><g opacity="0.25"
 							><path
@@ -184,10 +184,9 @@
 					>
 				</div>
 
-				<div class="flex w-100 h-100" style="top: 0px; left: 0px; width: 100%; height: 100%;">
+				<div class="flex" style="top: 0px; left: 0px; width: 100%; height: 100%;">
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
 						style="width: 50%; height: 100%;"
 						on:click={decrementMode}
 						on:keypress={decrementMode}
@@ -195,13 +194,11 @@
 
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
 						style="width: 50%; height: 100%"
 						on:click={incrementMode}
 						on:keypress={incrementMode}
 					/>
 				</div>
-				<div class="Transponder__ModeLine-bmz734-5 fsAVmj" />
 			{/if}
 			<div class="absolute mode-dial-line center" />
 		</div>

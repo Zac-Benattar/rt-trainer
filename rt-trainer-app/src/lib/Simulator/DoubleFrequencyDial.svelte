@@ -41,13 +41,13 @@
 
 <div
 	id={'dial-and-frequency-container-' + internalName}
-	class="flex items-center justify-center h-screen"
+	class="flex items-center justify-center"
 	style="width: 200px; height: 200px; justify-content: center;"
 >
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
 			id={'frequency-center-div-' + internalName}
-			class="w-0 h-0 absolute"
+			class="absolute"
 			style="top: 50%; left: 50%; position: absolute; margin: auto;"
 		/>
 		<button id={'double-frequency-dial-outer-' + internalName} class="double-frequency-dial-outer flex">
@@ -79,19 +79,19 @@
 			</div>
 			<div
 				id={'click-container-' + internalName}
-				class="absolute flex flex-row w-100 h-100"
+				class="absolute flex flex-row"
 				style="top: 0px; left: 0px; width: 100%; height: 100%;"
 			>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					class="w-100 h-100 relative"
+					class="relative"
 					style="width: 50%;"
 					on:click={onDialOuterAntiClockwiseTurn}
 				/>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div class="w-100 h-100" style="width: 50%;" on:click={onDialOuterClockwiseTurn} />
+				<div style="width: 50%;" on:click={onDialOuterClockwiseTurn} />
 			</div>
 			<button
 				id={'double-frequency-dial-inner-' + internalName}
@@ -124,19 +124,19 @@
 					>
 				</div>
 				<div
-					class="absolute flex flex-row w-100 h-100"
+					class="absolute flex flex-row"
 					style="top: 0px; left: 0px; width:100%; height:100%;"
 				>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100 relative"
+						class="relative"
 						style="width: 50%;"
 						on:click={onDialInnerAntiClockwiseTurn}
 						on:keypress={onDialInnerAntiClockwiseTurn}
 					/>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100 relative"
+						class="relative"
 						style="width: 50%;"
 						on:click={onDialInnerClockwiseTurn}
 						on:keypress={onDialInnerClockwiseTurn}
