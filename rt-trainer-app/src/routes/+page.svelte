@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GenerateScenarioButton from './GenerateScenarioButton.svelte';
+	import GenerateScenarioButton from '../lib/LinkButtons/GenerateScenarioButton.svelte';
 </script>
 
 <div class="container mx-auto p-8 space-y-8">

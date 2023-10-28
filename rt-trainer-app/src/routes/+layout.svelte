@@ -1,14 +1,13 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { AppShell, AppBar } from '@skeletonlabs/skeleton';
-	import { Avatar } from '@skeletonlabs/skeleton';
-	import { LightSwitch } from '@skeletonlabs/skeleton';
+	import { AppShell } from '@skeletonlabs/skeleton';
 	import { autoModeWatcher } from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/Navigation/Navigation.svelte';
+	import TopAppBar from '$lib/Navigation/TopAppBar.svelte';
 	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 
-	// Floating UI for Popups
+	// Floating UI for Popups - Used in drawers
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
@@ -21,19 +20,31 @@
 		drawerStore.open({});
 	}
 
+	// Holds status of major navigation elements, to control visibility
+	let classesSidebar: string;
+	let classesAppBar: string;
+	let burgerButton: string;
+	let topBarEnabled: boolean;
 	// Reactive Classes
-	$: classesSidebar = $page.url.pathname;
-	$: burgerButton = $page.url.pathname;
 	$: if ($page.url.pathname === '/') {
+		// If on homepage hide sidebar and ways to access it as user is not logged in
+		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
-		burgerButton = 'hidden';
+		burgerButton = 'lg:hidden';
+		topBarEnabled = true;
 	} else if ($page.url.pathname.includes('/scenario')) {
 		// Should also check if user is logged in
+		// If in a scenario hide sidebar and top app bar to fit everything in
+		classesAppBar = 'w-0';
 		classesSidebar = 'w-0';
-		burgerButton = 'block';
+		burgerButton = '';
+		topBarEnabled = false;
 	} else {
+		// Otherwise user is logged in and sidebar can be shown
+		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'hidden';
+		burgerButton = 'lg:hidden';
+		topBarEnabled = true;
 	}
 </script>
 
@@ -42,6 +53,7 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
+<!-- Navigation Drawer -->
 <Drawer width="w-64">
 	<h2 class="p-4">Navigation</h2>
 	<hr />
@@ -49,50 +61,13 @@
 </Drawer>
 
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}">
+<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader="{classesAppBar}">
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<AppBar>
-			<svelte:fragment slot="lead">
-				<div class="flex items-center">
-					<button class="lg:{burgerButton} btn btn-sm mr-4" on:click={drawerOpen}>
-						<span>
-							<svg viewBox="0 0 100 80" class="fill-token w-4 h-4">
-								<rect width="100" height="20" />
-								<rect y="30" width="100" height="20" />
-								<rect y="60" width="100" height="20" />
-							</svg>
-						</span>
-					</button>
-					<strong class="text-xl uppercase">RT Trainer</strong>
-				</div>
-			</svelte:fragment>
-
-			<svelte:fragment slot="trail">
-				<a
-					class="btn btn-sm variant-ghost-surface"
-					href="https://github.com/Zac-Benattar/csproj/"
-					target="_blank"
-					rel="external"
-				>
-					GitHub
-				</a>
-
-				<!-- on:click not working! -->
-				<a class="btn btn-sm variant-ghost-surface" href="/profile"
-					><Avatar
-						src="https://i.pravatar.cc/"
-						fallback="https://i.pravatar.cc/"
-						initials="ZB"
-						border="border-4 border-surface-300-600-token hover:!border-primary-500"
-						cursor="cursor-pointer"
-						data-sveltekit-preload-data="hover"
-					/></a
-				>
-			</svelte:fragment>
-		</AppBar>
+		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen}/>
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
+		<!-- Navigation -->
 		<Navigation />
 	</svelte:fragment>
 	<!-- Page Route Content -->
