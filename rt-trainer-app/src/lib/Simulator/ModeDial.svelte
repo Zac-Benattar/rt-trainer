@@ -137,13 +137,13 @@
 
 <div
 	id={'dial-and-modes-container-' + internalName}
-	class="flex items-center justify-center h-screen"
-	style="width: 200px; height: 200px; justify-content: center;"
+	class="flex items-center justify-center"
+	style="height:180px; justify-content: center;"
 >
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
 			id={'mode-center-div-' + internalName}
-			class="w-0 h-0 absolute"
+			class="w-0 h-0"
 			style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
 		/>
 		<div

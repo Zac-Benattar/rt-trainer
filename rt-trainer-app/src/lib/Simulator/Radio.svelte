@@ -2,6 +2,7 @@
 	import DoubleFrequencyDial from './DoubleFrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
+	import TransmitButton from './TransmitButton.svelte';
 	type RadioMode = 'COM' | 'NAV';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -20,6 +21,8 @@
 	export let tertiaryFrequency: number = 177.2;
 	export let displayOn: boolean = false;
 	export let frequencyDialEnabled: boolean = false;
+	export let transmitButtonEnabled: boolean = false;
+	export let transmitting: boolean = false;
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -76,11 +79,13 @@
 			}
 			displayOn = false;
 			frequencyDialEnabled = false;
+			transmitButtonEnabled = false;
 		} else {
 			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 			COMModeButton.classList.add('active-button');
 			displayOn = true;
 			frequencyDialEnabled = true;
+			transmitButtonEnabled = true;
 		}
 		radioDialMode = RadioDialModes[newDialModeIndex];
 	}
@@ -104,11 +109,16 @@
 </script>
 
 <div class="radio-container-outer relative card">
-	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+	<div class="left-container absolute inset-y-0 left-0">
+		<div class="power-selector-container content-center">
+			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+		</div>
+		<div class="transmit-button-container absolute" style="width: 55px; height: 55px; left: 120px; top: 115px;">
+			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
+		</div>
 	</div>
 
-	<div class="display-panel flex flex-col justify-center items-center">
+	<div class="center-container flex flex-col justify-center items-center">
 		<div class="active-standby-label-container flex flex-row">
 			<div class="active-standby-label" style="margin-right:130px;">ACTIVE</div>
 			<div class="active-standby-label">STANDBY</div>
@@ -127,7 +137,7 @@
 		</div>
 	</div>
 
-	<div class="frequency-selecter absolute inset-y-0 right-0">
+	<div class="right-container absolute inset-y-0 right-0">
 		<DoubleFrequencyDial
 			DialEnabled={frequencyDialEnabled}
 			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceLarge}
@@ -148,16 +158,26 @@
 		height: 200px;
 	}
 
-	.mode-selecter {
+	.left-container {
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
+		flex-direction: row;
 		object-position: left;
 		width: 200px;
 		height: 200px;
 	}
 
-	.display-panel {
+	.power-selector-container {
+		width: 75%;
+		height: 100%;
+		justify-content: center;
+	}
+
+	.transmit-button-container {
+		width: 30%;
+		height: 100%;
+	}
+
+	.center-container {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -173,7 +193,7 @@
 		object-position: center bottom;
 	}
 
-	.frequency-selecter {
+	.right-container {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
