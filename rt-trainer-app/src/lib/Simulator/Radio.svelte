@@ -86,19 +86,20 @@
 	}
 
 	function onRadioFrequencyIncreaseLarge(event: Event) {
-		activeFrequency += 1;
+		standbyFrequency += 1;
 	}
 
 	function onRadioFrequencyReduceLarge(event: Event) {
-		activeFrequency -= 1;
+		standbyFrequency -= 1;
 	}
 
+	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall(event: Event) {
-		activeFrequency += 0.005;
+		standbyFrequency += 0.005;
 	}
 
 	function onRadioFrequencyReduceSmall(event: Event) {
-		activeFrequency -= 0.005;
+		standbyFrequency -= 0.005;
 	}
 </script>
 

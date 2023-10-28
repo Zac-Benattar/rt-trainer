@@ -109,7 +109,7 @@
 	}
 
 	function onTransponderFrequencyIncrease(event: Event) {
-		if (digitArr[displayDigitSelected] == 9) {
+		if (digitArr[displayDigitSelected] == 7) {
 			digitArr[displayDigitSelected] = 0;
 		} else {
 			digitArr[displayDigitSelected] += 1;
@@ -118,7 +118,7 @@
 
 	function onTransponderFrequencyReduce(event: Event) {
 		if (digitArr[displayDigitSelected] == 0) {
-			digitArr[displayDigitSelected] = 9;
+			digitArr[displayDigitSelected] = 7;
 		} else {
 			digitArr[displayDigitSelected] -= 1;
 		}
