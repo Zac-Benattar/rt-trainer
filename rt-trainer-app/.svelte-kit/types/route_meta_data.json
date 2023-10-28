@@ -1,6 +1,9 @@
 {
 	"/": [],
 	"/about": [],
+	"/api/handshake": [
+		"src/routes/api/handshake/+server.ts"
+	],
 	"/profile": [],
 	"/scenario/[scenarioId]": []
 }

@@ -3,7 +3,6 @@
 
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'COM';
-	export let DigitSelected: number = 0;
 	export let activeFrequency: number = 123.17;
 	export let standbyFrequency: number = 126.41;
 	export let tertiaryFrequency: number = 177.2;
