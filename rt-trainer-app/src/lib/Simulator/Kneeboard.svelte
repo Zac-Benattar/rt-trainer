@@ -1,6 +1,9 @@
 <script lang="ts">
-	export let deleteButtonOffset: number = 865;
+	export let offset = 0;
+	let deleteButtonOffset: number = 865;
 	export let contents: string = '';
+
+	$: deleteButtonOffset = offset + 865;
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;

@@ -2,55 +2,52 @@
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
 	import Map from './Map.svelte';
-	import { clipboard } from '@skeletonlabs/skeleton';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
 	import Kneeboard from './Kneeboard.svelte';
+	import { clipboard } from '@skeletonlabs/skeleton';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
+
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
 	export let audioMessages: boolean = false;
 	export let seed: string = '0';
-	let deleteButtonOffset: number = 1345;
+	let kneeboardOffset: number = 480;
 
-	// generate the link to the scenario
+	// If not wanting server stuff to deal with then can chuck all the functionality in here?
+	// It would make the whole project run on clientside and expose all simulation code and require local stt
+
+	// Generate the link to the scenario
 	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
 	if (unexpectedEvents) {
 		scenarioLink += '?unexpectedEvents=' + unexpectedEvents;
 	}
 
-	const handleVoiceInputToggle = () => {
-		voiceInput = !voiceInput;
+	// Bodge to keep kneeboard delete button in the right place
+	function updateKneeboardOffset() {
 		if (!audioMessages) {
 			if (!voiceInput) {
-				deleteButtonOffset = 1345;
+				kneeboardOffset = 480;
 			} else {
-				deleteButtonOffset = 1105;
+				kneeboardOffset = 240;
 			}
 		} else {
 			if (!voiceInput) {
-				deleteButtonOffset = 1105;
+				kneeboardOffset = 240;
 			} else {
-				deleteButtonOffset = 865;
+				kneeboardOffset = 0;
 			}
 		}
+	}
+
+	const handleVoiceInputToggle = () => {
+		voiceInput = !voiceInput;
+		updateKneeboardOffset();
 	};
 
 	const handleAudioMessagesToggle = () => {
 		audioMessages = !audioMessages;
-		if (!audioMessages) {
-			if (!voiceInput) {
-				deleteButtonOffset = 1345;
-			} else {
-				deleteButtonOffset = 1105;
-			}
-		} else {
-			if (!voiceInput) {
-				deleteButtonOffset = 1105;
-			} else {
-				deleteButtonOffset = 865;
-			}
-		}
+		updateKneeboardOffset();
 	};
 </script>
 
@@ -111,7 +108,7 @@
 				<Map />
 			</div>
 			<div>
-				<Kneeboard {deleteButtonOffset} />
+				<Kneeboard offset={kneeboardOffset} />
 			</div>
 		</div>
 
