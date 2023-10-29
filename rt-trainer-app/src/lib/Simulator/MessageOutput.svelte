@@ -1,11 +1,9 @@
 <script lang="ts">
-
+	export let message: string = 'Radio messages will appear here.';
 </script>
 
 <div class="kneeboard">
-	<p class="output-box">
-        Radio messages will appear here.
-	</p>
+	<p class="output-box">{message}</p>
 </div>
 
 <style lang="postcss">
@@ -21,7 +19,7 @@
 		color: black;
 	}
 
-    :global(.icon) {
+	:global(.icon) {
 		width: 25px;
 		position: absolute;
 		bottom: 15px;

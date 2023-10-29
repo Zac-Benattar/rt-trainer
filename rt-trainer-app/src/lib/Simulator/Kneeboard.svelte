@@ -1,40 +1,48 @@
 <script lang="ts">
+	export let contents: string = '';
+
+	const handleKeypress = () => {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		contents = inputBox.innerHTML;
+	};
+
 	const handleDelete = () => {
 		clearBox();
 	};
 
 	const handleFocus = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
 		if (inputBox.innerHTML.includes('Make notes here.')) {
 			inputBox.innerHTML = '';
 		}
 	};
 
 	const handleFocusOut = () => {
-		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		if (inputBox.innerHTML === '' || inputBox.innerHTML.replace(/\s/g, '').length) {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		if (!inputBox.textContent || !inputBox.textContent.replace(/\s/g, '').length) {
 			resetBox();
 		}
 	};
 
 	const clearBox = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
 		inputBox.innerHTML = '';
 	};
 
 	const resetBox = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
 		inputBox.innerHTML = 'Make notes here.';
 	};
 </script>
 
 <div class="kneeboard-container">
 	<p
-		id="kneeboard"
+		id="kneeboard-input"
 		contenteditable="true"
 		class="input-box"
 		on:focus={handleFocus}
 		on:focusout={handleFocusOut}
+		on:keypress={handleKeypress}
 	>
 		Make notes here.
 	</p>

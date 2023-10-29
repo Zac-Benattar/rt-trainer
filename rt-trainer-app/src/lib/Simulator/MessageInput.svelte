@@ -1,4 +1,13 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	let mounted: boolean = false;
+	export let message: string = '';
+
+	const handleKeypress = () => {
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+		message = inputBox.innerHTML;
+	};
+
 	const handleDelete = () => {
 		clearBox();
 	};
@@ -11,8 +20,8 @@
 	};
 
 	const handleFocusOut = () => {
-        const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		if (inputBox.innerHTML === '' || inputBox.innerHTML.replace(/\s/g, '').length) {
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+		if (!inputBox.textContent || !inputBox.textContent.replace(/\s/g, '').length) {
 			resetBox();
 		}
 	};
@@ -26,10 +35,21 @@
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
 		inputBox.innerHTML = 'Enter your radio message here.';
 	};
+
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div class="message-input-container">
-	<p id="message-input" contenteditable="true" class="input-box" on:focus={handleFocus} on:focusout={handleFocusOut}>
+	<p
+		id="message-input"
+		contenteditable="true"
+		class="input-box"
+		on:focus={handleFocus}
+		on:focusout={handleFocusOut}
+		on:keypress={handleKeypress}
+	>
 		Enter your radio message here.
 	</p>
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
