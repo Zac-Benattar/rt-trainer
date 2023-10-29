@@ -1,23 +1,23 @@
 <script lang="ts">
 	export let offset = 0;
-	let deleteButtonOffset: number = 865;
 	export let contents: string = '';
+	let deleteButtonOffset: number = 865;
 
 	$: deleteButtonOffset = offset + 865;
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
-		contents = inputBox.innerHTML;
+		contents = inputBox.textContent ? inputBox.textContent : '';
 	};
 
 	const handleDelete = () => {
-		clearBox();
+		resetBox();
 	};
 
 	const handleFocus = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
-		if (inputBox.innerHTML.includes('Make notes here.')) {
-			inputBox.innerHTML = '';
+		if (inputBox.textContent === 'Make notes here.') {
+			inputBox.textContent = '';
 		}
 	};
 
@@ -28,14 +28,9 @@
 		}
 	};
 
-	const clearBox = () => {
-		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
-		inputBox.innerHTML = '';
-	};
-
 	const resetBox = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
-		inputBox.innerHTML = 'Make notes here.';
+		inputBox.textContent = 'Make notes here.';
 	};
 </script>
 

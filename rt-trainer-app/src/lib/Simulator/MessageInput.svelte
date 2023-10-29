@@ -5,17 +5,17 @@
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		message = inputBox.innerHTML;
+		message = inputBox.textContent ? inputBox.textContent : '';
 	};
 
 	const handleDelete = () => {
-		clearBox();
+		resetBox();
 	};
 
 	const handleFocus = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		if (inputBox.innerHTML.includes('Enter your radio message here.')) {
-			inputBox.innerHTML = '';
+		if (inputBox.textContent === 'Enter your radio message here.') {
+			inputBox.textContent = '';
 		}
 	};
 
@@ -26,14 +26,9 @@
 		}
 	};
 
-	const clearBox = () => {
-		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		inputBox.innerHTML = '';
-	};
-
 	const resetBox = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		inputBox.innerHTML = 'Enter your radio message here.';
+		inputBox.textContent = 'Enter your radio message here.';
 	};
 
 	onMount(() => {
