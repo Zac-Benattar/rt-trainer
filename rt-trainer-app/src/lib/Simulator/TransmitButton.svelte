@@ -35,9 +35,9 @@
 		}
 	};
 
-    onMount(() => {
-        mounted = true;
-    });
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div
@@ -57,14 +57,14 @@
 		width: 55px;
 		height: 55px;
 		border-radius: 50%;
-		background-color: rgb(255, 65, 65, 0.5);
-	}
-
-	:global(.transmit-button.enabled.active) {
-		background-color: rgb(255, 0, 0, 1);
+		background-color: rgba(80, 40, 40, 1);
 	}
 
 	:global(.transmit-button.enabled) {
-		background-color: rgb(255, 65, 65, 0.8);
+		background-color: rgb(220, 65, 65, 0.5);
+	}
+
+	:global(.transmit-button.enabled.active) {
+		background-color: rgb(220, 0, 0, 0.8);
 	}
 </style>

@@ -1,35 +1,65 @@
 import { convertToNATO } from '../lib/PhoneticAlphabetConverter';
 
 export type Context = {
+	currentRadar: string;
+	callsign: string;
+	lat: number;
+	lon: number;
+};
+
+export type AircraftMessage = {
 	radarName: string;
 	callsign: string;
 	message: string;
 };
 
-let atcResponse: Context = {
-	radarName: '',
-	callsign: '',
-	message: ''
+export type ATCResponse = {
+	radarName: string;
+	callsign: string;
+	message: string;
 };
 
-export function GetNextATCResponse(currentContex: Context, userMessage: Context, seed: number) {
-	// Return empty response if the user is not talking to the current controller
-	if (userMessage.radarName != currentContex.radarName) {
-		return atcResponse;
+function CapitaliseFirstLetters(str: string): string {
+    return str.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+}
+
+export class HandshakeGenerator {
+	seed: number = 0;
+	callsign = '';
+	constructor(seed: number, callsign: string) {
+		this.callsign = callsign;
+		this.seed = seed;
 	}
 
-	atcResponse.radarName = userMessage.radarName;
-	atcResponse.callsign = convertToNATO(userMessage.callsign);
+	GetNextATCResponse(
+		currentContext: Context,
+		userMessage: AircraftMessage,
+		seed: number
+	): ATCResponse {
+		let atcRes: ATCResponse = {
+			radarName: '',
+			callsign: '',
+			message: ''
+		};
 
-	if (userMessage.message === '') {
-		atcResponse.message = 'Say again';
-	} else if (userMessage.message === 'request zone transit') {
-		if (seed % 5 === 0) {
-			atcResponse.message = 'Transit denied';
-		} else {
-			atcResponse.message = 'Transit approved';
+		// Return empty response if the user is not talking to the current controller
+		if (userMessage.radarName != currentContext.currentRadar) {
+			return atcRes;
 		}
-	}
 
-	return atcResponse;
+		atcRes.radarName = CapitaliseFirstLetters(userMessage.radarName);
+		atcRes.callsign = convertToNATO(userMessage.callsign);
+
+		if (userMessage.message === '') {
+			atcRes.message = 'Say again';
+		} else if (userMessage.message === 'request zone transit') {
+			if (seed % 5 === 0) {
+				atcRes.message = 'Transit denied';
+			} else {
+				atcRes.message = 'Transit approved';
+			}
+		}
+
+		return atcRes;
+	}
 }

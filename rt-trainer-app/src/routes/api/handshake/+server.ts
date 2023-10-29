@@ -1,4 +1,4 @@
-import { GetNextATCResponse } from './HandshakeGenerator';
+import { HandshakeGenerator } from './HandshakeGenerator';
 
 export const GET = async ({ request, url }) => {
 	const authHeader = request.headers.get('Authorization');
@@ -13,11 +13,13 @@ export const GET = async ({ request, url }) => {
 	const userCallsign = String(url.searchParams.get('callsign')?.toLowerCase() ?? 'G-OSKY');
 	const userMessage = String(url.searchParams.get('message')?.toLowerCase() ?? 'Empty message');
 
-	const atcRes = GetNextATCResponse(
+	const handshakeGenerator = new HandshakeGenerator(seed, userCallsign);
+	const atcRes = handshakeGenerator.GetNextATCResponse(
 		{
-			radarName: 'Birmingham Radar'.toLowerCase(),
+			currentRadar: 'Birmingham Radar'.toLowerCase(),
 			callsign: 'G-OSKY'.toLowerCase(),
-			message: ''
+			lat: 0,
+			lon: 0
 		},
 		{
 			radarName: userRadarName.toLowerCase(),

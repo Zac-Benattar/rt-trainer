@@ -6,6 +6,7 @@
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import Kneeboard from './Kneeboard.svelte';
 	export let unexpectedEvents: boolean = false;
+	export let voiceInput: boolean = false;
 	export let seed: string = '0';
 
 	// generate the link to the scenario
@@ -17,7 +18,7 @@
 
 <div class="relative flex">
 	<div class="flex flex-col gap-10">
-		<div class="settings-container relative">
+		<div class="settings-container relative flex flex-row gap-5">
 			<SlideToggle
 				id="enable-random-events"
 				name="slider-small"
@@ -26,6 +27,15 @@
 				size="sm"
 				on:click={() => (unexpectedEvents = !unexpectedEvents)}
 				>Unexpected events
+			</SlideToggle>
+			<SlideToggle
+				id="enable-voice-input"
+				name="slider-small"
+				checked={voiceInput}
+				active="bg-primary-500"
+				size="sm"
+				on:click={() => (voiceInput = !voiceInput)}
+				>Voice input
 			</SlideToggle>
 		</div>
 		<div class="radio-transponder-container flex flex-col gap-10">
