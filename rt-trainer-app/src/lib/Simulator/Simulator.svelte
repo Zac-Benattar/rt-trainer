@@ -11,12 +11,47 @@
 	export let voiceInput: boolean = false;
 	export let audioMessages: boolean = false;
 	export let seed: string = '0';
+	let deleteButtonOffset: number = 1345;
 
 	// generate the link to the scenario
-	var scenarioLink = 'www.rt-trainer.com/scenario/' + seed;
+	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
 	if (unexpectedEvents) {
 		scenarioLink += '?unexpectedEvents=' + unexpectedEvents;
 	}
+
+	const handleVoiceInputToggle = () => {
+		voiceInput = !voiceInput;
+		if (!audioMessages) {
+			if (!voiceInput) {
+				deleteButtonOffset = 1345;
+			} else {
+				deleteButtonOffset = 1105;
+			}
+		} else {
+			if (!voiceInput) {
+				deleteButtonOffset = 1105;
+			} else {
+				deleteButtonOffset = 865;
+			}
+		}
+	};
+
+	const handleAudioMessagesToggle = () => {
+		audioMessages = !audioMessages;
+		if (!audioMessages) {
+			if (!voiceInput) {
+				deleteButtonOffset = 1345;
+			} else {
+				deleteButtonOffset = 1105;
+			}
+		} else {
+			if (!voiceInput) {
+				deleteButtonOffset = 1105;
+			} else {
+				deleteButtonOffset = 865;
+			}
+		}
+	};
 </script>
 
 <div class="relative flex">
@@ -37,7 +72,7 @@
 				checked={voiceInput}
 				active="bg-primary-500"
 				size="sm"
-				on:click={() => (voiceInput = !voiceInput)}
+				on:click={handleVoiceInputToggle}
 				>Voice input
 			</SlideToggle>
 			<SlideToggle
@@ -45,7 +80,7 @@
 				name="slider-small"
 				active="bg-primary-500"
 				size="sm"
-				on:click={() => (audioMessages = !audioMessages)}
+				on:click={handleAudioMessagesToggle}
 				>Audio messages
 			</SlideToggle>
 		</div>
@@ -76,7 +111,7 @@
 				<Map />
 			</div>
 			<div>
-				<Kneeboard />
+				<Kneeboard {deleteButtonOffset} />
 			</div>
 		</div>
 

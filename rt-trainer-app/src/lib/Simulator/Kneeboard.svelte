@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let deleteButtonOffset: number = 865;
 	export let contents: string = '';
 
 	const handleKeypress = () => {
@@ -50,7 +51,7 @@
 	<!-- svelte-ignore a11y-missing-attribute -->
 	<img
 		class="icon"
-		style="top: 1350px;"
+		style={"top: " + deleteButtonOffset + "px;"}
 		src="/images/delete.png"
 		on:click={handleDelete}
 		on:keypress={handleDelete}
