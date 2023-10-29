@@ -20,12 +20,14 @@ export type ATCResponse = {
 };
 
 function CapitaliseFirstLetters(str: string): string {
-    return str.replace(/(^\w{1})|(\s+\w{1})/g, letter => letter.toUpperCase());
+	return str.replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase());
 }
-
 export class HandshakeGenerator {
 	seed: number = 0;
 	callsign = '';
+	aircraftMessages: AircraftMessage[] = [];
+	atcResponses: ATCResponse[] = [];
+
 	constructor(seed: number, callsign: string) {
 		this.callsign = callsign;
 		this.seed = seed;
@@ -36,6 +38,12 @@ export class HandshakeGenerator {
 		userMessage: AircraftMessage,
 		seed: number
 	): ATCResponse {
+		// Limit recorded aircraft messages to 20 to prevent memory leak/api abuse
+		if (this.aircraftMessages.length > 20) {
+			this.aircraftMessages.shift();
+		}
+		this.aircraftMessages.push(userMessage);
+
 		let atcRes: ATCResponse = {
 			radarName: '',
 			callsign: '',
@@ -50,8 +58,11 @@ export class HandshakeGenerator {
 		atcRes.radarName = CapitaliseFirstLetters(userMessage.radarName);
 		atcRes.callsign = convertToNATO(userMessage.callsign);
 
+        // Set response message based on user message
 		if (userMessage.message === '') {
 			atcRes.message = 'Say again';
+		} else if (userMessage.message === 'say again') {
+			atcRes = this.atcResponses[this.atcResponses.length - 1];
 		} else if (userMessage.message === 'request zone transit') {
 			if (seed % 5 === 0) {
 				atcRes.message = 'Transit denied';
@@ -60,6 +71,7 @@ export class HandshakeGenerator {
 			}
 		}
 
+		this.atcResponses.push(atcRes);
 		return atcRes;
 	}
 }

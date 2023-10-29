@@ -4,45 +4,39 @@
 	};
 
 	const handleFocus = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
-		if (inputBox.innerHTML.includes('Make notes here.')) {
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+		if (inputBox.innerHTML.includes('Enter your radio message here.')) {
 			inputBox.innerHTML = '';
 		}
 	};
 
 	const handleFocusOut = () => {
-		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+        const inputBox = document.getElementById('message-input') as HTMLInputElement;
 		if (inputBox.innerHTML === '' || inputBox.innerHTML.replace(/\s/g, '').length) {
 			resetBox();
 		}
 	};
 
 	const clearBox = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
 		inputBox.innerHTML = '';
 	};
 
 	const resetBox = () => {
-		const inputBox = document.getElementById('kneeboard') as HTMLInputElement;
-		inputBox.innerHTML = 'Make notes here.';
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+		inputBox.innerHTML = 'Enter your radio message here.';
 	};
 </script>
 
-<div class="kneeboard-container">
-	<p
-		id="kneeboard"
-		contenteditable="true"
-		class="input-box"
-		on:focus={handleFocus}
-		on:focusout={handleFocusOut}
-	>
-		Make notes here.
+<div class="message-input-container">
+	<p id="message-input" contenteditable="true" class="input-box" on:focus={handleFocus} on:focusout={handleFocusOut}>
+		Enter your radio message here.
 	</p>
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-missing-attribute -->
 	<img
 		class="icon"
-		style="top: 1350px;"
+		style="top: 710px;"
 		src="/images/delete.png"
 		on:click={handleDelete}
 		on:keypress={handleDelete}
@@ -53,8 +47,8 @@
 	.input-box {
 		position: relative;
 		width: 100%;
-		min-width: 490px;
-		height: 360px;
+		min-width: 1000px;
+		height: 200px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;

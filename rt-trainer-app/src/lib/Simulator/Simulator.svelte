@@ -4,9 +4,12 @@
 	import Map from './Map.svelte';
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import MessageInput from './MessageInput.svelte';
+	import MessageOutput from './MessageOutput.svelte';
 	import Kneeboard from './Kneeboard.svelte';
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
+	export let audioMessages: boolean = false;
 	export let seed: string = '0';
 
 	// generate the link to the scenario
@@ -37,7 +40,16 @@
 				on:click={() => (voiceInput = !voiceInput)}
 				>Voice input
 			</SlideToggle>
+			<SlideToggle
+				id="enabled-audio-messages"
+				name="slider-small"
+				active="bg-primary-500"
+				size="sm"
+				on:click={() => (audioMessages = !audioMessages)}
+				>Audio messages
+			</SlideToggle>
 		</div>
+
 		<div class="radio-transponder-container flex flex-col gap-10">
 			<div>
 				<Radio />
@@ -45,15 +57,29 @@
 			<div>
 				<Transponder />
 			</div>
-			<div class="map-kneeboard-container flex flex-row gap-5">
-				<div>
-					<Map />
-				</div>
-				<div>
-					<Kneeboard />
-				</div>
+		</div>
+
+		{#if !voiceInput}
+			<div class="rt-message-input-container">
+				<MessageInput />
+			</div>
+		{/if}
+
+		{#if !audioMessages}
+			<div class="rt-message-output-container">
+				<MessageOutput />
+			</div>
+		{/if}
+
+		<div class="map-kneeboard-container flex flex-row gap-5">
+			<div>
+				<Map />
+			</div>
+			<div>
+				<Kneeboard />
 			</div>
 		</div>
+
 		<div
 			class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
 		>

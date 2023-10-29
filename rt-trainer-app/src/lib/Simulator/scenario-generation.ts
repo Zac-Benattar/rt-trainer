@@ -1,3 +1,5 @@
+// May need to write server separately - rust?
+
 // All serverside? - look into this
 // Initialise list of airports - need to compile json file
 // Initialise list of smaller airfields - need to compile json file
