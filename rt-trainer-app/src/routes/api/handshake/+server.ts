@@ -1,4 +1,4 @@
-import { convertToNATO } from '../lib/PhoneticAlphabetConverter';
+import { GetNextATCResponse } from './HandshakeGenerator';
 
 export const GET = async ({ request, url }) => {
 	const authHeader = request.headers.get('Authorization');
@@ -13,44 +13,23 @@ export const GET = async ({ request, url }) => {
 	const userCallsign = String(url.searchParams.get('callsign')?.toLowerCase() ?? 'G-OSKY');
 	const userMessage = String(url.searchParams.get('message')?.toLowerCase() ?? 'Empty message');
 
-	let radarName: string = 'birmingham radar';
-	if (userRadarName != radarName) {
-		return new Response(
-			JSON.stringify({
-				atcRes: {
-					radarName: userRadarName,
-					callsign: convertToNATO(userCallsign),
-					atcMessage: 'Empty message'
-				}
-			}),
-			{ status: 200 }
-		);
-	}
-
-	let callsign: string = 'G-OFLY';
-	let atcMessage: string = '';
-	if (userMessage === '') {
-		atcMessage = 'Say again';
-	} else if (userMessage === 'say again') {
-		// Repeat the previous message
-	} else if (userMessage === 'request zone transit') {
-		if (seed % 5 === 0) {
-			atcMessage = 'Transit denied';
-		} else {
-			atcMessage = 'Transit approved';
-		}
-	}
-
-	// const res = await fetch('https://dummyjson.com/posts')
-	// const data = await res.json();
+	const atcRes = GetNextATCResponse(
+		{
+			radarName: 'Birmingham Radar'.toLowerCase(),
+			callsign: 'G-OSKY'.toLowerCase(),
+			message: ''
+		},
+		{
+			radarName: userRadarName.toLowerCase(),
+			callsign: userCallsign.toLowerCase(),
+			message: userMessage.toLowerCase()
+		},
+		seed
+	);
 
 	return new Response(
 		JSON.stringify({
-			atcRes: {
-				radarName: radarName,
-				callsign: convertToNATO(callsign),
-				atcMessage: atcMessage
-			}
+			atcResponse: atcRes
 		}),
 		{ status: 200 }
 	);
