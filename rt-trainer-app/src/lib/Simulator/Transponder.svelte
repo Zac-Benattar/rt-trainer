@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
@@ -22,14 +23,20 @@
 		string?,
 		string?
 	];
-	let identEnabled: boolean = false;
-	let transponderDialModeIndex: number = 0;
-	let displayOn: boolean = false;
-	let digitArr = [7, 0, 0, 0];
-	let frequencyDialEnabled: boolean = false;
-	let displayDigitSelected: number = 0;
+	export let identEnabled: boolean = false;
+	export let transponderDialModeIndex: number = 0;
+	export let displayOn: boolean = false;
+	export let digitArr = [7, 0, 0, 0];
+	export let frequency: number = 7000;
+	export let frequencyDialEnabled: boolean = false;
+	export let displayDigitSelected: number = 0;
+	let mounted: boolean = false;
 
 	const dispatch = createEventDispatcher();
+
+	$: if (mounted) {
+		frequency = parseInt(digitArr.join(''));
+	}
 
 	// Trigger onTransponderDialModeChange when transponderDialMode changes
 	$: onTransponderDialModeChange(transponderDialModeIndex);
@@ -88,10 +95,6 @@
 		}
 	}
 
-	function getFrequency(): number {
-		return parseInt(digitArr.join(''));
-	}
-
 	function onTransponderFrequencyIncrease(event: Event) {
 		if (digitArr[displayDigitSelected] == 7) {
 			digitArr[displayDigitSelected] = 0;
@@ -107,6 +110,10 @@
 			digitArr[displayDigitSelected] -= 1;
 		}
 	}
+
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div class="transponder-container-outer relative card">

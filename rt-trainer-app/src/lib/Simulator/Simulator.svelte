@@ -21,13 +21,14 @@
 
 	// Holds current radio and transponder settings to be sent to server
 	type RadioMode = 'COM' | 'NAV';
-	let radioActiveFrequency: number = 0;
-	let radioStandbyFrequency: number = 0;
+	let radioActiveFrequency: number = 123.17;
+	let radioStandbyFrequency: number = 126.41;
+	let radioTertiaryFrequency: number = 177.2;
 	let radioTransmitting: boolean = false;
 	let radioMode: RadioMode = 'COM';
 	let radioDialMode: string = 'OFF';
 	let transponderFrequency: number = 7000;
-	let transponderVFROn: boolean = false;
+	let transponderIDENTEnabled: boolean = false;
 
 	// If not wanting server stuff to deal with then can chuck all the functionality in here?
 	// It would make the whole project run on clientside and expose all simulation code and require local STT
@@ -99,10 +100,17 @@
 
 		<div class="radio-transponder-container flex flex-col gap-10">
 			<div>
-				<Radio />
+				<Radio
+					activeFrequency={radioActiveFrequency}
+					standbyFrequency={radioStandbyFrequency}
+					tertiaryFrequency={radioTertiaryFrequency}
+					{radioMode}
+					{radioDialMode}
+					transmitting={radioTransmitting}
+				/>
 			</div>
 			<div>
-				<Transponder />
+				<Transponder identEnabled={transponderIDENTEnabled} frequency={transponderFrequency} />
 			</div>
 		</div>
 

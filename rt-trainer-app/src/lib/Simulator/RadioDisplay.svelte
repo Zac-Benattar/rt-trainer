@@ -20,7 +20,7 @@
 			mode = 'COM';
 		}
 	}
-	$: {
+	$: if (mounted) {
 		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
@@ -39,7 +39,7 @@
 		SFDigitArr[4] = newDigitArrRight[1];
 		SFDigitArr[5] = newDigitArrRight[2];
 	}
-	$: {
+	$: if (mounted) {
 		let split = activeFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
@@ -58,7 +58,7 @@
 		AFDigitArr[4] = newDigitArrRight[1];
 		AFDigitArr[5] = newDigitArrRight[2];
 	}
-	$: {
+	$: if (mounted) {
 		let split = tertiaryFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight = split[1].split('');
