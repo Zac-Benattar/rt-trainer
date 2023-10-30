@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createEventDispatcher } from 'svelte';
 
 	export let enabled: boolean = false;
 	export let transmitting: boolean = false;

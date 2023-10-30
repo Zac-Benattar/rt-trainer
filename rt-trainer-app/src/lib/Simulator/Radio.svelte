@@ -14,6 +14,7 @@
 		string?,
 		string?
 	];
+	// Holds current radio settings and exposes them for use by other components
 	export let radioMode: RadioMode = 'COM';
 	export let radioDialMode: string = 'OFF';
 	export let activeFrequency: number = 126.41;

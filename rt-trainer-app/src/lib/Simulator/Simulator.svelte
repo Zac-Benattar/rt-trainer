@@ -14,8 +14,23 @@
 	export let seed: string = '0';
 	let kneeboardOffset: number = 480;
 
+	// Holds current text input/output for kneeboard and radio messages
+	let kneeboardTextContent: string = 'Make notes here.';
+	let messageInputMessage: string = 'Type your message here.';
+	let messageOutputMessage: string = 'Radio messages will appear here.';
+
+	// Holds current radio and transponder settings to be sent to server
+	type RadioMode = 'COM' | 'NAV';
+	let radioActiveFrequency: number = 0;
+	let radioStandbyFrequency: number = 0;
+	let radioTransmitting: boolean = false;
+	let radioMode: RadioMode = 'COM';
+	let radioDialMode: string = 'OFF';
+	let transponderFrequency: number = 7000;
+	let transponderVFROn: boolean = false;
+
 	// If not wanting server stuff to deal with then can chuck all the functionality in here?
-	// It would make the whole project run on clientside and expose all simulation code and require local stt
+	// It would make the whole project run on clientside and expose all simulation code and require local STT
 
 	// Generate the link to the scenario
 	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
@@ -93,13 +108,13 @@
 
 		{#if !voiceInput}
 			<div class="rt-message-input-container">
-				<MessageInput />
+				<MessageInput message={messageInputMessage} />
 			</div>
 		{/if}
 
 		{#if !audioMessages}
 			<div class="rt-message-output-container">
-				<MessageOutput />
+				<MessageOutput message={messageOutputMessage} />
 			</div>
 		{/if}
 
@@ -108,7 +123,7 @@
 				<Map />
 			</div>
 			<div>
-				<Kneeboard offset={kneeboardOffset} />
+				<Kneeboard offset={kneeboardOffset} contents={kneeboardTextContent} />
 			</div>
 		</div>
 
