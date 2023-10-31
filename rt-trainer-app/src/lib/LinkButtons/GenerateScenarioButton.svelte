@@ -16,7 +16,7 @@
 	};
 </script>
 
-<div>
+<div class="card flex flex-col">
 	<div class="text-2xl">Generate a scenario</div>
 	<div>
 		<SlideToggle
@@ -31,3 +31,11 @@
 		<button type="button" class="btn variant-filled" on:click={handleClick}>Generate</button>
 	</div>
 </div>
+
+<style lang="postcss">
+	.card {
+		padding: 1rem;
+		min-width: 200px;
+		max-width: 260px;
+	}
+</style>

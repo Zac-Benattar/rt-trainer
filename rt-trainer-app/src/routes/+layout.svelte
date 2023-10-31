@@ -6,7 +6,6 @@
 	import TopAppBar from '$lib/Navigation/TopAppBar.svelte';
 	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
-
 	// Floating UI for Popups - Used in drawers
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
@@ -61,10 +60,10 @@
 </Drawer>
 
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader="{classesAppBar}">
+<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen}/>
+		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
@@ -73,3 +72,12 @@
 	<!-- Page Route Content -->
 	<slot />
 </AppShell>
+
+<style lang="postcss">
+	@font-face {
+		font-family: 'Geist';
+		font-style: normal;
+		font-weight: 100;
+		src: url('/fonts/GeistVF.woff2') format('woff2');
+	}
+</style>
