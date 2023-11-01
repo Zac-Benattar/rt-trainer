@@ -36,29 +36,24 @@ async fn main() -> anyhow::Result<()> {
         .await
         .context("could not connect to database_url")?;
 
+    // eventually nest routes so /:scenarioinstance/:usercall/ and /:scenarioinstance/:atccall are routes
     let app = Router::new()
         .route("/hello", get(root))
         .route("/usercalls", get(controllers::radiocall::all_user_calls))
         .route("/usercall", post(controllers::radiocall::new_user_call))
-        .route("/usercall/:id", get(controllers::radiocall::user_call))
         .route(
             "/usercall/:id",
-            put(controllers::radiocall::update_user_call),
-        )
-        .route(
-            "/usercall/:id",
-            delete(controllers::radiocall::delete_user_call),
+            get(controllers::radiocall::user_call)
+                .put(controllers::radiocall::update_user_call)
+                .delete(controllers::radiocall::delete_user_call),
         )
         .route("/useraccounts", get(controllers::user::all_user_accounts))
         .route("/useraccount", post(controllers::user::new_user_account))
-        .route("/useraccount/:id", get(controllers::user::user_account))
         .route(
             "/useraccount/:id",
-            put(controllers::user::update_user_account),
-        )
-        .route(
-            "/useraccount/:id",
-            delete(controllers::user::delete_user_account),
+            get(controllers::user::user_account)
+                .put(controllers::user::update_user_account)
+                .delete(controllers::user::delete_user_account),
         )
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());

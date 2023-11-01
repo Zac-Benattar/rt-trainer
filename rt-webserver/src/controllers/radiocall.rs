@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 use axum::{Extension, Json};
+use axum_macros::debug_handler;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
@@ -20,8 +21,8 @@ pub async fn all_user_calls(Extension(pool): Extension<PgPool>) -> impl IntoResp
 }
 
 pub async fn new_user_call(
-    Json(usercall): Json<radiocall::NewUserCall>,
     Extension(pool): Extension<PgPool>,
+    Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewUserCall>), CustomError> {
     if usercall.callsign.is_empty() || usercall.target.is_empty() || usercall.message.is_empty() {
         return Err(CustomError::BadRequest);
@@ -57,8 +58,8 @@ pub async fn user_call(
 // Required for say again
 pub async fn update_user_call(
     Path(id): Path<i32>,
-    Json(usercall): Json<radiocall::UpdateUserCall>,
     Extension(pool): Extension<PgPool>,
+    Json(usercall): Json<radiocall::UpdateUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::UpdateUserCall>), CustomError> {
     let sql = "SELECT * FROM usercall where id=$1".to_string();
 

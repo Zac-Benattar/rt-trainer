@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 use axum::{Extension, Json};
+use axum_macros::debug_handler;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
@@ -20,8 +21,8 @@ pub async fn all_user_accounts(Extension(pool): Extension<PgPool>) -> impl IntoR
 }
 
 pub async fn new_user_account(
-    Json(useraccount): Json<user::NewUserAccount>,
     Extension(pool): Extension<PgPool>,
+    Json(useraccount): Json<user::NewUserAccount>,
 ) -> Result<(StatusCode, Json<user::NewUserAccount>), CustomError> {
     if useraccount.username.is_empty()
         || useraccount.password_hash.is_empty()
@@ -63,8 +64,8 @@ pub async fn user_account(
 // Required for say again
 pub async fn update_user_account(
     Path(id): Path<i32>,
-    Json(useraccount): Json<user::UpdateUserAccount>,
     Extension(pool): Extension<PgPool>,
+    Json(useraccount): Json<user::UpdateUserAccount>,
 ) -> Result<(StatusCode, Json<user::UpdateUserAccount>), CustomError> {
     let sql = "SELECT * FROM useraccount where id=$1".to_string();
 
