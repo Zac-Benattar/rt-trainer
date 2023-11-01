@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(sqlx::FromRow, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, sqlx::FromRow)]
 pub struct UserRadioCall {
     pub id: i32,
     pub callsign: String,
@@ -8,7 +8,7 @@ pub struct UserRadioCall {
     pub message: String,
 }
 
-#[derive(sqlx::FromRow, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, sqlx::FromRow)]
 pub struct ATCRadioCall {
     pub id: i32,
     pub callsign: String,

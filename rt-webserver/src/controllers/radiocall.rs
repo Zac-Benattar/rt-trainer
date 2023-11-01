@@ -8,13 +8,13 @@ use serde_json::{json, Value};
 
 
 use crate::{
-    models::task,
+    models::userradiocall,
     errors::CustomError,
 };
 
 
 pub async fn all_tasks(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
-    let sql = "SELECT * FROM task ".to_string();
+    let sql = "SELECT * FROM userradiocall ".to_string();
 
    let task = sqlx::query_as::<_, task::Task>(&sql)
         .fetch_all(&pool)
