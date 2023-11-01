@@ -16,6 +16,13 @@ pub struct NewUserCall {
 }
 
 #[derive(Deserialize, Serialize, sqlx::FromRow)]
+pub struct UpdateUserCall {
+    pub callsign: String,
+    pub target: String,
+    pub message: String,
+}
+
+#[derive(Deserialize, Serialize, sqlx::FromRow)]
 pub struct ATCCall {
     pub id: i32,
     pub callsign: String,
