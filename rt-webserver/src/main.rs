@@ -1,24 +1,24 @@
 use axum::{
-    extract::{Extension},routing::{get, post, put, delete}, Router,
+    extract::Extension,
+    routing::{delete, get, post, put},
+    Router,
 };
 
-use sqlx::postgres::PgPoolOptions;
-use std::net::SocketAddr;
-use std::fs;
 use anyhow::Context;
+use sqlx::postgres::PgPoolOptions;
+use std::fs;
+use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
+mod controllers;
 mod errors;
 mod models;
-mod controllers;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-
     let env = fs::read_to_string(".env").unwrap();
     let (key, database_url) = env.split_once('=').unwrap();
-
 
     assert_eq!(key, "DATABASE_URL");
 
@@ -31,18 +31,18 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     let pool = PgPoolOptions::new()
-    .max_connections(50)
-    .connect(&database_url)
-    .await
-    .context("could not connect to database_url")?;
+        .max_connections(50)
+        .connect(&database_url)
+        .await
+        .context("could not connect to database_url")?;
 
     let app = Router::new()
         .route("/hello", get(root))
-        .route("/tasks", get(controllers::radiocall::all_tasks))
-        .route("/task", post(controllers::radiocall::new_task))
-        .route("/task/:id",get(controllers::radiocall::task))
-        .route("/task/:id", put(controllers::radiocall::update_task))
-        .route("/task/:id", delete(controllers::radiocall::delete_task))
+        .route("/usercalls", get(controllers::radiocall::all_user_calls))
+        .route("/usercall", post(controllers::radiocall::new_user_call))
+        .route("/usercall/:id", get(controllers::radiocall::user_call))
+        .route("/usercall/:id", put(controllers::radiocall::update_user_call))
+        .route("/usercall/:id", delete(controllers::radiocall::delete_user_call))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
 
@@ -52,8 +52,7 @@ async fn main() -> anyhow::Result<()> {
         .serve(app.into_make_service())
         .await?;
 
-        Ok(())
-
+    Ok(())
 }
 
 async fn root() -> &'static str {
