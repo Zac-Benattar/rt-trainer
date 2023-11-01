@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 use axum::{Extension, Json};
-use axum_macros::debug_handler;
+// use axum_macros::debug_handler;
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
@@ -69,7 +69,7 @@ pub async fn update_user_call(
         .await
         .map_err(|_| CustomError::UserCallNotFound)?;
 
-    sqlx::query("UPDATE usercall SET callsign=$1, target=$2, message=$3 WHERE id=$4")
+    let _ = sqlx::query("UPDATE usercall SET callsign=$1, target=$2, message=$3 WHERE id=$4")
         .bind(&usercall.callsign)
         .bind(&usercall.target)
         .bind(&usercall.message)

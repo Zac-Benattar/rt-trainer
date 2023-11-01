@@ -3,7 +3,7 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 
 use axum::{Extension, Json};
-use axum_macros::debug_handler;
+// use axum_macros::debug_handler; // insane macro that explains handler errors
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
@@ -75,7 +75,7 @@ pub async fn update_user_account(
         .await
         .map_err(|_| CustomError::UserAccountNotFound)?;
 
-    sqlx::query("UPDATE useraccount SET username=$1, password_hash=$2, email=$3, role=$4, active=$5 WHERE id=$6")
+    let _ = sqlx::query("UPDATE useraccount SET username=$1, password_hash=$2, email=$3, role=$4, active=$5 WHERE id=$6")
         .bind(&useraccount.username)
         .bind(&useraccount.password_hash)
         .bind(&useraccount.email)
