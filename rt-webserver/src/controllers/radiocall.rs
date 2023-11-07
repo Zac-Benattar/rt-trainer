@@ -7,7 +7,9 @@ use axum::{Extension, Json};
 use serde_json::{json, Value};
 use sqlx::PgPool;
 
-use crate::{errors::CustomError, models::radiocall};
+use crate::{
+    errors::CustomError, helpers::jsoncheckers::validate_usercall_json, models::radiocall,
+};
 
 pub async fn all_user_calls(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
     let sql = "SELECT * FROM usercall ".to_string();
@@ -24,14 +26,16 @@ pub async fn new_user_call(
     Extension(pool): Extension<PgPool>,
     Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewUserCall>), CustomError> {
-    if usercall.callsign.is_empty() || usercall.target.is_empty() || usercall.message.is_empty() {
+    if validate_usercall_json(Json(usercall)) {
         return Err(CustomError::BadRequest);
     }
-    let sql = "INSERT INTO usercall (callsign, target, message) values ($1, $2, $3)";
+    let sql = "INSERT INTO usercall (callsign_stated, target_stated, callsign_actual, target_actual, message) values ($1, $2, $3, $4, $5)";
 
     let _ = sqlx::query(&sql)
-        .bind(&usercall.callsign)
-        .bind(&usercall.target)
+        .bind(&usercall.callsign_stated)
+        .bind(&usercall.target_stated)
+        .bind(&usercall.callsign_actual)
+        .bind(&usercall.target_actual)
         .bind(&usercall.message)
         .execute(&pool)
         .await
@@ -69,9 +73,11 @@ pub async fn update_user_call(
         .await
         .map_err(|_| CustomError::UserCallNotFound)?;
 
-    let _ = sqlx::query("UPDATE usercall SET callsign=$1, target=$2, message=$3 WHERE id=$4")
-        .bind(&usercall.callsign)
-        .bind(&usercall.target)
+    let _ = sqlx::query("UPDATE usercall SET callsign_stated=$1, target_stated=$2, callsign_actual=$3, target_actual=$4, message=$5 WHERE id=$4")
+        .bind(&usercall.callsign_stated)
+        .bind(&usercall.target_stated)
+        .bind(&usercall.callsign_actual)
+        .bind(&usercall.target_actual)
         .bind(&usercall.message)
         .bind(id)
         .execute(&pool)

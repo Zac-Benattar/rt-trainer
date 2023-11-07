@@ -14,6 +14,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 mod controllers;
 mod errors;
 mod models;
+mod helpers;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -55,6 +56,7 @@ async fn main() -> anyhow::Result<()> {
                 .put(controllers::user::update_user_account)
                 .delete(controllers::user::delete_user_account),
         )
+        .route("/handshake/:seed/", get(controllers::generator::handshake))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
 

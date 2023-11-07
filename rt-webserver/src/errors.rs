@@ -7,6 +7,8 @@ pub enum CustomError {
     UserCallNotFound,
     ATCCallNotFound,
     UserAccountNotFound,
+    ATCCallGenerationError,
+    OtherAircraftCallGenerationError,
 }
 
 impl IntoResponse for CustomError {
@@ -19,6 +21,14 @@ impl IntoResponse for CustomError {
             Self::UserCallNotFound => (StatusCode::NOT_FOUND, "UserCall Not Found"),
             Self::ATCCallNotFound => (StatusCode::NOT_FOUND, "ATCCall Not Found"),
             Self::UserAccountNotFound => (StatusCode::NOT_FOUND, "UserAccount Not Found"),
+            Self::ATCCallGenerationError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "ATC Call Generation Error",
+            ),
+            Self::OtherAircraftCallGenerationError => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Other Aircraft Call Generation Error",
+            ),
         };
         (status, Json(json!({"error": error_message}))).into_response()
     }
