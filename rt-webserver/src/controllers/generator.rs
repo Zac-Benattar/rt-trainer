@@ -1,13 +1,10 @@
-use axum::extract::Path;
 use axum::http::StatusCode;
-use axum::response::IntoResponse;
 
 use axum::{Extension, Json};
 // use axum_macros::debug_handler;
-use serde_json::{json, Value};
 use sqlx::PgPool;
 
-use crate::helpers::jsoncheckers::validate_usercall_json;
+use crate::helpers::jsoncheckers::empty_usercall_json;
 use crate::{errors::CustomError, models::radiocall};
 
 pub async fn handshake(
@@ -15,12 +12,28 @@ pub async fn handshake(
     Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewATCCall>), CustomError> {
 
-    if validate_usercall_json(Json(usercall)) {
+    // Filter out empty json
+    if empty_usercall_json(Json(&usercall)) {
         return Err(CustomError::BadRequest);
     }
 
-    
-    let radiocall = "";
+    // Filter out cases where target_stated is not target_actual
+    if usercall.target_stated != usercall.target_actual {
+        return Err(CustomError::WrongTarget);
+    }
 
-    (StatusCode::OK, Json(radiocall))
+    let mut return_message = "";
+
+    if usercall.message == "request zone transit" {
+        return_message = "pass your message";
+    }
+
+    let radiocall = radiocall::NewATCCall {
+        message: return_message.to_owned(),
+        target_stated: usercall.callsign_stated,
+        callsign: usercall.target_actual,
+        target_actual: usercall.callsign_actual,
+    };
+
+    Ok((StatusCode::OK, Json(radiocall)))
 }

@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use sqlx::PgPool;
 
 use crate::{
-    errors::CustomError, helpers::jsoncheckers::validate_usercall_json, models::radiocall,
+    errors::CustomError, helpers::jsoncheckers::empty_usercall_json, models::radiocall,
 };
 
 pub async fn all_user_calls(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
@@ -26,7 +26,7 @@ pub async fn new_user_call(
     Extension(pool): Extension<PgPool>,
     Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewUserCall>), CustomError> {
-    if validate_usercall_json(Json(usercall)) {
+    if empty_usercall_json(Json(&usercall)) {
         return Err(CustomError::BadRequest);
     }
     let sql = "INSERT INTO usercall (callsign_stated, target_stated, callsign_actual, target_actual, message) values ($1, $2, $3, $4, $5)";

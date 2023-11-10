@@ -9,6 +9,7 @@ pub enum CustomError {
     UserAccountNotFound,
     ATCCallGenerationError,
     OtherAircraftCallGenerationError,
+    WrongTarget,
 }
 
 impl IntoResponse for CustomError {
@@ -29,6 +30,7 @@ impl IntoResponse for CustomError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Other Aircraft Call Generation Error",
             ),
+            Self::WrongTarget => (StatusCode::EXPECTATION_FAILED, "Wrong Target"),
         };
         (status, Json(json!({"error": error_message}))).into_response()
     }
