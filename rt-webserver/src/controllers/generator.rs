@@ -24,9 +24,12 @@ pub async fn handshake(
 
     let mut return_message = "";
 
-    if usercall.message == "request zone transit" {
+    if usercall.message.contains("request zone transit") {
         return_message = "pass your message";
+    } else if usercall.message.contains("leaving the ATZ to the") {
+        return_message = ", to the zone. Enjoy your flight";
     }
+
 
     let radiocall = radiocall::NewATCCall {
         message: return_message.to_owned(),
