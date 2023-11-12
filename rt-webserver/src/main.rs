@@ -10,6 +10,7 @@ use std::fs;
 use std::net::SocketAddr;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+use titlecase::titlecase;
 
 mod controllers;
 mod errors;

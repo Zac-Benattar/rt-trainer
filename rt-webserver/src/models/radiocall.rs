@@ -34,7 +34,8 @@ pub struct ATCCall {
     pub callsign: String,
     pub target_stated: String,
     pub target_actual: String,
-    pub message: String,
+    pub message_text: String,
+    pub message_audio_transcript: String,
 }
 
 #[derive(Deserialize, Serialize, sqlx::FromRow)]
@@ -42,5 +43,6 @@ pub struct NewATCCall {
     pub callsign: String,
     pub target_stated: String,
     pub target_actual: String,
-    pub message: String,
+    pub message_text: String,
+    pub message_audio_transcript: String,
 }
