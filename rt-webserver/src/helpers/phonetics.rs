@@ -139,10 +139,19 @@ pub fn replace_chars_with_phonetic_alphabet(message: String) -> String {
 pub fn replace_string_with_phonetic_alphabet(string: String) -> String {
     let mut return_string: String = "".to_string();
     let chars: Vec<char> = string.chars().collect();
-    for char in chars {
-        return_string.push_str(replace_char_with_phonetic_alphabet(char).as_str());
-        return_string.push_str(" ");
+    for (char, is_last_element) in chars
+        .iter()
+        .enumerate()
+        .map(|(i, w)| (w, i == chars.len() - 1))
+    {
+        if char != &'-' {
+            return_string.push_str(&replace_char_with_phonetic_alphabet(*char));
+            if !is_last_element {
+                return_string.push_str(" ");
+            }
+        }
     }
+
     return_string
 }
 
@@ -184,7 +193,8 @@ pub fn replace_char_with_phonetic_alphabet(character: char) -> String {
         '8' => "eight".to_string(),
         '9' => "niner".to_string(),
         '0' => "zero".to_string(),
-        _ => " ".to_string(),
+        '-' => "-".to_string(),
+        _ => "".to_string(),
     }
 }
 
