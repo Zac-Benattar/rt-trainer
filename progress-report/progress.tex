@@ -2,3 +2,17 @@
 \label{sec:progress}
 
 Summarise the progress you have made so far. You can cross-reference other sections (\ref{sec:background}).
+
+\subsection{User Interface}
+A large amount of the project work so far has been focused on developing the web application which will be the interface for users of the system.
+\subsubsection{Design}
+\subsubsection{Functionality}
+\subsubsection{Planned additions}
+Currently the UI visually provides the required functionality of a radio/transponder set that a student might interact with during their RT exam. The next stage of the UI is to make use of the exposed variables and functions of the UI elements to simulate an exam route and radio calls. This will only be possible once it can communicate with the functioning RT web-server.
+
+\subsection{RT Web-server}
+The main challenge of this project, and the main focus for the following few weeks is the web-server which will process the user's radio calls and generate ATC calls in response.
+\subsubsection{Radio call Parsing}
+Taking inspiration from the CS325 Compiler Design coursework, the chosen method for extracting meaning from the user's radio calls is the use of a parser. The highly standardised RT language can be treated in a similar way to a Context Free Grammar (CFG), a well studied linguistic structure, allowing formal methods of processing to be used to obtain meaning from a sentence. For example, the basic parsing of a Handshake (\ref{sec:handshake}) can be described as follows.
+% Include a diagram of a parsed handshake call
+
