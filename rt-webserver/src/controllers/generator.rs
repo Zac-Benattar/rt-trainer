@@ -1,13 +1,20 @@
+use std::os::unix::process;
+
 use axum::http::StatusCode;
 
 use axum::{Extension, Json};
 // use axum_macros::debug_handler;
 use sqlx::PgPool;
 
-use crate::helpers::jsoncheckers::empty_usercall_json;
-use crate::{errors::CustomError, models::radiocall};
-use crate::titlecase;
+// Text formatting
+use crate::helpers::jsoncheckers::invalid_usercall_json;
+use crate::helpers::preprocessors::process_string;
 use crate::helpers::phonetics;
+use crate::titlecase;
+
+// Database
+use crate::{errors::CustomError, models::radiocall};
+
 
 pub async fn handshake(
     Extension(pool): Extension<PgPool>,
@@ -15,7 +22,7 @@ pub async fn handshake(
 ) -> Result<(StatusCode, Json<radiocall::NewATCCall>), CustomError> {
 
     // Filter out empty json
-    if empty_usercall_json(Json(&usercall)) {
+    if invalid_usercall_json(Json(&usercall)) {
         return Err(CustomError::BadRequest);
     }
 
@@ -24,8 +31,15 @@ pub async fn handshake(
         return Err(CustomError::WrongTarget);
     }
 
+    // Make lowercase, remove punctuation and trim whitespace
+    let usercall_message = process_string(&usercall.message);
+
     // Begin building return ATC call message
-    let mut return_message_transcript: String = phonetics::replace_phonetic_alphabet_with_pronounciation(phonetics::replace_string_with_phonetic_alphabet(usercall.callsign_stated.to_owned().to_ascii_lowercase()));
+    let mut return_message_transcript: String = phonetics::replace_phonetic_alphabet_with_pronounciation(&phonetics::replace_string_with_phonetic_alphabet(&process_string(&usercall.callsign_stated)));
+    println!("usercall.callsign_stated: {}", usercall.callsign_stated);
+    println!("process_string(usercall.callsign_stated: {}", process_string(&usercall.callsign_stated));
+    println!("replaced with phonetic alphabet {}", phonetics::replace_string_with_phonetic_alphabet(&process_string(&usercall.callsign_stated)));
+    println!("return_message_transcript: {}", return_message_transcript);
     return_message_transcript.push_str(", ");
     let mut return_message_text: String = usercall.callsign_stated.to_owned();
     return_message_text.push_str(", ");
@@ -35,10 +49,13 @@ pub async fn handshake(
     return_message_text.push_str(", ");
 
     // Will need to be reworked when done properly
-    if usercall.message.contains("request zone transit") {
+    if usercall_message.contains("negative this is") {
+        // Return last message with callsign corrected
+    }
+    else if usercall_message.contains("request zone transit") {
         return_message_text.push_str("pass your message.");
         return_message_transcript.push_str("pass your message.");
-    } else if usercall.message.contains("leaving the ATZ to the") {
+    } else if usercall_message.contains("leaving the ATZ to the") {
         return_message_text.push_str("proceed to the zone. Enjoy your flight.");
         return_message_transcript.push_str("proceed to the zone. Enjoy your flight.");
     }
