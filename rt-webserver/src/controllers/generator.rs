@@ -36,10 +36,6 @@ pub async fn handshake(
 
     // Begin building return ATC call message
     let mut return_message_transcript: String = phonetics::replace_phonetic_alphabet_with_pronounciation(&phonetics::replace_string_with_phonetic_alphabet(&process_string(&usercall.callsign_stated)));
-    println!("usercall.callsign_stated: {}", usercall.callsign_stated);
-    println!("process_string(usercall.callsign_stated: {}", process_string(&usercall.callsign_stated));
-    println!("replaced with phonetic alphabet {}", phonetics::replace_string_with_phonetic_alphabet(&process_string(&usercall.callsign_stated)));
-    println!("return_message_transcript: {}", return_message_transcript);
     return_message_transcript.push_str(", ");
     let mut return_message_text: String = usercall.callsign_stated.to_owned();
     return_message_text.push_str(", ");

@@ -2,13 +2,14 @@
 	import '../app.postcss';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { autoModeWatcher } from '@skeletonlabs/skeleton';
-	import Navigation from '$lib/Navigation/Navigation.svelte';
-	import TopAppBar from '$lib/Navigation/TopAppBar.svelte';
+	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
 	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	// Floating UI for Popups - Used in drawers
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
+	import Navigation from '$lib/Sidebars/Navigation.svelte';
+	import SimulatorSettings from '$lib/Sidebars/SimulatorSettings.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -18,6 +19,8 @@
 	function drawerOpen(): void {
 		drawerStore.open({});
 	}
+
+	export let settingStudentPrefix: boolean = false;
 
 	// Holds status of major navigation elements, to control visibility
 	let classesSidebar: string;
@@ -52,11 +55,15 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
-<!-- Navigation Drawer -->
+<!-- Settings Drawer -->
 <Drawer width="w-64">
-	<h2 class="p-4">Navigation</h2>
+	<h2 class="p-4">Simulator Settings</h2>
 	<hr />
-	<Navigation />
+	{#if (classesSidebar == 'w-0')}
+		<SimulatorSettings />
+	{:else}
+		<Navigation />
+	{/if}
 </Drawer>
 
 <!-- App Shell -->
@@ -67,7 +74,11 @@
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		<Navigation />
+		{#if (classesSidebar == 'w-0')}
+			<SimulatorSettings studentPrefix={settingStudentPrefix} />
+		{:else}
+			<Navigation />
+		{/if}
 	</svelte:fragment>
 	<!-- Page Route Content -->
 	<slot />

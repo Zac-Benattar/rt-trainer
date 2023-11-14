@@ -1,15 +1,3 @@
-// pub fn replace_phonetics_with_text_formatting(s: &str) -> String {
-//     replace_phonetic_alphabet_with_chars(replace_pronounciation_with_phonetic_alphabet(
-//         replace_pronounciation_with_numeral_elements(s.to_owned()),
-//     ))
-// }
-
-// pub fn replace_text_formatting_with_phonetics(s: &str) -> String {
-//     replace_phonetic_alphabet_with_pronounciation(replace_chars_with_phonetic_alphabet(
-//         replace_numeral_elements_with_pronounciation(s.to_owned()),
-//     ))
-// }
-
 pub fn replace_phonetic_alphabet_with_chars(s: &str) -> String {
     // Loop on each word and replace with pronounciation if needed
     let mut return_string: String = "".to_string();
