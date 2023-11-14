@@ -13,7 +13,11 @@ use crate::helpers::phonetics;
 use crate::titlecase;
 
 // Database
-use crate::{errors::CustomError, models::radiocall};
+use crate::{errors::CustomError, models::radiocall, models::state};
+
+pub async fn getNextState(seed: u32, state: state::State) -> state::State {
+    
+}
 
 
 pub async fn handshake(
