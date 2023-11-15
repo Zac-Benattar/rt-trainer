@@ -1,30 +1,76 @@
-use std::os::unix::process;
-
 use axum::http::StatusCode;
 
-use axum::{Extension, Json};
+use axum::Json;
 // use axum_macros::debug_handler;
-use sqlx::PgPool;
 
 // Text formatting
 use crate::helpers::jsoncheckers::invalid_usercall_json;
-use crate::helpers::preprocessors::process_string;
 use crate::helpers::phonetics;
+use crate::helpers::preprocessors::process_string;
+use crate::models::state::{ParkedToTakeoffStage, State, Status, TaxiingToTakeoffStage};
 use crate::titlecase;
 
 // Database
-use crate::{errors::CustomError, models::radiocall, models::state};
+use crate::{errors::CustomError, models::radiocall};
 
-pub async fn getNextState(seed: u32, state: state::State) -> state::State {
-    
+// Modifies state based on seed and state, effectively moves situation forward one step
+pub async fn get_next_state(seed: u32, mut state: State) -> State {
+    match &state.status {
+        Status::Parked {
+            position,
+            stage,
+        } => {
+            match stage {
+                ParkedToTakeoffStage::PreRadiocheck => {
+                    // Parse pretakeoff radio check request
+                }
+                ParkedToTakeoffStage::PreDepartInfo => {
+                    // Parse pretakeoff departure information request
+                }
+                ParkedToTakeoffStage::PreReadbackDepartInfo => {
+                    // Parse pretakeoff departure information readback
+                }
+                ParkedToTakeoffStage::PreTaxiRequest => {
+                    // Parse pretakeoff taxi request
+                }
+                ParkedToTakeoffStage::PreTaxiClearanceReadback => {
+                    // Parse pretakeoff taxi clearance readback
+                    // Move to taxiing status
+                }
+            }
+        }
+        Status::Taxiing { holdpoint, runway, stage } => {
+            match stage {
+                TaxiingToTakeoffStage::PreReadyForDeparture => {
+                    // Parse pretakeoff ready for departure
+                }
+                TaxiingToTakeoffStage::PreInfoGivenForDeparture => {
+                    // Parse pretakeoff information given for departure
+                }
+                TaxiingToTakeoffStage::PreClearedForTakeoff => {
+                    // Parse pretakeoff cleared for takeoff
+                }
+                TaxiingToTakeoffStage::PreReadbackClearedForTakeoff => {
+                    // Parse pretakeoff cleared for takeoff readback
+                    // Move to airbourne status
+                }
+            }
+        }
+        Status::Airborne {
+            altitude,
+            heading,
+            speed,
+            next_point,
+        } => {}
+        Status::Landing { runway } => {}
+    }
+
+    state
 }
 
-
 pub async fn handshake(
-    Extension(pool): Extension<PgPool>,
     Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewATCCall>), CustomError> {
-
     // Filter out empty json
     if invalid_usercall_json(Json(&usercall)) {
         return Err(CustomError::BadRequest);
@@ -39,7 +85,12 @@ pub async fn handshake(
     let usercall_message = process_string(&usercall.message);
 
     // Begin building return ATC call message
-    let mut return_message_transcript: String = phonetics::replace_phonetic_alphabet_with_pronounciation(&phonetics::replace_string_with_phonetic_alphabet(&process_string(&usercall.callsign_stated)));
+    let mut return_message_transcript: String =
+        phonetics::replace_phonetic_alphabet_with_pronounciation(
+            &phonetics::replace_string_with_phonetic_alphabet(&process_string(
+                &usercall.callsign_stated,
+            )),
+        );
     return_message_transcript.push_str(", ");
     let mut return_message_text: String = usercall.callsign_stated.to_owned();
     return_message_text.push_str(", ");
@@ -51,8 +102,7 @@ pub async fn handshake(
     // Will need to be reworked when done properly
     if usercall_message.contains("negative this is") {
         // Return last message with callsign corrected
-    }
-    else if usercall_message.contains("request zone transit") {
+    } else if usercall_message.contains("request zone transit") {
         return_message_text.push_str("pass your message.");
         return_message_transcript.push_str("pass your message.");
     } else if usercall_message.contains("leaving the ATZ to the") {
