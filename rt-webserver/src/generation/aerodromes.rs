@@ -1,5 +1,21 @@
 use crate::models::aerodrome::Aerodrome;
 
+pub fn get_start_aerodrome(seed: u32) -> Aerodrome {
+    if seed % 2 == 0 {
+        get_large_aerodrome(seed)
+    } else {
+        get_small_aerodrome(seed)
+    }
+}
+
+pub fn get_destination_aerodrome(seed: u32) -> Aerodrome {
+    if seed % 2 == 0 {
+        get_small_aerodrome(seed)
+    } else {
+        get_large_aerodrome(seed)
+    }
+}
+
 // Eventually the data should be stored in a database
 pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
     Aerodrome {
@@ -13,6 +29,7 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
     }
 }
 
+// Eventually the data should be stored in a database
 pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
     Aerodrome {
         name: "Wellesbourne Mountford".to_string(),

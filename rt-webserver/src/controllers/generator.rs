@@ -3,13 +3,13 @@ use axum::http::StatusCode;
 use axum::Json;
 // use axum_macros::debug_handler;
 
+use crate::generation::states::{generate_initial_state, generate_next_state};
 // Text formatting
 use crate::helpers::jsoncheckers::invalid_usercall_json;
 use crate::helpers::phonetics;
 use crate::helpers::preprocessors::process_string;
-use crate::models::aerodrome::Aerodrome;
-use crate::models::state::{ParkedToTakeoffStage, State, Status, TaxiingToTakeoffStage};
-use crate::{data, titlecase};
+use crate::models::state::State;
+use crate::titlecase;
 
 // Database
 use crate::{errors::CustomError, models::radiocall};
@@ -17,98 +17,20 @@ use crate::{errors::CustomError, models::radiocall};
 /* Gets the first state that the frontend should match.
 The frontend will then ensure the radio and transponder are set to the
 required settings defined in the returned state. The next state is then requested (get_next_state)
-along with the seed and radio call. If radio call is correct next state is given.  */
+along with the seed and radio call. If radio call is correct next state is given. */
 pub async fn get_initial_state(seed: u32, prefix: &str, user_callsign: &str) -> State {
-    let mut start_aerodrome: Aerodrome;
-    let mut destination_aerodrome: Aerodrome;
-    if seed % 2 == 0 {
-        start_aerodrome = data::aerodromes::get_large_aerodrome(seed);
-        destination_aerodrome = data::aerodromes::get_small_aerodrome(seed);
-    } else {
-        start_aerodrome = data::aerodromes::get_small_aerodrome(seed);
-        destination_aerodrome = data::aerodromes::get_large_aerodrome(seed);
-    }
-
-    State {
-        status: Status::Parked {
-            position: "A1".to_string(),
-            stage: ParkedToTakeoffStage::PreDepartInfo,
-        },
-        lat: start_aerodrome.lat,
-        long: start_aerodrome.long,
-        current_atsu_callsign: start_aerodrome.atsu_callsign,
-        prefix: prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: user_callsign.to_owned(),
-        atsu_allocated_callsign: user_callsign.to_owned(), // Replaced by ATSU when needed
-        emergency: "".to_string(),
-        squark: false,
-        atsu_frequency: start_aerodrome.atsu_frequency,
-        current_radio_frequency: start_aerodrome.atsu_frequency,
-        required_transponder_frequency: start_aerodrome.atsu_frequency,
-        current_transponder_frequency: 7000.0,
-    }
+    generate_initial_state(seed, prefix, user_callsign)
 }
 
 // TODO - Make this take in a radio call and return a Result so errors in the radio call can be handled
 // Modifies state based on seed and state, effectively moves situation forward one step.
 // This ensures the server is stateless, and does not need to store any data for simulating a scenario.
 // Passed in radio call should be correct for the current state otherwise error should be returned.
-pub async fn get_next_state(seed: u32, mut state: State) -> State {
-    match &state.status {
-        Status::Parked { position, stage } => {
-            match stage {
-                ParkedToTakeoffStage::PreRadiocheck => {
-                    // Parse pretakeoff radio check request
-                }
-                ParkedToTakeoffStage::PreDepartInfo => {
-                    // Parse pretakeoff departure information request
-                }
-                ParkedToTakeoffStage::PreReadbackDepartInfo => {
-                    // Parse pretakeoff departure information readback
-                }
-                ParkedToTakeoffStage::PreTaxiRequest => {
-                    // Parse pretakeoff taxi request
-                }
-                ParkedToTakeoffStage::PreTaxiClearanceReadback => {
-                    // Parse pretakeoff taxi clearance readback
-                    // Move to taxiing status
-                }
-            }
-        }
-        Status::TaxiingToTakeoff {
-            holdpoint,
-            runway,
-            stage,
-        } => {
-            match stage {
-                TaxiingToTakeoffStage::PreReadyForDeparture => {
-                    // Parse pretakeoff ready for departure
-                }
-                TaxiingToTakeoffStage::PreInfoGivenForDeparture => {
-                    // Parse pretakeoff information given for departure
-                }
-                TaxiingToTakeoffStage::PreClearedForTakeoff => {
-                    // Parse pretakeoff cleared for takeoff
-                }
-                TaxiingToTakeoffStage::PreReadbackClearedForTakeoff => {
-                    // Parse pretakeoff cleared for takeoff readback
-                    // Move to airbourne status
-                }
-            }
-        }
-        Status::Airborne {
-            altitude,
-            heading,
-            speed,
-            next_point,
-        } => {}
-        Status::Landing { runway } => {}
-        Status::LandingToParked { position, stage } => {}
-    }
-
-    state
+pub async fn get_next_state(seed: u32, current_state: State) -> State {
+    generate_next_state(seed, current_state)
 }
 
+// Depreciated
 pub async fn handshake(
     Json(usercall): Json<radiocall::NewUserCall>,
 ) -> Result<(StatusCode, Json<radiocall::NewATCCall>), CustomError> {

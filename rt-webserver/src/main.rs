@@ -16,7 +16,7 @@ mod controllers;
 mod errors;
 mod models;
 mod helpers;
-mod data;
+mod generation;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
