@@ -13,8 +13,6 @@ use crate::helpers::phonetics;
 use crate::helpers::preprocessors::process_string;
 use crate::models::state::State;
 use crate::titlecase;
-
-// Database
 use crate::{errors::CustomError, models::radiocall};
 
 /* Gets the first state that the frontend should match.

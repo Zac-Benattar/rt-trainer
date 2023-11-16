@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::aerodrome::COMFrequency;
+
 #[derive(Deserialize, Serialize)]
 pub enum ParkedToTakeoffStage {
     PreRadiocheck,
@@ -93,18 +95,24 @@ pub struct FlightPoint {
 }
 
 #[derive(Deserialize, Serialize)]
+pub enum Emergency {
+    None,
+    Mayday,
+    PanPan,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct State {
     pub status: Status,
-    pub lat: f32,
-    pub long: f32,
-    pub current_atsu_callsign: String,
     pub prefix: String,
     pub callsign: String,
-    pub atsu_allocated_callsign: String,
-    pub emergency: String,
+    pub target_allocated_callsign: String,
     pub squark: bool,
-    pub atsu_frequency: f32,
+    pub current_target: COMFrequency,
     pub current_radio_frequency: f32,
-    pub required_transponder_frequency: f32,
-    pub current_transponder_frequency: f32,
+    pub current_transponder_frequency: u16,
+    pub required_transponder_frequency: u16,
+    pub lat: f32,
+    pub long: f32,
+    pub emergency: Emergency,
 }

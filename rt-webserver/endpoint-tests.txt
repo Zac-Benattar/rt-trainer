@@ -1,0 +1,38 @@
+initiate scenario:
+http://localhost:3000/initiatescenario/1
+{
+  "seed": 1,
+  "prefix": "STUDENT",
+  "user_callsign": "G-OFLY",
+  "radio_frequency": 180.030,
+  "transponder_frequency": 7000
+}
+
+get next state:
+http://localhost:3000/nextstate/1
+{
+  "seed": 1,
+  "current_state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreDepartInfo"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.03,
+  "current_transponder_frequency": 7000,
+  "required_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None"
+  }
+}

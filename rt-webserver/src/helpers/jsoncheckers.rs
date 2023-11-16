@@ -27,6 +27,7 @@ pub fn incorrect_size_usercall_json(Json(usercall): Json<&radiocall::NewUserCall
         || usercall.message.len() > 255
 }
 
+// Following functions are pretty much unimplemented but are here to show how the code should be structured
 pub fn invalid_scenario_generation_parameters_json(
     Json(scenario_generation_parameters): Json<&states::ScenarioGenerationParameters>,
 ) -> bool {
@@ -51,6 +52,4 @@ pub fn empty_scenario_status_data_json(
 ) -> bool {
     scenario_status_data.current_state.callsign.is_empty()
         || scenario_status_data.current_state.prefix.is_empty()
-        || scenario_status_data.current_state.atsu_allocated_callsign.is_empty()
-        || scenario_status_data.current_state.current_atsu_callsign.is_empty()
 }

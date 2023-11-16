@@ -1,7 +1,7 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-use crate::models::aerodrome::Aerodrome;
 use crate::generation::aerodromes::get_start_aerodrome;
+use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
 
 #[derive(Deserialize, Serialize)]
@@ -9,6 +9,8 @@ pub struct ScenarioGenerationParameters {
     pub seed: u32,
     pub prefix: String,
     pub user_callsign: String,
+    pub radio_frequency: f32,
+    pub transponder_frequency: u16,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -19,6 +21,7 @@ pub struct ScenarioStatusData {
 
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
     let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.seed);
+    let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
     // We don't need to calculate the destination aerodrome now as it is determined by the seed
 
     State {
@@ -28,16 +31,19 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
         },
         lat: start_aerodrome.lat,
         long: start_aerodrome.long,
-        current_atsu_callsign: start_aerodrome.atsu_callsign,
+        current_target: COMFrequency {
+            frequency_type: start_aerodrome_frequency.frequency_type,
+            frequency: start_aerodrome_frequency.frequency,
+            callsign: start_aerodrome_frequency.callsign.clone(),
+        },
         prefix: parameters.prefix, // Set by user: none, student, helicopter, police, etc...
         callsign: (&parameters.user_callsign).to_owned(),
-        atsu_allocated_callsign: parameters.user_callsign, // Replaced by ATSU when needed
-        emergency: "".to_string(),
+        target_allocated_callsign: parameters.user_callsign, // Replaced by ATSU when needed
+        emergency: Emergency::None,
         squark: false,
-        atsu_frequency: start_aerodrome.atsu_frequency,
-        current_radio_frequency: start_aerodrome.atsu_frequency,
-        required_transponder_frequency: start_aerodrome.atsu_frequency,
-        current_transponder_frequency: 7000.0,
+        current_radio_frequency: parameters.radio_frequency,
+        required_transponder_frequency: 7000,
+        current_transponder_frequency: parameters.transponder_frequency,
     }
 }
 
