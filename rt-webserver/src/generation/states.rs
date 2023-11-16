@@ -1,9 +1,24 @@
+use serde::{Serialize, Deserialize};
+
 use crate::models::aerodrome::Aerodrome;
 use crate::generation::aerodromes::get_start_aerodrome;
 use crate::models::state::*;
 
-pub fn generate_initial_state(seed: u32, prefix: &str, user_callsign: &str) -> State {
-    let start_aerodrome: Aerodrome = get_start_aerodrome(seed);
+#[derive(Deserialize, Serialize)]
+pub struct ScenarioGenerationParameters {
+    pub seed: u32,
+    pub prefix: String,
+    pub user_callsign: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ScenarioStatusData {
+    pub seed: u32,
+    pub current_state: State,
+}
+
+pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
+    let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.seed);
     // We don't need to calculate the destination aerodrome now as it is determined by the seed
 
     State {
@@ -14,9 +29,9 @@ pub fn generate_initial_state(seed: u32, prefix: &str, user_callsign: &str) -> S
         lat: start_aerodrome.lat,
         long: start_aerodrome.long,
         current_atsu_callsign: start_aerodrome.atsu_callsign,
-        prefix: prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: user_callsign.to_owned(),
-        atsu_allocated_callsign: user_callsign.to_owned(), // Replaced by ATSU when needed
+        prefix: parameters.prefix, // Set by user: none, student, helicopter, police, etc...
+        callsign: (&parameters.user_callsign).to_owned(),
+        atsu_allocated_callsign: parameters.user_callsign, // Replaced by ATSU when needed
         emergency: "".to_string(),
         squark: false,
         atsu_frequency: start_aerodrome.atsu_frequency,
@@ -26,9 +41,9 @@ pub fn generate_initial_state(seed: u32, prefix: &str, user_callsign: &str) -> S
     }
 }
 
-pub fn generate_next_state(seed: u32, current_state: State) -> State {
+pub fn generate_next_state(current_state_data: ScenarioStatusData) -> State {
     // TODO - Implement this
-    match &current_state.status {
+    match &current_state_data.current_state.status {
         Status::Parked { position: _, stage } => {
             match stage {
                 ParkedToTakeoffStage::PreRadiocheck => {
@@ -80,5 +95,5 @@ pub fn generate_next_state(seed: u32, current_state: State) -> State {
         Status::LandingToParked { position, stage } => {}
     }
 
-    current_state
+    current_state_data.current_state
 }

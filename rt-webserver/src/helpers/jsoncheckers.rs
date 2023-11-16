@@ -1,6 +1,6 @@
 use axum::Json;
 
-use crate::models::radiocall;
+use crate::{generation::states, models::radiocall};
 
 pub fn invalid_usercall_json(Json(usercall): Json<&radiocall::NewUserCall>) -> bool {
     empty_usercall_json(Json(usercall)) || incorrect_size_usercall_json(Json(usercall))
@@ -25,4 +25,32 @@ pub fn incorrect_size_usercall_json(Json(usercall): Json<&radiocall::NewUserCall
         || usercall.target_actual.len() > 50
         || usercall.message.len() < 5
         || usercall.message.len() > 255
+}
+
+pub fn invalid_scenario_generation_parameters_json(
+    Json(scenario_generation_parameters): Json<&states::ScenarioGenerationParameters>,
+) -> bool {
+    empty_scenario_generation_parameters_json(Json(scenario_generation_parameters))
+}
+
+pub fn empty_scenario_generation_parameters_json(
+    Json(scenario_generation_parameters): Json<&states::ScenarioGenerationParameters>,
+) -> bool {
+    scenario_generation_parameters.prefix.is_empty()
+        || scenario_generation_parameters.user_callsign.is_empty()
+}
+
+pub fn invalid_scenario_status_data_json(
+    Json(scenario_status_data): Json<&states::ScenarioStatusData>,
+) -> bool {
+    empty_scenario_status_data_json(Json(scenario_status_data))
+}
+
+pub fn empty_scenario_status_data_json(
+    Json(scenario_status_data): Json<&states::ScenarioStatusData>,
+) -> bool {
+    scenario_status_data.current_state.callsign.is_empty()
+        || scenario_status_data.current_state.prefix.is_empty()
+        || scenario_status_data.current_state.atsu_allocated_callsign.is_empty()
+        || scenario_status_data.current_state.current_atsu_callsign.is_empty()
 }

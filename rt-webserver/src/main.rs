@@ -39,7 +39,6 @@ async fn main() -> anyhow::Result<()> {
         .await
         .context("could not connect to database_url")?;
 
-    // eventually nest routes so /:scenarioinstance/:usercall/ and /:scenarioinstance/:atccall are routes
     let app = Router::new()
         .route("/hello", get(root))
         .route("/usercalls", get(controllers::radiocall::all_user_calls))
@@ -58,7 +57,8 @@ async fn main() -> anyhow::Result<()> {
                 .put(controllers::user::update_user_account)
                 .delete(controllers::user::delete_user_account),
         )
-        .route("/handshake/:seed/", get(controllers::generator::handshake))
+        .route("/initiatescenario/:seed", get(controllers::generator::get_initial_state))
+        .route("/nextstate/:seed", get(controllers::generator::get_next_state))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
 
