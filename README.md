@@ -11,6 +11,18 @@ This repository is inspired by a starter pack repository of resources for CS310 
 - GitHub Actions workflows for building each report and making them available as build artifacts.
 - Generic advice for writing the reports.
 
+## Installing and Running the System
+
+Nodejs (and npm) are required to run the frontend, Rust (and cargo) are required to run the backend.
+
+From the `rt-trainer-app` directory run the following commands in a terminal to start the frontend:
+`npm install`
+`npx vite`
+
+From the `rt-webserver` directory run the following commands in a terminal to start the backend:
+`cargo install`
+`cargo run`
+
 ### Continuous Integration
 
 This repository is configured with [GitHub Actions](https://docs.github.com/en/actions) workflows which will builds reports every time changes are pushed. For example, if you change `specification/specification.tex` locally, commit your changes, and push them to GitHub, then the workflow defined in `.github/workflows/specification.yml` will run and build your specification for you. If the build is successful, the resulting PDF will be uploaded as a build artifact and can be downloaded from the summary page of the corresponding job.

@@ -7,19 +7,55 @@ use axum::Json;
 use crate::helpers::jsoncheckers::invalid_usercall_json;
 use crate::helpers::phonetics;
 use crate::helpers::preprocessors::process_string;
+use crate::models::aerodrome::Aerodrome;
 use crate::models::state::{ParkedToTakeoffStage, State, Status, TaxiingToTakeoffStage};
-use crate::titlecase;
+use crate::{data, titlecase};
 
 // Database
 use crate::{errors::CustomError, models::radiocall};
 
-// Modifies state based on seed and state, effectively moves situation forward one step
+/* Gets the first state that the frontend should match.
+The frontend will then ensure the radio and transponder are set to the
+required settings defined in the returned state. The next state is then requested (get_next_state)
+along with the seed and radio call. If radio call is correct next state is given.  */
+pub async fn get_initial_state(seed: u32, prefix: &str, user_callsign: &str) -> State {
+    let mut start_aerodrome: Aerodrome;
+    let mut destination_aerodrome: Aerodrome;
+    if seed % 2 == 0 {
+        start_aerodrome = data::aerodromes::get_large_aerodrome(seed);
+        destination_aerodrome = data::aerodromes::get_small_aerodrome(seed);
+    } else {
+        start_aerodrome = data::aerodromes::get_small_aerodrome(seed);
+        destination_aerodrome = data::aerodromes::get_large_aerodrome(seed);
+    }
+
+    State {
+        status: Status::Parked {
+            position: "A1".to_string(),
+            stage: ParkedToTakeoffStage::PreDepartInfo,
+        },
+        lat: start_aerodrome.lat,
+        long: start_aerodrome.long,
+        current_atsu_callsign: start_aerodrome.atsu_callsign,
+        prefix: prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: user_callsign.to_owned(),
+        atsu_allocated_callsign: user_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: "".to_string(),
+        squark: false,
+        atsu_frequency: start_aerodrome.atsu_frequency,
+        current_radio_frequency: start_aerodrome.atsu_frequency,
+        required_transponder_frequency: start_aerodrome.atsu_frequency,
+        current_transponder_frequency: 7000.0,
+    }
+}
+
+// TODO - Make this take in a radio call and return a Result so errors in the radio call can be handled
+// Modifies state based on seed and state, effectively moves situation forward one step.
+// This ensures the server is stateless, and does not need to store any data for simulating a scenario.
+// Passed in radio call should be correct for the current state otherwise error should be returned.
 pub async fn get_next_state(seed: u32, mut state: State) -> State {
     match &state.status {
-        Status::Parked {
-            position,
-            stage,
-        } => {
+        Status::Parked { position, stage } => {
             match stage {
                 ParkedToTakeoffStage::PreRadiocheck => {
                     // Parse pretakeoff radio check request
@@ -39,7 +75,11 @@ pub async fn get_next_state(seed: u32, mut state: State) -> State {
                 }
             }
         }
-        Status::Taxiing { holdpoint, runway, stage } => {
+        Status::TaxiingToTakeoff {
+            holdpoint,
+            runway,
+            stage,
+        } => {
             match stage {
                 TaxiingToTakeoffStage::PreReadyForDeparture => {
                     // Parse pretakeoff ready for departure
@@ -63,6 +103,7 @@ pub async fn get_next_state(seed: u32, mut state: State) -> State {
             next_point,
         } => {}
         Status::Landing { runway } => {}
+        Status::LandingToParked { position, stage } => {}
     }
 
     state

@@ -1,6 +1,6 @@
 use axum::{
     extract::Extension,
-    routing::{delete, get, post, put},
+    routing::{get, post},
     Router,
 };
 
@@ -16,6 +16,7 @@ mod controllers;
 mod errors;
 mod models;
 mod helpers;
+mod data;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

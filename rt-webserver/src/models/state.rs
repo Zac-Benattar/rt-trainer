@@ -25,16 +25,38 @@ pub enum InboundForJoinStage {
     PreAcknowledgementRAIS, // RAIS = report airodrome in sight
     PreAirodromeInSight,
     PreContactTower,
+    PreAcknowledgeGoAround, // If told to go around by ATC
+    PreAnnounceGoAround, // If pilot decides to go around
 }
 
 #[derive(Deserialize, Serialize)]
 pub enum JoinCiruitStage {
-
+    PreHandshake,
+    PreCircuitRequest,
+    PreReadbackCircuitClearance,
+    PreAcknowledgementAltitude,
+    PreReportDescending,
+    PreAcknowledgeGoAround, // If told to go around by ATC
+    PreAnnounceGoAround, // If pilot decides to go around
 }
 
 # [derive(Deserialize, Serialize)]
 pub enum CircuitAndLandingStage {
+    PreReportDownwind,
+    PreReportTrafficInSight, // Optional if told to follow traffic
+    PreReportFinal,
+    PreReadbackContinueApproach,
+    PreReadbackLandingClearance,
+    PreAcknowledgeGoAround, // If told to go around by ATC
+    PreAnnounceGoAround, // If pilot decides to go around
+}
 
+#[derive(Deserialize, Serialize)]
+pub enum LandedToParkedStage {
+    PreHandshake, // For large airports - may not even be needed
+    PreReadbackVacateRunwayRequest,
+    PreVacatedRunway, 
+    PreTaxiClearanceReadback,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -43,7 +65,7 @@ pub enum Status {
         position: String,
         stage: ParkedToTakeoffStage,
     },
-    Taxiing {
+    TaxiingToTakeoff {
         holdpoint: String,
         runway: String,
         stage: TaxiingToTakeoffStage,
@@ -57,6 +79,10 @@ pub enum Status {
     Landing {
         runway: String,
     },
+    LandingToParked {
+        position: String,
+        stage: LandedToParkedStage,
+    },
 }
 
 #[derive(Deserialize, Serialize)]
@@ -69,16 +95,16 @@ pub struct FlightPoint {
 #[derive(Deserialize, Serialize)]
 pub struct State {
     pub status: Status,
-    pub lat: u32,
-    pub long: u32,
+    pub lat: f32,
+    pub long: f32,
     pub current_atsu_callsign: String,
     pub prefix: String,
     pub callsign: String,
     pub atsu_allocated_callsign: String,
     pub emergency: String,
     pub squark: bool,
-    pub atsu_frequency: u16,
-    pub current_radio_frequency: u16,
-    pub required_transponder_frequency: u16,
-    pub current_transponder_frequency: u16,
+    pub atsu_frequency: f32,
+    pub current_radio_frequency: f32,
+    pub required_transponder_frequency: f32,
+    pub current_transponder_frequency: f32,
 }
