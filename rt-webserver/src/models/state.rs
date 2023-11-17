@@ -4,7 +4,7 @@ use super::aerodrome::COMFrequency;
 
 #[derive(Deserialize, Serialize)]
 pub enum ParkedToTakeoffStage {
-    PreRadiocheck,
+    PreRadioCheck,
     PreDepartInfo,
     PreReadbackDepartInfo,
     PreTaxiRequest,
@@ -111,7 +111,6 @@ pub struct State {
     pub current_target: COMFrequency,
     pub current_radio_frequency: f32,
     pub current_transponder_frequency: u16,
-    pub required_transponder_frequency: u16,
     pub lat: f32,
     pub long: f32,
     pub emergency: Emergency,

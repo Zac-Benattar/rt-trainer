@@ -1,3 +1,5 @@
+use std::fmt;
+
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde_json::json;
 
@@ -11,6 +13,23 @@ pub enum CustomError {
     OtherAircraftCallGenerationError,
     WrongTarget,
 }
+
+impl fmt::Display for CustomError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let string_version = match self {
+            Self::InternalServerError => "Internal Server Error",
+            Self::BadRequest => "Bad Request",
+            Self::UserCallNotFound => "UserCall Not Found",
+            Self::ATCCallNotFound => "ATCCall Not Found",
+            Self::UserAccountNotFound => "UserAccount Not Found",
+            Self::ATCCallGenerationError => "ATC Call Generation Error",
+            Self::OtherAircraftCallGenerationError => "Other Aircraft Call Generation Error",
+            Self::WrongTarget => "Wrong Target",
+        };
+        write!(f, "{}", string_version)
+    }
+}
+
 
 impl IntoResponse for CustomError {
     fn into_response(self) -> axum::response::Response {
