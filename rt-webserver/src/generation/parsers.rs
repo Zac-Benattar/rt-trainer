@@ -1,18 +1,17 @@
-use std::thread::current;
-
 use crate::{errors::CustomError, models::{state::{State, Status, ParkedToTakeoffStage, Emergency}, aerodrome::COMFrequency}};
 
 pub fn parse_parked_to_takeoff_radio_check(
-    radio_check: &str,
+    radio_check: &String,
     current_state: &State,
 ) -> Result<State, CustomError> {
+    let message = radio_check;
     let mut callsign_stated = String::new();
     let mut astu_callsign_stated = String::new();
     let mut radio_freq_stated = String::new();
 
-    let number_index = radio_check.find(|c: char| c.is_numeric()).unwrap_or(0);
+    let number_index = message.find(|c: char| c.is_numeric()).unwrap_or(0);
     println!("Number index: {}", number_index);
-    println!("Radio Frequency: {}", radio_check[number_index..].to_string());
+    println!("Radio Frequency: {}", message[number_index..].to_string());
 
     // TODO - Implement this
 

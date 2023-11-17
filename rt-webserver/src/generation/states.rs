@@ -14,12 +14,6 @@ pub struct ScenarioGenerationParameters {
     pub transponder_frequency: u16,
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct ScenarioStatusData {
-    pub seed: u32,
-    pub current_state: State,
-}
-
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
     let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.seed);
     let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
@@ -47,23 +41,23 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
     }
 }
 
-pub fn generate_next_state(current_state_data: ScenarioStatusData) -> State {
+pub fn generate_next_state(seed: u32, radiocall: String, current_state: State) -> State {
     // TODO - Implement this
-    match &current_state_data.current_state.status {
+    match &current_state.status {
         Status::Parked { position: _, stage } => {
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
                     let result = parse_parked_to_takeoff_radio_check(
-                        &current_state_data.current_state.current_target.callsign,
-                        &current_state_data.current_state,
+                        &radiocall,
+                        &current_state,
                     );
 
                     let next_state = match result {
                         Ok(state) => state,
                         Err(error) => {
                             println!("Error: {}", error);
-                            current_state_data.current_state
+                            current_state
                         }
                     };
 
@@ -115,5 +109,5 @@ pub fn generate_next_state(current_state_data: ScenarioStatusData) -> State {
         Status::LandingToParked { position, stage } => {}
     }
 
-    current_state_data.current_state
+    current_state
 }

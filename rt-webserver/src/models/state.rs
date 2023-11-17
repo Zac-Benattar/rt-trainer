@@ -115,3 +115,10 @@ pub struct State {
     pub long: f32,
     pub emergency: Emergency,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct StateAndMessage {
+    pub state: State,
+    pub seed: u32,
+    pub message: String,
+}

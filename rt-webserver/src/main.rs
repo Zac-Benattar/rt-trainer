@@ -5,6 +5,7 @@ use axum::{
 };
 
 use anyhow::Context;
+// use axum_macros::debug_handler; -> use with #[debug_handler]
 use sqlx::postgres::PgPoolOptions;
 use std::fs;
 use std::net::SocketAddr;
@@ -41,14 +42,6 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/hello", get(root))
-        .route("/usercalls", get(controllers::radiocall::all_user_calls))
-        .route("/usercall", post(controllers::radiocall::new_user_call))
-        .route(
-            "/usercall/:id",
-            get(controllers::radiocall::user_call)
-                .put(controllers::radiocall::update_user_call)
-                .delete(controllers::radiocall::delete_user_call),
-        )
         .route("/useraccounts", get(controllers::user::all_user_accounts))
         .route("/useraccount", post(controllers::user::new_user_account))
         .route(
@@ -58,6 +51,7 @@ async fn main() -> anyhow::Result<()> {
                 .delete(controllers::user::delete_user_account),
         )
         .route("/initiatescenario/:seed", get(controllers::generator::get_initial_state))
+        
         .route("/nextstate/:seed", get(controllers::generator::get_next_state))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
