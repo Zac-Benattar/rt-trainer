@@ -97,7 +97,73 @@ impl fmt::Display for ParseError {
     }
 }
 
-
+impl IntoResponse for ParseError {
+    fn into_response(self) -> axum::response::Response {
+        let (status, error_message) = match self {
+            Self::FrequencyParseError {
+                frequency_found,
+                frequency_expected,
+            } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!(
+                    "Frequency Parse Error: Frequency found: {}, Frequency expected: {}",
+                    frequency_found, frequency_expected
+                ),
+            ),
+            Self::FrequencyMissingError { frequency_expected } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!("Frequency Missing Error: Frequency expected: {}", frequency_expected),
+            ),
+            Self::FrequencyIncorrectError {
+                frequency_found,
+                frequency_expected,
+            } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!(
+                    "Frequency Incorrect Error: Frequency found: {}, Frequency expected: {}",
+                    frequency_found, frequency_expected
+                ),
+            ),
+            Self::CallsignParseError {
+                callsign_found,
+                callsign_expected,
+            } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!(
+                    "Callsign Parse Error: Callsign found: {}, Callsign expected: {}",
+                    callsign_found, callsign_expected
+                ),
+            ),
+            Self::CallsignMissingError { callsign_expected } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!("Callsign Missing Error: Callsign expected: {}", callsign_expected),
+            ),
+            Self::MessageParseError {
+                message_found,
+                message_expected,
+            } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!(
+                    "Message Parse Error: Message found: {}, Message expected: {}",
+                    message_found, message_expected
+                ),
+            ),
+            Self::MessageMissingError { details } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!("Message Missing Error: Details: {}", details),
+            ),
+            Self::SeedParseError { seed_found } => (
+                StatusCode::EXPECTATION_FAILED,
+                format!("Seed Parse Error: Seed found: {}", seed_found),
+            ),
+            Self::ParseInputTooLongError => (
+                StatusCode::EXPECTATION_FAILED,
+                "Parse Input Too Long Error".to_string(),
+            ),
+        };
+        (status, Json(json!({"error": error_message}))).into_response()
+    }
+}
 
 impl fmt::Display for CustomError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -114,7 +180,6 @@ impl fmt::Display for CustomError {
         write!(f, "{}", string_version)
     }
 }
-
 
 impl IntoResponse for CustomError {
     fn into_response(self) -> axum::response::Response {

@@ -7,22 +7,21 @@ use crate::{
 };
 
 pub fn parse_parked_to_takeoff_radio_check(
+    seed: &u32,
     radio_check: &String,
     current_state: &State,
 ) -> Result<State, ParseError> {
     let message = radio_check;
     let message_words = message.split_whitespace().collect::<Vec<&str>>();
 
-    let radio_freq_index = message_words
-        .iter()
-        .position(|&x| x.contains('.'))
-        .unwrap_or(usize::MAX);
-    if radio_freq_index == usize::MAX {
-        println!("Radio frequency missing");
-        return Err(ParseError::FrequencyMissingError {
-            frequency_expected: current_state.current_radio_frequency.to_string(),
-        });
-    }
+    let radio_freq_index = match message_words.iter().position(|&x| x.contains('.')) {
+        Some(index) => index,
+        None => {
+            return Err(ParseError::FrequencyMissingError {
+                frequency_expected: current_state.current_radio_frequency.to_string(),
+            });
+        }
+    };
 
     let radio_freq_stated = match message_words[radio_freq_index].parse::<f32>() {
         Ok(freq) => freq,

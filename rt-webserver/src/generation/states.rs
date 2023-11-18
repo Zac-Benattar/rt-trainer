@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::errors::ParseError;
 use crate::generation::aerodromes::get_start_aerodrome;
 use crate::generation::parsers::*;
 use crate::models::aerodrome::{Aerodrome, COMFrequency};
@@ -41,26 +42,20 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
     }
 }
 
-pub fn generate_next_state(seed: u32, radiocall: String, current_state: State) -> State {
+pub fn generate_next_state(
+    seed: u32,
+    radiocall: String,
+    current_state: State,
+) -> Result<State, ParseError> {
     match &current_state.status {
         Status::Parked { position: _, stage } => {
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
-                    let result = parse_parked_to_takeoff_radio_check(
-                        &radiocall,
-                        &current_state,
-                    );
+                    let result =
+                        parse_parked_to_takeoff_radio_check(&seed, &radiocall, &current_state);
 
-                    let next_state = match result {
-                        Ok(state) => state,
-                        Err(error) => {
-                            println!("Error: {}", error);
-                            current_state
-                        }
-                    };
-
-                    return next_state;
+                    return result;
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
@@ -108,5 +103,5 @@ pub fn generate_next_state(seed: u32, radiocall: String, current_state: State) -
         Status::LandingToParked { position, stage } => {}
     }
 
-    current_state
+    Ok(current_state)
 }
