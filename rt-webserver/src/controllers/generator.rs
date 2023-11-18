@@ -10,7 +10,7 @@ use crate::helpers::jsoncheckers::{
     invalid_scenario_generation_parameters_json, invalid_state_data_json,
 };
 use crate::helpers::phonetics;
-use crate::helpers::preprocessors::process_string;
+use crate::helpers::preprocessors::{process_string, remove_punctuation};
 use crate::models::state::State;
 use crate::models::state::StateAndMessage;
 use crate::titlecase;
@@ -45,7 +45,7 @@ pub async fn get_next_state(
     //     return Err(CustomError::BadRequest);
     // }
 
-    let usercall = state_and_message.message;
+    let usercall = process_string(&state_and_message.message);
     let state_data = state_and_message.state;
     let seed = state_and_message.seed;
 

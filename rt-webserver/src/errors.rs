@@ -14,6 +14,91 @@ pub enum CustomError {
     WrongTarget,
 }
 
+pub enum ParseError {
+    FrequencyParseError {
+        frequency_found: String,
+        frequency_expected: String,
+    },
+    FrequencyMissingError {
+        frequency_expected: String,
+    },
+    FrequencyIncorrectError {
+        frequency_found: String,
+        frequency_expected: String,
+    },
+    CallsignParseError {
+        callsign_found: String,
+        callsign_expected: String,
+    },
+    CallsignMissingError {
+        callsign_expected: String,
+    },
+    MessageParseError {
+        message_found: String,
+        message_expected: String,
+    },
+    MessageMissingError {
+        details: String,
+    },
+    SeedParseError {
+        seed_found: String,
+    },
+    ParseInputTooLongError,
+}
+
+impl fmt::Display for ParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let string_version = match self {
+            Self::FrequencyParseError {
+                frequency_found,
+                frequency_expected,
+            } => format!(
+                "Frequency Parse Error: Frequency found: {}, Frequency expected: {}",
+                frequency_found, frequency_expected
+            ),
+            Self::FrequencyMissingError { frequency_expected } => {
+                format!("Frequency Missing Error: Frequency expected: {}", frequency_expected)
+            }
+            Self::FrequencyIncorrectError {
+                frequency_found,
+                frequency_expected,
+            } => format!(
+                "Frequency Incorrect Error: Frequency found: {}, Frequency expected: {}",
+                frequency_found, frequency_expected
+            ),
+            Self::CallsignParseError {
+                callsign_found,
+                callsign_expected,
+            } => format!(
+                "Callsign Parse Error: Callsign found: {}, Callsign expected: {}",
+                callsign_found, callsign_expected
+            ),
+            Self::CallsignMissingError { callsign_expected } => format!(
+                "Callsign Missing Error: Callsign expected: {}",
+                callsign_expected
+            ),
+            Self::MessageParseError {
+                message_found,
+                message_expected,
+            } => format!(
+                "Message Parse Error: Message found: {}, Message expected: {}",
+                message_found, message_expected
+            ),
+            Self::MessageMissingError { details } => format!(
+                "Message Missing Error: Details: {}",
+                details
+            ),
+            Self::SeedParseError { seed_found } => {
+                format!("Seed Parse Error: Seed found: {}", seed_found)
+            }
+            Self::ParseInputTooLongError => "Parse Input Too Long Error".to_string(),
+        };
+        write!(f, "{}", string_version)
+    }
+}
+
+
+
 impl fmt::Display for CustomError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let string_version = match self {

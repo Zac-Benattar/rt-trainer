@@ -1,19 +1,74 @@
-use crate::{errors::CustomError, models::{state::{State, Status, ParkedToTakeoffStage, Emergency}, aerodrome::COMFrequency}};
+use crate::{
+    errors::ParseError,
+    models::{
+        aerodrome::COMFrequency,
+        state::{Emergency, ParkedToTakeoffStage, State, Status},
+    },
+};
 
 pub fn parse_parked_to_takeoff_radio_check(
     radio_check: &String,
     current_state: &State,
-) -> Result<State, CustomError> {
+) -> Result<State, ParseError> {
     let message = radio_check;
-    let mut callsign_stated = String::new();
-    let mut astu_callsign_stated = String::new();
-    let mut radio_freq_stated = String::new();
+    let message_words = message.split_whitespace().collect::<Vec<&str>>();
 
-    let number_index = message.find(|c: char| c.is_numeric()).unwrap_or(0);
-    println!("Number index: {}", number_index);
-    println!("Radio Frequency: {}", message[number_index..].to_string());
+    let radio_freq_index = message_words
+        .iter()
+        .position(|&x| x.contains('.'))
+        .unwrap_or(usize::MAX);
+    if radio_freq_index == usize::MAX {
+        println!("Radio frequency missing");
+        return Err(ParseError::FrequencyMissingError {
+            frequency_expected: current_state.current_radio_frequency.to_string(),
+        });
+    }
 
-    // TODO - Implement this
+    let radio_freq_stated = match message_words[radio_freq_index].parse::<f32>() {
+        Ok(freq) => freq,
+        Err(_) => {
+            println!("Radio frequency not a number");
+            return Err(ParseError::FrequencyParseError {
+                frequency_found: message_words[radio_freq_index].to_string(),
+                frequency_expected: current_state.current_radio_frequency.to_string(),
+            });
+        }
+    };
+
+    let callsign_expected = current_state.current_target.callsign.to_lowercase();
+    let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
+    for i in 0..callsign_words.len() {
+        if message_words[i] != callsign_words[i] {
+            return Err(ParseError::CallsignParseError {
+                callsign_found: message_words[..callsign_words.len()].join(" "),
+                callsign_expected: current_state.current_target.callsign.to_lowercase(),
+            });
+        }
+    }
+
+    if message_words[callsign_words.len()] != current_state.callsign.to_lowercase() {
+        return Err(ParseError::CallsignParseError {
+            callsign_found: message_words[1].to_string(),
+            callsign_expected: current_state.callsign.to_lowercase(),
+        });
+    }
+
+    if message_words[radio_freq_index - 2] != "radio"
+        || message_words[radio_freq_index - 1] != "check"
+    {
+        return Err(ParseError::MessageParseError {
+            message_found: message.to_string(),
+            message_expected: "radio check".to_string(),
+        });
+    }
+
+    // Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
+    if radio_freq_stated != current_state.current_radio_frequency {
+        return Err(ParseError::FrequencyIncorrectError {
+            frequency_found: radio_freq_stated.to_string(),
+            frequency_expected: current_state.current_radio_frequency.to_string(),
+        });
+    }
 
     let next_state = State {
         status: Status::Parked {

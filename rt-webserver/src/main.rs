@@ -41,7 +41,7 @@ async fn main() -> anyhow::Result<()> {
         .context("could not connect to database_url")?;
 
     let app = Router::new()
-        .route("/hello", get(root))
+        .route("/test", get(test))
         .route("/useraccounts", get(controllers::user::all_user_accounts))
         .route("/useraccount", post(controllers::user::new_user_account))
         .route(
@@ -65,6 +65,6 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn root() -> &'static str {
+async fn test() -> &'static str {
     "Hello, World!"
 }

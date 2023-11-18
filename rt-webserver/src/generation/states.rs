@@ -42,7 +42,6 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 }
 
 pub fn generate_next_state(seed: u32, radiocall: String, current_state: State) -> State {
-    // TODO - Implement this
     match &current_state.status {
         Status::Parked { position: _, stage } => {
             match stage {
