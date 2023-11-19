@@ -8,11 +8,39 @@ http://localhost:3000/initiatescenario/1
   "transponder_frequency": 7000
 }
 
-get next state:
+radio check:
 http://localhost:3000/nextstate/1
 {
-  "seed": 1,
-  "current_state" :{
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreRadioCheck"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None"
+  },
+  "message": "Wellesbourne Information, G-OFLY, radio check 180.030 excess to trim 5.0",
+  "seed": 1
+}
+
+request departure information:
+http://localhost:3000/nextstate/1
+{
+  "state" :{
   "status": {
     "Parked": {
       "position": "A1",
@@ -28,11 +56,12 @@ http://localhost:3000/nextstate/1
     "frequency": 124.03,
     "callsign": "Wellesbourne Information"
   },
-  "current_radio_frequency": 180.03,
+  "current_radio_frequency": 180.030,
   "current_transponder_frequency": 7000,
-  "required_transponder_frequency": 7000,
   "lat": 52.1922,
   "long": -1.6144,
   "emergency": "None"
-  }
+  },
+  "message": "G-OFLY, request departure information.",
+  "seed": 1
 }
