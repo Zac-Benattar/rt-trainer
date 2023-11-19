@@ -8,8 +8,7 @@ use crate::generation::states::{self, generate_initial_state, generate_next_stat
 use crate::errors::{CustomError, ParseError};
 use crate::helpers::jsoncheckers::invalid_scenario_generation_parameters_json;
 use crate::helpers::preprocessors::process_string;
-use crate::models::state::State;
-use crate::models::state::StateAndMessage;
+use crate::models::state::{State, StateMessage, StateMessageSeed};
 
 /* Gets the first state that the frontend should match.
 The frontend will then ensure the radio and transponder are set to the
@@ -32,8 +31,8 @@ pub async fn get_initial_state(
 // This ensures the server is stateless, and does not need to store any data for simulating a scenario.
 // Passed in radio call should be correct for the current state otherwise error should be returned.
 pub async fn get_next_state(
-    Json(state_and_message): Json<StateAndMessage>,
-) -> Result<(StatusCode, Json<StateAndMessage>), ParseError> {
+    Json(state_and_message): Json<StateMessageSeed>,
+) -> Result<(StatusCode, Json<StateMessage>), ParseError> {
     // Filter out empty json
     // if invalid_state_and_message_data_json(Json(&state_and_message)) {
     //     return Err(CustomError::BadRequest);

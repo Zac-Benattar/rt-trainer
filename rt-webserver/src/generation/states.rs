@@ -46,7 +46,7 @@ pub fn generate_next_state(
     seed: u32,
     radiocall: String,
     current_state: State,
-) -> Result<StateAndMessage, ParseError> {
+) -> Result<StateMessage, ParseError> {
     match &current_state.status {
         Status::Parked { position: _, stage } => {
             match stage {
@@ -103,9 +103,8 @@ pub fn generate_next_state(
         Status::LandingToParked { position, stage } => {}
     }
 
-    Ok(StateAndMessage {
+    Ok(StateMessage {
         state: current_state,
-        seed: seed,
         message: "Error".to_string(),
     })
 }

@@ -117,8 +117,14 @@ pub struct State {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct StateAndMessage {
+pub struct StateMessageSeed {
     pub state: State,
+    pub message: String,
     pub seed: u32,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct StateMessage {
+    pub state: State,
     pub message: String,
 }
