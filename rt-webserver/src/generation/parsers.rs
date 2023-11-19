@@ -1,14 +1,45 @@
 use crate::{
     errors::ParseError,
-    generation::aerodromes::*,
     models::{
+        aerodrome::Aerodrome,
         aerodrome::COMFrequency,
         state::{Emergency, ParkedToTakeoffStage, State, StateMessage, Status},
-        aerodrome::Aerodrome,
     },
 };
 
 use super::aerodromes::get_start_aerodrome;
+
+pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -> String {
+    let mut shortened_callsign = String::new();
+    if callsign.len() == 6 {
+        let mut standard_reg_style: bool = true;
+        for (i, c) in callsign.chars().enumerate() {
+            if !c.is_ascii_uppercase() && i != 1 {
+                standard_reg_style = false;
+            }
+        }
+
+        if standard_reg_style {
+            print!("{}", seed);
+            if seed % 3 == 0 {
+                shortened_callsign.push_str(&aircraft_type);
+                shortened_callsign.push_str(" ");
+                shortened_callsign.push_str(&callsign[4..]);
+            } else {
+                shortened_callsign.push_str(&callsign[0..1]);
+                shortened_callsign.push_str("-");
+                shortened_callsign.push_str(&callsign[4..]);
+            }
+        } else {
+            shortened_callsign.push_str(&callsign[..]);
+        }
+    } else {
+        let callsign_words = callsign.split_whitespace().collect::<Vec<&str>>();
+        shortened_callsign.push_str(callsign_words[0]);
+    }
+
+    shortened_callsign
+}
 
 pub fn parse_radio_check(
     seed: &u32,
@@ -97,6 +128,7 @@ pub fn parse_radio_check(
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
         current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
     Ok(StateMessage {
@@ -105,8 +137,14 @@ pub fn parse_radio_check(
     })
 }
 
-pub fn parse_departure_information_request(seed: &u32, departure_information_request: &String, current_state: &State) -> Result<StateMessage, ParseError> {
-    let message_words = departure_information_request.split_whitespace().collect::<Vec<&str>>();
+pub fn parse_departure_information_request(
+    seed: &u32,
+    departure_information_request: &String,
+    current_state: &State,
+) -> Result<StateMessage, ParseError> {
+    let message_words = departure_information_request
+        .split_whitespace()
+        .collect::<Vec<&str>>();
     let callsign_expected = current_state.callsign.to_lowercase();
     let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
@@ -140,7 +178,13 @@ pub fn parse_departure_information_request(seed: &u32, departure_information_req
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
     let atc_response = format!(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}.",
-        &current_state.callsign, runway.name, aerodrome.wind_direction, aerodrome.wind_speed, aerodrome.pressure, aerodrome.temperature, aerodrome.dewpoint
+        shorten_callsign(seed, &current_state.aircraft_type, &current_state.callsign),
+        runway.name,
+        aerodrome.wind_direction,
+        aerodrome.wind_speed,
+        aerodrome.pressure,
+        aerodrome.temperature,
+        aerodrome.dewpoint
     );
 
     let next_state = State {
@@ -157,11 +201,86 @@ pub fn parse_departure_information_request(seed: &u32, departure_information_req
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: shorten_callsign(
+            seed,
+            &current_state.aircraft_type,
+            &current_state.target_allocated_callsign.to_owned(),
+        ), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(StateMessage {
+        state: next_state,
+        message: atc_response,
+    })
+}
+
+pub fn parse_departure_information_readback(
+    seed: &u32,
+    departure_information_readback: &String,
+    current_state: &State,
+) -> Result<StateMessage, ParseError> {
+    let message_words = departure_information_readback
+        .split_whitespace()
+        .collect::<Vec<&str>>();
+
+    let aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let runway_index: usize = (seed % (aerodrome.runways.len() as u32)) as usize;
+    let runway = match aerodrome.runways.get(runway_index) {
+        Some(runway) => runway,
+        None => {
+            return Err(ParseError::RunwayInvalidError {
+                aerodrome,
+                runway_index,
+            });
+        }
+    };
+
+    let runway_string = format!("runway {}", runway.name);
+    let pressure_string = format!("qnh {}", aerodrome.pressure);
+    if !departure_information_readback.contains(runway_string.as_str())
+        || !departure_information_readback.contains(pressure_string.as_str())
+        || message_words[message_words.len() - 1]
+            != current_state.target_allocated_callsign.to_lowercase()
+    {
+        return Err(ParseError::MessageParseError {
+            message_found: departure_information_readback.to_string(),
+            message_expected: format!(
+                "runway {0} qnh {1} {2}",
+                runway.name,
+                aerodrome.pressure,
+                current_state.target_allocated_callsign.to_lowercase()
+            ),
+        });
+    }
+
+    // ATC does not respond to this message
+    let atc_response: String = String::new();
+
+    let next_state = State {
+        status: Status::Parked {
+            position: "A1".to_string(), // fix this
+            stage: ParkedToTakeoffStage::PreTaxiRequest,
+        },
+        lat: current_state.lat,
+        long: current_state.long,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
         target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
         current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
     Ok(StateMessage {

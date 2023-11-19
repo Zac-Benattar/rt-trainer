@@ -9,15 +9,15 @@ use anyhow::Context;
 use sqlx::postgres::PgPoolOptions;
 use std::fs;
 use std::net::SocketAddr;
+use titlecase::titlecase;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-use titlecase::titlecase;
 
 mod controllers;
 mod errors;
-mod models;
-mod helpers;
 mod generation;
+mod helpers;
+mod models;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -50,9 +50,11 @@ async fn main() -> anyhow::Result<()> {
                 .put(controllers::user::update_user_account)
                 .delete(controllers::user::delete_user_account),
         )
-        .route("/initiatescenario/:seed", get(controllers::generator::get_initial_state))
-        
-        .route("/nextstate/:seed", get(controllers::generator::get_next_state))
+        .route(
+            "/initiatescenario",
+            get(controllers::generator::get_initial_state),
+        )
+        .route("/nextstate", get(controllers::generator::get_next_state))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
 

@@ -18,7 +18,7 @@ pub struct ScenarioGenerationParameters {
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
     let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.seed);
     let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
-    // We don't need to calculate the destination aerodrome now as it is determined by the seed
+    // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
     State {
         status: Status::Parked {
@@ -39,6 +39,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
         squark: false,
         current_radio_frequency: parameters.radio_frequency,
         current_transponder_frequency: 7000,
+        aircraft_type: "Cessna".to_string(),
     }
 }
 
@@ -65,6 +66,9 @@ pub fn generate_next_state(
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
+                    let result = parse_departure_information_readback(&seed, &radiocall, &current_state);
+
+                return result;
                 }
                 ParkedToTakeoffStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request

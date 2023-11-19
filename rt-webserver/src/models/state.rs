@@ -114,6 +114,7 @@ pub struct State {
     pub lat: f32,
     pub long: f32,
     pub emergency: Emergency,
+    pub aircraft_type: String,
 }
 
 #[derive(Deserialize, Serialize)]
