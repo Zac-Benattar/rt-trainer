@@ -34,4 +34,10 @@ pub struct Aerodrome {
     pub runways: Vec<Runway>,
     pub lat: f32,
     pub long: f32,
+    // Following 5 can be simulated by having a basic statistical model sampled using the seed
+    pub wind_direction: u16,
+    pub wind_speed: u8,
+    pub pressure: u16,
+    pub temperature: i8,
+    pub dewpoint: i8,
 }

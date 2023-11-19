@@ -6,7 +6,7 @@ use axum::Json;
 use crate::generation::states::{self, generate_initial_state, generate_next_state};
 // Text formatting
 use crate::errors::{CustomError, ParseError};
-use crate::helpers::jsoncheckers::invalid_scenario_generation_parameters_json;
+use crate::helpers::jsoncheckers::{invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json};
 use crate::helpers::preprocessors::process_string;
 use crate::models::state::{State, StateMessage, StateMessageSeed};
 
@@ -31,16 +31,16 @@ pub async fn get_initial_state(
 // This ensures the server is stateless, and does not need to store any data for simulating a scenario.
 // Passed in radio call should be correct for the current state otherwise error should be returned.
 pub async fn get_next_state(
-    Json(state_and_message): Json<StateMessageSeed>,
+    Json(state_message_seed): Json<StateMessageSeed>,
 ) -> Result<(StatusCode, Json<StateMessage>), ParseError> {
     // Filter out empty json
-    // if invalid_state_and_message_data_json(Json(&state_and_message)) {
-    //     return Err(CustomError::BadRequest);
-    // }
+    if invalid_state_message_seed_data_json(Json(&state_message_seed)) {
+        return Err(ParseError::InvalidJSONError);
+    }
 
-    let usercall = process_string(&state_and_message.message);
-    let state_data = state_and_message.state;
-    let seed = state_and_message.seed;
+    let usercall = process_string(&state_message_seed.message);
+    let state_data = state_message_seed.state;
+    let seed = state_message_seed.seed;
 
     let result = generate_next_state(seed, usercall, state_data);
 

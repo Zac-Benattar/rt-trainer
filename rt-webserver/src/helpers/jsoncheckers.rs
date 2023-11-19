@@ -1,6 +1,6 @@
 use axum::Json;
 
-use crate::{generation::states, models::state::State};
+use crate::{generation::states, models::state::{State, StateMessageSeed}};
 
 // Following functions are pretty much unimplemented but are here to show how the code should be structured
 pub fn invalid_scenario_generation_parameters_json(
@@ -27,4 +27,17 @@ pub fn empty_state_data_json(
 ) -> bool {
     state.callsign.is_empty()
         || state.prefix.is_empty()
+}
+
+pub fn invalid_state_message_seed_data_json(
+    Json(state_message): Json<&StateMessageSeed>,
+) -> bool {
+    empty_state_message_seed_data_json(Json(state_message))
+}
+
+pub fn empty_state_message_seed_data_json(
+    Json(state_message): Json<&StateMessageSeed>,
+) -> bool {
+    state_message.message.is_empty()
+        || state_message.state.callsign.is_empty()
 }

@@ -48,6 +48,11 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
         runways: runways,
         lat: 51.4700,
         long: -0.4543,
+        wind_direction: 260,
+        wind_speed: 14,
+        pressure: 990,
+        temperature: 13,
+        dewpoint: 10,
     }
 }
 
@@ -79,5 +84,10 @@ pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
         runways: runways,
         lat: 52.1922,
         long: -1.6144,
+        wind_direction: 240,
+        wind_speed: 18,
+        pressure: 997,
+        temperature: 13,
+        dewpoint: 10,
     }
 }

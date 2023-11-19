@@ -3,6 +3,8 @@ use std::fmt;
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use serde_json::json;
 
+use crate::models::aerodrome::Aerodrome;
+
 pub enum CustomError {
     InternalServerError,
     BadRequest,
@@ -15,6 +17,7 @@ pub enum CustomError {
 }
 
 pub enum ParseError {
+    InvalidJSONError,
     FrequencyParseError {
         frequency_found: String,
         frequency_expected: String,
@@ -44,11 +47,16 @@ pub enum ParseError {
         seed_found: String,
     },
     ParseInputTooLongError,
+    RunwayInvalidError {
+        aerodrome: Aerodrome,
+        runway_index: usize,
+    },
 }
 
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let string_version = match self {
+            Self::InvalidJSONError => "Invalid JSON Error".to_owned(),
             Self::FrequencyParseError {
                 frequency_found,
                 frequency_expected,
@@ -57,7 +65,10 @@ impl fmt::Display for ParseError {
                 frequency_found, frequency_expected
             ),
             Self::FrequencyMissingError { frequency_expected } => {
-                format!("Frequency Missing Error: Frequency expected: {}", frequency_expected)
+                format!(
+                    "Frequency Missing Error: Frequency expected: {}",
+                    frequency_expected
+                )
             }
             Self::FrequencyIncorrectError {
                 frequency_found,
@@ -84,14 +95,23 @@ impl fmt::Display for ParseError {
                 "Message Parse Error: Message found: {}, Message expected: {}",
                 message_found, message_expected
             ),
-            Self::MessageMissingError { details } => format!(
-                "Message Missing Error: Details: {}",
-                details
-            ),
+            Self::MessageMissingError { details } => {
+                format!("Message Missing Error: Details: {}", details)
+            }
             Self::SeedParseError { seed_found } => {
                 format!("Seed Parse Error: Seed found: {}", seed_found)
             }
             Self::ParseInputTooLongError => "Parse Input Too Long Error".to_string(),
+            Self::RunwayInvalidError {
+                aerodrome,
+                runway_index,
+            } => {
+                format!(
+                    "Runway Invalid Error: Num runways: {}, Runway requested {}",
+                    aerodrome.runways.len(),
+                    runway_index
+                )
+            }
         };
         write!(f, "{}", string_version)
     }
@@ -100,6 +120,10 @@ impl fmt::Display for ParseError {
 impl IntoResponse for ParseError {
     fn into_response(self) -> axum::response::Response {
         let (status, error_message) = match self {
+            Self::InvalidJSONError => (
+                StatusCode::EXPECTATION_FAILED,
+                "Invalid JSON Error".to_string(),
+            ),
             Self::FrequencyParseError {
                 frequency_found,
                 frequency_expected,
@@ -112,7 +136,10 @@ impl IntoResponse for ParseError {
             ),
             Self::FrequencyMissingError { frequency_expected } => (
                 StatusCode::EXPECTATION_FAILED,
-                format!("Frequency Missing Error: Frequency expected: {}", frequency_expected),
+                format!(
+                    "Frequency Missing Error: Frequency expected: {}",
+                    frequency_expected
+                ),
             ),
             Self::FrequencyIncorrectError {
                 frequency_found,
@@ -136,7 +163,10 @@ impl IntoResponse for ParseError {
             ),
             Self::CallsignMissingError { callsign_expected } => (
                 StatusCode::EXPECTATION_FAILED,
-                format!("Callsign Missing Error: Callsign expected: {}", callsign_expected),
+                format!(
+                    "Callsign Missing Error: Callsign expected: {}",
+                    callsign_expected
+                ),
             ),
             Self::MessageParseError {
                 message_found,
@@ -159,6 +189,17 @@ impl IntoResponse for ParseError {
             Self::ParseInputTooLongError => (
                 StatusCode::EXPECTATION_FAILED,
                 "Parse Input Too Long Error".to_string(),
+            ),
+            Self::RunwayInvalidError {
+                aerodrome,
+                runway_index,
+            } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!(
+                    "Runway Invalid Error: Num runways: {}, Runway requested {}",
+                    aerodrome.runways.len(),
+                    runway_index
+                ),
             ),
         };
         (status, Json(json!({"error": error_message}))).into_response()

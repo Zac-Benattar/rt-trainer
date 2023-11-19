@@ -53,12 +53,15 @@ pub fn generate_next_state(
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
                     let result =
-                        parse_parked_to_takeoff_radio_check(&seed, &radiocall, &current_state);
+                        parse_radio_check(&seed, &radiocall, &current_state);
 
                     return result;
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
+                    let result = parse_departure_information_request(&seed, &radiocall, &current_state);
+
+                return result;
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
