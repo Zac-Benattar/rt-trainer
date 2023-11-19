@@ -33,7 +33,7 @@ pub async fn get_initial_state(
 // Passed in radio call should be correct for the current state otherwise error should be returned.
 pub async fn get_next_state(
     Json(state_and_message): Json<StateAndMessage>,
-) -> Result<(StatusCode, Json<State>), ParseError> {
+) -> Result<(StatusCode, Json<StateAndMessage>), ParseError> {
     // Filter out empty json
     // if invalid_state_and_message_data_json(Json(&state_and_message)) {
     //     return Err(CustomError::BadRequest);
@@ -45,7 +45,7 @@ pub async fn get_next_state(
 
     let result = generate_next_state(seed, usercall, state_data);
 
-    let next_state = match result {
+    let next_state_and_message = match result {
         Ok(state) => state,
         Err(error) => {
             println!("Error: {:?}", error.to_string());
@@ -53,5 +53,5 @@ pub async fn get_next_state(
         }
     };
 
-    Ok((StatusCode::OK, Json(next_state)))
+    Ok((StatusCode::OK, Json(next_state_and_message)))
 }

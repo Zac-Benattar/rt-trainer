@@ -2,7 +2,7 @@ use crate::{
     errors::ParseError,
     models::{
         aerodrome::COMFrequency,
-        state::{Emergency, ParkedToTakeoffStage, State, Status},
+        state::{Emergency, ParkedToTakeoffStage, State, StateAndMessage, Status},
     },
 };
 
@@ -10,7 +10,7 @@ pub fn parse_parked_to_takeoff_radio_check(
     seed: &u32,
     radio_check: &String,
     current_state: &State,
-) -> Result<State, ParseError> {
+) -> Result<StateAndMessage, ParseError> {
     let message = radio_check;
     let message_words = message.split_whitespace().collect::<Vec<&str>>();
 
@@ -69,6 +69,11 @@ pub fn parse_parked_to_takeoff_radio_check(
         });
     }
 
+    let atc_response = format!(
+        "{0}, {1}, reading you 5.",
+        &current_state.callsign, &current_state.current_target.callsign
+    );
+
     let next_state = State {
         status: Status::Parked {
             position: "A1".to_string(),
@@ -90,5 +95,9 @@ pub fn parse_parked_to_takeoff_radio_check(
         current_transponder_frequency: current_state.current_transponder_frequency,
     };
 
-    Ok(next_state)
+    Ok(StateAndMessage {
+        state: next_state,
+        seed: *seed,
+        message: atc_response,
+    })
 }
