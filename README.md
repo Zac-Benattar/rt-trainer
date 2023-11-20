@@ -4,20 +4,20 @@ https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-ope
 ## The repository
 This repository is inspired by a starter pack repository of resources for CS310 and other, similar modules written by Warwick alumni Michael B. Gale (https://github.com/mbg/cs310). It initially comprised of:
 - LaTeX templates for the project specification, progress report, and dissertation.
-- GitHub Actions workflows for building each report and making them available as build artifacts.
+- GitHub Actions workflows for building each report and making them available as build artefacts.
 - Generic advice for writing the reports.
 ## Installing and Running the System
 - Clone the repo into a local folder.
 - Install Node.js (https://nodejs.org/en) and npm (should be installed with nodejs), you may need to restart your terminal to use npm.
 - Install Rust (https://www.rust-lang.org/) and cargo (should be installed with Rust), again you may need to restart your terminal to use cargo.
-- From the `rt-trainer-app` directory run the following commands in a terminal to start the frontend:
+- From the `rt-trainer-app` directory run the following commands in a terminal to start the front-end:
 	- Install the required dependencies: `npm install`
 	- Run the front-end webserver on `localhost:5173/`: `npx vite` 
-- From the `rt-webserver` directory run the following commands in a terminal to start the backend:
+- From the `rt-webserver` directory run the following commands in a terminal to start the back-end:
 	- Install the required dependencies: `cargo install`
 	- Compile and run the back-end rt-webserver on `localhost:3000/`: `cargo run`
 ### Communicating with the RT Webserver
-The RT webserver 
+The RT handles the user's radio call messages and returns the next state and ATC's response to the user's call. It also provides a start state for a given set of parameters for the scenario. It is stateless, needing only the state, seed and message to generate its response.
 #### Scenario Initiation
 The following JSON object containing the parameters of the scenario should be sent to `http://localhost:3000/initiatescenario`:
 ```
