@@ -1,5 +1,5 @@
 initiate scenario:
-http://localhost:3000/initiatescenario/1
+http://localhost:3000/initiatescenario
 {
   "seed": 1,
   "prefix": "STUDENT",
@@ -9,7 +9,7 @@ http://localhost:3000/initiatescenario/1
 }
 
 radio check:
-http://localhost:3000/nextstate/1
+http://localhost:3000/nextstate
 {
   "state" :{
   "status": {
@@ -39,7 +39,7 @@ http://localhost:3000/nextstate/1
 }
 
 request departure information:
-http://localhost:3000/nextstate/1
+http://localhost:3000/nextstate
 {
   "state" :{
   "status": {
@@ -69,7 +69,7 @@ http://localhost:3000/nextstate/1
 }
 
 readback departure information:
-http://localhost:3000/nextstate/1
+http://localhost:3000/nextstate
 {
   "state" :{
   "status": {
