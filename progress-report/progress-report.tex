@@ -1,9 +1,11 @@
-\documentclass[a4paper,fleqn,twoside,12pt]{article}
+\documentclass[a4paper,fleqn,12pt]{article}
 
 %%%%%%%%%%%%%%%%%%%%
 
 \input{../common/common.tex}
 \input{../common/project.tex}
+
+\setcounter{secnumdepth}{0} % disables section numbering
 
 \assignment{Progress report}
 
@@ -15,10 +17,9 @@
 \makeatletter
 \fancypagestyle{plain}{
 	\fancyhf{}
-	\fancyhead[LE]{\thepage}
-	\fancyhead[RE]{\textit{\@author}}
-	\fancyhead[RO]{\thepage}
-	\fancyhead[LO]{\textit{\@title}}
+	\fancyhead[R]{\textit{\@title}}
+    \fancyhead[L]{\textit{\@author} - \textit{\@librarycardnumber}}
+    \fancyfoot[C]{\thepage}
 }
 \makeatother
 
@@ -27,11 +28,20 @@
 \begin{document}
 
 \pagestyle{plain}
+
 \input{introduction.tex}
 \input{background.tex}
 \input{progress.tex}
-\input{progress-report/ethical-consent}
+\input{legal-progressional-social-issues}
 \input{project-management.tex}
+
+\newpage
+\title{Specification}
+\section{Appendix - Project Specification}
+\input{../specification/introduction.tex}
+\input{../specification/background.tex}
+\input{../specification/objectives.tex}
+\input{../specification/project-management.tex}
 
 \printbibliography
 

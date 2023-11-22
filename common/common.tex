@@ -1,6 +1,6 @@
 \usepackage[utf8]{inputenc}
 
-\usepackage[a4paper, total={6.0in, 9.5in}]{geometry} % sets content area width and height respectively
+\usepackage[a4paper, total={5.5in, 9.5in}]{geometry} % sets content area width and height respectively
 
 \usepackage{amsmath} %For both in-line and equation mode
 \numberwithin{equation}{section} %Numbering of our equations per section
@@ -46,6 +46,9 @@ sorting=none
 \newcommand{\supervisor}[1]{\renewcommand{\@supervisor}{#1}}
 \newcommand{\@yearofstudy}[0]{}
 \newcommand{\yearofstudy}[1]{\renewcommand{\@yearofstudy}{#1}}
+\newcommand{\@librarycardnumber}[0]{}
+\newcommand{\librarycardnumber}[1]{\renewcommand{\@librarycardnumber}{#1}}
+
 \makeatletter
 
 \newtoggle{IsDissertation}
