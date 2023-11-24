@@ -83,13 +83,6 @@
 	});
 </script>
 
-<link
-	rel="stylesheet"
-	media="screen"
-	href="https://fontlibrary.org//face/segment7"
-	type="text/css"
-/>
-
 <div
 	class="radio-segdisplay {showDisplayText} card flex flex-row nowrap items-center place-content-between"
 >
@@ -146,7 +139,7 @@
 	}
 
 	.radio-segdisplay .mode-icon {
-		font-family: Segment7Standard;
+		font-family: SevenSegment;
 		font-size: 20px;
 		text-algin: left;
 		padding: 2px;
@@ -161,13 +154,13 @@
 	}
 
 	.radio-segdisplay .rdigit {
-		font-family: Segment7Standard;
+		font-family: SevenSegment;
 		text-algin: right;
 		padding: 8px 0px;
 	}
 
 	.radio-segdisplay .rdecimal-point {
-		font-family: Segment7Standard;
+		font-family: SevenSegment;
 		text-algin: right;
 		padding: 8px 0px;
 	}

@@ -91,4 +91,11 @@
 		font-weight: 100;
 		src: url('/fonts/GeistVF.woff2') format('woff2');
 	}
+
+	@font-face {
+		font-family: 'SevenSegment';
+		font-style: normal;
+		font-weight: 100;
+		src: url('/fonts/SevenSegment.ttf') format('opentype');
+	}
 </style>

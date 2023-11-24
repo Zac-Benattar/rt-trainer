@@ -32,13 +32,6 @@
 	});
 </script>
 
-<link
-	rel="stylesheet"
-	media="screen"
-	href="https://fontlibrary.org//face/segment7"
-	type="text/css"
-/>
-
 <div
 	class="transponder-segdisplay {showDisplayText} card flex flex-row nowrap items-center place-content-between"
 >
@@ -69,7 +62,7 @@
 	}
 
 	.transponder-segdisplay .mode-icon {
-		font-family: Segment7Standard;
+		font-family: SevenSegment;
 		font-size: 20px;
 		text-algin: left;
 		padding: 2px;
@@ -83,7 +76,7 @@
 	}
 
 	.transponder-segdisplay .tdigit {
-		font-family: Segment7Standard;
+		font-family: SevenSegment;
 		text-algin: right;
 		padding: 8px 0px;
 	}
