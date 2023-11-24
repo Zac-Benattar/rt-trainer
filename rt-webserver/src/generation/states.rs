@@ -13,6 +13,7 @@ pub struct ScenarioGenerationParameters {
     pub user_callsign: String,
     pub radio_frequency: f32,
     pub transponder_frequency: u16,
+    pub aircraft_type: String,
 }
 
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
@@ -39,7 +40,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
         squark: false,
         current_radio_frequency: parameters.radio_frequency,
         current_transponder_frequency: 7000,
-        aircraft_type: "Cessna".to_string(),
+        aircraft_type: parameters.aircraft_type,
     }
 }
 
@@ -53,25 +54,29 @@ pub fn generate_next_state(
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
-                    let result =
-                        parse_radio_check(&seed, &radiocall, &current_state);
+                    let result = parse_radio_check(&seed, &radiocall, &current_state);
 
                     return result;
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
-                    let result = parse_departure_information_request(&seed, &radiocall, &current_state);
+                    let result =
+                        parse_departure_information_request(&seed, &radiocall, &current_state);
 
-                return result;
+                    return result;
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
-                    let result = parse_departure_information_readback(&seed, &radiocall, &current_state);
+                    let result =
+                        parse_departure_information_readback(&seed, &radiocall, &current_state);
 
-                return result;
+                    return result;
                 }
                 ParkedToTakeoffStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request
+                    let result = parse_taxi_request(&seed, &radiocall, &current_state);
+
+                    return result;
                 }
                 ParkedToTakeoffStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback

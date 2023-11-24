@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-use super::aerodromes::get_start_aerodrome;
+use super::aerodromes::{get_start_aerodrome, get_destination_aerodrome};
 
 pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
@@ -69,21 +69,21 @@ pub fn parse_radio_check(
         }
     };
 
-    let callsign_expected = current_state.current_target.callsign.to_lowercase();
+    let callsign_expected = current_state.current_target.callsign.to_ascii_lowercase();
     let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
             return Err(ParseError::CallsignParseError {
                 callsign_found: message_words[..callsign_words.len()].join(" "),
-                callsign_expected: current_state.current_target.callsign.to_lowercase(),
+                callsign_expected: current_state.current_target.callsign.to_ascii_lowercase(),
             });
         }
     }
 
-    if message_words[callsign_words.len()] != current_state.callsign.to_lowercase() {
+    if message_words[callsign_words.len()] != current_state.callsign.to_ascii_lowercase() {
         return Err(ParseError::CallsignParseError {
             callsign_found: message_words[1].to_string(),
-            callsign_expected: current_state.callsign.to_lowercase(),
+            callsign_expected: current_state.callsign.to_ascii_lowercase(),
         });
     }
 
@@ -145,13 +145,13 @@ pub fn parse_departure_information_request(
     let message_words = departure_information_request
         .split_whitespace()
         .collect::<Vec<&str>>();
-    let callsign_expected = current_state.callsign.to_lowercase();
+    let callsign_expected = current_state.callsign.to_ascii_lowercase();
     let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
             return Err(ParseError::CallsignParseError {
                 callsign_found: message_words[..callsign_words.len()].join(" "),
-                callsign_expected: current_state.current_target.callsign.to_lowercase(),
+                callsign_expected: current_state.current_target.callsign.to_ascii_lowercase(),
             });
         }
     }
@@ -180,11 +180,11 @@ pub fn parse_departure_information_request(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}.",
         shorten_callsign(seed, &current_state.aircraft_type, &current_state.callsign),
         runway.name,
-        aerodrome.wind_direction,
-        aerodrome.wind_speed,
-        aerodrome.pressure,
-        aerodrome.temperature,
-        aerodrome.dewpoint
+        aerodrome.metor_data.wind_direction,
+        aerodrome.metor_data.avg_wind_speed,
+        aerodrome.metor_data.avg_pressure,
+        aerodrome.metor_data.avg_temp,
+        aerodrome.metor_data.avg_dewpoint
     );
 
     let next_state = State {
@@ -241,19 +241,19 @@ pub fn parse_departure_information_readback(
     };
 
     let runway_string = format!("runway {}", runway.name);
-    let pressure_string = format!("qnh {}", aerodrome.pressure);
+    let pressure_string = format!("qnh {}", aerodrome.metor_data.avg_pressure);
     if !departure_information_readback.contains(runway_string.as_str())
         || !departure_information_readback.contains(pressure_string.as_str())
         || message_words[message_words.len() - 1]
-            != current_state.target_allocated_callsign.to_lowercase()
+            != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
         return Err(ParseError::MessageParseError {
             message_found: departure_information_readback.to_string(),
             message_expected: format!(
                 "runway {0} qnh {1} {2}",
                 runway.name,
-                aerodrome.pressure,
-                current_state.target_allocated_callsign.to_lowercase()
+                aerodrome.metor_data.avg_pressure,
+                current_state.target_allocated_callsign.to_ascii_lowercase()
             ),
         });
     }
@@ -265,6 +265,65 @@ pub fn parse_departure_information_readback(
         status: Status::Parked {
             position: "A1".to_string(), // fix this
             stage: ParkedToTakeoffStage::PreTaxiRequest,
+        },
+        lat: current_state.lat,
+        long: current_state.long,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(StateMessage {
+        state: next_state,
+        message: atc_response,
+    })
+}
+
+pub fn parse_taxi_request(
+    seed: &u32,
+    taxi_request: &String,
+    current_state: &State,
+) -> Result<StateMessage, ParseError> {
+    let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
+
+    let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let destination_aerodrome: Aerodrome = get_destination_aerodrome(*seed);
+
+    if message_words[message_words.len() - 1]
+        != current_state.target_allocated_callsign.to_ascii_lowercase()
+        || message_words[1] != current_state.aircraft_type.to_ascii_lowercase()
+        || message_words.contains(&start_aerodrome.start_point.to_ascii_lowercase().as_str())
+        || message_words.contains(&destination_aerodrome.name.to_ascii_lowercase().as_str())
+    {
+        return Err(ParseError::MessageParseError {
+            message_found: taxi_request.to_string(),
+            message_expected: format!(
+                "{0} {1} at {2} request taxi VFR to {3}",
+                current_state.target_allocated_callsign.to_ascii_lowercase(),
+                current_state.aircraft_type.to_ascii_lowercase(),
+                start_aerodrome.start_point.to_ascii_lowercase(),
+                destination_aerodrome.name.to_ascii_lowercase(),
+
+            ),
+        });
+    }
+
+    let atc_response = String::new();
+
+    let next_state = State {
+        status: Status::Parked {
+            position: "A1".to_string(), // fix this
+            stage: ParkedToTakeoffStage::PreTaxiClearanceReadback,
         },
         lat: current_state.lat,
         long: current_state.long,

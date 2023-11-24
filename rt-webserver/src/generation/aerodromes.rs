@@ -1,4 +1,4 @@
-use crate::models::aerodrome::{Aerodrome, COMFrequency, COMFrequencyType, Runway};
+use crate::models::aerodrome::{Aerodrome, COMFrequency, COMFrequencyType, Runway, METORData};
 
 pub fn get_start_aerodrome(seed: u32) -> Aerodrome {
     if seed % 2 == 0 {
@@ -41,6 +41,23 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
             name: "33".to_string(),
         },
     ];
+
+    let metor_data = METORData {
+        wind_direction: 260,
+        avg_wind_speed: 5,
+        min_wind_speed: 1,
+        max_wind_speed: 45,
+        avg_pressure: 960,
+        min_pressure: 890,
+        max_pressure: 1090,
+        avg_temp: 10,
+        min_temp: -5,
+        max_temp: 33,
+        avg_dewpoint: 9,
+        min_dewpoint: -5,
+        max_dewpoint: 28,
+    };
+
     Aerodrome {
         name: "Birmingham".to_string(),
         icao: "EGBB".to_string(),
@@ -48,11 +65,8 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
         runways: runways,
         lat: 51.4700,
         long: -0.4543,
-        wind_direction: 260,
-        wind_speed: 14,
-        pressure: 990,
-        temperature: 13,
-        dewpoint: 10,
+        start_point: "North Side Hangers".to_string(),
+        metor_data,
     }
 }
 
@@ -77,6 +91,23 @@ pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
             name: "23".to_string(),
         }
     ];
+
+    let metor_data = METORData {
+        wind_direction: 240,
+        avg_wind_speed: 11,
+        min_wind_speed: 1,
+        max_wind_speed: 35,
+        avg_pressure: 960,
+        min_pressure: 890,
+        max_pressure: 1090,
+        avg_temp: 11,
+        min_temp: -4,
+        max_temp: 30,
+        avg_dewpoint: 10,
+        min_dewpoint: -5,
+        max_dewpoint: 28,
+    };
+
     Aerodrome {
         name: "Wellesbourne Mountford".to_string(),
         icao: "EGBW".to_string(),
@@ -84,10 +115,7 @@ pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
         runways: runways,
         lat: 52.1922,
         long: -1.6144,
-        wind_direction: 240,
-        wind_speed: 18,
-        pressure: 997,
-        temperature: 13,
-        dewpoint: 10,
+        start_point: "South Side Hangers".to_string(),
+        metor_data,
     }
 }
