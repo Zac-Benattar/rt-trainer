@@ -62,7 +62,7 @@
 	}
 
 	.transponder-segdisplay .mode-icon {
-		font-family: SevenSegment;
+		font-family: DSEG7ClassicMini;
 		font-size: 20px;
 		text-algin: left;
 		padding: 2px;
@@ -76,7 +76,7 @@
 	}
 
 	.transponder-segdisplay .tdigit {
-		font-family: SevenSegment;
+		font-family: DSEG7ClassicMini;
 		text-algin: right;
 		padding: 8px 0px;
 	}

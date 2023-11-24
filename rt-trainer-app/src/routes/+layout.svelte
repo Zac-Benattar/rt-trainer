@@ -93,9 +93,9 @@
 	}
 
 	@font-face {
-		font-family: 'SevenSegment';
+		font-family: 'DSEG7ClassicMini';
 		font-style: normal;
 		font-weight: 100;
-		src: url('/fonts/SevenSegment.ttf') format('opentype');
+		src: url('/fonts/DSEG7ClassicMini-Regular.woff2') format('woff2');
 	}
 </style>

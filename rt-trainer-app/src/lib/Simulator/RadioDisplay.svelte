@@ -111,6 +111,9 @@
 			<div id="primary-rdigit-dp-1" class="rdigit">{SFDigitArr[4]}</div>
 			<div id="primary-rdigit-dp-2" class="rdigit">{SFDigitArr[5]}</div>
 		</div>
+		<!-- <div>
+			<div class="padding" style="width: 50px;"></div>
+		</div> -->
 		<div class="tertiary-frequency flex flex-row">
 			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
 			<div id="tertiary-rdigit-1" class="rdigit">{TFDigitArr[1]}</div>
@@ -139,7 +142,7 @@
 	}
 
 	.radio-segdisplay .mode-icon {
-		font-family: SevenSegment;
+		font-family: DSEG7ClassicMini;
 		font-size: 20px;
 		text-algin: left;
 		padding: 2px;
@@ -154,13 +157,14 @@
 	}
 
 	.radio-segdisplay .rdigit {
-		font-family: SevenSegment;
+		font-family: DSEG7ClassicMini;
+		font-size: 30px;
 		text-algin: right;
 		padding: 8px 0px;
 	}
 
 	.radio-segdisplay .rdecimal-point {
-		font-family: SevenSegment;
+		font-family: DSEG7ClassicMini;
 		text-algin: right;
 		padding: 8px 0px;
 	}
