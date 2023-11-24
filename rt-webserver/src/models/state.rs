@@ -85,7 +85,7 @@ pub enum Status {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct FlightPoint {
+pub struct Waypoint {
     lat: u32,
     long: u32,
     name: String,

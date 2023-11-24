@@ -403,7 +403,7 @@ pub fn parse_taxi_readback(
 
     let next_state = State {
         status: Status::TaxiingToTakeoff {
-            stage: TaxiingToTakeoffStage::PreInfoGivenForDeparture,
+            stage: TaxiingToTakeoffStage::PreReadyForDeparture,
         },
         lat: current_state.lat,
         long: current_state.long,

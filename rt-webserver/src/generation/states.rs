@@ -53,36 +53,24 @@ pub fn generate_next_state(
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
-                    let result = parse_radio_check(&seed, &radiocall, &current_state);
-
-                    return result;
+                    return parse_radio_check(&seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
-                    let result =
-                        parse_departure_information_request(&seed, &radiocall, &current_state);
-
-                    return result;
+                    return parse_departure_information_request(&seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
-                    let result =
-                        parse_departure_information_readback(&seed, &radiocall, &current_state);
-
-                    return result;
+                    return parse_departure_information_readback(&seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request
-                    let result = parse_taxi_request(&seed, &radiocall, &current_state);
-
-                    return result;
+                    return parse_taxi_request(&seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback
                     // Move to taxiing status
-                    let result = parse_taxi_readback(&seed, &radiocall, &current_state);
-
-                    return result;
+                    return parse_taxi_readback(&seed, &radiocall, &current_state);
                 }
             }
         }
