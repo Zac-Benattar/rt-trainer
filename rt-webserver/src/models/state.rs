@@ -64,12 +64,9 @@ pub enum LandedToParkedStage {
 #[derive(Deserialize, Serialize)]
 pub enum Status {
     Parked {
-        position: String,
         stage: ParkedToTakeoffStage,
     },
     TaxiingToTakeoff {
-        holdpoint: String,
-        runway: String,
         stage: TaxiingToTakeoffStage,
     },
     Airborne {

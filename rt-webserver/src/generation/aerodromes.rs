@@ -1,4 +1,4 @@
-use crate::models::aerodrome::{Aerodrome, COMFrequency, COMFrequencyType, Runway, METORData};
+use crate::models::aerodrome::{Aerodrome, COMFrequency, COMFrequencyType, Runway, METORData, HoldingPoint};
 
 pub fn get_start_aerodrome(seed: u32) -> Aerodrome {
     if seed % 2 == 0 {
@@ -36,9 +36,11 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
     let runways = vec![
         Runway {
             name: "15".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         },
         Runway {
             name: "33".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         },
     ];
 
@@ -77,18 +79,23 @@ pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
         frequency: 124.030,
         callsign: "Wellesbourne Information".to_string(),
     };
+
     let runways: Vec<Runway> = vec![
         Runway {
             name: "18".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         },
         Runway {
             name: "36".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         },
         Runway {
             name: "05".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         },
         Runway {
             name: "23".to_string(),
+            holding_points: vec![HoldingPoint{name: "A1".to_string()}]
         }
     ];
 

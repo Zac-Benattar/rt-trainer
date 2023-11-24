@@ -3,11 +3,13 @@ use crate::{
     models::{
         aerodrome::Aerodrome,
         aerodrome::COMFrequency,
-        state::{Emergency, ParkedToTakeoffStage, State, StateMessage, Status},
+        state::{
+            Emergency, ParkedToTakeoffStage, State, StateMessage, Status, TaxiingToTakeoffStage,
+        },
     },
 };
 
-use super::aerodromes::{get_start_aerodrome, get_destination_aerodrome};
+use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome};
 
 pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
@@ -105,13 +107,12 @@ pub fn parse_radio_check(
     }
 
     let atc_response = format!(
-        "{0}, {1}, reading you 5.",
+        "{0}, {1}, reading you 5",
         &current_state.callsign, &current_state.current_target.callsign
     );
 
     let next_state = State {
         status: Status::Parked {
-            position: "A1".to_string(),
             stage: ParkedToTakeoffStage::PreDepartInfo,
         },
         lat: current_state.lat,
@@ -177,7 +178,7 @@ pub fn parse_departure_information_request(
 
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
     let atc_response = format!(
-        "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}.",
+        "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
         shorten_callsign(seed, &current_state.aircraft_type, &current_state.callsign),
         runway.name,
         aerodrome.metor_data.wind_direction,
@@ -189,7 +190,6 @@ pub fn parse_departure_information_request(
 
     let next_state = State {
         status: Status::Parked {
-            position: "A1".to_string(),
             stage: ParkedToTakeoffStage::PreReadbackDepartInfo,
         },
         lat: current_state.lat,
@@ -263,7 +263,6 @@ pub fn parse_departure_information_readback(
 
     let next_state = State {
         status: Status::Parked {
-            position: "A1".to_string(), // fix this
             stage: ParkedToTakeoffStage::PreTaxiRequest,
         },
         lat: current_state.lat,
@@ -299,8 +298,18 @@ pub fn parse_taxi_request(
     let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
     let destination_aerodrome: Aerodrome = get_destination_aerodrome(*seed);
 
-    if message_words[message_words.len() - 1]
-        != current_state.target_allocated_callsign.to_ascii_lowercase()
+    let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
+    let runway = match start_aerodrome.runways.get(runway_index) {
+        Some(runway) => runway,
+        None => {
+            return Err(ParseError::RunwayInvalidError {
+                aerodrome: start_aerodrome,
+                runway_index,
+            });
+        }
+    };
+
+    if message_words[0] != current_state.target_allocated_callsign.to_ascii_lowercase()
         || message_words[1] != current_state.aircraft_type.to_ascii_lowercase()
         || message_words.contains(&start_aerodrome.start_point.to_ascii_lowercase().as_str())
         || message_words.contains(&destination_aerodrome.name.to_ascii_lowercase().as_str())
@@ -313,7 +322,79 @@ pub fn parse_taxi_request(
                 current_state.aircraft_type.to_ascii_lowercase(),
                 start_aerodrome.start_point.to_ascii_lowercase(),
                 destination_aerodrome.name.to_ascii_lowercase(),
+            ),
+        });
+    }
 
+    let atc_response = format!(
+        "{0}, taxi to holding point {1}, runway {2}, QNH {3}",
+        current_state.target_allocated_callsign,
+        runway.holding_points[0].name,
+        runway.name,
+        start_aerodrome.metor_data.avg_pressure,
+    );
+
+    let next_state = State {
+        status: Status::Parked {
+            stage: ParkedToTakeoffStage::PreTaxiClearanceReadback,
+        },
+        lat: current_state.lat,
+        long: current_state.long,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(StateMessage {
+        state: next_state,
+        message: atc_response,
+    })
+}
+
+pub fn parse_taxi_readback(
+    seed: &u32,
+    taxi_request: &String,
+    current_state: &State,
+) -> Result<StateMessage, ParseError> {
+    let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
+
+    let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
+
+    let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
+    let runway = match start_aerodrome.runways.get(runway_index) {
+        Some(runway) => runway,
+        None => {
+            return Err(ParseError::RunwayInvalidError {
+                aerodrome: start_aerodrome,
+                runway_index,
+            });
+        }
+    };
+
+    if !(taxi_request.contains("taxi holding point")
+        && taxi_request.contains("taxi to holding point"))
+        || !message_words.contains(&runway.holding_points[0].name.as_str())
+        || message_words[message_words.len() - 1]
+            != current_state.target_allocated_callsign.to_ascii_lowercase()
+    {
+        return Err(ParseError::MessageParseError {
+            message_found: taxi_request.to_string(),
+            message_expected: format!(
+                "taxi holding point {0} runway {1} QNH {2} {3}",
+                runway.holding_points[0].name,
+                runway.name,
+                start_aerodrome.metor_data.avg_pressure,
+                current_state.target_allocated_callsign.to_ascii_lowercase(),
             ),
         });
     }
@@ -321,9 +402,8 @@ pub fn parse_taxi_request(
     let atc_response = String::new();
 
     let next_state = State {
-        status: Status::Parked {
-            position: "A1".to_string(), // fix this
-            stage: ParkedToTakeoffStage::PreTaxiClearanceReadback,
+        status: Status::TaxiingToTakeoff {
+            stage: TaxiingToTakeoffStage::PreInfoGivenForDeparture,
         },
         lat: current_state.lat,
         long: current_state.long,

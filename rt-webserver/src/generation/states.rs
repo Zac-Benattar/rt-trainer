@@ -23,7 +23,6 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 
     State {
         status: Status::Parked {
-            position: "A1".to_string(),
             stage: ParkedToTakeoffStage::PreRadioCheck,
         },
         lat: start_aerodrome.lat,
@@ -50,7 +49,7 @@ pub fn generate_next_state(
     current_state: State,
 ) -> Result<StateMessage, ParseError> {
     match &current_state.status {
-        Status::Parked { position: _, stage } => {
+        Status::Parked { stage } => {
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
@@ -81,14 +80,13 @@ pub fn generate_next_state(
                 ParkedToTakeoffStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback
                     // Move to taxiing status
+                    let result = parse_taxi_readback(&seed, &radiocall, &current_state);
+
+                    return result;
                 }
             }
         }
-        Status::TaxiingToTakeoff {
-            holdpoint,
-            runway,
-            stage,
-        } => {
+        Status::TaxiingToTakeoff { stage } => {
             match stage {
                 TaxiingToTakeoffStage::PreReadyForDeparture => {
                     // Parse pretakeoff ready for departure

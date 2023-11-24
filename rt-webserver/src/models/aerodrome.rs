@@ -22,8 +22,14 @@ pub struct COMFrequency {
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct HoldingPoint {
+    pub name: String,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct Runway {
     pub name: String,
+    pub holding_points: Vec<HoldingPoint>,
 }
 
 #[derive(Deserialize, Serialize)]
