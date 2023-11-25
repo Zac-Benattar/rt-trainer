@@ -118,7 +118,8 @@ pub struct State {
 pub struct StateMessageSeed {
     pub state: State,
     pub message: String,
-    pub seed: u32,
+    pub scenario_seed: u32,
+    pub weather_seed: u16,
 }
 
 #[derive(Deserialize, Serialize)]

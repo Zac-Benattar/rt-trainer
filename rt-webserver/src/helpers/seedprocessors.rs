@@ -3,6 +3,10 @@ pub fn get_scenario_seed(whole_seed: u32) -> u32 {
 }
 
 pub fn get_weather_seed(whole_seed: u32) -> u32 {
+    let num_digits = count_n(whole_seed);
+    if num_digits < 3 {
+        return whole_seed;
+    }
     return cat_left(whole_seed, count_n(whole_seed) - 3);
 }
 

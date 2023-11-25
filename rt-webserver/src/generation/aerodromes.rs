@@ -28,7 +28,7 @@ pub fn get_destination_aerodrome(seed: u32) -> Aerodrome {
     }
 }
 
-pub fn get_metor_sample(seed: u32, metor_data: METORData) -> METORDataSample {
+pub fn get_metor_sample(seed: u16, metor_data: METORData) -> METORDataSample {
     let mut rng = SmallRng::seed_from_u64(seed as u64);
 
     let season = match seed % 4 {

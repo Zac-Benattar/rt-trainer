@@ -6,12 +6,12 @@ use crate::{
         state::{
             Emergency, ParkedToTakeoffStage, State, StateMessage, Status, TaxiingToTakeoffStage,
         },
-    },
+    }, helpers::seedprocessors::get_weather_seed,
 };
 
 use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome, get_metor_sample};
 
-pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -> String {
+pub fn shorten_callsign(scenario_seed: &u32, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
     if callsign.len() == 6 {
         let mut standard_reg_style: bool = true;
@@ -22,8 +22,8 @@ pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -
         }
 
         if standard_reg_style {
-            print!("{}", seed);
-            if seed % 3 == 0 {
+            print!("{}", scenario_seed);
+            if scenario_seed % 3 == 0 {
                 shortened_callsign.push_str(&aircraft_type);
                 shortened_callsign.push_str(" ");
                 shortened_callsign.push_str(&callsign[4..]);
@@ -139,7 +139,8 @@ pub fn parse_radio_check(
 }
 
 pub fn parse_departure_information_request(
-    seed: &u32,
+    scenario_seed: &u32,
+    weather_seed: &u16,
     departure_information_request: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
@@ -157,9 +158,9 @@ pub fn parse_departure_information_request(
         }
     }
 
-    let aerodrome: Aerodrome = get_start_aerodrome(*seed);
-    let metor_sample = get_metor_sample(*seed, aerodrome.metor_data.clone());
-    let runway_index: usize = (seed % (aerodrome.runways.len() as u32)) as usize;
+    let aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
+    let metor_sample = get_metor_sample(*weather_seed, aerodrome.metor_data.clone());
+    let runway_index: usize = (scenario_seed % (aerodrome.runways.len() as u32)) as usize;
     let runway = match aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
@@ -180,7 +181,7 @@ pub fn parse_departure_information_request(
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
     let atc_response = format!(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
-        shorten_callsign(seed, &current_state.aircraft_type, &current_state.callsign),
+        shorten_callsign(scenario_seed, &current_state.aircraft_type, &current_state.callsign),
         runway.name,
         metor_sample.wind_direction,
         metor_sample.wind_speed,
@@ -203,7 +204,7 @@ pub fn parse_departure_information_request(
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
         target_allocated_callsign: shorten_callsign(
-            seed,
+            scenario_seed,
             &current_state.aircraft_type,
             &current_state.target_allocated_callsign.to_owned(),
         ), // Replaced by ATSU when needed
@@ -221,7 +222,8 @@ pub fn parse_departure_information_request(
 }
 
 pub fn parse_departure_information_readback(
-    seed: &u32,
+    scenario_seed: &u32,
+    weather_seed: &u16,
     departure_information_readback: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
@@ -229,9 +231,9 @@ pub fn parse_departure_information_readback(
         .split_whitespace()
         .collect::<Vec<&str>>();
 
-    let aerodrome: Aerodrome = get_start_aerodrome(*seed);
-    let metor_sample = get_metor_sample(*seed, aerodrome.metor_data.clone());
-    let runway_index: usize = (seed % (aerodrome.runways.len() as u32)) as usize;
+    let aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
+    let metor_sample = get_metor_sample(*weather_seed, aerodrome.metor_data.clone());
+    let runway_index: usize = (scenario_seed % (aerodrome.runways.len() as u32)) as usize;
     let runway = match aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
@@ -291,17 +293,18 @@ pub fn parse_departure_information_readback(
 }
 
 pub fn parse_taxi_request(
-    seed: &u32,
+    scenario_seed: &u32,
+    weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
-    let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
-    let metor_sample = get_metor_sample(*seed, start_aerodrome.metor_data.clone());
-    let destination_aerodrome: Aerodrome = get_destination_aerodrome(*seed);
+    let start_aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
+    let metor_sample = get_metor_sample(*weather_seed, start_aerodrome.metor_data.clone());
+    let destination_aerodrome: Aerodrome = get_destination_aerodrome(*scenario_seed);
 
-    let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
+    let runway_index: usize = (scenario_seed % (start_aerodrome.runways.len() as u32)) as usize;
     let runway = match start_aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
@@ -365,16 +368,17 @@ pub fn parse_taxi_request(
 }
 
 pub fn parse_taxi_readback(
-    seed: &u32,
+    scenario_seed: &u32,
+    weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
-    let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
-    let metor_sample = get_metor_sample(*seed, start_aerodrome.metor_data.clone());
+    let start_aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
+    let metor_sample = get_metor_sample(*weather_seed, start_aerodrome.metor_data.clone());
 
-    let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
+    let runway_index: usize = (scenario_seed % (start_aerodrome.runways.len() as u32)) as usize;
     let runway = match start_aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
         None => {

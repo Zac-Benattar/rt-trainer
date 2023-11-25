@@ -44,7 +44,8 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 }
 
 pub fn generate_next_state(
-    seed: u32,
+    scenario_seed: u32,
+    weather_seed: u16,
     radiocall: String,
     current_state: State,
 ) -> Result<StateMessage, ParseError> {
@@ -53,24 +54,24 @@ pub fn generate_next_state(
             match stage {
                 ParkedToTakeoffStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
-                    return parse_radio_check(&seed, &radiocall, &current_state);
+                    return parse_radio_check(&scenario_seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
-                    return parse_departure_information_request(&seed, &radiocall, &current_state);
+                    return parse_departure_information_request(&scenario_seed, &weather_seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
-                    return parse_departure_information_readback(&seed, &radiocall, &current_state);
+                    return parse_departure_information_readback(&scenario_seed, &weather_seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request
-                    return parse_taxi_request(&seed, &radiocall, &current_state);
+                    return parse_taxi_request(&scenario_seed, &weather_seed, &radiocall, &current_state);
                 }
                 ParkedToTakeoffStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback
                     // Move to taxiing status
-                    return parse_taxi_readback(&seed, &radiocall, &current_state);
+                    return parse_taxi_readback(&scenario_seed, &weather_seed, &radiocall, &current_state);
                 }
             }
         }

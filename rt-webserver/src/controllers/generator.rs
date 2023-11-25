@@ -40,9 +40,10 @@ pub async fn get_next_state(
 
     let usercall = process_string(&state_message_seed.message);
     let state_data = state_message_seed.state;
-    let seed = state_message_seed.seed;
+    let scenario_seed = state_message_seed.scenario_seed;
+    let weather_seed = state_message_seed.weather_seed;
 
-    let result = generate_next_state(seed, usercall, state_data);
+    let result = generate_next_state(scenario_seed, weather_seed, usercall, state_data);
 
     let next_state_and_message = match result {
         Ok(state) => state,
