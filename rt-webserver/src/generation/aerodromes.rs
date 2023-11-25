@@ -63,7 +63,7 @@ pub fn get_metor_sample(seed: u32, metor_data: METORData) -> METORDataSample {
         wind_speed: wind_speed as u16,
         pressure: pressure as u32,
         temp: temp as i8,
-        dewpoint: (temp * 0.95) as i8 // this needs improving
+        dewpoint: ((temp * 0.95) - 1.2) as i8 // this needs improving
     }
 }
 
