@@ -44,20 +44,25 @@ pub struct Aerodrome {
     pub metor_data: METORData,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct METORData {
+    pub avg_wind_direction: f32,
+    pub mean_wind_speed: f32,
+    pub std_wind_speed: f32,
+    pub mean_pressure: f32,
+    pub std_pressure: f32,
+    pub mean_temp: f32,
+    pub std_temp: f32,
+    pub mean_dewpoint: f32,
+    pub std_dewpoint: f32,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct METORDataSample {
     pub wind_direction: u16,
-    pub avg_wind_speed: u8,
-    pub min_wind_speed: u8,
-    pub max_wind_speed: u8,
-    pub avg_pressure: u16,
-    pub min_pressure: u16,
-    pub max_pressure: u16,
-    pub avg_temp: i8,
-    pub min_temp: i8,
-    pub max_temp: i8,
-    pub avg_dewpoint: i8,
-    pub min_dewpoint: i8,
-    pub max_dewpoint: i8,
+    pub wind_speed: u16,
+    pub pressure: u32,
+    pub temp: i8,
+    pub dewpoint: i8,
 }
 

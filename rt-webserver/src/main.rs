@@ -5,11 +5,11 @@ use axum::{
 };
 
 use anyhow::Context;
-// use axum_macros::debug_handler; -> use with #[debug_handler]
+// use with #[debug_handler]
+use axum_macros::debug_handler; 
 use sqlx::postgres::PgPoolOptions;
 use std::fs;
 use std::net::SocketAddr;
-use titlecase::titlecase;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 

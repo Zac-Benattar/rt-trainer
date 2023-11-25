@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome};
+use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome, get_metor_sample};
 
 pub fn shorten_callsign(seed: &u32, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
@@ -158,6 +158,7 @@ pub fn parse_departure_information_request(
     }
 
     let aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let metor_sample = get_metor_sample(*seed, aerodrome.metor_data.clone());
     let runway_index: usize = (seed % (aerodrome.runways.len() as u32)) as usize;
     let runway = match aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
@@ -181,11 +182,11 @@ pub fn parse_departure_information_request(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
         shorten_callsign(seed, &current_state.aircraft_type, &current_state.callsign),
         runway.name,
-        aerodrome.metor_data.wind_direction,
-        aerodrome.metor_data.avg_wind_speed,
-        aerodrome.metor_data.avg_pressure,
-        aerodrome.metor_data.avg_temp,
-        aerodrome.metor_data.avg_dewpoint
+        metor_sample.wind_direction,
+        metor_sample.wind_speed,
+        metor_sample.pressure,
+        metor_sample.temp,
+        metor_sample.dewpoint,
     );
 
     let next_state = State {
@@ -229,6 +230,7 @@ pub fn parse_departure_information_readback(
         .collect::<Vec<&str>>();
 
     let aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let metor_sample = get_metor_sample(*seed, aerodrome.metor_data.clone());
     let runway_index: usize = (seed % (aerodrome.runways.len() as u32)) as usize;
     let runway = match aerodrome.runways.get(runway_index) {
         Some(runway) => runway,
@@ -241,7 +243,7 @@ pub fn parse_departure_information_readback(
     };
 
     let runway_string = format!("runway {}", runway.name);
-    let pressure_string = format!("qnh {}", aerodrome.metor_data.avg_pressure);
+    let pressure_string = format!("qnh {}", metor_sample.pressure,);
     if !departure_information_readback.contains(runway_string.as_str())
         || !departure_information_readback.contains(pressure_string.as_str())
         || message_words[message_words.len() - 1]
@@ -252,7 +254,7 @@ pub fn parse_departure_information_readback(
             message_expected: format!(
                 "runway {0} qnh {1} {2}",
                 runway.name,
-                aerodrome.metor_data.avg_pressure,
+                metor_sample.pressure,
                 current_state.target_allocated_callsign.to_ascii_lowercase()
             ),
         });
@@ -296,6 +298,7 @@ pub fn parse_taxi_request(
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let metor_sample = get_metor_sample(*seed, start_aerodrome.metor_data.clone());
     let destination_aerodrome: Aerodrome = get_destination_aerodrome(*seed);
 
     let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
@@ -331,7 +334,7 @@ pub fn parse_taxi_request(
         current_state.target_allocated_callsign,
         runway.holding_points[0].name,
         runway.name,
-        start_aerodrome.metor_data.avg_pressure,
+        metor_sample.pressure,
     );
 
     let next_state = State {
@@ -369,6 +372,7 @@ pub fn parse_taxi_readback(
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     let start_aerodrome: Aerodrome = get_start_aerodrome(*seed);
+    let metor_sample = get_metor_sample(*seed, start_aerodrome.metor_data.clone());
 
     let runway_index: usize = (seed % (start_aerodrome.runways.len() as u32)) as usize;
     let runway = match start_aerodrome.runways.get(runway_index) {
@@ -393,7 +397,7 @@ pub fn parse_taxi_readback(
                 "taxi holding point {0} runway {1} QNH {2} {3}",
                 runway.holding_points[0].name,
                 runway.name,
-                start_aerodrome.metor_data.avg_pressure,
+                metor_sample.pressure,
                 current_state.target_allocated_callsign.to_ascii_lowercase(),
             ),
         });
