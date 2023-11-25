@@ -6,7 +6,7 @@ use crate::{
         state::{
             Emergency, ParkedToTakeoffStage, State, StateMessage, Status, TaxiingToTakeoffStage,
         },
-    }, helpers::seedprocessors::get_weather_seed,
+    }
 };
 
 use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome, get_metor_sample};

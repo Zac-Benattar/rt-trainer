@@ -8,7 +8,8 @@ use crate::models::state::*;
 
 #[derive(Deserialize, Serialize)]
 pub struct ScenarioGenerationParameters {
-    pub seed: u32,
+    pub scenario_seed: u32,
+    pub weather_seed: u16,
     pub prefix: String,
     pub user_callsign: String,
     pub radio_frequency: f32,
@@ -17,7 +18,7 @@ pub struct ScenarioGenerationParameters {
 }
 
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
-    let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.seed);
+    let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.scenario_seed);
     let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
     // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
