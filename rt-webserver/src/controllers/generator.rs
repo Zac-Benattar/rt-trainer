@@ -6,7 +6,9 @@ use axum::Json;
 use crate::generation::states::{self, generate_initial_state, generate_next_state};
 // Text formatting
 use crate::errors::{CustomError, ParseError};
-use crate::helpers::jsoncheckers::{invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json};
+use crate::helpers::jsoncheckers::{
+    invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json,
+};
 use crate::helpers::preprocessors::process_string;
 use crate::models::state::{State, StateMessage, StateMessageSeed};
 

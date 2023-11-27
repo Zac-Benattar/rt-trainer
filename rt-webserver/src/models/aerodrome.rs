@@ -65,4 +65,3 @@ pub struct METORDataSample {
     pub temp: i8,
     pub dewpoint: i8,
 }
-

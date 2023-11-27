@@ -63,20 +63,40 @@ pub fn generate_next_state(
                 }
                 ParkedToTakeoffStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
-                    return parse_departure_information_request(&scenario_seed, &weather_seed, &radiocall, &current_state);
+                    return parse_departure_information_request(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &current_state,
+                    );
                 }
                 ParkedToTakeoffStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
-                    return parse_departure_information_readback(&scenario_seed, &weather_seed, &radiocall, &current_state);
+                    return parse_departure_information_readback(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &current_state,
+                    );
                 }
                 ParkedToTakeoffStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request
-                    return parse_taxi_request(&scenario_seed, &weather_seed, &radiocall, &current_state);
+                    return parse_taxi_request(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &current_state,
+                    );
                 }
                 ParkedToTakeoffStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback
                     // Move to taxiing status
-                    return parse_taxi_readback(&scenario_seed, &weather_seed, &radiocall, &current_state);
+                    return parse_taxi_readback(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &current_state,
+                    );
                 }
             }
         }

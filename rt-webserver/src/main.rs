@@ -6,7 +6,7 @@ use axum::{
 
 use anyhow::Context;
 // use with #[debug_handler]
-// use axum_macros::debug_handler; 
+// use axum_macros::debug_handler;
 use sqlx::postgres::PgPoolOptions;
 use std::fs;
 use std::net::SocketAddr;

@@ -9,7 +9,10 @@ use crate::{
     },
 };
 
-use super::{aerodromes::{get_metor_sample, get_start_and_end_aerodromes}, routes::get_route};
+use super::{
+    aerodromes::{get_metor_sample, get_start_and_end_aerodromes},
+    routes::get_route,
+};
 
 pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
@@ -428,7 +431,7 @@ pub fn parse_taxi_readback(
                     seed: scenario_seed.to_owned() as u64,
                 });
             }
-    };
+        };
 
     let metor_sample =
         get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
@@ -462,6 +465,12 @@ pub fn parse_taxi_readback(
             ),
         });
     }
+
+    get_route(
+        *scenario_seed,
+        &start_and_end_aerodrome.0,
+        &start_and_end_aerodrome.1,
+    );
 
     let atc_response = String::new();
 
