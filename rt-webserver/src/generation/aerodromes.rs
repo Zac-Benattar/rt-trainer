@@ -5,6 +5,8 @@ use rand_distr::{Normal, Distribution};
 use rand::SeedableRng;
 use rand::rngs::SmallRng;
 
+use super::routes::haversine_distance;
+
 enum Season {
     Spring,
     Summer,
@@ -12,19 +14,45 @@ enum Season {
     Winter,
 }
 
-pub fn get_start_aerodrome(seed: u32) -> Aerodrome {
-    if seed % 2 == 0 {
-        get_large_aerodrome(seed)
-    } else {
-        get_small_aerodrome(seed)
-    }
-}
+pub fn get_start_and_end_aerodrome(seed: u64, small_aerodromes: &[Aerodrome], large_aerodromes: &[Aerodrome]) -> Option<(Aerodrome, Aerodrome)> {
+    let mut rng = rand::rngs::SmallRng::seed_from_u64(seed);
 
-pub fn get_destination_aerodrome(seed: u32) -> Aerodrome {
-    if seed % 2 == 0 {
-        get_small_aerodrome(seed)
-    } else {
-        get_large_aerodrome(seed)
+    let start: Option<Aerodrome> = None;
+    let destination: Option<Aerodrome> = None;
+
+    let destination = {
+        if seed % 2 == 0 {
+            get_small_aerodrome(seed)
+        } else {
+            get_large_aerodrome(seed)
+        }
+    };
+
+    // Attempt to find valid start and destination waypoints within 300 nautical miles
+    for _ in 0..1000 {
+        if seed % 2 == 0 {
+            start = large_aerodromes.choose(&mut rng);
+            destination = small_aerodromes.choose(&mut rng);
+        } else {
+            start = small_aerodromes.choose(&mut rng);
+            destination = large_aerodromes.choose(&mut rng);
+        }
+
+        let distance = haversine_distance(
+            start.unwrap().lat,
+            start.unwrap().long,
+            destination.unwrap().lat,
+            destination.unwrap().long,
+        );
+
+        if distance <= 300.0 {
+            break;
+        }
+    }
+
+    match (start, destination) {
+        (Some(start), Some(destination)) => Some((start.clone(), destination.clone())),
+        _ => None,
     }
 }
 
@@ -68,21 +96,21 @@ pub fn get_metor_sample(seed: u16, metor_data: METORData) -> METORDataSample {
 }
 
 // Eventually the data should be stored in a database
-pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
+pub fn get_large_aerodrome(seed: u64) -> Aerodrome {
     let atis = COMFrequency {
         frequency_type: COMFrequencyType::ATIS,
         frequency: 136.030,
-        callsign: "Birstdgham Info".to_string(),
+        callsign: "Birmingham Info".to_string(),
     };
     let tower = COMFrequency {
         frequency_type: COMFrequencyType::Tower,
         frequency: 118.305,
-        callsign: "Birstdgham Tower".to_string(),
+        callsign: "Birmingham Tower".to_string(),
     };
     let ground = COMFrequency {
         frequency_type: COMFrequencyType::Ground,
         frequency: 121.805,
-        callsign: "Birstdgham Ground".to_string(),
+        callsign: "Birmingham Ground".to_string(),
     };
     let runways = vec![
         Runway {
@@ -112,7 +140,7 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
     };
 
     Aerodrome {
-        name: "Birstdgham".to_string(),
+        name: "Birmingham".to_string(),
         icao: "EGBB".to_string(),
         com_frequencies: vec![atis, tower, ground],
         runways: runways,
@@ -124,7 +152,7 @@ pub fn get_large_aerodrome(seed: u32) -> Aerodrome {
 }
 
 // Eventually the data should be stored in a database
-pub fn get_small_aerodrome(seed: u32) -> Aerodrome {
+pub fn get_small_aerodrome(seed: u64) -> Aerodrome {
     let afis = COMFrequency {
         frequency_type: COMFrequencyType::AFIS,
         frequency: 124.030,
