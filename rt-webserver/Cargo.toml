@@ -3,11 +3,9 @@ name = "rt-webserver"
 version = "0.0.1"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-axum = "0.6.20"
-axum-macros = "0.3.8"
+axum = "0.7.1"
+axum-macros = "0.4.0"
 tokio = { version = "1.33", features = ["full"] }
 serde = "1.0.190"
 tracing = "0.1.40"
@@ -16,7 +14,7 @@ tracing-subscriber = { version = "0.3.17", features = ["env-filter"]}
 sqlx = { version = "0.7.2", features = ["runtime-tokio-native-tls", "json", "postgres"] }
 anyhow = "1.0.75"
 serde_json = "1.0.108"
-tower-http = { version = "0.4.4", features = ["trace"] }
+tower-http = { version = "0.5.0", features = ["trace"] }
 
 titlecase = "2.2.1"
 fancy-regex = "0.12.0"

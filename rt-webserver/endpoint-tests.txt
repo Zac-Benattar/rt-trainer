@@ -1,5 +1,5 @@
 initiate scenario:
-http://localhost:3000/initiatescenario
+http://127.0.0.1:3000/initiatescenario
 {
   "scenario_seed": 1,
   "weather_seed": 1,
@@ -10,7 +10,7 @@ http://localhost:3000/initiatescenario
 }
 
 radio check:
-http://localhost:3000/nextstate
+http://127.0.0.1:3000/nextstate
 {
   "state" :{
   "status": {
@@ -41,7 +41,7 @@ http://localhost:3000/nextstate
 }
 
 request departure information:
-http://localhost:3000/nextstate
+http://127.0.0.1:3000/nextstate
 {
   "state" :{
   "status": {
@@ -72,7 +72,7 @@ http://localhost:3000/nextstate
 }
 
 readback departure information:
-http://localhost:3000/nextstate
+http://127.0.0.1:3000/nextstate
 {
   "state" :{
   "status": {
@@ -103,7 +103,7 @@ http://localhost:3000/nextstate
 }
 
 readback taxi clearance:
-http://localhost:3000/nextstate
+http://127.0.0.1:3000/nextstate
 {
   "state" :{
   "status": {
