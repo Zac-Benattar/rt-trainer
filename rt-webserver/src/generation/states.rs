@@ -1,14 +1,15 @@
 use serde::{Deserialize, Serialize};
 
 use crate::errors::ParseError;
-use crate::generation::aerodromes::get_start_aerodrome;
 use crate::generation::parsers::*;
 use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
 
+use super::aerodromes::get_start_and_end_aerodromes;
+
 #[derive(Deserialize, Serialize)]
 pub struct ScenarioGenerationParameters {
-    pub scenario_seed: u32,
+    pub scenario_seed: u64,
     pub weather_seed: u16,
     pub prefix: String,
     pub user_callsign: String,
@@ -18,7 +19,10 @@ pub struct ScenarioGenerationParameters {
 }
 
 pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
-    let start_aerodrome: Aerodrome = get_start_aerodrome(parameters.scenario_seed);
+    let start_aerodrome: Aerodrome = match get_start_and_end_aerodromes(parameters.scenario_seed) {
+        Some((start, _)) => start,
+        None => panic!("Could not find start aerodrome"),
+    };
     let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
     // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
@@ -45,7 +49,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 }
 
 pub fn generate_next_state(
-    scenario_seed: u32,
+    scenario_seed: u64,
     weather_seed: u16,
     radiocall: String,
     current_state: State,

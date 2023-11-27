@@ -1,10 +1,14 @@
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rand::seq::SliceRandom;
 
+use crate::models::aerodrome::Aerodrome;
+
+
+#[derive(Clone)]
 struct Waypoint {
-    name: String,
-    latitude: f64,
-    longitude: f64,
+    pub name: String,
+    pub lat: f64,
+    pub long: f64,
 }
 
 pub fn haversine_distance(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
@@ -28,19 +32,44 @@ fn generate_route(seed: u64, start: &Waypoint, destination: &Waypoint) -> Vec<Wa
     let waypoints = vec![
         Waypoint {
             name: "WAYPT1".to_string(),
-            latitude: 51.1234,
-            longitude: -0.5678,
+            lat: 51.1234,
+            long: -0.5678,
         },
         Waypoint {
             name: "WAYPT2".to_string(),
-            latitude: 51.4321,
-            longitude: -0.9876,
+            lat: 51.4321,
+            long: -0.9876,
+        },
+        Waypoint {
+            name: "WAYPT3".to_string(),
+            lat: 51.8765,
+            long: -0.1234,
+        },
+        Waypoint {
+            name: "WAYPT4".to_string(),
+            lat: 51.6789,
+            long: -0.4321,
+        },
+        Waypoint {
+            name: "WAYPT5".to_string(),
+            lat: 51.2345,
+            long: -0.8765,
+        },
+        Waypoint {
+            name: "WAYPT6".to_string(),
+            lat: 51.9876,
+            long: -0.6789,
+        },
+        Waypoint {
+            name: "WAYPT7".to_string(),
+            lat: 51.3456,
+            long: -0.2345,
         },
         // Add more waypoints as needed
     ];
 
     // Shuffle the waypoints to select a random subset
-    let mut shuffled_waypoints = waypoints.choose_multiple(&mut rng, 5).cloned().collect::<Vec<_>>();
+    let shuffled_waypoints = waypoints.choose_multiple(&mut rng, 5).cloned().collect::<Vec<_>>();
 
     // Initialize variables for route generation
     let mut route = vec![start.clone()];
@@ -49,10 +78,10 @@ fn generate_route(seed: u64, start: &Waypoint, destination: &Waypoint) -> Vec<Wa
     for waypoint in shuffled_waypoints {
         // Calculate the distance between the last waypoint and the new one
         let distance = haversine_distance(
-            route.last().unwrap().latitude,
-            route.last().unwrap().longitude,
-            waypoint.latitude,
-            waypoint.longitude,
+            route.last().unwrap().lat,
+            route.last().unwrap().long,
+            waypoint.lat,
+            waypoint.long,
         );
 
         // Check if adding the new waypoint would exceed the distance or waypoint limit
@@ -71,23 +100,23 @@ fn generate_route(seed: u64, start: &Waypoint, destination: &Waypoint) -> Vec<Wa
     route
 }
 
-pub fn get_route(scenario_seed: u64, start_aerodrome: Aerodrome, destination_aerodrome: Aerodrome) {
+pub fn get_route(scenario_seed: u64, start_aerodrome: &Aerodrome, destination_aerodrome: &Aerodrome) {
     let start = Waypoint {
-        name: start_aerodrome.icao_code,
-        latitude: start_aerodrome.lat,
-        longitude: start_aerodrome.long,
+        name: (&start_aerodrome.icao).to_owned(),
+        lat: start_aerodrome.lat,
+        long: start_aerodrome.long,
     };
 
     let destination = Waypoint {
-        name: destination_aerodrome.icao_code,
-        latitude: destination_aerodrome.lat,
-        longitude: destination_aerodrome.long,
+        name: (&destination_aerodrome.icao).to_owned(),
+        lat: destination_aerodrome.lat,
+        long: destination_aerodrome.long,
     };
 
-    let route = generate_route(seed, &start, &destination);
+    let route = generate_route(scenario_seed, &start, &destination);
 
     println!("Generated Route:");
     for waypoint in &route {
-        println!("{}: ({}, {})", waypoint.name, waypoint.latitude, waypoint.longitude);
+        println!("{}: ({}, {})", waypoint.name, waypoint.lat, waypoint.long);
     }
 }

@@ -6,12 +6,12 @@ use crate::{
         state::{
             Emergency, ParkedToTakeoffStage, State, StateMessage, Status, TaxiingToTakeoffStage,
         },
-    }
+    },
 };
 
-use super::aerodromes::{get_destination_aerodrome, get_start_aerodrome, get_metor_sample};
+use super::{aerodromes::{get_metor_sample, get_start_and_end_aerodromes}, routes::get_route};
 
-pub fn shorten_callsign(scenario_seed: &u32, aircraft_type: &String, callsign: &String) -> String {
+pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &String) -> String {
     let mut shortened_callsign = String::new();
     if callsign.len() == 6 {
         let mut standard_reg_style: bool = true;
@@ -44,7 +44,7 @@ pub fn shorten_callsign(scenario_seed: &u32, aircraft_type: &String, callsign: &
 }
 
 pub fn parse_radio_check(
-    seed: &u32,
+    seed: &u64,
     radio_check: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
@@ -139,7 +139,7 @@ pub fn parse_radio_check(
 }
 
 pub fn parse_departure_information_request(
-    scenario_seed: &u32,
+    scenario_seed: &u64,
     weather_seed: &u16,
     departure_information_request: &String,
     current_state: &State,
@@ -158,14 +158,26 @@ pub fn parse_departure_information_request(
         }
     }
 
-    let aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
-    let metor_sample = get_metor_sample(*weather_seed, aerodrome.metor_data.clone());
-    let runway_index: usize = (scenario_seed % (aerodrome.runways.len() as u32)) as usize;
-    let runway = match aerodrome.runways.get(runway_index) {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(ParseError::GenerationError {
+                    details: "Aerodromes not generated".to_string(),
+                    seed: scenario_seed.to_owned() as u64,
+                });
+            }
+        };
+
+    let metor_sample =
+        get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
+    let runway_index: usize =
+        (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
+    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Err(ParseError::RunwayInvalidError {
-                aerodrome,
+                aerodrome: start_and_end_aerodrome.0,
                 runway_index,
             });
         }
@@ -181,7 +193,11 @@ pub fn parse_departure_information_request(
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
     let atc_response = format!(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
-        shorten_callsign(scenario_seed, &current_state.aircraft_type, &current_state.callsign),
+        shorten_callsign(
+            scenario_seed,
+            &current_state.aircraft_type,
+            &current_state.callsign
+        ),
         runway.name,
         metor_sample.wind_direction,
         metor_sample.wind_speed,
@@ -222,7 +238,7 @@ pub fn parse_departure_information_request(
 }
 
 pub fn parse_departure_information_readback(
-    scenario_seed: &u32,
+    scenario_seed: &u64,
     weather_seed: &u16,
     departure_information_readback: &String,
     current_state: &State,
@@ -231,14 +247,26 @@ pub fn parse_departure_information_readback(
         .split_whitespace()
         .collect::<Vec<&str>>();
 
-    let aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
-    let metor_sample = get_metor_sample(*weather_seed, aerodrome.metor_data.clone());
-    let runway_index: usize = (scenario_seed % (aerodrome.runways.len() as u32)) as usize;
-    let runway = match aerodrome.runways.get(runway_index) {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(ParseError::GenerationError {
+                    details: "Aerodromes not generated".to_string(),
+                    seed: scenario_seed.to_owned() as u64,
+                });
+            }
+        };
+
+    let metor_sample =
+        get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
+    let runway_index: usize =
+        (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
+    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Err(ParseError::RunwayInvalidError {
-                aerodrome,
+                aerodrome: start_and_end_aerodrome.0,
                 runway_index,
             });
         }
@@ -293,23 +321,33 @@ pub fn parse_departure_information_readback(
 }
 
 pub fn parse_taxi_request(
-    scenario_seed: &u32,
+    scenario_seed: &u64,
     weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
-    let start_aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
-    let metor_sample = get_metor_sample(*weather_seed, start_aerodrome.metor_data.clone());
-    let destination_aerodrome: Aerodrome = get_destination_aerodrome(*scenario_seed);
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(ParseError::GenerationError {
+                    details: "Aerodromes not generated".to_string(),
+                    seed: scenario_seed.to_owned() as u64,
+                });
+            }
+        };
+    let metor_sample =
+        get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
 
-    let runway_index: usize = (scenario_seed % (start_aerodrome.runways.len() as u32)) as usize;
-    let runway = match start_aerodrome.runways.get(runway_index) {
+    let runway_index: usize =
+        (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
+    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_aerodrome,
+                aerodrome: start_and_end_aerodrome.0,
                 runway_index,
             });
         }
@@ -317,8 +355,14 @@ pub fn parse_taxi_request(
 
     if message_words[0] != current_state.target_allocated_callsign.to_ascii_lowercase()
         || message_words[1] != current_state.aircraft_type.to_ascii_lowercase()
-        || message_words.contains(&start_aerodrome.start_point.to_ascii_lowercase().as_str())
-        || message_words.contains(&destination_aerodrome.name.to_ascii_lowercase().as_str())
+        || message_words.contains(
+            &start_and_end_aerodrome
+                .0
+                .start_point
+                .to_ascii_lowercase()
+                .as_str(),
+        )
+        || message_words.contains(&start_and_end_aerodrome.1.name.to_ascii_lowercase().as_str())
     {
         return Err(ParseError::MessageParseError {
             message_found: taxi_request.to_string(),
@@ -326,8 +370,8 @@ pub fn parse_taxi_request(
                 "{0} {1} at {2} request taxi VFR to {3}",
                 current_state.target_allocated_callsign.to_ascii_lowercase(),
                 current_state.aircraft_type.to_ascii_lowercase(),
-                start_aerodrome.start_point.to_ascii_lowercase(),
-                destination_aerodrome.name.to_ascii_lowercase(),
+                start_and_end_aerodrome.0.start_point.to_ascii_lowercase(),
+                start_and_end_aerodrome.1.name.to_ascii_lowercase(),
             ),
         });
     }
@@ -368,37 +412,49 @@ pub fn parse_taxi_request(
 }
 
 pub fn parse_taxi_readback(
-    scenario_seed: &u32,
+    scenario_seed: &u64,
     weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<StateMessage, ParseError> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
-    let start_aerodrome: Aerodrome = get_start_aerodrome(*scenario_seed);
-    let metor_sample = get_metor_sample(*weather_seed, start_aerodrome.metor_data.clone());
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(ParseError::GenerationError {
+                    details: "Aerodromes not generated".to_string(),
+                    seed: scenario_seed.to_owned() as u64,
+                });
+            }
+    };
 
-    let runway_index: usize = (scenario_seed % (start_aerodrome.runways.len() as u32)) as usize;
-    let runway = match start_aerodrome.runways.get(runway_index) {
+    let metor_sample =
+        get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
+
+    let runway_index: usize =
+        (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
+    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_aerodrome,
+                aerodrome: start_and_end_aerodrome.0,
                 runway_index,
             });
         }
     };
 
     if !(taxi_request.contains("taxi holding point")
-        && taxi_request.contains("taxi to holding point"))
-        || !message_words.contains(&runway.holding_points[0].name.as_str())
+        || taxi_request.contains("taxi to holding point"))
+        || !message_words.contains(&runway.holding_points[0].name.to_ascii_lowercase().as_str())
         || message_words[message_words.len() - 1]
             != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
         return Err(ParseError::MessageParseError {
             message_found: taxi_request.to_string(),
             message_expected: format!(
-                "taxi holding point {0} runway {1} QNH {2} {3}",
+                "taxi holding point {0} runway {1} qnh {2} {3}",
                 runway.holding_points[0].name,
                 runway.name,
                 metor_sample.pressure,

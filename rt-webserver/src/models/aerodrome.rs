@@ -21,25 +21,25 @@ pub struct COMFrequency {
     pub callsign: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct HoldingPoint {
     pub name: String,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Runway {
     pub name: String,
     pub holding_points: Vec<HoldingPoint>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Aerodrome {
     pub name: String,
     pub icao: String,
     pub com_frequencies: Vec<COMFrequency>,
     pub runways: Vec<Runway>,
-    pub lat: f32,
-    pub long: f32,
+    pub lat: f64,
+    pub long: f64,
     pub start_point: String,
     pub metor_data: METORData,
 }

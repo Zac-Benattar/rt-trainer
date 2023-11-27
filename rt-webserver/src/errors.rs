@@ -17,6 +17,10 @@ pub enum CustomError {
 }
 
 pub enum ParseError {
+    GenerationError {
+        details: String,
+        seed: u64,
+    },
     InvalidJSONError,
     FrequencyParseError {
         frequency_found: String,
@@ -56,6 +60,9 @@ pub enum ParseError {
 impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let string_version = match self {
+            Self::GenerationError { details, seed } => {
+                format!("Generation Error {}, seed: {}", details, seed)
+            }
             Self::InvalidJSONError => "Invalid JSON Error".to_owned(),
             Self::FrequencyParseError {
                 frequency_found,
@@ -120,6 +127,10 @@ impl fmt::Display for ParseError {
 impl IntoResponse for ParseError {
     fn into_response(self) -> axum::response::Response {
         let (status, error_message) = match self {
+            Self::GenerationError { details, seed } => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Generation Error {}, seed: {}", details, seed),
+            ),
             Self::InvalidJSONError => (
                 StatusCode::EXPECTATION_FAILED,
                 "Invalid JSON Error".to_string(),

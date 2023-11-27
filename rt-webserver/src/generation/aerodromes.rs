@@ -1,9 +1,10 @@
 use crate::models::aerodrome::{
     Aerodrome, COMFrequency, COMFrequencyType, HoldingPoint, METORData, METORDataSample, Runway,
 };
-use rand_distr::{Normal, Distribution};
-use rand::SeedableRng;
 use rand::rngs::SmallRng;
+use rand::seq::SliceRandom;
+use rand::SeedableRng;
+use rand_distr::{Distribution, Normal};
 
 use super::routes::haversine_distance;
 
@@ -14,19 +15,45 @@ enum Season {
     Winter,
 }
 
-pub fn get_start_and_end_aerodrome(seed: u64, small_aerodromes: &[Aerodrome], large_aerodromes: &[Aerodrome]) -> Option<(Aerodrome, Aerodrome)> {
+pub fn get_start_and_end_aerodromes(seed: u64) -> Option<(Aerodrome, Aerodrome)> {
+    let large_aerodromes = vec![
+        get_large_aerodrome(1),
+        get_large_aerodrome(2),
+        get_large_aerodrome(3),
+        get_large_aerodrome(4),
+        get_large_aerodrome(5),
+        get_large_aerodrome(6),
+        get_large_aerodrome(7),
+        get_large_aerodrome(8),
+        get_large_aerodrome(9),
+        get_large_aerodrome(10),
+    ];
+
+    let small_aerodromes = vec![
+        get_small_aerodrome(1),
+        get_small_aerodrome(2),
+        get_small_aerodrome(3),
+        get_small_aerodrome(4),
+        get_small_aerodrome(5),
+        get_small_aerodrome(6),
+        get_small_aerodrome(7),
+        get_small_aerodrome(8),
+        get_small_aerodrome(9),
+        get_small_aerodrome(10),
+    ];
+
+    generate_start_and_end_aerodromes(seed, &small_aerodromes, &large_aerodromes)
+}
+
+fn generate_start_and_end_aerodromes(
+    seed: u64,
+    small_aerodromes: &[Aerodrome],
+    large_aerodromes: &[Aerodrome],
+) -> Option<(Aerodrome, Aerodrome)> {
     let mut rng = rand::rngs::SmallRng::seed_from_u64(seed);
 
-    let start: Option<Aerodrome> = None;
-    let destination: Option<Aerodrome> = None;
-
-    let destination = {
-        if seed % 2 == 0 {
-            get_small_aerodrome(seed)
-        } else {
-            get_large_aerodrome(seed)
-        }
-    };
+    let mut start: Option<&Aerodrome> = None;
+    let mut destination: Option<&Aerodrome> = None;
 
     // Attempt to find valid start and destination waypoints within 300 nautical miles
     for _ in 0..1000 {
@@ -80,7 +107,8 @@ pub fn get_metor_sample(seed: u16, metor_data: METORData) -> METORDataSample {
     let temp_normal = Normal::new(mean_temp, metor_data.std_temp).unwrap();
     let temp = temp_normal.sample(&mut rng);
 
-    let wind_speed_normal = Normal::new(metor_data.mean_wind_speed, metor_data.std_wind_speed).unwrap();
+    let wind_speed_normal =
+        Normal::new(metor_data.mean_wind_speed, metor_data.std_wind_speed).unwrap();
     let wind_speed = wind_speed_normal.sample(&mut rng);
 
     let pressure_normal = Normal::new(metor_data.mean_pressure, metor_data.std_temp).unwrap();
@@ -91,8 +119,8 @@ pub fn get_metor_sample(seed: u16, metor_data: METORData) -> METORDataSample {
         wind_speed: wind_speed as u16,
         pressure: pressure as u32,
         temp: temp as i8,
-        dewpoint: ((temp * 0.95) - 1.2) as i8 // this needs improving
-    }
+        dewpoint: ((temp * 0.95) - 1.2) as i8, // this needs improving
+    };
 }
 
 // Eventually the data should be stored in a database

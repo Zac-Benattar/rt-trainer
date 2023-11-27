@@ -108,8 +108,8 @@ pub struct State {
     pub current_target: COMFrequency,
     pub current_radio_frequency: f32,
     pub current_transponder_frequency: u16,
-    pub lat: f32,
-    pub long: f32,
+    pub lat: f64,
+    pub long: f64,
     pub emergency: Emergency,
     pub aircraft_type: String,
 }
@@ -118,7 +118,7 @@ pub struct State {
 pub struct StateMessageSeed {
     pub state: State,
     pub message: String,
-    pub scenario_seed: u32,
+    pub scenario_seed: u64,
     pub weather_seed: u16,
 }
 
