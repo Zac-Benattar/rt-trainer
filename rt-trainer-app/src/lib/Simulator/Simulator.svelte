@@ -9,6 +9,9 @@
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import type { Mistake, StateMessage, StateMessageSeeds } from '$lib/lib/States';
+	import { onMount } from 'svelte';
+
+	export let state: StateMessage | undefined;
 
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
@@ -61,41 +64,47 @@
 		}
 	}
 
-	function splitAndPadNumber(input: number): [string, string] {
-		// Convert the number to a string
-		const numberString = input.toString();
-
-		// Calculate the length of each half
-		const halfLength = Math.ceil(numberString.length / 2);
-
-		// Pad the first half with zeros if needed
-		const firstHalf = numberString.padEnd(halfLength, '0').slice(0, halfLength);
-
-		// Pad the second half with zeros if needed
-		const secondHalf = numberString.slice(halfLength).padEnd(halfLength, '0');
-
-		return [firstHalf, secondHalf];
+	async function handleSubmit() {
+		// Check state matches expected state
+		// Send message to server
+		let newStateMessage = await getNextState();
+		if (newStateMessage === undefined) {
+		} else {
+			messageOutputMessage = newStateMessage.message;
+		}
+		// Get response from server
+		// Update components with new state
 	}
 
-	function simpleHash(str: string) {
-		let hash = 0;
+	const handleVoiceInputToggle = () => {
+		voiceInput = !voiceInput;
+		updateKneeboardOffset();
+	};
 
-		if (str.length === 0) {
-			return hash;
-		}
+	const handleAudioMessagesToggle = () => {
+		audioMessages = !audioMessages;
+		updateKneeboardOffset();
+	};
 
-		for (let i = 0; i < str.length; i++) {
-			const char = str.charCodeAt(i);
-			hash = (hash << 5) - hash + char;
-			// The above line is a simple hash function: hash * 31 + char
-		}
-
-		return hash;
-	}
+	onMount(async () => {
+		// Get the state from the server
+		let newStateMessage = await getInitialState();
+		// Update the components with the new state
+	});
 
 	async function getInitialState(): Promise<StateMessage | undefined> {
 		try {
 			const [scenarioSeed, weatherSeed] = splitAndPadNumber(simpleHash(seed));
+
+			console.log({
+				scenario_seed: scenarioSeed,
+				weather_seed: weatherSeed,
+				prefix: userPrefix,
+				user_callsign: userCallsign,
+				radio_frequency: radioActiveFrequency,
+				transponder_frequency: transponderFrequency,
+				aircraft_type: aircraftType
+			});
 
 			const response = await axios.post('http://localhost:3000/initialstate', {
 				scenario_seed: scenarioSeed,
@@ -106,18 +115,43 @@
 				transponder_frequency: transponderFrequency,
 				aircraft_type: aircraftType
 			});
+
 			return response.data;
 		} catch (error) {
 			console.error('Error: ', error);
 		}
-	}
 
-	async function handleSubmit() {
-		// Check state matches expected state
-		// Send message to server
-		let newStateMessage = await getNextState();
-		// Get response from server
-		// Update components with new state
+		function splitAndPadNumber(input: number): [number, number] {
+			// Convert the number to a string
+			const numberString = input.toString();
+
+			// Calculate the length of each half
+			const halfLength = Math.ceil(numberString.length / 2);
+
+			// Pad the first half with zeros if needed
+			const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
+
+			// Pad the second half with zeros if needed
+			const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
+
+			return [firstHalf, secondHalf];
+		}
+
+		function simpleHash(str: string) {
+			let hash = 0;
+
+			if (str.length === 0) {
+				return hash;
+			}
+
+			for (let i = 0; i < str.length; i++) {
+				const char = str.charCodeAt(i);
+				hash = (hash << 5) - hash + char;
+				// The above line is a simple hash function: hash * 31 + char
+			}
+
+			return hash;
+		}
 	}
 
 	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
@@ -155,16 +189,6 @@
 			console.error('Error: ', error);
 		}
 	}
-
-	const handleVoiceInputToggle = () => {
-		voiceInput = !voiceInput;
-		updateKneeboardOffset();
-	};
-
-	const handleAudioMessagesToggle = () => {
-		audioMessages = !audioMessages;
-		updateKneeboardOffset();
-	};
 </script>
 
 <div class="relative flex">

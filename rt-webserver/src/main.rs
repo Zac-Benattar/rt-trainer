@@ -51,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
                 .delete(controllers::user::delete_user_account),
         )
         .route(
-            "/initiatescenario",
+            "/initialstate",
             post(controllers::generator::get_initial_state),
         )
         .route("/nextstate", post(controllers::generator::get_next_state))

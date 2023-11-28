@@ -10,7 +10,7 @@ use super::aerodromes::get_start_and_end_aerodromes;
 #[derive(Deserialize, Serialize)]
 pub struct ScenarioGenerationParameters {
     pub scenario_seed: u64,
-    pub weather_seed: u16,
+    pub weather_seed: u64,
     pub prefix: String,
     pub user_callsign: String,
     pub radio_frequency: f32,
