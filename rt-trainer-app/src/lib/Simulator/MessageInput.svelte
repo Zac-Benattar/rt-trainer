@@ -5,6 +5,13 @@
 	let mounted: boolean = false;
 	export let message: string = '';
 
+	$: if (mounted) {
+		const inputBox = document.getElementById('message-input') as HTMLInputElement;
+		if (inputBox.textContent !== null && inputBox.textContent !== 'Enter your radio message here.') {
+			message = inputBox.textContent;
+		}
+	}
+
 	const dispatch = createEventDispatcher();
 
 	const handleKeypress = () => {
@@ -51,7 +58,9 @@
 		class="input-box"
 		on:focus={handleFocus}
 		on:focusout={handleFocusOut}
+		on:change={handleFocus}
 		on:keypress={handleKeypress}
+		on:input={handleKeypress}
 	>
 		Enter your radio message here.
 	</p>
@@ -74,7 +83,7 @@
 	.input-box {
 		position: relative;
 		width: 100%;
-		min-width: 1000px;
+		width: 600px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;
@@ -88,7 +97,7 @@
 		position: absolute;
 		bottom: 15px;
 		right: 15px;
-		top: 680px;
+		top: 660px;
 		cursor: pointer;
 	}
 
@@ -100,7 +109,7 @@
 		position: absolute;
 		bottom: 15px;
 		right: 65px;
-		top: 680px;
+		top: 660px;
 		height: 30px;
 		cursor: pointer;
 		color: black;

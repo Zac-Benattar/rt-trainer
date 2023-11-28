@@ -53,8 +53,8 @@
 
 <style lang="postcss">
 	.transmit-button {
-		width: 55px;
-		height: 55px;
+		width: 50px;
+		height: 50px;
 		border-radius: 50%;
 		background-color: rgba(80, 40, 40, 1);
 	}

@@ -88,7 +88,10 @@
 			frequencyDialEnabled = true;
 			transmitButtonEnabled = true;
 		}
-		radioDialMode = RadioDialModes[newDialModeIndex];
+		
+		if (RadioDialModes[newDialModeIndex] !== undefined) {
+			radioDialMode = RadioDialModes[newDialModeIndex]!
+		}
 	}
 
 	function onRadioFrequencyIncreaseLarge(event: Event) {
@@ -114,7 +117,7 @@
 		<div class="power-selector-container content-center">
 			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 		</div>
-		<div class="transmit-button-container absolute" style="width: 55px; height: 55px; left: 120px; top: 115px;">
+		<div class="transmit-button-container absolute" style="width: 55px; height: 55px; left: 130px; top: 85px;">
 			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 		</div>
 	</div>
@@ -156,7 +159,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.left-container {
@@ -164,7 +167,7 @@
 		flex-direction: row;
 		object-position: left;
 		width: 200px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.power-selector-container {
@@ -184,7 +187,7 @@
 		justify-content: center;
 		object-position: center;
 		width: 600px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.display-buttons-container {
@@ -200,7 +203,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.button {

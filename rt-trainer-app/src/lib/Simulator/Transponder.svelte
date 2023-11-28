@@ -128,7 +128,7 @@
 			{digitArr}
 			DigitSelected={displayDigitSelected}
 		/>
-		<div class="display-buttons-container">
+		<div class="display-buttons-container relative flex flex-row items-center gap-2">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
 			<button class="button" id="button-enter" on:click={handleENTERButtonClick}>ENT</button>
@@ -152,7 +152,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.mode-selecter {
@@ -161,7 +161,7 @@
 		justify-content: center;
 		object-position: left;
 		width: 200px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.display-panel {
@@ -170,14 +170,11 @@
 		justify-content: center;
 		object-position: center;
 		width: 600px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.display-buttons-container {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		object-position: center bottom;
+		padding-top: 10px;
 	}
 
 	.frequency-selecter {
@@ -186,7 +183,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 180px;
+		height: 160px;
 	}
 
 	.button {

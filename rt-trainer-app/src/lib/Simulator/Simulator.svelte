@@ -11,7 +11,7 @@
 	import type { Mistake, StateMessage, StateMessageSeeds } from '$lib/lib/States';
 	import { onMount } from 'svelte';
 
-	export let state: StateMessage | undefined;
+	let state: StateMessage | undefined;
 
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
@@ -21,7 +21,7 @@
 
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
-	let messageInputMessage: string = 'Type your message here.';
+	let messageInputMessage: string = 'Enter your radio message here.';
 	let messageOutputMessage: string = 'Radio messages will appear here.';
 
 	// Holds current radio and transponder settings to be sent to server
@@ -64,12 +64,27 @@
 		}
 	}
 
+	function isMistake (message: any): message is Mistake {
+		return typeof (message as Mistake).details === 'string'
+	}
+
 	async function handleSubmit() {
+		console.log('Submitting message: ' + messageInputMessage);
 		// Check state matches expected state
 		// Send message to server
 		let newStateMessage = await getNextState();
+		console.log(newStateMessage);
 		if (newStateMessage === undefined) {
+			// Handle error
+			console.log('Error: No response from server');
+		} else if (isMistake(newStateMessage)) {
+			// Handle mistake
+			console.log('mistake');
+			messageOutputMessage = newStateMessage.message;
 		} else {
+			// Update the components with the new state
+			console.log('new state');
+			state = newStateMessage;
 			messageOutputMessage = newStateMessage.message;
 		}
 		// Get response from server
@@ -122,18 +137,10 @@
 		}
 
 		function splitAndPadNumber(input: number): [number, number] {
-			// Convert the number to a string
 			const numberString = input.toString();
-
-			// Calculate the length of each half
 			const halfLength = Math.ceil(numberString.length / 2);
-
-			// Pad the first half with zeros if needed
 			const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
-
-			// Pad the second half with zeros if needed
 			const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
-
 			return [firstHalf, secondHalf];
 		}
 
@@ -240,7 +247,7 @@
 
 		{#if !voiceInput}
 			<div class="rt-message-input-container">
-				<MessageInput message={messageInputMessage} on:submit={handleSubmit} />
+				<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
 			</div>
 		{/if}
 
