@@ -7,6 +7,8 @@
 	import Kneeboard from './Kneeboard.svelte';
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import axios from 'axios';
+	import type { Mistake, StateMessage, StateMessageSeeds } from '$lib/lib/States';
 
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
@@ -29,6 +31,9 @@
 	let radioDialMode: string = 'OFF';
 	let transponderFrequency: number = 7000;
 	let transponderIDENTEnabled: boolean = false;
+	let aircraftType: string = 'Cessna 172';
+	let userCallsign: string = 'G-OFLY';
+	let userPrefix: string = 'STUDENT';
 
 	// If not wanting server stuff to deal with then can chuck all the functionality in here?
 	// It would make the whole project run on clientside and expose all simulation code and require local STT
@@ -56,65 +61,99 @@
 		}
 	}
 
-	function getNextState() {
-		const apiUrl = 'http://localhost:3000/nextstate';
-		const state = {
-			state: {
-				status: {
-					Parked: {
-						position: 'A1',
-						stage: 'PreDepartInfo'
-					}
-				},
-				prefix: 'STUDENT',
-				callsign: 'G-OFLY',
-				target_allocated_callsign: 'G-OFLY',
-				squark: false,
-				current_target: {
-					frequency_type: 'AFIS',
-					frequency: 124.03,
-					callsign: 'Wellesbourne Information'
-				},
-				current_radio_frequency: 180.03,
-				current_transponder_frequency: 7000,
-				lat: 52.1922,
-				long: -1.6144,
-				emergency: 'None',
-				aircraft_type: 'Cessna 172'
-			},
-			message: 'G-OFLY, request departure information.',
-			scenario_seed: 1,
-			weather_seed: 1
-		};
+	function splitAndPadNumber(input: number): [string, string] {
+		// Convert the number to a string
+		const numberString = input.toString();
 
-		const requestOptions = {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(state)
-		};
+		// Calculate the length of each half
+		const halfLength = Math.ceil(numberString.length / 2);
 
-		fetch(apiUrl, requestOptions)
-			.then((response) => {
-				if (!response.ok) {
-					if (response.status === 404) {
-						throw new Error('Data not found');
-					} else if (response.status === 500) {
-						throw new Error('Server error');
-					} else {
-						throw new Error('Network response was not ok');
-					}
-				}
-				console.log('Response: ', response);
-				return response.json();
-			})
-			.then((data) => {
-				console.log('Next state data: ', data);
-			})
-			.catch((error) => {
-				console.error('Error:', error);
+		// Pad the first half with zeros if needed
+		const firstHalf = numberString.padEnd(halfLength, '0').slice(0, halfLength);
+
+		// Pad the second half with zeros if needed
+		const secondHalf = numberString.slice(halfLength).padEnd(halfLength, '0');
+
+		return [firstHalf, secondHalf];
+	}
+
+	function simpleHash(str: string) {
+		let hash = 0;
+
+		if (str.length === 0) {
+			return hash;
+		}
+
+		for (let i = 0; i < str.length; i++) {
+			const char = str.charCodeAt(i);
+			hash = (hash << 5) - hash + char;
+			// The above line is a simple hash function: hash * 31 + char
+		}
+
+		return hash;
+	}
+
+	async function getInitialState(): Promise<StateMessage | undefined> {
+		try {
+			const [scenarioSeed, weatherSeed] = splitAndPadNumber(simpleHash(seed));
+
+			const response = await axios.post('http://localhost:3000/initialstate', {
+				scenario_seed: scenarioSeed,
+				weather_seed: weatherSeed,
+				prefix: userPrefix,
+				user_callsign: userCallsign,
+				radio_frequency: radioActiveFrequency,
+				transponder_frequency: transponderFrequency,
+				aircraft_type: aircraftType
 			});
+			return response.data;
+		} catch (error) {
+			console.error('Error: ', error);
+		}
+	}
+
+	async function handleSubmit() {
+		// Check state matches expected state
+		// Send message to server
+		let newStateMessage = await getNextState();
+		// Get response from server
+		// Update components with new state
+	}
+
+	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
+		try {
+			const response = await axios.post('http://localhost:3000/nextstate', {
+				state: {
+					status: {
+						Parked: {
+							position: 'A1',
+							stage: 'PreDepartInfo'
+						}
+					},
+					prefix: 'STUDENT',
+					callsign: 'G-OFLY',
+					target_allocated_callsign: 'G-OFLY',
+					squark: false,
+					current_target: {
+						frequency_type: 'AFIS',
+						frequency: 124.03,
+						callsign: 'Wellesbourne Information'
+					},
+					current_radio_frequency: 180.03,
+					current_transponder_frequency: 7000,
+					lat: 52.1922,
+					long: -1.6144,
+					emergency: 'None',
+					aircraft_type: 'Cessna 172'
+				},
+				message: messageInputMessage,
+				scenario_seed: 1,
+				weather_seed: 1
+			});
+			return response.data;
+		} catch (error) {
+			console.error('Error: ', error);
+		}
 	}
 
 	const handleVoiceInputToggle = () => {
@@ -130,7 +169,7 @@
 
 <div class="relative flex">
 	<div class="flex flex-col gap-10">
-		<div class="settings-container relative flex flex-row gap-5">
+		<div class="settings-container relative flex flex-row items-center gap-5">
 			<SlideToggle
 				id="enable-random-events"
 				name="slider-small"
@@ -157,7 +196,6 @@
 				on:click={handleAudioMessagesToggle}
 				>Audio messages
 			</SlideToggle>
-			<button id="next-state" class="btn variant-filled" on:click={getNextState}>Next state</button>
 		</div>
 
 		<div class="radio-transponder-container flex flex-col gap-10">
@@ -178,7 +216,7 @@
 
 		{#if !voiceInput}
 			<div class="rt-message-input-container">
-				<MessageInput message={messageInputMessage} />
+				<MessageInput message={messageInputMessage} on:submit={handleSubmit} />
 			</div>
 		{/if}
 

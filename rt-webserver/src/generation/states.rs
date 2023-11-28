@@ -1,6 +1,6 @@
+use anyhow::Error;
 use serde::{Deserialize, Serialize};
 
-use crate::errors::ParseError;
 use crate::generation::parsers::*;
 use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
@@ -53,7 +53,7 @@ pub fn generate_next_state(
     weather_seed: u16,
     radiocall: String,
     current_state: State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     match &current_state.status {
         Status::Parked { stage } => {
             match stage {
@@ -127,8 +127,9 @@ pub fn generate_next_state(
         Status::LandingToParked { position, stage } => {}
     }
 
-    Ok(StateMessage {
-        state: current_state,
-        message: "Error".to_string(),
-    })
+    Ok(ServerResponse::Mistake(Mistake {
+            details: "Unknown error".to_owned(),
+            message: "Unknown message".to_owned(),
+        },
+    ))
 }

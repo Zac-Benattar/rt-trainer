@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
+
 	let mounted: boolean = false;
 	export let message: string = '';
+
+	const dispatch = createEventDispatcher();
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
@@ -31,6 +35,10 @@
 		inputBox.textContent = 'Enter your radio message here.';
 	};
 
+	const submit = () => {
+		dispatch('submit', message);
+	};
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -50,12 +58,16 @@
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-missing-attribute -->
 	<img
-		class="icon"
-		style="top: 710px;"
+		class="delete-icon"
 		src="/images/delete.png"
 		on:click={handleDelete}
 		on:keypress={handleDelete}
 	/>
+
+	<button
+	class="submit-button btn variant-filled"
+	on:click={submit}
+>Submit</button>
 </div>
 
 <style lang="postcss">
@@ -71,11 +83,31 @@
 		color: black;
 	}
 
-	:global(.icon) {
-		width: 25px;
+	:global(.delete-icon) {
+		width: 36px;
 		position: absolute;
 		bottom: 15px;
 		right: 15px;
+		top: 680px;
 		cursor: pointer;
+	}
+
+	:global(.delete-icon:hover) {
+		width: 40px;
+	}
+
+	:global(.submit-button) {
+		position: absolute;
+		bottom: 15px;
+		right: 65px;
+		top: 680px;
+		height: 30px;
+		cursor: pointer;
+		color: black;
+		background-color: #707070;
+	}
+
+	:global(.submit-button:hover) {
+		background-color: #707070;
 	}
 </style>

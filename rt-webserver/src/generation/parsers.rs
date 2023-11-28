@@ -1,11 +1,11 @@
-use crate::{
-    errors::ParseError,
-    models::{
-        aerodrome::Aerodrome,
-        aerodrome::COMFrequency,
-        state::{
-            Emergency, ParkedToTakeoffStage, State, StateMessage, Status, TaxiingToTakeoffStage,
-        },
+use anyhow::Error;
+
+use crate::models::{
+    aerodrome::Aerodrome,
+    aerodrome::COMFrequency,
+    state::{
+        Emergency, Mistake, ParkedToTakeoffStage, ServerResponse, State, StateMessage, Status,
+        TaxiingToTakeoffStage,
     },
 };
 
@@ -50,27 +50,28 @@ pub fn parse_radio_check(
     seed: &u64,
     radio_check: &String,
     current_state: &State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     let message = radio_check;
     let message_words = message.split_whitespace().collect::<Vec<&str>>();
 
     let radio_freq_index = match message_words.iter().position(|&x| x.contains('.')) {
         Some(index) => index,
         None => {
-            return Err(ParseError::FrequencyMissingError {
-                frequency_expected: current_state.current_radio_frequency.to_string(),
-            });
+            return Ok(ServerResponse::Mistake(Mistake {
+                details: "Frequency missing".to_string(),
+                message: message.to_string(),
+            }));
         }
     };
 
+    // Convert frequency string to float
     let radio_freq_stated = match message_words[radio_freq_index].parse::<f32>() {
-        Ok(freq) => freq,
+        Ok(frequency) => frequency,
         Err(_) => {
-            println!("Radio frequency not a number");
-            return Err(ParseError::FrequencyParseError {
-                frequency_found: message_words[radio_freq_index].to_string(),
-                frequency_expected: current_state.current_radio_frequency.to_string(),
-            });
+            return Ok(ServerResponse::Mistake(Mistake {
+                details: "Frequency not recognised".to_string(),
+                message: message.to_string(),
+            }));
         }
     };
 
@@ -78,35 +79,44 @@ pub fn parse_radio_check(
     let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
-            return Err(ParseError::CallsignParseError {
-                callsign_found: message_words[..callsign_words.len()].join(" "),
-                callsign_expected: current_state.current_target.callsign.to_ascii_lowercase(),
-            });
+            return Ok(ServerResponse::Mistake(Mistake {
+                details: format!(
+                    "Callsign not recognised: {}",
+                    message_words[..callsign_words.len()].join(" ")
+                ),
+                message: message.to_string(),
+            }));
         }
     }
 
     if message_words[callsign_words.len()] != current_state.callsign.to_ascii_lowercase() {
-        return Err(ParseError::CallsignParseError {
-            callsign_found: message_words[1].to_string(),
-            callsign_expected: current_state.callsign.to_ascii_lowercase(),
-        });
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Callsign not recognised: {}",
+                message_words[..callsign_words.len()].join(" ")
+            ),
+            message: message.to_string(),
+        }));
     }
 
     if message_words[radio_freq_index - 2] != "radio"
         || message_words[radio_freq_index - 1] != "check"
     {
-        return Err(ParseError::MessageParseError {
-            message_found: message.to_string(),
-            message_expected: "radio check".to_string(),
-        });
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: "Expected 'radio check' in message".to_string(),
+            message: message.to_string(),
+        }));
     }
 
     // Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
     if radio_freq_stated != current_state.current_radio_frequency {
-        return Err(ParseError::FrequencyIncorrectError {
-            frequency_found: radio_freq_stated.to_string(),
-            frequency_expected: current_state.current_radio_frequency.to_string(),
-        });
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Frequency incorrect: {0} \n Expected: {1}",
+                radio_freq_stated, current_state.current_radio_frequency
+            ),
+            message: message.to_string(),
+        }));
     }
 
     let atc_response = format!(
@@ -135,10 +145,10 @@ pub fn parse_radio_check(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(StateMessage {
+    Ok(ServerResponse::StateMessage(StateMessage {
         state: next_state,
         message: atc_response,
-    })
+    }))
 }
 
 pub fn parse_departure_information_request(
@@ -146,7 +156,7 @@ pub fn parse_departure_information_request(
     weather_seed: &u16,
     departure_information_request: &String,
     current_state: &State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     let message_words = departure_information_request
         .split_whitespace()
         .collect::<Vec<&str>>();
@@ -154,10 +164,10 @@ pub fn parse_departure_information_request(
     let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
-            return Err(ParseError::CallsignParseError {
-                callsign_found: message_words[..callsign_words.len()].join(" "),
-                callsign_expected: current_state.current_target.callsign.to_ascii_lowercase(),
-            });
+            return Ok(ServerResponse::Mistake(Mistake {
+                details: "Callsign not recognised".to_string(),
+                message: departure_information_request.to_string(),
+            }));
         }
     }
 
@@ -165,10 +175,7 @@ pub fn parse_departure_information_request(
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
             None => {
-                return Err(ParseError::GenerationError {
-                    details: "Aerodromes not generated".to_string(),
-                    seed: scenario_seed.to_owned() as u64,
-                });
+                return Err(Error::msg("Aerodromes not generated"));
             }
         };
 
@@ -179,18 +186,22 @@ pub fn parse_departure_information_request(
     let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
-            return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_and_end_aerodrome.0,
-                runway_index,
-            });
+            return Ok(ServerResponse::Mistake(Mistake {
+                details: "Runway not recognised".to_string(),
+                message: departure_information_request.to_string(),
+            }));
         }
     };
 
     if !departure_information_request.contains("request departure information") {
-        return Err(ParseError::MessageParseError {
-            message_found: departure_information_request.to_string(),
-            message_expected: format!("{0} request departure information", &current_state.callsign),
-        });
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Expected: {0} request departure information \n Found: {1}",
+                &current_state.callsign.to_ascii_lowercase(),
+                departure_information_request.to_string()
+            ),
+            message: departure_information_request.to_string(),
+        }));
     }
 
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
@@ -234,10 +245,10 @@ pub fn parse_departure_information_request(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(StateMessage {
+    Ok(ServerResponse::StateMessage(StateMessage {
         state: next_state,
         message: atc_response,
-    })
+    }))
 }
 
 pub fn parse_departure_information_readback(
@@ -245,7 +256,7 @@ pub fn parse_departure_information_readback(
     weather_seed: &u16,
     departure_information_readback: &String,
     current_state: &State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     let message_words = departure_information_readback
         .split_whitespace()
         .collect::<Vec<&str>>();
@@ -254,10 +265,7 @@ pub fn parse_departure_information_readback(
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
             None => {
-                return Err(ParseError::GenerationError {
-                    details: "Aerodromes not generated".to_string(),
-                    seed: scenario_seed.to_owned() as u64,
-                });
+                return Err(Error::msg("Aerodromes not generated"));
             }
         };
 
@@ -268,10 +276,7 @@ pub fn parse_departure_information_readback(
     let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
-            return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_and_end_aerodrome.0,
-                runway_index,
-            });
+            return Err(Error::msg("Runway not generated"));
         }
     };
 
@@ -282,15 +287,16 @@ pub fn parse_departure_information_readback(
         || message_words[message_words.len() - 1]
             != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
-        return Err(ParseError::MessageParseError {
-            message_found: departure_information_readback.to_string(),
-            message_expected: format!(
-                "runway {0} qnh {1} {2}",
-                runway.name,
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Expected: {0} runway {1} qnh {2} {3}",
+                &current_state.callsign.to_ascii_lowercase(),
+                runway.name.to_ascii_lowercase(),
                 metor_sample.pressure,
                 current_state.target_allocated_callsign.to_ascii_lowercase()
             ),
-        });
+            message: departure_information_readback.to_string(),
+        }));
     }
 
     // ATC does not respond to this message
@@ -317,10 +323,10 @@ pub fn parse_departure_information_readback(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(StateMessage {
+    Ok(ServerResponse::StateMessage(StateMessage {
         state: next_state,
         message: atc_response,
-    })
+    }))
 }
 
 pub fn parse_taxi_request(
@@ -328,17 +334,14 @@ pub fn parse_taxi_request(
     weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
             None => {
-                return Err(ParseError::GenerationError {
-                    details: "Aerodromes not generated".to_string(),
-                    seed: scenario_seed.to_owned() as u64,
-                });
+                return Err(Error::msg("Aerodromes not generated"));
             }
         };
     let metor_sample =
@@ -349,10 +352,7 @@ pub fn parse_taxi_request(
     let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
-            return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_and_end_aerodrome.0,
-                runway_index,
-            });
+            return Err(Error::msg("Runway not generated"));
         }
     };
 
@@ -367,16 +367,16 @@ pub fn parse_taxi_request(
         )
         || message_words.contains(&start_and_end_aerodrome.1.name.to_ascii_lowercase().as_str())
     {
-        return Err(ParseError::MessageParseError {
-            message_found: taxi_request.to_string(),
-            message_expected: format!(
-                "{0} {1} at {2} request taxi VFR to {3}",
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Expected: {0} {1} at {2} request taxi VFR to {3}",
                 current_state.target_allocated_callsign.to_ascii_lowercase(),
                 current_state.aircraft_type.to_ascii_lowercase(),
                 start_and_end_aerodrome.0.start_point.to_ascii_lowercase(),
                 start_and_end_aerodrome.1.name.to_ascii_lowercase(),
             ),
-        });
+            message: taxi_request.to_string(),
+        }));
     }
 
     let atc_response = format!(
@@ -408,10 +408,10 @@ pub fn parse_taxi_request(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(StateMessage {
+    Ok(ServerResponse::StateMessage(StateMessage {
         state: next_state,
         message: atc_response,
-    })
+    }))
 }
 
 pub fn parse_taxi_readback(
@@ -419,17 +419,14 @@ pub fn parse_taxi_readback(
     weather_seed: &u16,
     taxi_request: &String,
     current_state: &State,
-) -> Result<StateMessage, ParseError> {
+) -> Result<ServerResponse, Error> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
             None => {
-                return Err(ParseError::GenerationError {
-                    details: "Aerodromes not generated".to_string(),
-                    seed: scenario_seed.to_owned() as u64,
-                });
+                return Err(Error::msg("Aerodromes not generated"));
             }
         };
 
@@ -441,10 +438,7 @@ pub fn parse_taxi_readback(
     let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
-            return Err(ParseError::RunwayInvalidError {
-                aerodrome: start_and_end_aerodrome.0,
-                runway_index,
-            });
+            return Err(Error::msg("Runway not generated"));
         }
     };
 
@@ -454,16 +448,17 @@ pub fn parse_taxi_readback(
         || message_words[message_words.len() - 1]
             != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
-        return Err(ParseError::MessageParseError {
-            message_found: taxi_request.to_string(),
-            message_expected: format!(
-                "taxi holding point {0} runway {1} qnh {2} {3}",
-                runway.holding_points[0].name,
-                runway.name,
+        return Ok(ServerResponse::Mistake(Mistake {
+            details: format!(
+                "Expected: {0} taxi holding point {1} runway {2} qnh {3} {4}",
+                current_state.target_allocated_callsign.to_ascii_lowercase(),
+                runway.holding_points[0].name.to_ascii_lowercase(),
+                runway.name.to_ascii_lowercase(),
                 metor_sample.pressure,
                 current_state.target_allocated_callsign.to_ascii_lowercase(),
             ),
-        });
+            message: taxi_request.to_string(),
+        }));
     }
 
     get_route(
@@ -495,8 +490,8 @@ pub fn parse_taxi_readback(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(StateMessage {
+    Ok(ServerResponse::StateMessage(StateMessage {
         state: next_state,
         message: atc_response,
-    })
+    }))
 }

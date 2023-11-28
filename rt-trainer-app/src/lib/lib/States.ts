@@ -3,13 +3,13 @@ export type Status = {
         "position": "A1",
         "stage": "PreDepartInfo"
     }
-};
+}
 
 export type COMFrequency = {
     frequency_type: "AFIS" | "TWR" | "GND",
     frequency: number,
     callsign: string
-};
+}
 
 export type State = {
     status: Status,
@@ -24,11 +24,21 @@ export type State = {
     long: number,
     emergency: "None" | "Mayday",
     aircraft_type: string
-};
+}
 
 export type StateMessageSeeds = {
     state: State,
     message: string,
     scenario_seed: number,
     weather_seed: number
+}
+
+export type StateMessage = {
+    state: State,
+    message: string
+}
+
+export type Mistake = {
+    details: string,
+    message: string
 }

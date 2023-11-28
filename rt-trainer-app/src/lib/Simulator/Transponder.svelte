@@ -152,7 +152,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.mode-selecter {
@@ -161,7 +161,7 @@
 		justify-content: center;
 		object-position: left;
 		width: 200px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.display-panel {
@@ -186,7 +186,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.button {

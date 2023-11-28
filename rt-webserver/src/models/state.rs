@@ -127,3 +127,15 @@ pub struct StateMessage {
     pub state: State,
     pub message: String,
 }
+
+#[derive(Deserialize, Serialize)]
+pub struct Mistake {
+    pub details: String,
+    pub message: String,
+}
+
+#[derive(Deserialize, Serialize)]
+pub enum ServerResponse {
+    StateMessage(StateMessage),
+    Mistake(Mistake),
+}

@@ -5,12 +5,12 @@ use axum::Json;
 
 use crate::generation::states::{self, generate_initial_state, generate_next_state};
 // Text formatting
-use crate::errors::{CustomError, ParseError};
+use crate::errors::CustomError;
 use crate::helpers::jsoncheckers::{
     invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json,
 };
 use crate::helpers::preprocessors::process_string;
-use crate::models::state::{State, StateMessage, StateMessageSeed};
+use crate::models::state::{State, StateMessage, StateMessageSeed, ServerResponse};
 
 /* Gets the first state that the frontend should match.
 The frontend will then ensure the radio and transponder are set to the
@@ -34,10 +34,10 @@ pub async fn get_initial_state(
 // Passed in radio call should be correct for the current state otherwise error should be returned.
 pub async fn get_next_state(
     Json(state_message_seed): Json<StateMessageSeed>,
-) -> Result<(StatusCode, Json<StateMessage>), ParseError> {
+) -> Result<(StatusCode, Json<ServerResponse>), CustomError> {
     // Filter out empty json
     if invalid_state_message_seed_data_json(Json(&state_message_seed)) {
-        return Err(ParseError::InvalidJSONError);
+        return Err(CustomError::BadRequest);
     }
 
     let usercall = process_string(&state_message_seed.message);
@@ -51,7 +51,7 @@ pub async fn get_next_state(
         Ok(state) => state,
         Err(error) => {
             println!("Error: {:?}", error.to_string());
-            return Err(error);
+            return Err(CustomError::BadRequest);
         }
     };
 

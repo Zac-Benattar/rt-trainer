@@ -156,7 +156,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.left-container {
@@ -164,7 +164,7 @@
 		flex-direction: row;
 		object-position: left;
 		width: 200px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.power-selector-container {
@@ -184,7 +184,7 @@
 		justify-content: center;
 		object-position: center;
 		width: 600px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.display-buttons-container {
@@ -200,7 +200,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 200px;
+		height: 180px;
 	}
 
 	.button {
