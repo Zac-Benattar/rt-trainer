@@ -10,7 +10,7 @@
 	.output-box {
 		position: relative;
 		width: 100%;
-		width: 600px;
+		width: 500px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;

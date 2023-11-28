@@ -64,8 +64,8 @@
 		}
 	}
 
-	function isMistake (message: any): message is Mistake {
-		return typeof (message as Mistake).details === 'string'
+	function isMistake(message: any): message is Mistake {
+		return typeof (message as Mistake).details === 'string';
 	}
 
 	async function handleSubmit() {
@@ -199,7 +199,7 @@
 </script>
 
 <div class="relative flex">
-	<div class="flex flex-col gap-10">
+	<div class="flex flex-col items-center gap-10" style="width:1050px">
 		<div class="settings-container relative flex flex-row items-center gap-5">
 			<SlideToggle
 				id="enable-random-events"
@@ -229,7 +229,7 @@
 			</SlideToggle>
 		</div>
 
-		<div class="radio-transponder-container flex flex-col gap-10">
+		<div class="radio-transponder-container flex flex-col items center gap-10">
 			<div>
 				<Radio
 					activeFrequency={radioActiveFrequency}
@@ -245,38 +245,41 @@
 			</div>
 		</div>
 
-		{#if !voiceInput}
-			<div class="rt-message-input-container">
-				<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
-			</div>
-		{/if}
+		<div class="input-output-map-kneeboard-container flex flex row items-center content-center grid-cols-2 gap-4 flex-wrap">
+			{#if !voiceInput}
+				<div class="rt-message-input-container">
+					<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
+				</div>
+			{/if}
 
-		{#if !audioMessages}
-			<div class="rt-message-output-container">
-				<MessageOutput message={messageOutputMessage} />
-			</div>
-		{/if}
+			{#if !audioMessages}
+				<div class="rt-message-output-container">
+					<MessageOutput message={messageOutputMessage} />
+				</div>
+			{/if}
 
-		<div class="map-kneeboard-container flex flex-row gap-5">
-			<div>
-				<Map />
+			<div class="map-kneeboard-container flex flex-row gap-5">
+				<div>
+					<Map />
+				</div>
+				<div>
+					<Kneeboard offset={kneeboardOffset} contents={kneeboardTextContent} />
+				</div>
 			</div>
-			<div>
-				<Kneeboard offset={kneeboardOffset} contents={kneeboardTextContent} />
-			</div>
-		</div>
 
-		<div
-			class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
-		>
-			<!-- Source -->
-			<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
-
-			<!-- Trigger -->
-			<button use:clipboard={{ element: 'scenarioLinkElement' }} class="btn variant-filled"
-				>Copy</button
+			<div
+				class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
 			>
+				<!-- Source -->
+				<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
+
+				<!-- Trigger -->
+				<button use:clipboard={{ element: 'scenarioLinkElement' }} class="btn variant-filled"
+					>Copy</button
+				>
+			</div>
 		</div>
+
 		<div class="h-5" />
 	</div>
 </div>

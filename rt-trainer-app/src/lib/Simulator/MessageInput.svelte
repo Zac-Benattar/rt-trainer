@@ -7,7 +7,10 @@
 
 	$: if (mounted) {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		if (inputBox.textContent !== null && inputBox.textContent !== 'Enter your radio message here.') {
+		if (
+			inputBox.textContent !== null &&
+			inputBox.textContent !== 'Enter your radio message here.'
+		) {
 			message = inputBox.textContent;
 		}
 	}
@@ -66,24 +69,21 @@
 	</p>
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-missing-attribute -->
-	<img
+	<!-- <img
 		class="delete-icon"
 		src="/images/delete.png"
 		on:click={handleDelete}
 		on:keypress={handleDelete}
-	/>
+	/> -->
 
-	<button
-	class="submit-button btn variant-filled"
-	on:click={submit}
->Submit</button>
+	<!-- <button class="submit-button btn variant-filled" on:click={submit}>Submit</button> -->
 </div>
 
 <style lang="postcss">
 	.input-box {
 		position: relative;
 		width: 100%;
-		width: 600px;
+		width: 500px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;
