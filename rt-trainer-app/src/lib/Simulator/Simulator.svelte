@@ -56,6 +56,67 @@
 		}
 	}
 
+	function getNextState() {
+		const apiUrl = 'http://localhost:3000/nextstate';
+		const state = {
+			state: {
+				status: {
+					Parked: {
+						position: 'A1',
+						stage: 'PreDepartInfo'
+					}
+				},
+				prefix: 'STUDENT',
+				callsign: 'G-OFLY',
+				target_allocated_callsign: 'G-OFLY',
+				squark: false,
+				current_target: {
+					frequency_type: 'AFIS',
+					frequency: 124.03,
+					callsign: 'Wellesbourne Information'
+				},
+				current_radio_frequency: 180.03,
+				current_transponder_frequency: 7000,
+				lat: 52.1922,
+				long: -1.6144,
+				emergency: 'None',
+				aircraft_type: 'Cessna 172'
+			},
+			message: 'G-OFLY, request departure information.',
+			scenario_seed: 1,
+			weather_seed: 1
+		};
+
+		const requestOptions = {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(state)
+		};
+
+		fetch(apiUrl, requestOptions)
+			.then((response) => {
+				if (!response.ok) {
+					if (response.status === 404) {
+						throw new Error('Data not found');
+					} else if (response.status === 500) {
+						throw new Error('Server error');
+					} else {
+						throw new Error('Network response was not ok');
+					}
+				}
+				console.log('Response: ', response);
+				return response.json();
+			})
+			.then((data) => {
+				console.log('Next state data: ', data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	}
+
 	const handleVoiceInputToggle = () => {
 		voiceInput = !voiceInput;
 		updateKneeboardOffset();
@@ -96,6 +157,7 @@
 				on:click={handleAudioMessagesToggle}
 				>Audio messages
 			</SlideToggle>
+			<button id="next-state" class="btn variant-filled" on:click={getNextState}>Next state</button>
 		</div>
 
 		<div class="radio-transponder-container flex flex-col gap-10">

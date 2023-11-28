@@ -52,9 +52,9 @@ async fn main() -> anyhow::Result<()> {
         )
         .route(
             "/initiatescenario",
-            get(controllers::generator::get_initial_state),
+            post(controllers::generator::get_initial_state),
         )
-        .route("/nextstate", get(controllers::generator::get_next_state))
+        .route("/nextstate", post(controllers::generator::get_next_state))
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
 
