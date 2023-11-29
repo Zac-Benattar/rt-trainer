@@ -10,6 +10,8 @@
 	import axios from 'axios';
 	import type { Mistake, StateMessage, StateMessageSeeds } from '$lib/lib/States';
 	import { onMount } from 'svelte';
+	import { Modal, getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
 
 	let state: StateMessage | undefined;
 
@@ -37,6 +39,8 @@
 	let aircraftType: string = 'Cessna 172';
 	let userCallsign: string = 'G-OFLY';
 	let userPrefix: string = 'STUDENT';
+
+	const modalStore = getModalStore();
 
 	// If not wanting server stuff to deal with then can chuck all the functionality in here?
 	// It would make the whole project run on clientside and expose all simulation code and require local STT
@@ -80,7 +84,13 @@
 			// Handle mistake
 			console.log('mistake');
 			// Pop up modal with mistake details
-
+			const modal: ModalSettings = {
+				type: 'alert',
+				// Data
+				title: 'Mistake',
+				body: newStateMessage.details,
+			};
+			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
 			console.log('new state');
@@ -195,7 +205,7 @@
 			if (typeof response.data === 'object') {
 				return response.data.Mistake as Mistake;
 			}
-			
+
 			return response.data;
 		} catch (error) {
 			console.error('Error: ', error);

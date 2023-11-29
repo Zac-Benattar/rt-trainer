@@ -10,6 +10,7 @@
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/Sidebars/Navigation.svelte';
 	import SimulatorSettings from '$lib/Sidebars/SimulatorSettings.svelte';
+	import { Modal } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -59,12 +60,14 @@
 <Drawer width="w-64">
 	<h2 class="p-4">Simulator Settings</h2>
 	<hr />
-	{#if (classesSidebar == 'w-0')}
+	{#if classesSidebar == 'w-0'}
 		<SimulatorSettings />
 	{:else}
 		<Navigation />
 	{/if}
 </Drawer>
+
+<Modal />
 
 <!-- App Shell -->
 <AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>
@@ -74,7 +77,7 @@
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		{#if (classesSidebar == 'w-0')}
+		{#if classesSidebar == 'w-0'}
 			<SimulatorSettings studentPrefix={settingStudentPrefix} />
 		{:else}
 			<Navigation />
