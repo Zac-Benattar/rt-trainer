@@ -37,6 +37,9 @@
 		class="input-box"
 		on:focus={handleFocus}
 		on:focusout={handleFocusOut}
+		on:change={handleFocus}
+		on:keypress={handleKeypress}
+		on:input={handleKeypress}
 	>
 		Make notes here.
 	</p>
