@@ -21,45 +21,46 @@ This repository is inspired by a starter pack repository of resources for CS310 
 ### Communicating with the RT Webserver
 The RT handles the user's radio call messages and returns the next state and ATC's response to the user's call. It also provides a start state for a given set of parameters for the scenario. It is stateless, needing only the state, seed and message to generate its response.
 #### Scenario Initiation
-The following JSON object containing the parameters of the scenario should be sent to `http://localhost:3000/initiatescenario`:
+The following JSON object containing the parameters of the scenario should be sent to `http://localhost:3000/initialstate`:
 ```
 {
-	"seed": 1,
-	"prefix": "STUDENT",
-	"user_callsign": "G-OFLY",
-	"radio_frequency": 180.030,
-	"transponder_frequency": 7000
+  "scenario_seed": 15678,
+  "weather_seed": 95148,
+  "prefix": "STUDENT",
+  "user_callsign": "G-OFLY",
+  "aircraft_type": "Cessna 172"
 }
 ```
 #### Next State/Validate Radio Call
 The following JSON object containing the seed, current state, and radio message should be sent to `http://localhost:3000/nextstate`:
 ```
 {
-	"state" :{
-		"status": {
-			"Parked": {
-				"position": "A1",
-				"stage": "PreRadioCheck" 
-			}
-		},
-		"prefix": "STUDENT",
-		"callsign": "G-OFLY",
-		"target_allocated_callsign": "G-OFLY",
-		"squark": false,
-		"current_target": {
-			"frequency_type": "AFIS",
-			"frequency": 124.03,
-			"callsign": "Wellesbourne Information"
-		},
-		"current_radio_frequency": 180.030,
-		"current_transponder_frequency": 7000,
-		"lat": 52.1922,
-		"long": -1.6144,
-		"emergency": "None",
-		"aircraft_type": "Cessna"
-	},
-	"message": "Wellesbourne Information, G-OFLY, radio check 180.030",
-	"seed": 1
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreRadioCheck"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None",
+  "aircraft_type": "Cessna"
+  },
+  "message": "Wellesbourne Information, G-OFLY, radio check 180.030",
+  "scenario_seed": 15678,
+  "weather_seed": 95148
 }
 ```
 ### LaTeX documents
