@@ -22,7 +22,7 @@
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
 	let messageInputMessage: string = 'Enter your radio message here.';
-	let messageOutputMessage: string = 'Radio messages will appear here.';
+	let messageOutputMessage: string = 'Radio responses will appear here.';
 
 	// Holds current radio and transponder settings to be sent to server
 	type RadioMode = 'COM' | 'NAV';
@@ -199,7 +199,7 @@
 </script>
 
 <div class="relative flex">
-	<div class="flex flex-col items-center gap-10" style="width:1050px">
+	<div class="flex flex-col items-center gap-10" style="width:1000px">
 		<div class="settings-container relative flex flex-row items-center gap-5">
 			<SlideToggle
 				id="enable-random-events"
@@ -229,6 +229,20 @@
 			</SlideToggle>
 		</div>
 
+		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
+			{#if !voiceInput}
+				<div class="rt-message-input-container">
+					<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
+				</div>
+			{/if}
+
+			{#if !audioMessages}
+				<div class="rt-message-output-container">
+					<MessageOutput bind:message={messageOutputMessage} />
+				</div>
+			{/if}
+		</div>
+
 		<div class="radio-transponder-container flex flex-col items center gap-10">
 			<div>
 				<Radio
@@ -245,26 +259,14 @@
 			</div>
 		</div>
 
-		<div class="input-output-map-kneeboard-container flex flex row items-center content-center grid-cols-2 gap-4 flex-wrap">
-			{#if !voiceInput}
-				<div class="rt-message-input-container">
-					<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
-				</div>
-			{/if}
-
-			{#if !audioMessages}
-				<div class="rt-message-output-container">
-					<MessageOutput message={messageOutputMessage} />
-				</div>
-			{/if}
-
-			<div class="map-kneeboard-container flex flex-row gap-5">
-				<div>
-					<Map />
-				</div>
-				<div>
-					<Kneeboard offset={kneeboardOffset} contents={kneeboardTextContent} />
-				</div>
+		<div
+			class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap"
+		>
+			<div>
+				<Map />
+			</div>
+			<div>
+				<Kneeboard bind:contents={kneeboardTextContent} />
 			</div>
 
 			<div

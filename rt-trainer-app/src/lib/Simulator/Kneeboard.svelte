@@ -1,9 +1,5 @@
 <script lang="ts">
-	export let offset = 0;
 	export let contents: string = '';
-	let deleteButtonOffset: number = 820;
-
-	$: deleteButtonOffset = offset + 820;
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
@@ -34,7 +30,7 @@
 	};
 </script>
 
-<div class="kneeboard-container">
+<div class="kneeboard-container flex flex-col grid-cols-1 items-end">
 	<p
 		id="kneeboard-input"
 		contenteditable="true"
@@ -47,21 +43,15 @@
 	</p>
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-missing-attribute -->
-	<img
-		class="icon"
-		style={"top: " + deleteButtonOffset + "px;"}
-		src="/images/delete.png"
-		on:click={handleDelete}
-		on:keypress={handleDelete}
-	/>
+	<input class="delete-button btn" type="image" src="/images/delete.png" on:click={handleDelete} on:keypress={handleDelete}/>
 </div>
 
 <style lang="postcss">
-	.input-box {
-		position: relative;
-		width: 100%;
+	.kneeboard-container {
+		box-sizing: border-box;
+		padding: 10px;
 		min-width: 490px;
-		height: 360px;
+		height: 390px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;
@@ -69,11 +59,21 @@
 		color: black;
 	}
 
-	:global(.icon) {
-		width: 36px;
-		position: absolute;
-		bottom: 15px;
-		right: 15px;
-		cursor: pointer;
+	.input-box {
+		width: 100%;
+		height: 430px;
+	}
+
+	.input-box:focus {
+		outline: none;
+	}
+
+	.delete-button {
+		padding-right: 0px;
+		padding-bottom: 0px;
+		padding-top: 0px;
+		padding-left: 10px;
+		width: 60px;
+		height: 40px;
 	}
 </style>

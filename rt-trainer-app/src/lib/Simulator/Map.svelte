@@ -12,7 +12,7 @@
         position: relative;
 		width: 100%;
 		min-width: 490px;
-		min-height: 360px;
+		min-height: 390px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;

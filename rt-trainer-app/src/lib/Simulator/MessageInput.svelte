@@ -54,7 +54,7 @@
 	});
 </script>
 
-<div class="message-input-container">
+<div class="message-input-container flex flex-col grid-cols-1 items-end">
 	<p
 		id="message-input"
 		contenteditable="true"
@@ -67,23 +67,26 @@
 	>
 		Enter your radio message here.
 	</p>
-	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-	<!-- svelte-ignore a11y-missing-attribute -->
-	<!-- <img
-		class="delete-icon"
-		src="/images/delete.png"
-		on:click={handleDelete}
-		on:keypress={handleDelete}
-	/> -->
 
-	<!-- <button class="submit-button btn variant-filled" on:click={submit}>Submit</button> -->
+	<div class="flex flex-row grid-rows-1 items-end content-center items-center">
+		<button class="submit-button btn variant-filled" on:click={submit}>Submit</button>
+		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<!-- svelte-ignore a11y-missing-attribute -->
+		<input
+			class="delete-button btn"
+			type="image"
+			src="/images/delete.png"
+			on:click={handleDelete}
+			on:keypress={handleDelete}
+		/>
+	</div>
 </div>
 
 <style lang="postcss">
-	.input-box {
-		position: relative;
-		width: 100%;
-		width: 500px;
+	.message-input-container {
+		box-sizing: border-box;
+		padding: 10px;
+		min-width: 490px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;
@@ -92,26 +95,25 @@
 		color: black;
 	}
 
-	:global(.delete-icon) {
-		width: 36px;
-		position: absolute;
-		bottom: 15px;
-		right: 15px;
-		top: 660px;
-		cursor: pointer;
+	.input-box {
+		width: 100%;
+		height: 120px;
 	}
 
-	:global(.delete-icon:hover) {
-		width: 40px;
+	.input-box:focus {
+		outline: none;
 	}
 
-	:global(.submit-button) {
-		position: absolute;
-		bottom: 15px;
-		right: 65px;
-		top: 660px;
-		height: 30px;
-		cursor: pointer;
+	.delete-button {
+		padding-right: 0px;
+		padding-bottom: 0px;
+		padding-top: 0px;
+		padding-left: 10px;
+		width: 60px;
+		height: 40px;
+	}
+
+	.submit-button {
 		color: black;
 		background-color: #707070;
 	}
