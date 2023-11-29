@@ -8,12 +8,18 @@
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
-	import type { Mistake, StateMessage, StateMessageSeeds } from '$lib/lib/States';
+	import type { COMFrequency, Mistake, State, StateMessage } from '$lib/lib/States';
 	import { onMount } from 'svelte';
-	import { Modal, getModalStore } from '@skeletonlabs/skeleton';
-	import type { ModalSettings, ModalComponent, ModalStore } from '@skeletonlabs/skeleton';
+	import { getModalStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings } from '@skeletonlabs/skeleton';
 
-	let state: StateMessage | undefined;
+	let state: State | undefined; // Required state for user to match
+	let currentMessage: string = 'Radio messages will appear here.'; // Most recent radio message from ATC
+	let currentTarget: COMFrequency = {
+		frequency_type: 'GND',
+		frequency: 0,
+		callsign: 'current_target_callsign'
+	}; // Current ATC target
 
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
@@ -24,7 +30,7 @@
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
 	let messageInputMessage: string = 'Enter your radio message here.';
-	let messageOutputMessage: string = 'Radio responses will appear here.';
+	let messageOutputMessage: string = currentMessage;
 
 	// Holds current radio and transponder settings to be sent to server
 	type RadioMode = 'COM' | 'NAV';
@@ -36,36 +42,22 @@
 	let radioDialMode: string = 'OFF';
 	let transponderFrequency: number = 7000;
 	let transponderIDENTEnabled: boolean = false;
+	let transponderDialModeIndex: number = 0;
 	let aircraftType: string = 'Cessna 172';
 	let userCallsign: string = 'G-OFLY';
 	let userPrefix: string = 'STUDENT';
+	let allocated_callsign: string = 'G-OFLY';
+	let currentLat: number = 0;
+	let currentLong: number = 0;
+	let scenarioSeed: number = 0;
+	let weatherSeed: number = 0;
 
 	const modalStore = getModalStore();
-
-	// If not wanting server stuff to deal with then can chuck all the functionality in here?
-	// It would make the whole project run on clientside and expose all simulation code and require local STT
 
 	// Generate the link to the scenario
 	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
 	if (unexpectedEvents) {
 		scenarioLink += '?unexpectedEvents=' + unexpectedEvents;
-	}
-
-	// Bodge to keep kneeboard delete button in the right place
-	function updateKneeboardOffset() {
-		if (!audioMessages) {
-			if (!voiceInput) {
-				kneeboardOffset = 480;
-			} else {
-				kneeboardOffset = 240;
-			}
-		} else {
-			if (!voiceInput) {
-				kneeboardOffset = 240;
-			} else {
-				kneeboardOffset = 0;
-			}
-		}
 	}
 
 	function isMistake(message: any): message is Mistake {
@@ -74,6 +66,41 @@
 
 	async function handleSubmit() {
 		// Check state matches expected state
+		if (!state) {
+			console.log('Error: No state');
+			return;
+		}
+
+		if (radioDialMode == 'OFF') {
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Error',
+				body: 'Radio dial is off'
+			});
+			return;
+		} else if (transponderDialModeIndex == 0) {
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Error',
+				body: 'Transponder dial is off'
+			});
+			return;
+		} else if (state.current_radio_frequency != radioActiveFrequency) {
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Error',
+				body: 'Radio frequency incorrect'
+			});
+			return;
+		} else if (state.current_transponder_frequency != transponderFrequency) {
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Error',
+				body: 'Transponder frequency incorrect'
+			});
+			return;
+		}
+
 		// Send message to server
 		let newStateMessage = await getNextState();
 		console.log(newStateMessage);
@@ -88,39 +115,51 @@
 				type: 'alert',
 				// Data
 				title: 'Mistake',
-				body: newStateMessage.details,
+				body: newStateMessage.details
 			};
 			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
-			console.log('new state');
-			state = newStateMessage;
-			messageOutputMessage = newStateMessage.message;
+			console.log('new state: ', newStateMessage);
+			state = newStateMessage.state;
+			currentMessage = newStateMessage.message;
+			messageOutputMessage = newStateMessage.message; // May be redundant
 		}
 		// Get response from server
 		// Update components with new state
 	}
 
-	const handleVoiceInputToggle = () => {
-		voiceInput = !voiceInput;
-		updateKneeboardOffset();
-	};
-
-	const handleAudioMessagesToggle = () => {
-		audioMessages = !audioMessages;
-		updateKneeboardOffset();
-	};
-
 	onMount(async () => {
-		// Get the state from the server
-		let newStateMessage = await getInitialState();
-		// Update the components with the new state
+		if (!initiateScenario())
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Fatal Error',
+				body: 'No response from server'
+			});
 	});
 
-	async function getInitialState(): Promise<StateMessage | undefined> {
-		try {
-			const [scenarioSeed, weatherSeed] = splitAndPadNumber(simpleHash(seed));
+	async function initiateScenario() {
+		// Get the state from the server
+		let initialState = await getInitialState();
+		// Update the components with the new state
+		if (initialState === undefined) {
+			// Handle error
+			console.log('Error: No response from server');
+			return 0;
+		} else {
+			state = initialState;
+			console.log('state: ', state);
+			currentTarget = initialState.current_target;
+		}
+	}
 
+	async function getInitialState(): Promise<State | undefined> {
+		try {
+			const [tempScenarioSeed, tempWeatherSeed] = splitAndPadNumber(simpleHash(seed));
+			scenarioSeed = tempScenarioSeed;
+			weatherSeed = tempWeatherSeed;
+
+			// Debugging
 			console.log({
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed,
@@ -173,7 +212,7 @@
 
 	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
 		try {
-			const response = await axios.post('http://localhost:3000/nextstate', {
+			const stateMessage: StateMessage = {
 				state: {
 					status: {
 						Parked: {
@@ -181,26 +220,28 @@
 							stage: 'PreDepartInfo'
 						}
 					},
-					prefix: 'STUDENT',
-					callsign: 'G-OFLY',
-					target_allocated_callsign: 'G-OFLY',
+					prefix: userPrefix,
+					callsign: userCallsign,
+					target_allocated_callsign: allocated_callsign,
 					squark: false,
 					current_target: {
-						frequency_type: 'AFIS',
-						frequency: 124.03,
-						callsign: 'Wellesbourne Information'
+						frequency_type: currentTarget.frequency_type,
+						frequency: currentTarget.frequency,
+						callsign: currentTarget.callsign
 					},
-					current_radio_frequency: 180.03,
-					current_transponder_frequency: 7000,
-					lat: 52.1922,
-					long: -1.6144,
+					current_radio_frequency: radioActiveFrequency,
+					current_transponder_frequency: transponderFrequency,
+					lat: currentLat,
+					long: currentLong,
 					emergency: 'None',
-					aircraft_type: 'Cessna 172'
+					aircraft_type: aircraftType
 				},
 				message: messageInputMessage,
-				scenario_seed: 1,
-				weather_seed: 1
-			});
+				scenario_seed: scenarioSeed,
+				weather_seed: weatherSeed
+			};
+
+			const response = await axios.post('http://localhost:3000/nextstate', stateMessage);
 
 			if (typeof response.data === 'object') {
 				return response.data.Mistake as Mistake;
@@ -231,7 +272,7 @@
 				checked={voiceInput}
 				active="bg-primary-500"
 				size="sm"
-				on:click={handleVoiceInputToggle}
+				on:click={() => (voiceInput = !voiceInput)}
 				>Voice input
 			</SlideToggle>
 			<SlideToggle
@@ -239,7 +280,7 @@
 				name="slider-small"
 				active="bg-primary-500"
 				size="sm"
-				on:click={handleAudioMessagesToggle}
+				on:click={() => (audioMessages = !audioMessages)}
 				>Audio messages
 			</SlideToggle>
 		</div>
@@ -253,7 +294,7 @@
 
 			{#if !audioMessages}
 				<div class="rt-message-output-container">
-					<MessageOutput bind:message={messageOutputMessage} />
+					<MessageOutput bind:message={messageOutputMessage} bind:currentTarget />
 				</div>
 			{/if}
 		</div>
@@ -261,16 +302,20 @@
 		<div class="radio-transponder-container flex flex-col items center gap-10">
 			<div>
 				<Radio
-					activeFrequency={radioActiveFrequency}
-					standbyFrequency={radioStandbyFrequency}
-					tertiaryFrequency={radioTertiaryFrequency}
-					{radioMode}
-					{radioDialMode}
-					transmitting={radioTransmitting}
+					bind:activeFrequency={radioActiveFrequency}
+					bind:standbyFrequency={radioStandbyFrequency}
+					bind:tertiaryFrequency={radioTertiaryFrequency}
+					bind:radioMode
+					bind:radioDialMode
+					bind:transmitting={radioTransmitting}
 				/>
 			</div>
 			<div>
-				<Transponder identEnabled={transponderIDENTEnabled} frequency={transponderFrequency} />
+				<Transponder
+					bind:identEnabled={transponderIDENTEnabled}
+					bind:frequency={transponderFrequency}
+					bind:transponderDialModeIndex
+				/>
 			</div>
 		</div>
 
@@ -285,10 +330,8 @@
 			<div
 				class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
 			>
-				<!-- Source -->
 				<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
 
-				<!-- Trigger -->
 				<button use:clipboard={{ element: 'scenarioLinkElement' }} class="btn variant-filled"
 					>Copy</button
 				>

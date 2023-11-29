@@ -83,8 +83,8 @@ fn generate_start_and_end_aerodromes(
     }
 }
 
-pub fn get_metor_sample(seed: u16, metor_data: METORData) -> METORDataSample {
-    let mut rng = SmallRng::seed_from_u64(seed as u64);
+pub fn get_metor_sample(seed: u64, metor_data: METORData) -> METORDataSample {
+    let mut rng = SmallRng::seed_from_u64(seed);
 
     let season = match seed % 4 {
         0 => Season::Spring,

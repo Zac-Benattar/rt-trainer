@@ -13,8 +13,6 @@ pub struct ScenarioGenerationParameters {
     pub weather_seed: u64,
     pub prefix: String,
     pub user_callsign: String,
-    pub radio_frequency: f32,
-    pub transponder_frequency: u16,
     pub aircraft_type: String,
 }
 
@@ -28,7 +26,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 
     State {
         status: Status::Parked {
-            stage: ParkedToTakeoffStage::PreRadioCheck,
+            stage: ParkedStage::PreRadioCheck,
         },
         lat: start_aerodrome.lat,
         long: start_aerodrome.long,
@@ -42,7 +40,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
         target_allocated_callsign: parameters.user_callsign, // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
-        current_radio_frequency: parameters.radio_frequency,
+        current_radio_frequency: start_aerodrome_frequency.frequency,
         current_transponder_frequency: 7000,
         aircraft_type: parameters.aircraft_type,
     }
@@ -50,18 +48,18 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
 
 pub fn generate_next_state(
     scenario_seed: u64,
-    weather_seed: u16,
+    weather_seed: u64,
     radiocall: String,
     current_state: State,
 ) -> Result<ServerResponse, Error> {
     match &current_state.status {
         Status::Parked { stage } => {
             match stage {
-                ParkedToTakeoffStage::PreRadioCheck => {
+                ParkedStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
                     return parse_radio_check(&scenario_seed, &radiocall, &current_state);
                 }
-                ParkedToTakeoffStage::PreDepartInfo => {
+                ParkedStage::PreDepartInfo => {
                     // Parse pretakeoff departure information request
                     return parse_departure_information_request(
                         &scenario_seed,
@@ -70,7 +68,7 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
-                ParkedToTakeoffStage::PreReadbackDepartInfo => {
+                ParkedStage::PreReadbackDepartInfo => {
                     // Parse pretakeoff departure information readback
                     return parse_departure_information_readback(
                         &scenario_seed,
@@ -79,7 +77,7 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
-                ParkedToTakeoffStage::PreTaxiRequest => {
+                ParkedStage::PreTaxiRequest => {
                     // Parse pretakeoff taxi request
                     return parse_taxi_request(
                         &scenario_seed,
@@ -88,7 +86,7 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
-                ParkedToTakeoffStage::PreTaxiClearanceReadback => {
+                ParkedStage::PreTaxiClearanceReadback => {
                     // Parse pretakeoff taxi clearance readback
                     // Move to taxiing status
                     return parse_taxi_readback(
@@ -100,36 +98,45 @@ pub fn generate_next_state(
                 }
             }
         }
-        Status::TaxiingToTakeoff { stage } => {
+        Status::Taxiing { stage } => {
             match stage {
-                TaxiingToTakeoffStage::PreReadyForDeparture => {
+                TaxiingStage::PreReadyForDeparture => {
                     // Parse pretakeoff ready for departure
                 }
-                TaxiingToTakeoffStage::PreInfoGivenForDeparture => {
+                TaxiingStage::PreInfoGivenForDeparture => {
                     // Parse pretakeoff information given for departure
                 }
-                TaxiingToTakeoffStage::PreClearedForTakeoff => {
+            }
+        }
+        Status::Holding {
+            stage,
+            holding_point,
+        } => {
+            match stage {
+                HoldingStage::PreClearedForTakeoff => {
                     // Parse pretakeoff cleared for takeoff
                 }
-                TaxiingToTakeoffStage::PreReadbackClearedForTakeoff => {
+                HoldingStage::PreReadbackClearedForTakeoff => {
                     // Parse pretakeoff cleared for takeoff readback
                     // Move to airbourne status
                 }
             }
         }
+        Status::Takeoff { runway } => todo!(),
         Status::Airborne {
             altitude,
             heading,
             speed,
             next_point,
         } => {}
-        Status::Landing { runway } => {}
-        Status::LandingToParked { position, stage } => {}
+        Status::Landing { runway } => todo!(),
+        Status::LandingToParked { position, stage } => todo!(),
+        Status::Descent {} => todo!(),
+        Status::Approach {} => todo!(),
     }
 
     Ok(ServerResponse::Mistake(Mistake {
-            details: "Unknown error".to_owned(),
-            message: "Unknown message".to_owned(),
-        },
-    ))
+        details: "Unknown error".to_owned(),
+        message: "Unknown message".to_owned(),
+    }))
 }

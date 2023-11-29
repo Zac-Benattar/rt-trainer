@@ -1,9 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-use super::aerodrome::COMFrequency;
+use super::aerodrome::{COMFrequency, HoldingPoint, Runway};
 
 #[derive(Deserialize, Serialize)]
-pub enum ParkedToTakeoffStage {
+pub enum ParkedStage {
     PreRadioCheck,
     PreDepartInfo,
     PreReadbackDepartInfo,
@@ -12,9 +12,13 @@ pub enum ParkedToTakeoffStage {
 }
 
 #[derive(Deserialize, Serialize)]
-pub enum TaxiingToTakeoffStage {
+pub enum TaxiingStage {
     PreReadyForDeparture,
     PreInfoGivenForDeparture,
+}
+
+#[derive(Deserialize, Serialize)]
+pub enum HoldingStage {
     PreClearedForTakeoff,
     PreReadbackClearedForTakeoff,
 }
@@ -28,7 +32,7 @@ pub enum InboundForJoinStage {
     PreAirodromeInSight,
     PreContactTower,
     PreAcknowledgeGoAround, // If told to go around by ATC
-    PreAnnounceGoAround, // If pilot decides to go around
+    PreAnnounceGoAround,    // If pilot decides to go around
 }
 
 #[derive(Deserialize, Serialize)]
@@ -39,10 +43,10 @@ pub enum JoinCiruitStage {
     PreAcknowledgementAltitude,
     PreReportDescending,
     PreAcknowledgeGoAround, // If told to go around by ATC
-    PreAnnounceGoAround, // If pilot decides to go around
+    PreAnnounceGoAround,    // If pilot decides to go around
 }
 
-# [derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum CircuitAndLandingStage {
     PreReportDownwind,
     PreReportTrafficInSight, // Optional if told to follow traffic
@@ -50,24 +54,31 @@ pub enum CircuitAndLandingStage {
     PreReadbackContinueApproach,
     PreReadbackLandingClearance,
     PreAcknowledgeGoAround, // If told to go around by ATC
-    PreAnnounceGoAround, // If pilot decides to go around
+    PreAnnounceGoAround,    // If pilot decides to go around
 }
 
 #[derive(Deserialize, Serialize)]
 pub enum LandedToParkedStage {
     PreHandshake, // For large airports - may not even be needed
     PreReadbackVacateRunwayRequest,
-    PreVacatedRunway, 
+    PreVacatedRunway,
     PreTaxiClearanceReadback,
 }
 
 #[derive(Deserialize, Serialize)]
 pub enum Status {
     Parked {
-        stage: ParkedToTakeoffStage,
+        stage: ParkedStage,
     },
-    TaxiingToTakeoff {
-        stage: TaxiingToTakeoffStage,
+    Taxiing {
+        stage: TaxiingStage,
+    },
+    Holding {
+        stage: HoldingStage,
+        holding_point: HoldingPoint,
+    },
+    Takeoff {
+        runway: Runway,
     },
     Airborne {
         altitude: u32,
@@ -75,6 +86,8 @@ pub enum Status {
         speed: u32,
         next_point: String,
     },
+    Descent {},
+    Approach {},
     Landing {
         runway: String,
     },
@@ -119,7 +132,7 @@ pub struct StateMessageSeed {
     pub state: State,
     pub message: String,
     pub scenario_seed: u64,
-    pub weather_seed: u16,
+    pub weather_seed: u64,
 }
 
 #[derive(Deserialize, Serialize)]

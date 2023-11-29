@@ -4,8 +4,8 @@ use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::COMFrequency,
     state::{
-        Emergency, Mistake, ParkedToTakeoffStage, ServerResponse, State, StateMessage, Status,
-        TaxiingToTakeoffStage,
+        Emergency, Mistake, ParkedStage, ServerResponse, State, StateMessage, Status,
+        TaxiingStage,
     },
 };
 
@@ -126,7 +126,7 @@ pub fn parse_radio_check(
 
     let next_state = State {
         status: Status::Parked {
-            stage: ParkedToTakeoffStage::PreDepartInfo,
+            stage: ParkedStage::PreDepartInfo,
         },
         lat: current_state.lat,
         long: current_state.long,
@@ -153,7 +153,7 @@ pub fn parse_radio_check(
 
 pub fn parse_departure_information_request(
     scenario_seed: &u64,
-    weather_seed: &u16,
+    weather_seed: &u64,
     departure_information_request: &String,
     current_state: &State,
 ) -> Result<ServerResponse, Error> {
@@ -222,7 +222,7 @@ pub fn parse_departure_information_request(
 
     let next_state = State {
         status: Status::Parked {
-            stage: ParkedToTakeoffStage::PreReadbackDepartInfo,
+            stage: ParkedStage::PreReadbackDepartInfo,
         },
         lat: current_state.lat,
         long: current_state.long,
@@ -253,7 +253,7 @@ pub fn parse_departure_information_request(
 
 pub fn parse_departure_information_readback(
     scenario_seed: &u64,
-    weather_seed: &u16,
+    weather_seed: &u64,
     departure_information_readback: &String,
     current_state: &State,
 ) -> Result<ServerResponse, Error> {
@@ -304,7 +304,7 @@ pub fn parse_departure_information_readback(
 
     let next_state = State {
         status: Status::Parked {
-            stage: ParkedToTakeoffStage::PreTaxiRequest,
+            stage: ParkedStage::PreTaxiRequest,
         },
         lat: current_state.lat,
         long: current_state.long,
@@ -331,7 +331,7 @@ pub fn parse_departure_information_readback(
 
 pub fn parse_taxi_request(
     scenario_seed: &u64,
-    weather_seed: &u16,
+    weather_seed: &u64,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<ServerResponse, Error> {
@@ -389,7 +389,7 @@ pub fn parse_taxi_request(
 
     let next_state = State {
         status: Status::Parked {
-            stage: ParkedToTakeoffStage::PreTaxiClearanceReadback,
+            stage: ParkedStage::PreTaxiClearanceReadback,
         },
         lat: current_state.lat,
         long: current_state.long,
@@ -416,7 +416,7 @@ pub fn parse_taxi_request(
 
 pub fn parse_taxi_readback(
     scenario_seed: &u64,
-    weather_seed: &u16,
+    weather_seed: &u64,
     taxi_request: &String,
     current_state: &State,
 ) -> Result<ServerResponse, Error> {
@@ -470,8 +470,8 @@ pub fn parse_taxi_readback(
     let atc_response = String::new();
 
     let next_state = State {
-        status: Status::TaxiingToTakeoff {
-            stage: TaxiingToTakeoffStage::PreReadyForDeparture,
+        status: Status::Taxiing {
+            stage: TaxiingStage::PreReadyForDeparture,
         },
         lat: current_state.lat,
         long: current_state.long,
