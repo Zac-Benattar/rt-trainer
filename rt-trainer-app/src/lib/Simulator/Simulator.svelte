@@ -25,12 +25,10 @@
 	export let voiceInput: boolean = false;
 	export let audioMessages: boolean = false;
 	export let seed: string = '0';
-	let kneeboardOffset: number = 480;
 
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
 	let messageInputMessage: string = 'Enter your radio message here.';
-	let messageOutputMessage: string = currentMessage;
 
 	// Holds current radio and transponder settings to be sent to server
 	type RadioMode = 'COM' | 'NAV';
@@ -39,14 +37,14 @@
 	let radioTertiaryFrequency: number = 177.2;
 	let radioTransmitting: boolean = false;
 	let radioMode: RadioMode = 'COM';
-	let radioDialMode: string = 'OFF';
+	let radioDialMode: string;
 	let transponderFrequency: number = 7000;
 	let transponderIDENTEnabled: boolean = false;
 	let transponderDialModeIndex: number = 0;
-	let aircraftType: string = 'Cessna 172';
-	let userCallsign: string = 'G-OFLY';
-	let userPrefix: string = 'STUDENT';
-	let allocated_callsign: string = 'G-OFLY';
+	let aircraftType: string;
+	let userCallsign: string;
+	let userPrefix: string;
+	let allocated_callsign: string;
 	let currentLat: number = 0;
 	let currentLong: number = 0;
 	let scenarioSeed: number = 0;
@@ -123,7 +121,6 @@
 			console.log('new state: ', newStateMessage);
 			state = newStateMessage.state;
 			currentMessage = newStateMessage.message;
-			messageOutputMessage = newStateMessage.message; // May be redundant
 		}
 		// Get response from server
 		// Update components with new state
@@ -294,7 +291,7 @@
 
 			{#if !audioMessages}
 				<div class="rt-message-output-container">
-					<MessageOutput bind:message={messageOutputMessage} bind:currentTarget />
+					<MessageOutput bind:message={currentMessage} bind:currentTarget />
 				</div>
 			{/if}
 		</div>
