@@ -87,6 +87,7 @@
 		box-sizing: border-box;
 		padding: 10px;
 		min-width: 490px;
+		max-width:490px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;
@@ -98,6 +99,8 @@
 	.input-box {
 		width: 100%;
 		height: 120px;
+		resize: none;
+		overflow: scroll;
 	}
 
 	.input-box:focus {

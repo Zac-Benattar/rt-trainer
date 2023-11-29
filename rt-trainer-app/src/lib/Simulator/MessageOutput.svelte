@@ -11,19 +11,14 @@
 		position: relative;
 		width: 100%;
 		min-width: 490px;
+		max-width: 490px;
 		height: 200px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;
 		border-radius: 5px;
 		color: black;
-	}
-
-	:global(.icon) {
-		width: 25px;
-		position: absolute;
-		bottom: 15px;
-		right: 15px;
-		cursor: pointer;
+		resize: none;
+		overflow: scroll;
 	}
 </style>

@@ -37,13 +37,12 @@
 		class="input-box"
 		on:focus={handleFocus}
 		on:focusout={handleFocusOut}
-		on:keypress={handleKeypress}
 	>
 		Make notes here.
 	</p>
 	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 	<!-- svelte-ignore a11y-missing-attribute -->
-	<input class="delete-button btn" type="image" src="/images/delete.png" on:click={handleDelete} on:keypress={handleDelete}/>
+	<input class="delete-button btn" type="image" src="/images/delete.png" on:click={handleDelete} />
 </div>
 
 <style lang="postcss">
@@ -51,6 +50,7 @@
 		box-sizing: border-box;
 		padding: 10px;
 		min-width: 490px;
+		max-width: 490px;
 		height: 390px;
 		background-color: #fff;
 		padding: 20px;
@@ -62,6 +62,8 @@
 	.input-box {
 		width: 100%;
 		height: 430px;
+		resize: none;
+		overflow: scroll;
 	}
 
 	.input-box:focus {

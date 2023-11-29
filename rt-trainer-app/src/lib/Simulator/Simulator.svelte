@@ -69,7 +69,6 @@
 	}
 
 	async function handleSubmit() {
-		console.log('Submitting message: ' + messageInputMessage);
 		// Check state matches expected state
 		// Send message to server
 		let newStateMessage = await getNextState();
@@ -80,7 +79,8 @@
 		} else if (isMistake(newStateMessage)) {
 			// Handle mistake
 			console.log('mistake');
-			messageOutputMessage = newStateMessage.message;
+			// Pop up modal with mistake details
+
 		} else {
 			// Update the components with the new state
 			console.log('new state');
@@ -191,6 +191,11 @@
 				scenario_seed: 1,
 				weather_seed: 1
 			});
+
+			if (typeof response.data === 'object') {
+				return response.data.Mistake as Mistake;
+			}
+			
 			return response.data;
 		} catch (error) {
 			console.error('Error: ', error);
@@ -259,9 +264,7 @@
 			</div>
 		</div>
 
-		<div
-			class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap"
-		>
+		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
 			<div>
 				<Map />
 			</div>
