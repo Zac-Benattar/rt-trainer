@@ -37,6 +37,7 @@ declare module '$env/static/private' {
 	export const TERM_PROGRAM_VERSION: string;
 	export const LANGUAGE: string;
 	export const NODE: string;
+	export const FLYCTL_INSTALL: string;
 	export const MEMORY_PRESSURE_WRITE: string;
 	export const COLOR: string;
 	export const npm_config_local_prefix: string;
@@ -91,6 +92,7 @@ declare module '$env/static/private' {
 	export const DISPLAY: string;
 	export const npm_lifecycle_event: string;
 	export const SHLVL: string;
+	export const LC_MEASUREMENT: string;
 	export const XDG_VTNR: string;
 	export const XDG_SESSION_ID: string;
 	export const npm_config_user_agent: string;
@@ -157,6 +159,7 @@ declare module '$env/dynamic/private' {
 		TERM_PROGRAM_VERSION: string;
 		LANGUAGE: string;
 		NODE: string;
+		FLYCTL_INSTALL: string;
 		MEMORY_PRESSURE_WRITE: string;
 		COLOR: string;
 		npm_config_local_prefix: string;
@@ -211,6 +214,7 @@ declare module '$env/dynamic/private' {
 		DISPLAY: string;
 		npm_lifecycle_event: string;
 		SHLVL: string;
+		LC_MEASUREMENT: string;
 		XDG_VTNR: string;
 		XDG_SESSION_ID: string;
 		npm_config_user_agent: string;

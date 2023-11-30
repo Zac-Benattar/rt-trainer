@@ -1,120 +1,63 @@
-import { writable } from 'svelte/store';
-import type { COMFrequency, SimulatorSettings, State } from './lib/States';
+import { derived, writable } from 'svelte/store';
+import type { COMFrequency, SimulatorSettings, SimulatorState } from './lib/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
-    prefix: 'STUDENT',
-    callsign: 'G-OSKY',
-    aircraftType: 'Cessna 172'
+	prefix: 'STUDENT',
+	callsign: 'G-OSKY',
+	aircraftType: 'Cessna 172'
+};
+
+const initialSimulatorState: SimulatorState = {
+	radio_mode: 'OFF',
+	radio_dial_mode: 'OFF',
+	radio_active_frequency: 0,
+	radio_standby_frequency: 0,
+	radio_tertiary_frequency: 0,
+	transponder_dial_mode: 'OFF',
+	transponder_frequency: 0,
+	transponder_ident_enabled: false,
+	transponder_vfr_has_executed: false,
+	message: '',
+	atc_message: ''
+};
+
+const initialSimulatorTarget: COMFrequency = {
+	frequency: 0,
+	callsign: 'NONE',
+	frequency_type: 'AFIS'
 };
 
 export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
 
+export const simulatorStateStore = writable<SimulatorState>(initialSimulatorState);
+
+export const simulatorCurrentTargetStore = writable<COMFrequency>(initialSimulatorTarget);
+
+export const simulatorMessageStore = derived(simulatorStateStore, ($simulatorStateStore) => {
+    return $simulatorStateStore.message;
+});
+
+export const simulatorATCMessageStore = derived(simulatorStateStore, ($simulatorStateStore) => {
+    return $simulatorStateStore.atc_message;
+});
+
 export function setSettingsPrefix(prefix: string) {
-    simulatorSettingsStore.update(settings => {
-        settings.prefix = prefix;
-        return settings;
-    });
+	simulatorSettingsStore.update((settings) => {
+		settings.prefix = prefix;
+		return settings;
+	});
 }
 
 export function setSettingsCallsign(callsign: string) {
-    simulatorSettingsStore.update(settings => {
-        settings.callsign = callsign;
-        return settings;
-    });
+	simulatorSettingsStore.update((settings) => {
+		settings.callsign = callsign;
+		return settings;
+	});
 }
 
 export function setSettingsAircraftType(aircraftType: string) {
-    simulatorSettingsStore.update(settings => {
-        settings.aircraftType = aircraftType;
-        return settings;
-    });
+	simulatorSettingsStore.update((settings) => {
+		settings.aircraftType = aircraftType;
+		return settings;
+	});
 }
-
-export const simulatorStateStore = writable<State>();
-
-export function setStatePrefix(prefix: string) {
-    simulatorStateStore.update(state => {
-        state.prefix = prefix;
-        return state;
-    })
-}
-
-export function setStateCallsign(callsign: string) {
-    simulatorStateStore.update(state => {
-        state.callsign = callsign;
-        return state;
-    })
-}
-
-export function setStateTargetAllocatedCallsign(callsign: string) {
-    simulatorStateStore.update(state => {
-        state.target_allocated_callsign = callsign;
-        return state;
-    })
-}
-
-export function setStateSquark(squark: boolean) {
-    simulatorStateStore.update(state => {
-        state.squark = squark;
-        return state;
-    })
-}
-
-export function setStateCurrentTarget(target: COMFrequency) {
-    simulatorStateStore.update(state => {
-        state.current_target = target;
-        return state;
-    })
-}
-
-export function setStateCurrentRadioFrequency(frequency: number) {
-    simulatorStateStore.update(state => {
-        state.current_radio_frequency = frequency;
-        return state;
-    })
-}
-
-export function setStateCurrentTransponderFrequency(frequency: number) {
-    simulatorStateStore.update(state => {
-        state.current_transponder_frequency = frequency;
-        return state;
-    })
-}
-
-export function setStateLat(lat: number) {
-    simulatorStateStore.update(state => {
-        state.lat = lat;
-        return state;
-    })
-}
-
-export function setStateLong(long: number) {
-    simulatorStateStore.update(state => {
-        state.long = long;
-        return state;
-    })
-}
-
-export function setStateEmergency(emergency: "None" | "Mayday") {
-    simulatorStateStore.update(state => {
-        state.emergency = emergency;
-        return state;
-    })
-}
-
-export function setStateAircraftType(aircraftType: string) {
-    simulatorStateStore.update(state => {
-        state.aircraft_type = aircraftType;
-        return state;
-    })
-}
-
-export function setStateStatus(status: string) {
-    simulatorStateStore.update(state => {
-        state.status = status;
-        return state;
-    })
-}
-
-
-

@@ -8,53 +8,40 @@
 	import { clipboard } from '@skeletonlabs/skeleton';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
-	import type { COMFrequency, Mistake, State, StateMessage } from '$lib/lib/States';
+	import type {
+		COMFrequency,
+		Mistake,
+		SimulatorSettings,
+		ScenarioState,
+		StateMessage,
+		SimulatorState
+	} from '$lib/lib/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import { simulatorSettingsStore, simulatorStateStore } from '$lib/stores';
 
+	// Simulator state and settings
 	let scenarioSeed: number = 0;
 	let weatherSeed: number = 0;
-	let requiredState: State | undefined; // Required state for user to match
-	let currentMessage: string = 'Radio messages will appear here.'; // Most recent radio message from ATC
-	let currentState: State = {
-		status: {
-			Parked: {
-				position: 'A1',
-				stage: 'PreDepartInfo'
-			}
-		},
-		prefix: 'G',
-		callsign: 'ABC',
-		target_allocated_callsign: 'ABC',
-		squark: false,
-		current_target: {
-			frequency_type: 'AFIS',
-			frequency: 123.17,
-			callsign: 'ABC'
-		},
-		current_radio_frequency: 123.17,
-		current_transponder_frequency: 7000,
-		lat: 0,
-		long: 0,
-		emergency: 'None',
-		aircraft_type: 'A320'
-	}; // Current state of the simulator
-
-	export let unexpectedEvents: boolean = false;
-	export let voiceInput: boolean = false;
-	export let audioMessages: boolean = false;
-	export let seed: string = '0';
-	let callsign: string;
-	let prefix: string;
-	let aircraftType: string;
+	let requiredState: ScenarioState | undefined; // Required state for user to match
+	let simulatorSettings: SimulatorSettings; // Current settings of the simulator
+	let simulatorState: SimulatorState;
+	let currentTarget: COMFrequency;
 
 	simulatorSettingsStore.subscribe((value) => {
-		prefix = value.prefix;
-		callsign = value.callsign;
-		aircraftType = value.aircraftType;
+		simulatorSettings = value;
 	});
+
+	simulatorStateStore.subscribe((value) => {
+		simulatorState = value;
+	});
+
+	// Page settings
+	export let unexpectedEvents: boolean = false;
+	export let seed: string = '0';
+	let voiceInput: boolean = false;
+	let audioMessages: boolean = false;
 
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
@@ -79,28 +66,30 @@
 			return;
 		}
 
-		if (radioDialMode == 'OFF') {
+		if (simulatorState.radio_dial_mode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio dial is off'
 			});
 			return;
-		} else if (transponderDialModeIndex == 0) {
+		} else if (simulatorState.transponder_dial_mode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Transponder dial is off'
 			});
 			return;
-		} else if (requiredState.current_radio_frequency != radioActiveFrequency) {
+		} else if (requiredState.current_radio_frequency != simulatorState.radio_active_frequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio frequency incorrect'
 			});
 			return;
-		} else if (requiredState.current_transponder_frequency != transponderFrequency) {
+		} else if (
+			requiredState.current_transponder_frequency != simulatorState.transponder_frequency
+		) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -130,7 +119,7 @@
 			// Update the components with the new state
 			console.log('new state: ', newStateMessage);
 			requiredState = newStateMessage.state;
-			currentMessage = newStateMessage.message;
+			simulatorState.atc_message = newStateMessage.message;
 		}
 		// Get response from server
 		// Update components with new state
@@ -160,31 +149,20 @@
 		}
 	}
 
-	async function getInitialState(): Promise<State | undefined> {
+	async function getInitialState(): Promise<ScenarioState | undefined> {
 		try {
 			const [tempScenarioSeed, tempWeatherSeed] = splitAndPadNumber(simpleHash(seed));
 			scenarioSeed = tempScenarioSeed;
 			weatherSeed = tempWeatherSeed;
 
-			// Debugging
-			console.log({
-				scenario_seed: scenarioSeed,
-				weather_seed: weatherSeed,
-				prefix: prefix,
-				user_callsign: callsign,
-				radio_frequency: radioActiveFrequency,
-				transponder_frequency: transponderFrequency,
-				aircraft_type: aircraftType
-			});
-
 			const response = await axios.post('http://localhost:3000/initialstate', {
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed,
-				prefix: prefix,
-				user_callsign: callsign,
-				radio_frequency: radioActiveFrequency,
-				transponder_frequency: transponderFrequency,
-				aircraft_type: aircraftType
+				prefix: simulatorSettings.prefix,
+				user_callsign: simulatorSettings.callsign,
+				radio_frequency: simulatorState.radio_active_frequency,
+				transponder_frequency: simulatorState.transponder_frequency,
+				aircraft_type: simulatorSettings.aircraftType
 			});
 
 			return response.data;
@@ -218,6 +196,10 @@
 	}
 
 	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
+		if (!requiredState) {
+			console.log('Error: No state');
+			return;
+		}
 		try {
 			const stateMessage: StateMessage = {
 				state: {
@@ -227,21 +209,19 @@
 							stage: 'PreDepartInfo'
 						}
 					},
-					prefix: prefix,
-					callsign: callsign,
-					target_allocated_callsign: allocated_callsign,
+					prefix: simulatorSettings.prefix,
+					callsign: simulatorSettings.callsign,
+					target_allocated_callsign: requiredState.current_target.callsign,
 					squark: false,
 					current_target: {
 						frequency_type: currentTarget.frequency_type,
 						frequency: currentTarget.frequency,
 						callsign: currentTarget.callsign
 					},
-					current_radio_frequency: radioActiveFrequency,
-					current_transponder_frequency: transponderFrequency,
-					lat: currentLat,
-					long: currentLong,
+					current_radio_frequency: simulatorState.radio_active_frequency,
+					current_transponder_frequency: simulatorState.transponder_frequency,
 					emergency: 'None',
-					aircraft_type: aircraftType
+					aircraft_type: simulatorSettings.aircraftType
 				},
 				message: messageInputMessage,
 				scenario_seed: scenarioSeed,
@@ -295,34 +275,23 @@
 		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
 			{#if !voiceInput}
 				<div class="rt-message-input-container">
-					<MessageInput bind:message={messageInputMessage} on:submit={handleSubmit} />
+					<MessageInput on:submit={handleSubmit} />
 				</div>
 			{/if}
 
 			{#if !audioMessages}
 				<div class="rt-message-output-container">
-					<MessageOutput bind:message={currentMessage} bind:currentTarget />
+					<MessageOutput />
 				</div>
 			{/if}
 		</div>
 
 		<div class="radio-transponder-container flex flex-col items center gap-10">
 			<div>
-				<Radio
-					bind:activeFrequency={radioActiveFrequency}
-					bind:standbyFrequency={radioStandbyFrequency}
-					bind:tertiaryFrequency={radioTertiaryFrequency}
-					bind:radioMode
-					bind:radioDialMode
-					bind:transmitting={radioTransmitting}
-				/>
+				<Radio />
 			</div>
 			<div>
-				<Transponder
-					bind:identEnabled={transponderIDENTEnabled}
-					bind:frequency={transponderFrequency}
-					bind:transponderDialModeIndex
-				/>
+				<Transponder />
 			</div>
 		</div>
 

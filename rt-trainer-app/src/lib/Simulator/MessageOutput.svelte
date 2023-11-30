@@ -1,16 +1,26 @@
 <script lang="ts">
 	import type { COMFrequency } from '$lib/lib/States';
+	import { simulatorCurrentTargetStore, simulatorATCMessageStore } from '$lib/stores';
 
-	export let message: string = 'Radio messages will appear here.';
-	export let currentTarget: COMFrequency;
+	let simulatorCurrentTarget: COMFrequency;
+
+	simulatorCurrentTargetStore.subscribe((value) => {
+		simulatorCurrentTarget = value;
+	});
+
+	let atcMessage: string;
+
+	simulatorATCMessageStore.subscribe((value) => {
+		atcMessage = value;
+	});
 </script>
 
 <div class="kneeboard flex flex-col grid-cols-1">
-	<p class="output-box">{message}</p>
+	<p class="output-box">{atcMessage}</p>
 	<p class="output-box">
-		Current Target: {currentTarget.callsign}<br />
-		Frequency: {currentTarget.frequency} <br />
-		Type: {currentTarget.frequency_type}
+		Current Target: {simulatorCurrentTarget.callsign}<br />
+		Frequency: {simulatorCurrentTarget.frequency} <br />
+		Type: {simulatorCurrentTarget.frequency_type}
 	</p>
 </div>
 

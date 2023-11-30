@@ -4,8 +4,10 @@
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import type { SimulatorState } from '$lib/lib/States';
+	import { simulatorStateStore } from '$lib/stores';
 
-	var TransponderDialModes: ArrayMaxLength7MinLength2 = [
+	const transponderDialModes: ArrayMaxLength7MinLength2 = [
 		'OFF',
 		'SBY',
 		'GND',
@@ -14,6 +16,7 @@
 		'ALT',
 		'TEST'
 	];
+
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
 		string,
@@ -23,14 +26,22 @@
 		string?,
 		string?
 	];
-	export let identEnabled: boolean = false;
-	export let transponderDialModeIndex: number = 0;
-	export let displayOn: boolean = false;
-	export let digitArr = [7, 0, 0, 0];
-	export let frequency: number = 7000;
-	export let frequencyDialEnabled: boolean = false;
-	export let displayDigitSelected: number = 0;
+
+	// Holds current transponder settings
+	let simulatorState: SimulatorState;
+	let dialModeIndex: number = 0;
+	let displayOn: boolean = false;
+	let digitArr = [7, 0, 0, 0];
+	let frequency: number = 7000;
+	let frequencyDialEnabled: boolean = false;
+	let displayDigitSelected: number = 0;
 	let mounted: boolean = false;
+
+	simulatorStateStore.subscribe((value) => {
+		simulatorState = value;
+	});
+
+	// $: simulatorStateStore.set(simulatorState);
 
 	const dispatch = createEventDispatcher();
 
@@ -39,24 +50,24 @@
 	}
 
 	// Trigger onTransponderDialModeChange when transponderDialMode changes
-	$: onTransponderDialModeChange(transponderDialModeIndex);
+	$: onTransponderDialModeChange(dialModeIndex);
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
-		if (transponderDialModeIndex != 0) {
+		if (simulatorState.transponder_dial_mode != 'OFF') {
 			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
 			// Make flash continuously when clicked, untill clicked again
 			IDENTModeButton.classList.toggle('blink-continiously');
-			identEnabled = !identEnabled;
+			simulatorState.transponder_ident_enabled = !simulatorState.transponder_ident_enabled;
 		}
 	};
 
 	const handleVFRButtonClick = () => {
-		if (transponderDialModeIndex != 0) {
+		if (simulatorState.transponder_dial_mode != 'OFF') {
 			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
 			// Make flash on when pressed then remain off
 			VFRModeButton.classList.toggle('blink-once');
-			dispatch('VFR Clicked');
+			simulatorState.transponder_ident_enabled = true;
 		}
 	};
 
@@ -80,16 +91,32 @@
 		}
 	};
 
-	function onTransponderDialModeChange(newIndex: number) {
-		if (newIndex == 0) {
-			if (identEnabled) {
+	function onTransponderDialModeChange(newModeIndex: number) {
+		if (newModeIndex == 0) {
+			if (simulatorState.transponder_ident_enabled) {
 				const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
 				IDENTModeButton.classList.remove('active-button');
-				identEnabled = false;
+				simulatorState.transponder_ident_enabled = false;
 			}
+			simulatorState.transponder_dial_mode = 'OFF';
 			displayOn = false;
 			frequencyDialEnabled = false;
 		} else {
+			switch (newModeIndex) {
+				case 1:
+					simulatorState.transponder_dial_mode = 'SBY';
+				case 2:
+					simulatorState.transponder_dial_mode = 'GND';
+				case 3:
+					simulatorState.transponder_dial_mode = 'STBY';
+				case 4:
+					simulatorState.transponder_dial_mode = 'ON';
+				case 5:
+					simulatorState.transponder_dial_mode = 'ALT';
+				case 6:
+					simulatorState.transponder_dial_mode = 'TEST';
+			}
+
 			displayOn = true;
 			frequencyDialEnabled = true;
 		}
@@ -118,13 +145,13 @@
 
 <div class="transponder-container-outer relative card">
 	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={TransponderDialModes} bind:CurrentModeIndex={transponderDialModeIndex} />
+		<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
 		<TransponderDisplay
 			DisplayOn={displayOn}
-			mode={TransponderDialModes[transponderDialModeIndex]}
+			mode={transponderDialModes[dialModeIndex]}
 			{digitArr}
 			DigitSelected={displayDigitSelected}
 		/>

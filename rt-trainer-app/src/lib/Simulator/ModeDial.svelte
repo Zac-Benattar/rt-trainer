@@ -76,7 +76,7 @@
 		var radius = 60;
 		if (centerDiv != null) {
 			for (let i = 0; i < Modes.length; i++) {
-				if (Modes[i] != null) {
+				if (Modes[i] != undefined) {
 					addMode(
 						Modes[i],
 						radius * Math.sin(angle),

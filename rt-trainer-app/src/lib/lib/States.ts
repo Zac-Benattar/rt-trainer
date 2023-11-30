@@ -56,7 +56,7 @@ export type Aerodrome = {
     metor_data: METORData
 }
 
-export type State = {
+export type ScenarioState = {
     status: Status,
     prefix: string,
     callsign: string,
@@ -71,15 +71,31 @@ export type State = {
     aircraft_type: string
 }
 
+export type SimulatorState = {
+    radio_mode: "OFF" | "COM" | "NAV",
+    radio_dial_mode: "OFF" | "COM" | "NAV",
+    radio_active_frequency: number,
+    radio_standby_frequency: number,
+    radio_tertiary_frequency: number,
+    transponder_dial_mode: TransponderDialMode
+    transponder_frequency: number,
+    transponder_ident_enabled: boolean,
+    transponder_vfr_has_executed: boolean,
+    message: string,
+    atc_message: string,
+}
+
+export type TransponderDialMode = "OFF" | "SBY" | "GND" | "STBY" | "ON" | "ALT" | "TEST";
+
 export type StateMessageSeeds = {
-    state: State,
+    state: ScenarioState,
     message: string,
     scenario_seed: number,
     weather_seed: number
 }
 
 export type StateMessage = {
-    state: State,
+    state: ScenarioState,
     message: string
 }
 
