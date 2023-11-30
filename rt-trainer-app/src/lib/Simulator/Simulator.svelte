@@ -25,7 +25,8 @@
 		simulatorRadioStateStore,
 		simulatorTransponderStateStore,
 		simulatorMessageStore,
-		simulatorATCMessageStore
+		simulatorATCMessageStore,
+		simulatorCurrentTargetStore
 	} from '$lib/stores';
 
 	// Simulator state and settings
@@ -53,6 +54,10 @@
 	simulatorMessageStore.subscribe((value) => {
 		userMessage = value;
 	});
+
+	$: if (requiredState) {
+		currentTarget = requiredState.current_target;
+	}
 
 	// Page settings
 	export let unexpectedEvents: boolean = false;
@@ -96,7 +101,7 @@
 				body: 'Transponder dial is off'
 			});
 			return;
-		} else if (radioState.active_frequency != requiredState.current_radio_frequency) {
+		} else if (radioState.active_frequency.toFixed(3) != requiredState.current_radio_frequency.toFixed(3)) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -114,7 +119,7 @@
 
 		// Send message to server
 		let newStateMessage = await getNextState();
-		console.log(newStateMessage);
+		console.log('Received state: ', newStateMessage);
 		if (newStateMessage === undefined) {
 			// Handle error
 			console.log('Error: No response from server');
@@ -157,9 +162,9 @@
 			console.log('Error: No response from server');
 			return 0;
 		} else {
+			console.log(initialState);
 			requiredState = initialState;
-			console.log('state: ', requiredState);
-			currentTarget = initialState.current_target;
+			simulatorCurrentTargetStore.set(initialState.current_target);
 		}
 	}
 
@@ -223,7 +228,7 @@
 					},
 					prefix: simulatorSettings.prefix,
 					callsign: simulatorSettings.callsign,
-					target_allocated_callsign: requiredState.current_target.callsign,
+					target_allocated_callsign: requiredState.target_allocated_callsign,
 					squark: false,
 					current_target: {
 						frequency_type: currentTarget.frequency_type,
@@ -239,6 +244,8 @@
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed
 			};
+
+			console.log('Sending state: ', stateMessage);
 
 			const response = await axios.post('http://localhost:3000/nextstate', stateMessage);
 

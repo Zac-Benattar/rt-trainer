@@ -10,7 +10,7 @@ use crate::helpers::jsoncheckers::{
     invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json,
 };
 use crate::helpers::preprocessors::process_string;
-use crate::models::state::{State, StateMessage, StateMessageSeed, ServerResponse};
+use crate::models::state::{SentState, StateMessage, StateMessageSeed, ServerResponse};
 
 /* Gets the first state that the frontend should match.
 The frontend will then ensure the radio and transponder are set to the
@@ -18,7 +18,7 @@ required settings defined in the returned state. The next state is then requeste
 along with the seed and radio call. If radio call is correct next state is given. */
 pub async fn get_initial_state(
     Json(scenario_generation_parameters): Json<states::ScenarioGenerationParameters>,
-) -> Result<(StatusCode, Json<State>), CustomError> {
+) -> Result<(StatusCode, Json<SentState>), CustomError> {
     // Filter out empty json
     if invalid_scenario_generation_parameters_json(Json(&scenario_generation_parameters)) {
         return Err(CustomError::BadRequest);

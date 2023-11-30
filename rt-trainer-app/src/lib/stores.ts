@@ -3,7 +3,7 @@ import type { RadioState, COMFrequency, SimulatorSettings, TransponderState } fr
 
 const initialSimulatorSettings: SimulatorSettings = {
 	prefix: 'STUDENT',
-	callsign: 'G-OSKY',
+	callsign: 'G-OFLY',
 	aircraftType: 'Cessna 172'
 };
 

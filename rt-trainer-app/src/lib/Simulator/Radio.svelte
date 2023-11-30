@@ -49,7 +49,6 @@
 	};
 
 	const handleNAVButtonClick = () => {
-		console.log(radioState.dial_mode);
 		if (radioState.dial_mode != 'OFF') {
 			const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
 			if (NAVModeButton != null) {

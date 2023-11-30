@@ -112,7 +112,7 @@ pub enum Emergency {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct State {
+pub struct SentState {
     pub status: Status,
     pub prefix: String,
     pub callsign: String,
@@ -128,8 +128,22 @@ pub struct State {
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct RecievedState {
+    pub status: Status,
+    pub prefix: String,
+    pub callsign: String,
+    pub target_allocated_callsign: String,
+    pub squark: bool,
+    pub current_target: COMFrequency,
+    pub current_radio_frequency: f32,
+    pub current_transponder_frequency: u16,
+    pub emergency: Emergency,
+    pub aircraft_type: String,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct StateMessageSeed {
-    pub state: State,
+    pub state: RecievedState,
     pub message: String,
     pub scenario_seed: u64,
     pub weather_seed: u64,
@@ -137,7 +151,7 @@ pub struct StateMessageSeed {
 
 #[derive(Deserialize, Serialize)]
 pub struct StateMessage {
-    pub state: State,
+    pub state: SentState,
     pub message: String,
 }
 

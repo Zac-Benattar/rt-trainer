@@ -16,7 +16,7 @@ pub struct ScenarioGenerationParameters {
     pub aircraft_type: String,
 }
 
-pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State {
+pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> SentState {
     let start_aerodrome: Aerodrome = match get_start_and_end_aerodromes(parameters.scenario_seed) {
         Some((start, _)) => start,
         None => panic!("Could not find start aerodrome"),
@@ -24,7 +24,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> State
     let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
     // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
-    State {
+    SentState {
         status: Status::Parked {
             stage: ParkedStage::PreRadioCheck,
         },
@@ -50,7 +50,7 @@ pub fn generate_next_state(
     scenario_seed: u64,
     weather_seed: u64,
     radiocall: String,
-    current_state: State,
+    current_state: RecievedState,
 ) -> Result<ServerResponse, Error> {
     match &current_state.status {
         Status::Parked { stage } => {

@@ -183,7 +183,7 @@ pub fn get_large_aerodrome(seed: u64) -> Aerodrome {
 pub fn get_small_aerodrome(seed: u64) -> Aerodrome {
     let afis = COMFrequency {
         frequency_type: COMFrequencyType::AFIS,
-        frequency: 124.030,
+        frequency: 180.030,
         callsign: "Wellesbourne Information".to_string(),
     };
 

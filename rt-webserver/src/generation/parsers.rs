@@ -4,8 +4,8 @@ use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::COMFrequency,
     state::{
-        Emergency, Mistake, ParkedStage, ServerResponse, State, StateMessage, Status,
-        TaxiingStage,
+        Emergency, Mistake, ParkedStage, ServerResponse, SentState, StateMessage, Status,
+        TaxiingStage, RecievedState,
     },
 };
 
@@ -47,12 +47,20 @@ pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &
 }
 
 pub fn parse_radio_check(
-    seed: &u64,
+    scenario_seed: &u64,
     radio_check: &String,
-    current_state: &State,
+    current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let message = radio_check;
     let message_words = message.split_whitespace().collect::<Vec<&str>>();
+
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+    match get_start_and_end_aerodromes(*scenario_seed) {
+        Some(aerodromes) => aerodromes,
+        None => {
+            return Err(Error::msg("Aerodromes not generated"));
+        }
+    };
 
     let radio_freq_index = match message_words.iter().position(|&x| x.contains('.')) {
         Some(index) => index,
@@ -124,12 +132,12 @@ pub fn parse_radio_check(
         &current_state.callsign, &current_state.current_target.callsign
     );
 
-    let next_state = State {
+    let next_state = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreDepartInfo,
         },
-        lat: current_state.lat,
-        long: current_state.long,
+        lat: start_and_end_aerodrome.0.lat,
+        long: start_and_end_aerodrome.0.long,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -155,7 +163,7 @@ pub fn parse_departure_information_request(
     scenario_seed: &u64,
     weather_seed: &u64,
     departure_information_request: &String,
-    current_state: &State,
+    current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let message_words = departure_information_request
         .split_whitespace()
@@ -220,12 +228,12 @@ pub fn parse_departure_information_request(
         metor_sample.dewpoint,
     );
 
-    let next_state = State {
+    let next_state = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreReadbackDepartInfo,
         },
-        lat: current_state.lat,
-        long: current_state.long,
+        lat: start_and_end_aerodrome.0.lat,
+        long: start_and_end_aerodrome.0.long,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -255,7 +263,7 @@ pub fn parse_departure_information_readback(
     scenario_seed: &u64,
     weather_seed: &u64,
     departure_information_readback: &String,
-    current_state: &State,
+    current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let message_words = departure_information_readback
         .split_whitespace()
@@ -302,12 +310,12 @@ pub fn parse_departure_information_readback(
     // ATC does not respond to this message
     let atc_response: String = String::new();
 
-    let next_state = State {
+    let next_state = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreTaxiRequest,
         },
-        lat: current_state.lat,
-        long: current_state.long,
+        lat: start_and_end_aerodrome.0.lat,
+        long: start_and_end_aerodrome.0.long,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -333,7 +341,7 @@ pub fn parse_taxi_request(
     scenario_seed: &u64,
     weather_seed: &u64,
     taxi_request: &String,
-    current_state: &State,
+    current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
@@ -387,12 +395,12 @@ pub fn parse_taxi_request(
         metor_sample.pressure,
     );
 
-    let next_state = State {
+    let next_state = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreTaxiClearanceReadback,
         },
-        lat: current_state.lat,
-        long: current_state.long,
+        lat: start_and_end_aerodrome.0.lat,
+        long: start_and_end_aerodrome.0.long,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -418,7 +426,7 @@ pub fn parse_taxi_readback(
     scenario_seed: &u64,
     weather_seed: &u64,
     taxi_request: &String,
-    current_state: &State,
+    current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
@@ -469,12 +477,12 @@ pub fn parse_taxi_readback(
 
     let atc_response = String::new();
 
-    let next_state = State {
+    let next_state = SentState {
         status: Status::Taxiing {
             stage: TaxiingStage::PreReadyForDeparture,
         },
-        lat: current_state.lat,
-        long: current_state.long,
+        lat: start_and_end_aerodrome.0.lat,
+        long: start_and_end_aerodrome.0.long,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,

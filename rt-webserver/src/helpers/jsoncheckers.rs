@@ -2,7 +2,7 @@ use axum::Json;
 
 use crate::{
     generation::states,
-    models::state::{State, StateMessageSeed},
+    models::state::{SentState, StateMessageSeed},
 };
 
 // Following functions are pretty much unimplemented but are here to show how the code should be structured
@@ -36,11 +36,11 @@ pub fn empty_scenario_generation_parameters_json(
         || scenario_generation_parameters.aircraft_type.is_empty()
 }
 
-pub fn invalid_state_data_json(Json(state): Json<&State>) -> bool {
+pub fn invalid_state_data_json(Json(state): Json<&SentState>) -> bool {
     empty_state_data_json(Json(state))
 }
 
-pub fn empty_state_data_json(Json(state): Json<&State>) -> bool {
+pub fn empty_state_data_json(Json(state): Json<&SentState>) -> bool {
     state.callsign.is_empty() || state.prefix.is_empty()
 }
 

@@ -30,7 +30,7 @@
 	// Holds current transponder settings
 	let transponderState: TransponderState = {
 		dial_mode: 'OFF',
-		frequency: 0,
+		frequency: 7000,
 		ident_enabled: false,
 		vfr_has_executed: false
 	};

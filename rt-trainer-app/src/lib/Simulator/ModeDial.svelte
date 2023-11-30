@@ -106,7 +106,6 @@
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeDial != null) {
 			if (Modes.length == 2) {
-				console.log('Setting mode' + modeIndex);
 				if (modeIndex == 0) {
 					ModeDial.style.transform = 'rotate(-150deg)';
 					DialEnabled = false;
