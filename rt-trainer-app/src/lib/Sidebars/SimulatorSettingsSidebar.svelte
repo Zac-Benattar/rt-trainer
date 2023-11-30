@@ -2,27 +2,46 @@
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
 	import { getDrawerStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
+	import { simulatorSettingsStore, setCallsign, setAircraftType, setPrefix } from '$lib/stores';
+	import type { SimulatorSettings } from '$lib/lib/States';
 
-	export let prefix: string = '';
-	export let callsign: string = 'G-OSKY';
-	export let aircraftType: string = 'Cessna 172';
 	let mounted: boolean = false;
 	let prefixInputElement: HTMLInputElement;
 	let callsignInputElement: HTMLInputElement;
 	let aircraftTypeInputElement: HTMLInputElement;
 
+	let simulatorSettings: SimulatorSettings;
+	simulatorSettingsStore.subscribe((value) => {
+		simulatorSettings = value;
+	});
+
 	// Untested
 	$: if (mounted) {
-		prefix = prefixInputElement.value;
-		callsign = callsignInputElement.value;
-		aircraftType = aircraftTypeInputElement.value;
-		console.log(prefix);
-		console.log(callsign);
-		console.log(aircraftType);
+		if (prefixInputElement.value && prefixInputElement.value !== simulatorSettings.prefix) {
+			setPrefix(prefixInputElement.value);
+		}
+		if (callsignInputElement.value && callsignInputElement.value !== simulatorSettings.callsign) {
+			setCallsign(callsignInputElement.value);
+		}
+		if (
+			aircraftTypeInputElement.value &&
+			aircraftTypeInputElement.value !== simulatorSettings.aircraftType
+		) {
+			setAircraftType(aircraftTypeInputElement.value);
+		}
 	}
 
 	const handlePrefixChange = () => {
-		prefix = prefixInputElement.value;
+		if (
+			prefixInputElement.value !== simulatorSettings.prefix &&
+			(prefixInputElement.value == '' ||
+				prefixInputElement.value == 'STUDENT' ||
+				prefixInputElement.value == 'HELICOPTER' ||
+				prefixInputElement.value == 'POLICE' ||
+				prefixInputElement.value == 'SUPER')
+		) {
+			setPrefix(prefixInputElement.value);
+		}
 	};
 
 	const drawerStore = getDrawerStore();
@@ -43,13 +62,13 @@
 	<ul>
 		<li><a href="/" on:click={drawerClose}>Home</a></li>
 		<li>
-			<label for="prefix-input">Callsign:</label>
+			<label for="prefix-input">Prefix:</label>
 			<input
 				id="prefix-input"
 				class="prefix-input"
 				type="text"
 				list="prefixes"
-				value={prefix}
+				value={simulatorSettings.prefix}
 				on:change={handlePrefixChange}
 				on:click={handlePrefixChange}
 				on:keyup={handlePrefixChange}
@@ -68,7 +87,7 @@
 				id="callsign-input"
 				class="callsign-input"
 				type="text"
-				value={callsign}
+				value={simulatorSettings.callsign}
 				minlength="6"
 				maxlength="20"
 				pattern="[\x00-\x7F]+"
@@ -80,7 +99,7 @@
 				id="aircraft-type-input"
 				class="aircraft-type-input"
 				type="text"
-				value={aircraftType}
+				value={simulatorSettings.aircraftType}
 				minlength="6"
 				maxlength="30"
 				pattern="[\x00-\x7F]+"

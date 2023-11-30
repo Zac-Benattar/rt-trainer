@@ -12,6 +12,7 @@
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { simulatorSettingsStore } from '$lib/stores';
 
 	let state: State | undefined; // Required state for user to match
 	let currentMessage: string = 'Radio messages will appear here.'; // Most recent radio message from ATC
@@ -25,6 +26,15 @@
 	export let voiceInput: boolean = false;
 	export let audioMessages: boolean = false;
 	export let seed: string = '0';
+	let callsign: string;
+	let prefix: string;
+	let aircraftType: string;
+
+	simulatorSettingsStore.subscribe((value) => {
+		prefix = value.prefix;
+		callsign = value.callsign;
+		aircraftType = value.aircraftType;
+	});
 
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
@@ -41,9 +51,6 @@
 	let transponderFrequency: number = 7000;
 	let transponderIDENTEnabled: boolean = false;
 	let transponderDialModeIndex: number = 0;
-	let aircraftType: string;
-	let userCallsign: string;
-	let userPrefix: string;
 	let allocated_callsign: string;
 	let currentLat: number = 0;
 	let currentLong: number = 0;
@@ -160,8 +167,8 @@
 			console.log({
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed,
-				prefix: userPrefix,
-				user_callsign: userCallsign,
+				prefix: prefix,
+				user_callsign: callsign,
 				radio_frequency: radioActiveFrequency,
 				transponder_frequency: transponderFrequency,
 				aircraft_type: aircraftType
@@ -170,8 +177,8 @@
 			const response = await axios.post('http://localhost:3000/initialstate', {
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed,
-				prefix: userPrefix,
-				user_callsign: userCallsign,
+				prefix: prefix,
+				user_callsign: callsign,
 				radio_frequency: radioActiveFrequency,
 				transponder_frequency: transponderFrequency,
 				aircraft_type: aircraftType
@@ -217,8 +224,8 @@
 							stage: 'PreDepartInfo'
 						}
 					},
-					prefix: userPrefix,
-					callsign: userCallsign,
+					prefix: prefix,
+					callsign: callsign,
 					target_allocated_callsign: allocated_callsign,
 					squark: false,
 					current_target: {

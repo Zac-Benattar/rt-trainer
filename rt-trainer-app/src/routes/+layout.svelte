@@ -5,12 +5,12 @@
 	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
 	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
-	// Floating UI for Popups - Used in drawers
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
-	import Navigation from '$lib/Sidebars/Navigation.svelte';
-	import SimulatorSettings from '$lib/Sidebars/SimulatorSettings.svelte';
+	import Navigation from '$lib/Sidebars/NavigationSidebar.svelte';
+	import type { SimulatorSettings } from '$lib/lib/States';
 	import { Modal } from '@skeletonlabs/skeleton';
+	import SimulatorSettingsSidebar from '$lib/Sidebars/SimulatorSettingsSidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -21,13 +21,12 @@
 		drawerStore.open({});
 	}
 
-	export let settingStudentPrefix: boolean = false;
-
 	// Holds status of major navigation elements, to control visibility
 	let classesSidebar: string;
 	let classesAppBar: string;
 	let burgerButton: string;
 	let topBarEnabled: boolean;
+
 	// Reactive Classes
 	$: if ($page.url.pathname === '/') {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
@@ -61,7 +60,7 @@
 	<h2 class="p-4">Simulator Settings</h2>
 	<hr />
 	{#if classesSidebar == 'w-0'}
-		<SimulatorSettings />
+		<SimulatorSettingsSidebar />
 	{:else}
 		<Navigation />
 	{/if}
@@ -78,7 +77,7 @@
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
 		{#if classesSidebar == 'w-0'}
-			<SimulatorSettings studentPrefix={settingStudentPrefix} />
+			<SimulatorSettingsSidebar />
 		{:else}
 			<Navigation />
 		{/if}

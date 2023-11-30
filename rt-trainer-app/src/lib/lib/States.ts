@@ -87,3 +87,9 @@ export type Mistake = {
     details: string,
     message: string
 }
+
+export type SimulatorSettings = {
+    callsign: string,
+    prefix: string,
+    aircraftType: string,
+}
