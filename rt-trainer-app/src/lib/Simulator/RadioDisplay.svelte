@@ -21,7 +21,6 @@
 		}
 	}
 	$: if (mounted) {
-		console.log(standbyFrequency);
 		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
 		let newDigitArrRight: string[] = ["0", "0", "0"];

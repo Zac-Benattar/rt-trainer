@@ -73,7 +73,9 @@ export type ScenarioState = {
 
 export type TransponderDialMode = "OFF" | "SBY" | "GND" | "STBY" | "ON" | "ALT" | "TEST";
 
-export type RadioDialMode = "OFF" | "COM" | "NAV";
+export type RadioMode = "OFF" | "COM" | "NAV";
+
+export type RadioDialMode = "OFF" | "SBY"
 
 export type StateMessageSeeds = {
     state: ScenarioState,
@@ -99,7 +101,7 @@ export type SimulatorSettings = {
 }
 
 export type RadioState = {
-    mode: "COM" | "NAV" | "OFF",
+    mode: RadioMode,
     dial_mode: RadioDialMode,
     active_frequency: number,
     standby_frequency: number,
