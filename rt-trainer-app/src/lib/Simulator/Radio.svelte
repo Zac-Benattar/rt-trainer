@@ -3,8 +3,8 @@
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
 	import TransmitButton from './TransmitButton.svelte';
-	import { simulatorStateStore } from '$lib/stores';
-	import type { SimulatorState } from '$lib/lib/States';
+	import { simulatorRadioStateStore } from '$lib/stores';
+	import type { RadioState } from '$lib/lib/States';
 	type RadioMode = 'COM' | 'NAV';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -18,7 +18,13 @@
 	];
 
 	// Holds current radio settings
-	let simulatorState: SimulatorState;
+	let radioState: RadioState = {
+		mode: 'OFF',
+		dial_mode: 'OFF',
+		active_frequency: 0,
+		standby_frequency: 0,
+		tertiary_frequency: 0
+	};
 	let radioMode: RadioMode = 'COM';
 	let radioDialMode: string = 'OFF';
 	let displayOn: boolean = false;
@@ -26,11 +32,7 @@
 	let transmitButtonEnabled: boolean = false;
 	let transmitting: boolean = false;
 
-	simulatorStateStore.subscribe((value) => {
-		simulatorState = value;
-	});
-
-	// $: simulatorStateStore.set(simulatorState);
+	$: simulatorRadioStateStore.set(radioState);
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -67,9 +69,9 @@
 
 	const handleSWAPButtonClick = () => {
 		if (radioDialMode != 'OFF') {
-			let tempFrequency = simulatorState.radio_active_frequency;
-			simulatorState.radio_active_frequency = simulatorState.radio_standby_frequency;
-			simulatorState.radio_standby_frequency = tempFrequency;
+			let tempFrequency = radioState.active_frequency;
+			radioState.active_frequency = radioState.standby_frequency;
+			radioState.standby_frequency = tempFrequency;
 		}
 	};
 
@@ -95,27 +97,27 @@
 			frequencyDialEnabled = true;
 			transmitButtonEnabled = true;
 		}
-		
+
 		if (RadioDialModes[newDialModeIndex] !== undefined) {
-			radioDialMode = RadioDialModes[newDialModeIndex]!
+			radioDialMode = RadioDialModes[newDialModeIndex]!;
 		}
 	}
 
 	function onRadioFrequencyIncreaseLarge(event: Event) {
-		simulatorState.radio_standby_frequency += 1;
+		radioState.standby_frequency += 1;
 	}
 
 	function onRadioFrequencyReduceLarge(event: Event) {
-		simulatorState.radio_standby_frequency -= 1;
+		radioState.standby_frequency -= 1;
 	}
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall(event: Event) {
-		simulatorState.radio_standby_frequency += 0.005;
+		radioState.standby_frequency += 0.005;
 	}
 
 	function onRadioFrequencyReduceSmall(event: Event) {
-		simulatorState.radio_standby_frequency -= 0.005;
+		radioState.standby_frequency -= 0.005;
 	}
 </script>
 
@@ -124,7 +126,10 @@
 		<div class="power-selector-container content-center">
 			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 		</div>
-		<div class="transmit-button-container absolute" style="width: 55px; height: 55px; left: 130px; top: 85px;">
+		<div
+			class="transmit-button-container absolute"
+			style="width: 55px; height: 55px; left: 130px; top: 85px;"
+		>
 			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 		</div>
 	</div>
@@ -137,9 +142,9 @@
 		<RadioDisplay
 			DisplayOn={displayOn}
 			mode={radioMode}
-			bind:activeFrequency={simulatorState.radio_active_frequency}
-			bind:standbyFrequency={simulatorState.radio_standby_frequency}
-			bind:tertiaryFrequency={simulatorState.radio_tertiary_frequency}
+			bind:activeFrequency={radioState.active_frequency}
+			bind:standbyFrequency={radioState.standby_frequency}
+			bind:tertiaryFrequency={radioState.tertiary_frequency}
 		/>
 		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>

@@ -14,27 +14,44 @@
 		SimulatorSettings,
 		ScenarioState,
 		StateMessage,
-		SimulatorState
+		RadioState,
+		TransponderState
 	} from '$lib/lib/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { simulatorSettingsStore, simulatorStateStore } from '$lib/stores';
+	import {
+		simulatorSettingsStore,
+		simulatorRadioStateStore,
+		simulatorTransponderStateStore,
+		simulatorMessageStore,
+		simulatorATCMessageStore
+	} from '$lib/stores';
 
 	// Simulator state and settings
 	let scenarioSeed: number = 0;
 	let weatherSeed: number = 0;
 	let requiredState: ScenarioState | undefined; // Required state for user to match
 	let simulatorSettings: SimulatorSettings; // Current settings of the simulator
-	let simulatorState: SimulatorState;
+	let radioState: RadioState; // Current radio settings
+	let transponderState: TransponderState; // Current transponder settings
 	let currentTarget: COMFrequency;
+	let userMessage: string;
 
 	simulatorSettingsStore.subscribe((value) => {
 		simulatorSettings = value;
 	});
 
-	simulatorStateStore.subscribe((value) => {
-		simulatorState = value;
+	simulatorRadioStateStore.subscribe((value) => {
+		radioState = value;
+	});
+
+	simulatorTransponderStateStore.subscribe((value) => {
+		transponderState = value;
+	});
+
+	simulatorMessageStore.subscribe((value) => {
+		userMessage = value;
 	});
 
 	// Page settings
@@ -45,7 +62,6 @@
 
 	// Holds current text input/output for kneeboard and radio messages
 	let kneeboardTextContent: string = 'Make notes here.';
-	let messageInputMessage: string = 'Enter your radio message here.';
 
 	const modalStore = getModalStore();
 
@@ -66,30 +82,28 @@
 			return;
 		}
 
-		if (simulatorState.radio_dial_mode == 'OFF') {
+		if (radioState.dial_mode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio dial is off'
 			});
 			return;
-		} else if (simulatorState.transponder_dial_mode == 'OFF') {
+		} else if (transponderState.dial_mode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Transponder dial is off'
 			});
 			return;
-		} else if (requiredState.current_radio_frequency != simulatorState.radio_active_frequency) {
+		} else if (radioState.active_frequency != requiredState.current_radio_frequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio frequency incorrect'
 			});
 			return;
-		} else if (
-			requiredState.current_transponder_frequency != simulatorState.transponder_frequency
-		) {
+		} else if (transponderState.frequency != requiredState.current_transponder_frequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -119,7 +133,7 @@
 			// Update the components with the new state
 			console.log('new state: ', newStateMessage);
 			requiredState = newStateMessage.state;
-			simulatorState.atc_message = newStateMessage.message;
+			simulatorATCMessageStore.set(newStateMessage.message);
 		}
 		// Get response from server
 		// Update components with new state
@@ -160,8 +174,6 @@
 				weather_seed: weatherSeed,
 				prefix: simulatorSettings.prefix,
 				user_callsign: simulatorSettings.callsign,
-				radio_frequency: simulatorState.radio_active_frequency,
-				transponder_frequency: simulatorState.transponder_frequency,
 				aircraft_type: simulatorSettings.aircraftType
 			});
 
@@ -218,12 +230,12 @@
 						frequency: currentTarget.frequency,
 						callsign: currentTarget.callsign
 					},
-					current_radio_frequency: simulatorState.radio_active_frequency,
-					current_transponder_frequency: simulatorState.transponder_frequency,
+					current_radio_frequency: radioState.active_frequency,
+					current_transponder_frequency: transponderState.frequency,
 					emergency: 'None',
 					aircraft_type: simulatorSettings.aircraftType
 				},
-				message: messageInputMessage,
+				message: userMessage,
 				scenario_seed: scenarioSeed,
 				weather_seed: weatherSeed
 			};

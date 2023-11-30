@@ -71,21 +71,9 @@ export type ScenarioState = {
     aircraft_type: string
 }
 
-export type SimulatorState = {
-    radio_mode: "OFF" | "COM" | "NAV",
-    radio_dial_mode: "OFF" | "COM" | "NAV",
-    radio_active_frequency: number,
-    radio_standby_frequency: number,
-    radio_tertiary_frequency: number,
-    transponder_dial_mode: TransponderDialMode
-    transponder_frequency: number,
-    transponder_ident_enabled: boolean,
-    transponder_vfr_has_executed: boolean,
-    message: string,
-    atc_message: string,
-}
-
 export type TransponderDialMode = "OFF" | "SBY" | "GND" | "STBY" | "ON" | "ALT" | "TEST";
+
+export type RadioDialMode = "OFF" | "COM" | "NAV";
 
 export type StateMessageSeeds = {
     state: ScenarioState,
@@ -108,4 +96,19 @@ export type SimulatorSettings = {
     callsign: string,
     prefix: string,
     aircraftType: string,
+}
+
+export type RadioState = {
+    mode: "COM" | "NAV" | "OFF",
+    dial_mode: RadioDialMode,
+    active_frequency: number,
+    standby_frequency: number,
+    tertiary_frequency: number,
+}
+
+export type TransponderState = {
+    dial_mode: TransponderDialMode,
+    frequency: number,
+    ident_enabled: boolean,
+    vfr_has_executed: boolean,
 }

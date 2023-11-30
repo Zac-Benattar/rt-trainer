@@ -4,8 +4,8 @@
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { SimulatorState } from '$lib/lib/States';
-	import { simulatorStateStore } from '$lib/stores';
+	import type { TransponderState } from '$lib/lib/States';
+	import { simulatorTransponderStateStore } from '$lib/stores';
 
 	const transponderDialModes: ArrayMaxLength7MinLength2 = [
 		'OFF',
@@ -28,7 +28,12 @@
 	];
 
 	// Holds current transponder settings
-	let simulatorState: SimulatorState;
+	let transponderState: TransponderState = {
+		dial_mode: 'OFF',
+		frequency: 0,
+		ident_enabled: false,
+		vfr_has_executed: false
+	};
 	let dialModeIndex: number = 0;
 	let displayOn: boolean = false;
 	let digitArr = [7, 0, 0, 0];
@@ -37,11 +42,7 @@
 	let displayDigitSelected: number = 0;
 	let mounted: boolean = false;
 
-	simulatorStateStore.subscribe((value) => {
-		simulatorState = value;
-	});
-
-	// $: simulatorStateStore.set(simulatorState);
+	$: simulatorTransponderStateStore.set(transponderState);
 
 	const dispatch = createEventDispatcher();
 
@@ -54,20 +55,20 @@
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
-		if (simulatorState.transponder_dial_mode != 'OFF') {
+		if (transponderState.dial_mode != 'OFF') {
 			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
 			// Make flash continuously when clicked, untill clicked again
 			IDENTModeButton.classList.toggle('blink-continiously');
-			simulatorState.transponder_ident_enabled = !simulatorState.transponder_ident_enabled;
+			transponderState.ident_enabled = !transponderState.ident_enabled;
 		}
 	};
 
 	const handleVFRButtonClick = () => {
-		if (simulatorState.transponder_dial_mode != 'OFF') {
+		if (transponderState.dial_mode != 'OFF') {
 			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
 			// Make flash on when pressed then remain off
 			VFRModeButton.classList.toggle('blink-once');
-			simulatorState.transponder_ident_enabled = true;
+			transponderState.ident_enabled = true;
 		}
 	};
 
@@ -93,28 +94,28 @@
 
 	function onTransponderDialModeChange(newModeIndex: number) {
 		if (newModeIndex == 0) {
-			if (simulatorState.transponder_ident_enabled) {
+			if (transponderState.ident_enabled) {
 				const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
 				IDENTModeButton.classList.remove('active-button');
-				simulatorState.transponder_ident_enabled = false;
+				transponderState.ident_enabled = false;
 			}
-			simulatorState.transponder_dial_mode = 'OFF';
+			transponderState.dial_mode = 'OFF';
 			displayOn = false;
 			frequencyDialEnabled = false;
 		} else {
 			switch (newModeIndex) {
 				case 1:
-					simulatorState.transponder_dial_mode = 'SBY';
+					transponderState.dial_mode = 'SBY';
 				case 2:
-					simulatorState.transponder_dial_mode = 'GND';
+					transponderState.dial_mode = 'GND';
 				case 3:
-					simulatorState.transponder_dial_mode = 'STBY';
+					transponderState.dial_mode = 'STBY';
 				case 4:
-					simulatorState.transponder_dial_mode = 'ON';
+					transponderState.dial_mode = 'ON';
 				case 5:
-					simulatorState.transponder_dial_mode = 'ALT';
+					transponderState.dial_mode = 'ALT';
 				case 6:
-					simulatorState.transponder_dial_mode = 'TEST';
+					transponderState.dial_mode = 'TEST';
 			}
 
 			displayOn = true;

@@ -1,5 +1,5 @@
-import { derived, writable } from 'svelte/store';
-import type { COMFrequency, SimulatorSettings, SimulatorState } from './lib/States';
+import { writable } from 'svelte/store';
+import type { RadioState, COMFrequency, SimulatorSettings, TransponderState } from './lib/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
 	prefix: 'STUDENT',
@@ -7,18 +7,19 @@ const initialSimulatorSettings: SimulatorSettings = {
 	aircraftType: 'Cessna 172'
 };
 
-const initialSimulatorState: SimulatorState = {
-	radio_mode: 'OFF',
-	radio_dial_mode: 'OFF',
-	radio_active_frequency: 0,
-	radio_standby_frequency: 0,
-	radio_tertiary_frequency: 0,
-	transponder_dial_mode: 'OFF',
-	transponder_frequency: 0,
-	transponder_ident_enabled: false,
-	transponder_vfr_has_executed: false,
-	message: '',
-	atc_message: ''
+const initialRadioState: RadioState = {
+	mode: 'OFF',
+	dial_mode: 'OFF',
+	active_frequency: 0,
+	standby_frequency: 0,
+	tertiary_frequency: 0,
+};
+
+const initialTransponderState: TransponderState = {
+	dial_mode: 'OFF',
+	frequency: 0,
+	ident_enabled: false,
+	vfr_has_executed: false,
 };
 
 const initialSimulatorTarget: COMFrequency = {
@@ -29,17 +30,15 @@ const initialSimulatorTarget: COMFrequency = {
 
 export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
 
-export const simulatorStateStore = writable<SimulatorState>(initialSimulatorState);
-
 export const simulatorCurrentTargetStore = writable<COMFrequency>(initialSimulatorTarget);
 
-export const simulatorMessageStore = derived(simulatorStateStore, ($simulatorStateStore) => {
-    return $simulatorStateStore.message;
-});
+export const simulatorRadioStateStore = writable<RadioState>(initialRadioState);
 
-export const simulatorATCMessageStore = derived(simulatorStateStore, ($simulatorStateStore) => {
-    return $simulatorStateStore.atc_message;
-});
+export const simulatorTransponderStateStore = writable<TransponderState>(initialTransponderState);
+
+export const simulatorMessageStore = writable<string>('');
+
+export const simulatorATCMessageStore = writable<string>('');
 
 export function setSettingsPrefix(prefix: string) {
 	simulatorSettingsStore.update((settings) => {

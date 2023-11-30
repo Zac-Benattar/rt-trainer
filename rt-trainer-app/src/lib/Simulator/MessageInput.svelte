@@ -1,18 +1,13 @@
 <script lang="ts">
-	import type { SimulatorState } from '$lib/lib/States';
-	import { simulatorStateStore } from '$lib/stores';
+	import { simulatorMessageStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
 	let mounted: boolean = false;
 
-	let simulatorState: SimulatorState;
+	let message: string = 'Enter your radio message here.';
 
-	simulatorStateStore.subscribe((value) => {
-		simulatorState = value;
-	});
-
-	$: simulatorStateStore.set(simulatorState);
+	$: simulatorMessageStore.set(message);
 
 	$: if (mounted) {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
@@ -20,7 +15,7 @@
 			inputBox.textContent !== null &&
 			inputBox.textContent !== 'Enter your radio message here.'
 		) {
-			simulatorState.message = inputBox.textContent;
+			message = inputBox.textContent;
 		}
 	}
 
@@ -28,7 +23,7 @@
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
-		simulatorState.message = inputBox.textContent ? inputBox.textContent : '';
+		message = inputBox.textContent ? inputBox.textContent : '';
 	};
 
 	const handleDelete = () => {
@@ -39,7 +34,7 @@
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
 		if (inputBox.textContent === 'Enter your radio message here.') {
 			inputBox.textContent = '';
-			simulatorState.message = '';
+			message = '';
 		}
 	};
 
@@ -53,7 +48,7 @@
 	const resetBox = () => {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
 		inputBox.textContent = 'Enter your radio message here.';
-		simulatorState.message = '';
+		message = '';
 	};
 
 	const submit = () => {
