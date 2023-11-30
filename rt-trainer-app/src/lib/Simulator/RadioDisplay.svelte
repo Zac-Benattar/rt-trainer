@@ -21,9 +21,14 @@
 		}
 	}
 	$: if (mounted) {
+		console.log(standbyFrequency);
 		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
+
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
@@ -42,7 +47,10 @@
 	$: if (mounted) {
 		let split = activeFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
@@ -61,7 +69,10 @@
 	$: if (mounted) {
 		let split = tertiaryFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
