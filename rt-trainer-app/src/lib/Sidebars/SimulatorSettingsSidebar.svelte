@@ -2,7 +2,7 @@
 	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
 	import { getDrawerStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
-	import { simulatorSettingsStore, setCallsign, setAircraftType, setPrefix } from '$lib/stores';
+	import { simulatorSettingsStore, setSettingsCallsign, setSettingsAircraftType, setSettingsPrefix } from '$lib/stores';
 	import type { SimulatorSettings } from '$lib/lib/States';
 
 	let mounted: boolean = false;
@@ -18,16 +18,16 @@
 	// Untested
 	$: if (mounted) {
 		if (prefixInputElement.value && prefixInputElement.value !== simulatorSettings.prefix) {
-			setPrefix(prefixInputElement.value);
+			setSettingsPrefix(prefixInputElement.value);
 		}
 		if (callsignInputElement.value && callsignInputElement.value !== simulatorSettings.callsign) {
-			setCallsign(callsignInputElement.value);
+			setSettingsCallsign(callsignInputElement.value);
 		}
 		if (
 			aircraftTypeInputElement.value &&
 			aircraftTypeInputElement.value !== simulatorSettings.aircraftType
 		) {
-			setAircraftType(aircraftTypeInputElement.value);
+			setSettingsAircraftType(aircraftTypeInputElement.value);
 		}
 	}
 
@@ -40,7 +40,7 @@
 				prefixInputElement.value == 'POLICE' ||
 				prefixInputElement.value == 'SUPER')
 		) {
-			setPrefix(prefixInputElement.value);
+			setSettingsPrefix(prefixInputElement.value);
 		}
 	};
 

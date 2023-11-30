@@ -12,15 +12,35 @@
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
-	import { simulatorSettingsStore } from '$lib/stores';
+	import { simulatorSettingsStore, simulatorStateStore } from '$lib/stores';
 
-	let state: State | undefined; // Required state for user to match
+	let scenarioSeed: number = 0;
+	let weatherSeed: number = 0;
+	let requiredState: State | undefined; // Required state for user to match
 	let currentMessage: string = 'Radio messages will appear here.'; // Most recent radio message from ATC
-	let currentTarget: COMFrequency = {
-		frequency_type: 'GND',
-		frequency: 0,
-		callsign: 'current_target_callsign'
-	}; // Current ATC target
+	let currentState: State = {
+		status: {
+			Parked: {
+				position: 'A1',
+				stage: 'PreDepartInfo'
+			}
+		},
+		prefix: 'G',
+		callsign: 'ABC',
+		target_allocated_callsign: 'ABC',
+		squark: false,
+		current_target: {
+			frequency_type: 'AFIS',
+			frequency: 123.17,
+			callsign: 'ABC'
+		},
+		current_radio_frequency: 123.17,
+		current_transponder_frequency: 7000,
+		lat: 0,
+		long: 0,
+		emergency: 'None',
+		aircraft_type: 'A320'
+	}; // Current state of the simulator
 
 	export let unexpectedEvents: boolean = false;
 	export let voiceInput: boolean = false;
@@ -40,23 +60,6 @@
 	let kneeboardTextContent: string = 'Make notes here.';
 	let messageInputMessage: string = 'Enter your radio message here.';
 
-	// Holds current radio and transponder settings to be sent to server
-	type RadioMode = 'COM' | 'NAV';
-	let radioActiveFrequency: number = 123.17;
-	let radioStandbyFrequency: number = 126.41;
-	let radioTertiaryFrequency: number = 177.2;
-	let radioTransmitting: boolean = false;
-	let radioMode: RadioMode = 'COM';
-	let radioDialMode: string;
-	let transponderFrequency: number = 7000;
-	let transponderIDENTEnabled: boolean = false;
-	let transponderDialModeIndex: number = 0;
-	let allocated_callsign: string;
-	let currentLat: number = 0;
-	let currentLong: number = 0;
-	let scenarioSeed: number = 0;
-	let weatherSeed: number = 0;
-
 	const modalStore = getModalStore();
 
 	// Generate the link to the scenario
@@ -71,7 +74,7 @@
 
 	async function handleSubmit() {
 		// Check state matches expected state
-		if (!state) {
+		if (!requiredState) {
 			console.log('Error: No state');
 			return;
 		}
@@ -90,14 +93,14 @@
 				body: 'Transponder dial is off'
 			});
 			return;
-		} else if (state.current_radio_frequency != radioActiveFrequency) {
+		} else if (requiredState.current_radio_frequency != radioActiveFrequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio frequency incorrect'
 			});
 			return;
-		} else if (state.current_transponder_frequency != transponderFrequency) {
+		} else if (requiredState.current_transponder_frequency != transponderFrequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -126,7 +129,7 @@
 		} else {
 			// Update the components with the new state
 			console.log('new state: ', newStateMessage);
-			state = newStateMessage.state;
+			requiredState = newStateMessage.state;
 			currentMessage = newStateMessage.message;
 		}
 		// Get response from server
@@ -151,8 +154,8 @@
 			console.log('Error: No response from server');
 			return 0;
 		} else {
-			state = initialState;
-			console.log('state: ', state);
+			requiredState = initialState;
+			console.log('state: ', requiredState);
 			currentTarget = initialState.current_target;
 		}
 	}
