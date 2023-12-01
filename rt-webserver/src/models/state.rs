@@ -142,7 +142,7 @@ pub struct RecievedState {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct StateMessageSeed {
+pub struct RecievedStateMessageSeed {
     pub state: RecievedState,
     pub message: String,
     pub scenario_seed: u64,
@@ -150,7 +150,7 @@ pub struct StateMessageSeed {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct StateMessage {
+pub struct SentStateMessage {
     pub state: SentState,
     pub message: String,
 }
@@ -163,6 +163,6 @@ pub struct Mistake {
 
 #[derive(Deserialize, Serialize)]
 pub enum ServerResponse {
-    StateMessage(StateMessage),
+    StateMessage(SentStateMessage),
     Mistake(Mistake),
 }

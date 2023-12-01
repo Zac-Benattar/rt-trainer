@@ -125,7 +125,7 @@
 			console.log('Error: No response from server');
 		} else if (isMistake(newStateMessage)) {
 			// Handle mistake
-			console.log('mistake');
+
 			// Pop up modal with mistake details
 			const modal: ModalSettings = {
 				type: 'alert',
@@ -136,7 +136,6 @@
 			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
-			console.log('new state: ', newStateMessage);
 			requiredState = newStateMessage.state;
 			simulatorATCMessageStore.set(newStateMessage.message);
 		}
@@ -222,8 +221,7 @@
 				state: {
 					status: {
 						Parked: {
-							position: 'A1',
-							stage: 'PreDepartInfo'
+							stage: 'PreRadioCheck'
 						}
 					},
 					prefix: simulatorSettings.prefix,
@@ -249,8 +247,13 @@
 
 			const response = await axios.post('http://localhost:3000/nextstate', stateMessage);
 
-			if (typeof response.data === 'object') {
+			if (response.data.StateMessage != undefined) {
+				return response.data.StateMessage as StateMessage;
+			} else if (response.data.Mistake != undefined) {
 				return response.data.Mistake as Mistake;
+			} else {
+				console.log('Error: No response from server');
+				return;
 			}
 
 			return response.data;

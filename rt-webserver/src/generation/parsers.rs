@@ -4,7 +4,7 @@ use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::COMFrequency,
     state::{
-        Emergency, Mistake, ParkedStage, ServerResponse, SentState, StateMessage, Status,
+        Emergency, Mistake, ParkedStage, ServerResponse, SentState, SentStateMessage, Status,
         TaxiingStage, RecievedState,
     },
 };
@@ -153,7 +153,7 @@ pub fn parse_radio_check(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(ServerResponse::StateMessage(StateMessage {
+    Ok(ServerResponse::StateMessage(SentStateMessage {
         state: next_state,
         message: atc_response,
     }))
@@ -253,7 +253,7 @@ pub fn parse_departure_information_request(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(ServerResponse::StateMessage(StateMessage {
+    Ok(ServerResponse::StateMessage(SentStateMessage {
         state: next_state,
         message: atc_response,
     }))
@@ -331,7 +331,7 @@ pub fn parse_departure_information_readback(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(ServerResponse::StateMessage(StateMessage {
+    Ok(ServerResponse::StateMessage(SentStateMessage {
         state: next_state,
         message: atc_response,
     }))
@@ -416,7 +416,7 @@ pub fn parse_taxi_request(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(ServerResponse::StateMessage(StateMessage {
+    Ok(ServerResponse::StateMessage(SentStateMessage {
         state: next_state,
         message: atc_response,
     }))
@@ -498,7 +498,7 @@ pub fn parse_taxi_readback(
         aircraft_type: current_state.aircraft_type.to_owned(),
     };
 
-    Ok(ServerResponse::StateMessage(StateMessage {
+    Ok(ServerResponse::StateMessage(SentStateMessage {
         state: next_state,
         message: atc_response,
     }))
