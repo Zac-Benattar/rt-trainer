@@ -112,11 +112,11 @@
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall() {
-		radioState.standby_frequency += 0.005;
+		radioState.standby_frequency = parseFloat((radioState.standby_frequency + 0.005).toPrecision(6));
 	}
 
 	function onRadioFrequencyReduceSmall() {
-		radioState.standby_frequency -= 0.005;
+		radioState.standby_frequency = parseFloat((radioState.standby_frequency - 0.005).toPrecision(6));
 	}
 </script>
 

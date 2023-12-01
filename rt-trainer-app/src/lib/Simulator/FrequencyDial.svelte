@@ -3,6 +3,7 @@
 	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
 	let mounted: boolean = false;
+	var intervalId: any;
 
 	$: if (mounted) {
 		const frequencyDial = document.getElementById(
@@ -15,6 +16,10 @@
 		}
 	}
 
+	$: if (!DialEnabled) {
+		clearInterval(intervalId);
+	}
+
 	const dispatch = createEventDispatcher();
 
 	const onDialAntiClockwiseTurn = () => {
@@ -24,6 +29,24 @@
 	const onDialClockwiseTurn = () => {
 		dispatch('dialClockwiseTurn');
 	};
+
+	function startIncrementingAntiClockwiseHold() {
+		onDialAntiClockwiseTurn();
+		intervalId = setInterval(onDialAntiClockwiseTurn, 100);
+	}
+
+	function stopIncrementingAntiClockwiseHold() {
+		clearInterval(intervalId);
+	}
+
+	function startIncrementingClockwiseHold() {
+		onDialClockwiseTurn();
+		intervalId = setInterval(onDialClockwiseTurn, 100);
+	}
+
+	function stopIncrementingClockwiseHold() {
+		clearInterval(intervalId);
+	}
 
 	onMount(() => {
 		mounted = true;
@@ -76,15 +99,17 @@
 				<div
 					class="w-100 h-100"
 					style="width: 50%; height: 100%;"
-					on:click={onDialAntiClockwiseTurn}
-					on:keypress={onDialAntiClockwiseTurn}
+					on:mousedown={startIncrementingAntiClockwiseHold}
+					on:mouseup={stopIncrementingAntiClockwiseHold}
+					on:mouseleave={stopIncrementingAntiClockwiseHold}
 				/>
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					class="w-100 h-100"
 					style="width: 50%; height: 100%;"
-					on:click={onDialClockwiseTurn}
-					on:keypress={onDialClockwiseTurn}
+					on:mousedown={startIncrementingClockwiseHold}
+					on:mouseup={stopIncrementingClockwiseHold}
+					on:mouseleave={stopIncrementingClockwiseHold}
 				/>
 			</div>
 
