@@ -84,7 +84,7 @@ pub enum Status {
         altitude: u32,
         heading: u32,
         speed: u32,
-        next_point: String,
+        current_point: Waypoint,
     },
     Descent {},
     Approach {},
@@ -97,11 +97,25 @@ pub enum Status {
     },
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
+pub enum WaypointType {
+    Aerodrome,
+    NDB, // Non-directional beacon - helps with positioning
+    VOR, // VHF Omnidirectional Range station - helps with positioning
+    Fix, // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir
+    DME, // Distance Measuring Equipment - helps with positioning by measuring distance from a VOR
+    GPS, // GPS waypoint - arbitrary point defined in terms of lat/long
+    Intersection, // Intersection of two or more airways
+    NewAirspace, // Entering new airspace - changing frequency
+}
+
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Waypoint {
-    lat: u32,
-    long: u32,
-    name: String,
+    pub waypoint_type: WaypointType,
+    pub lat: f64,
+    pub long: f64,
+    pub name: String,
+    pub com_frequencies: Vec<COMFrequency>,
 }
 
 #[derive(Deserialize, Serialize)]

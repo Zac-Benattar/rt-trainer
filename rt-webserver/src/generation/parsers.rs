@@ -4,8 +4,8 @@ use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::COMFrequency,
     state::{
-        Emergency, Mistake, ParkedStage, ServerResponse, SentState, SentStateMessage, Status,
-        TaxiingStage, RecievedState,
+        Emergency, Mistake, ParkedStage, RecievedState, SentState, SentStateMessage,
+        ServerResponse, Status, TaxiingStage,
     },
 };
 
@@ -55,12 +55,12 @@ pub fn parse_radio_check(
     let message_words = message.split_whitespace().collect::<Vec<&str>>();
 
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
-    match get_start_and_end_aerodromes(*scenario_seed) {
-        Some(aerodromes) => aerodromes,
-        None => {
-            return Err(Error::msg("Aerodromes not generated"));
-        }
-    };
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(Error::msg("Aerodromes not generated"));
+            }
+        };
 
     let radio_freq_index = match message_words.iter().position(|&x| x.contains('.')) {
         Some(index) => index,
@@ -503,3 +503,12 @@ pub fn parse_taxi_readback(
         message: atc_response,
     }))
 }
+
+// pub fn parse_waypoint_arrival(
+//     altitude: &u32,
+//     heading: &u32,
+//     speed: &u32,
+//     current_point: &Waypoint,
+//     current_state: &RecievedState,
+// ) -> Result<ServerResponse, Error> {
+// }

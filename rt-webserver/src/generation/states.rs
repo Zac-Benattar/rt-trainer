@@ -127,8 +127,8 @@ pub fn generate_next_state(
             altitude,
             heading,
             speed,
-            next_point,
-        } => {}
+            current_point,
+        } => todo!(),
         Status::Landing { runway } => todo!(),
         Status::LandingToParked { position, stage } => todo!(),
         Status::Descent {} => todo!(),
