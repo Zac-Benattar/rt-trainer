@@ -37,7 +37,32 @@
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
 	let currentTarget: COMFrequency;
+	let atcMessage: string;
 	let userMessage: string;
+	let kneeboardTextContent: string = 'Make notes here.';
+
+	// Page settings
+	export let unexpectedEvents: boolean = false;
+	export let seed: string = '0';
+	let mapEnabled = false; // User will need to opt in as the map uses cookies
+	let voiceInput: boolean = false;
+	let audioMessages: boolean = false;
+	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
+	const modalStore = getModalStore();
+
+	$: if (audioMessages && atcMessage) {
+		speakATCMessage();
+	}
+
+	$: if (requiredState) {
+		currentTarget = requiredState.current_target;
+	}
+
+	$: if (unexpectedEvents) {
+		scenarioLink = 'www.rt-trainer.com/scenario/' + seed + '?unexpectedEvents=true';
+	} else {
+		scenarioLink = 'www.rt-trainer.com/scenario/' + seed;
+	}
 
 	simulatorSettingsStore.subscribe((value) => {
 		simulatorSettings = value;
@@ -55,25 +80,24 @@
 		userMessage = value;
 	});
 
-	$: if (requiredState) {
-		currentTarget = requiredState.current_target;
-	}
+	simulatorATCMessageStore.subscribe((value) => {
+		atcMessage = value;
+	});
 
-	// Page settings
-	export let unexpectedEvents: boolean = false;
-	export let seed: string = '0';
-	let voiceInput: boolean = false;
-	let audioMessages: boolean = false;
+	function speakATCMessage() {
+		if ('speechSynthesis' in window) {
+			var utterance = new SpeechSynthesisUtterance();
 
-	// Holds current text input/output for kneeboard and radio messages
-	let kneeboardTextContent: string = 'Make notes here.';
+			utterance.text = atcMessage;
 
-	const modalStore = getModalStore();
+			// utterance.voice = ...
+			// utterance.rate = ...
+			// utterance.pitch = ...
 
-	// Generate the link to the scenario
-	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
-	if (unexpectedEvents) {
-		scenarioLink += '?unexpectedEvents=' + unexpectedEvents;
+			speechSynthesis.speak(utterance);
+		} else {
+			console.error('SpeechSynthesis API is not supported in this browser.');
+		}
 	}
 
 	function isMistake(message: any): message is Mistake {
@@ -101,7 +125,9 @@
 				body: 'Transponder dial is off'
 			});
 			return;
-		} else if (radioState.active_frequency.toFixed(3) != requiredState.current_radio_frequency.toFixed(3)) {
+		} else if (
+			radioState.active_frequency.toFixed(3) != requiredState.current_radio_frequency.toFixed(3)
+		) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -139,18 +165,7 @@
 			requiredState = newStateMessage.state;
 			simulatorATCMessageStore.set(newStateMessage.message);
 		}
-		// Get response from server
-		// Update components with new state
 	}
-
-	onMount(async () => {
-		if (!initiateScenario())
-			modalStore.trigger({
-				type: 'alert',
-				title: 'Fatal Error',
-				body: 'No response from server'
-			});
-	});
 
 	async function initiateScenario() {
 		// Get the state from the server
@@ -255,12 +270,19 @@
 				console.log('Error: No response from server');
 				return;
 			}
-
-			return response.data;
 		} catch (error) {
 			console.error('Error: ', error);
 		}
 	}
+
+	onMount(async () => {
+		if (!initiateScenario())
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Fatal Error',
+				body: 'No response from server'
+			});
+	});
 </script>
 
 <div class="relative flex">
@@ -319,7 +341,7 @@
 
 		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
 			<div>
-				<Map />
+				<Map enabled={mapEnabled} />
 			</div>
 			<div>
 				<Kneeboard bind:contents={kneeboardTextContent} />
