@@ -5,7 +5,7 @@ use crate::models::{
     aerodrome::COMFrequency,
     state::{
         Emergency, Mistake, ParkedStage, RecievedState, SentState, SentStateMessage,
-        ServerResponse, Status, TaxiingStage,
+        ServerResponse, Status, TaxiingStage, WaypointType, Waypoint,
     },
 };
 
@@ -504,11 +504,65 @@ pub fn parse_taxi_readback(
     }))
 }
 
-// pub fn parse_waypoint_arrival(
-//     altitude: &u32,
-//     heading: &u32,
-//     speed: &u32,
-//     current_point: &Waypoint,
-//     current_state: &RecievedState,
-// ) -> Result<ServerResponse, Error> {
-// }
+pub fn parse_waypoint_arrival(
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+    let atc_response = String::new();
+
+    match current_point.waypoint_type {
+        WaypointType::Aerodrome {} => todo!(),
+        WaypointType::NDB {} => todo!(),
+        WaypointType::VOR {} => todo!(),
+        WaypointType::DME {} => todo!(),
+        WaypointType::Fix {} => todo!(),
+        WaypointType::GPS {} => todo!(),
+        WaypointType::NewAirspace {} => {
+            parse_new_airspace(altitude, heading, speed, current_point, current_state)
+        }
+        WaypointType::Intersection {} => todo!(),
+    }
+}
+
+fn parse_new_airspace(
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+
+    let atc_response = String::new();
+
+    let next_state = SentState {
+        status: Status::Airbourne { // These need to be updated with the information for the next waypoint
+            altitude: altitude.to_owned(),
+            heading: heading.to_owned(),
+            speed: speed.to_owned(),
+            current_point: current_point.to_owned(),
+        },
+        lat: current_point.lat,
+        long: current_point.long,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(ServerResponse::StateMessage(SentStateMessage {
+        state: next_state,
+        message: atc_response,
+    }))
+}

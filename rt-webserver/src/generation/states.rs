@@ -123,7 +123,7 @@ pub fn generate_next_state(
             }
         }
         Status::Takeoff { runway } => todo!(),
-        Status::Airborne {
+        Status::Airbourne {
             altitude,
             heading,
             speed,

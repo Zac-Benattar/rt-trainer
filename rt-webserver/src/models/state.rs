@@ -80,7 +80,7 @@ pub enum Status {
     Takeoff {
         runway: Runway,
     },
-    Airborne {
+    Airbourne {
         altitude: u32,
         heading: u32,
         speed: u32,
