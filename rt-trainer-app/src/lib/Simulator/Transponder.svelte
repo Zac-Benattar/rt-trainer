@@ -4,7 +4,7 @@
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
 	import { createEventDispatcher } from 'svelte';
-	import type { TransponderState } from '$lib/lib/States';
+	import type { TransponderState } from '$lib/purets/States';
 	import { simulatorTransponderStateStore } from '$lib/stores';
 
 	const transponderDialModes: ArrayMaxLength7MinLength2 = [

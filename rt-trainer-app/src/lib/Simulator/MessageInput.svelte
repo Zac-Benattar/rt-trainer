@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { simulatorMessageStore } from '$lib/stores';
+	import { simulatorUserMessageStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 
@@ -7,7 +7,7 @@
 
 	let message: string = 'Enter your radio message here.';
 
-	$: simulatorMessageStore.set(message);
+	$: simulatorUserMessageStore.set(message);
 
 	$: if (mounted) {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;

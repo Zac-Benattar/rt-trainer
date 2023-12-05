@@ -16,7 +16,7 @@
 		StateMessage,
 		RadioState,
 		TransponderState
-	} from '$lib/lib/States';
+	} from '$lib/purets/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
@@ -24,7 +24,7 @@
 		simulatorSettingsStore,
 		simulatorRadioStateStore,
 		simulatorTransponderStateStore,
-		simulatorMessageStore,
+		simulatorUserMessageStore,
 		simulatorATCMessageStore,
 		simulatorCurrentTargetStore
 	} from '$lib/stores';
@@ -76,7 +76,7 @@
 		transponderState = value;
 	});
 
-	simulatorMessageStore.subscribe((value) => {
+	simulatorUserMessageStore.subscribe((value) => {
 		userMessage = value;
 	});
 

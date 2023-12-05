@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { COMFrequency } from '$lib/lib/States';
+	import type { COMFrequency } from '$lib/purets/States';
 	import { simulatorCurrentTargetStore, simulatorATCMessageStore } from '$lib/stores';
 
 	let simulatorCurrentTarget: COMFrequency;

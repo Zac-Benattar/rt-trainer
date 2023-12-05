@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { RadioState, COMFrequency, SimulatorSettings, TransponderState } from './lib/States';
+import type { RadioState, COMFrequency, SimulatorSettings, TransponderState } from './purets/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
 	prefix: 'STUDENT',
@@ -36,7 +36,7 @@ export const simulatorRadioStateStore = writable<RadioState>(initialRadioState);
 
 export const simulatorTransponderStateStore = writable<TransponderState>(initialTransponderState);
 
-export const simulatorMessageStore = writable<string>('');
+export const simulatorUserMessageStore = writable<string>('');
 
 export const simulatorATCMessageStore = writable<string>('');
 

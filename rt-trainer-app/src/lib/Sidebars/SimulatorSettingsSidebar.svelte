@@ -3,7 +3,7 @@
 	import { getDrawerStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
 	import { simulatorSettingsStore, setSettingsCallsign, setSettingsAircraftType, setSettingsPrefix } from '$lib/stores';
-	import type { SimulatorSettings } from '$lib/lib/States';
+	import type { SimulatorSettings } from '$lib/purets/States';
 
 	let mounted: boolean = false;
 	let prefixInputElement: HTMLInputElement;

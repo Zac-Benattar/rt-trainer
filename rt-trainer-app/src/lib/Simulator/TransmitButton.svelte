@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { simulatorUserMessageStore } from '$lib/stores';
+	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	export let enabled: boolean = false;
+	export let speechEnabled: boolean = true; // User's choice
 	export let transmitting: boolean = false;
 	let mounted: boolean = false;
+	let userMessage: string;
+	let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+	let recognition: SpeechRecognition | null;
+	const modalStore = getModalStore();
 
 	$: if (mounted) {
 		const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
@@ -14,22 +21,44 @@
 		}
 	}
 
+	$: if (speechEnabled) {
+		recognition = new SpeechRecognition();
+		recognition.onresult = (event) => {
+			const speechInput = event.results[0][0].transcript;
+			console.log('Confidence: ', event.results[0][0].confidence);
+			if (event.results[0][0].confidence > 0.5) {
+				userMessage = speechInput;
+				simulatorUserMessageStore.set(userMessage);
+			} else {
+				modalStore.trigger({
+					type: 'alert',
+					title: 'Speech Recognition Error',
+					body: 'Low confidence in speech recognition. Please repeat your message clearly.'
+				});
+			}
+		};
+	} else {
+		recognition = null; // Disable speech recognition fully
+	}
+
 	const handleTransmitMouseDown = () => {
-		if (enabled) {
+		if (enabled && speechEnabled) {
 			const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
 			if (transmitButton != null) {
 				transmitButton.classList.add('active');
 				transmitting = true;
+				recognition?.start();
 			}
 		}
 	};
 
 	const handleTransmitMouseUp = () => {
-		if (enabled) {
+		if (enabled && speechEnabled) {
 			const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
 			if (transmitButton != null) {
 				transmitButton.classList.remove('active');
 				transmitting = false;
+				recognition?.stop();
 			}
 		}
 	};
