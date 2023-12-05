@@ -8,9 +8,11 @@
 	export let transmitting: boolean = false;
 	let mounted: boolean = false;
 	let userMessage: string;
-	let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-	let recognition: SpeechRecognition | null;
 	const modalStore = getModalStore();
+	let SpeechRecognitionType: any;
+	let SpeechGrammarList: any;
+	let SpeechRecognitionEvent: any;
+	let recognition: any;
 
 	$: if (mounted) {
 		const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
@@ -21,11 +23,15 @@
 		}
 	}
 
-	$: if (speechEnabled) {
-		recognition = new SpeechRecognition();
-		recognition.onresult = (event) => {
+	$: if (speechEnabled && mounted) {
+		SpeechRecognitionType = window.SpeechRecognition || window.webkitSpeechRecognition;
+		SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
+		SpeechRecognitionEvent =
+			window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
+		recognition = new SpeechRecognitionType();
+		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
-			console.log('Confidence: ', event.results[0][0].confidence);
+			console.log(`Input: ${event.results[0][0].transcript} Confidence: ${event.results[0][0].confidence}`);
 			if (event.results[0][0].confidence > 0.5) {
 				userMessage = speechInput;
 				simulatorUserMessageStore.set(userMessage);
@@ -37,8 +43,6 @@
 				});
 			}
 		};
-	} else {
-		recognition = null; // Disable speech recognition fully
 	}
 
 	const handleTransmitMouseDown = () => {
@@ -47,6 +51,7 @@
 			if (transmitButton != null) {
 				transmitButton.classList.add('active');
 				transmitting = true;
+				console.log(recognition);
 				recognition?.start();
 			}
 		}
