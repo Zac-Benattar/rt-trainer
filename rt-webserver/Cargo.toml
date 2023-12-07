@@ -1,6 +1,6 @@
 [package]
 name = "rt-webserver"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 
 [dependencies]
@@ -14,7 +14,8 @@ tracing-subscriber = { version = "0.3.17", features = ["env-filter"]}
 sqlx = { version = "0.7.2", features = ["runtime-tokio-native-tls", "json", "postgres"] }
 anyhow = "1.0.75"
 serde_json = "1.0.108"
-tower-http = { version = "0.5.0", features = ["trace"] }
+tower = "0.4.12"
+tower-http = { version = "0.5.0", features = ["trace", "timeout", "cors"] }
 
 titlecase = "2.2.1"
 fancy-regex = "0.12.0"

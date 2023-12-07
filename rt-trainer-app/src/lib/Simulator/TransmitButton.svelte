@@ -29,6 +29,7 @@
 		SpeechRecognitionEvent =
 			window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
 		recognition = new SpeechRecognitionType();
+		recognition.lang = 'en';
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
 			console.log(`Input: ${event.results[0][0].transcript} Confidence: ${event.results[0][0].confidence}`);

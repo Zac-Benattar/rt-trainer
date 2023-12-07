@@ -1,15 +1,17 @@
 use axum::{
     extract::Extension,
     routing::{get, post},
-    Router,
+    Router, http::Method,
 };
 
 use anyhow::Context;
 // use with #[debug_handler]
 // use axum_macros::debug_handler;
 use sqlx::postgres::PgPoolOptions;
-use std::fs;
 use std::net::SocketAddr;
+use std::{fs, time::Duration};
+use tower::ServiceBuilder;
+use tower_http::{timeout::TimeoutLayer, cors::{CorsLayer, Any}};
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -34,6 +36,15 @@ async fn main() -> anyhow::Result<()> {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    // Tighten these for production
+    let cors = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow any headers
+        .allow_headers(Any)
+        // allow requests from any origin
+        .allow_origin(Any);
+
     let pool = PgPoolOptions::new()
         .max_connections(50)
         .connect(&database_url)
@@ -55,8 +66,13 @@ async fn main() -> anyhow::Result<()> {
             post(controllers::generator::get_initial_state),
         )
         .route("/nextstate", post(controllers::generator::get_next_state))
-        .layer(Extension(pool))
-        .layer(TraceLayer::new_for_http());
+        .layer(
+            ServiceBuilder::new()
+                .layer(Extension(pool))
+                .layer(TraceLayer::new_for_http())
+                .layer(TimeoutLayer::new(Duration::from_secs(5)))
+                .layer(cors),
+        );
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")

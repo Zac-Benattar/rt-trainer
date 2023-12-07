@@ -188,13 +188,22 @@
 			scenarioSeed = tempScenarioSeed;
 			weatherSeed = tempWeatherSeed;
 
-			const response = await axios.post('http://localhost:3000/initialstate', {
-				scenario_seed: scenarioSeed,
-				weather_seed: weatherSeed,
-				prefix: simulatorSettings.prefix,
-				user_callsign: simulatorSettings.callsign,
-				aircraft_type: simulatorSettings.aircraftType
-			});
+			const response = await axios.post(
+				'http://localhost:3000/initialstate',
+				{
+					scenario_seed: scenarioSeed,
+					weather_seed: weatherSeed,
+					prefix: simulatorSettings.prefix,
+					user_callsign: simulatorSettings.callsign,
+					aircraft_type: simulatorSettings.aircraftType
+				},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*'
+					}
+				}
+			);
 
 			return response.data;
 		} catch (error) {
