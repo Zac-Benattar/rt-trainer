@@ -7,7 +7,13 @@
 
 	let message: string = 'Enter your radio message here.';
 
-	$: simulatorUserMessageStore.set(message);
+	simulatorUserMessageStore.subscribe((value) => {
+		if (mounted) {
+			const inputBox = document.getElementById('message-input') as HTMLInputElement;
+			inputBox.textContent = value;
+			message = value;
+		}
+	});
 
 	$: if (mounted) {
 		const inputBox = document.getElementById('message-input') as HTMLInputElement;
@@ -52,6 +58,7 @@
 	};
 
 	const submit = () => {
+		simulatorUserMessageStore.set(message);
 		dispatch('submit');
 	};
 
