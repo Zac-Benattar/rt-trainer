@@ -42,6 +42,6 @@
 		width: 100%;
 		height: 120px;
 		resize: none;
-		overflow: scroll;
+		overflow: auto;
 	}
 </style>

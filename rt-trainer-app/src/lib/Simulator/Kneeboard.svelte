@@ -51,7 +51,7 @@
 <style lang="postcss">
 	.kneeboard-container {
 		box-sizing: border-box;
-		padding: 10px;
+		background-clip: padding-box;
 		min-width: 490px;
 		max-width: 490px;
 		height: 390px;
@@ -66,7 +66,7 @@
 		width: 100%;
 		height: 430px;
 		resize: none;
-		overflow: scroll;
+		overflow: auto;
 	}
 
 	.input-box:focus {
