@@ -1,3 +1,17 @@
+use fancy_regex::Regex;
+
+pub fn replace_phonetic_decimal_with_number(s: &str) -> String {
+    // Define the fancy-regex pattern
+    let pattern = Regex::new(r"(\d{3}) decimal (\d{3})").unwrap();
+
+    // Use the replace method to perform the replacement
+    let result_str = pattern.replace_all(s, |caps: &fancy_regex::Captures| {
+        format!("{}.{}", &caps[1], &caps[2])
+    });
+
+    return result_str.to_string();
+}
+
 pub fn replace_phonetic_alphabet_with_chars(s: &str) -> String {
     // Loop on each word and replace with pronounciation if needed
     let mut return_string: String = "".to_string();
@@ -193,7 +207,7 @@ fn replace_numeral_element_with_pronounciation(s: &str) -> &str {
         "decimal" => "day see mal",
         "hundred" => "hun dred",
         "thousand" => "tou sand",
-        _ => ""
+        _ => "",
     }
 }
 
@@ -226,7 +240,7 @@ fn replace_pronounciation_with_phonetic_alphabet_word(s: &str) -> &str {
         "ho tell" => "hotel",
         "in dee ah" => "india",
         "jew lee ett" => "juliet",
-        "key low" => "kilo",    
+        "key low" => "kilo",
         "lee mah" => "lima",
         "mike" => "mike",
         "no vem ber" => "november",
@@ -242,7 +256,7 @@ fn replace_pronounciation_with_phonetic_alphabet_word(s: &str) -> &str {
         "ecks ray" => "x-ray",
         "yankee" => "yankee",
         "zoo loo" => "zulu",
-        _ => ""
+        _ => "",
     }
 }
 
@@ -277,6 +291,6 @@ fn replace_pronounciation_with_numeral_element(s: &str) -> &str {
         "day see mal" => "decimal",
         "hun dread" => "hundred",
         "tou sand" => "thousand",
-        _ => ""
+        _ => "",
     }
 }
