@@ -23,10 +23,12 @@ mod models;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let env = fs::read_to_string(".env").unwrap();
-    let (key, database_url) = env.split_once('=').unwrap();
+    // let env = fs::read_to_string(".env").unwrap();
+    // // log env to console
+    // println!("{}", env);
+    // let (key, database_url) = env.split_once('=').unwrap();
 
-    assert_eq!(key, "DATABASE_URL");
+    // assert_eq!(key, "DATABASE_URL");
 
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::new(
@@ -45,11 +47,11 @@ async fn main() -> anyhow::Result<()> {
         // allow requests from any origin
         .allow_origin(Any);
 
-    let pool = PgPoolOptions::new()
-        .max_connections(50)
-        .connect(&database_url)
-        .await
-        .context("could not connect to database_url")?;
+    // let pool = PgPoolOptions::new()
+    //     .max_connections(50)
+    //     .connect(&database_url)
+    //     .await
+    //     .context("could not connect to database_url")?;
 
     let app = Router::new()
         .route("/test", get(test))
@@ -68,7 +70,7 @@ async fn main() -> anyhow::Result<()> {
         .route("/nextstate", post(controllers::generator::get_next_state))
         .layer(
             ServiceBuilder::new()
-                .layer(Extension(pool))
+                // .layer(Extension(pool))
                 .layer(TraceLayer::new_for_http())
                 .layer(TimeoutLayer::new(Duration::from_secs(5)))
                 .layer(cors),
