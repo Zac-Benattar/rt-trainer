@@ -16,6 +16,11 @@ export type COMFrequency = {
     callsign: string
 }
 
+export type Location = {
+    lat: number,
+    long: number
+}
+
 export type HoldingPoint = {
     name: string
 }
@@ -65,8 +70,7 @@ export type ScenarioState = {
     current_target: COMFrequency,
     current_radio_frequency: number,
     current_transponder_frequency: number,
-    lat: number,
-    long: number,
+    location: Location,
     emergency: "None" | "Mayday",
     aircraft_type: string
 }

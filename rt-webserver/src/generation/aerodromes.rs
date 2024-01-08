@@ -1,5 +1,8 @@
-use crate::models::aerodrome::{
-    Aerodrome, COMFrequency, COMFrequencyType, HoldingPoint, METORData, METORDataSample, Runway,
+use crate::models::{
+    aerodrome::{
+        Aerodrome, COMFrequency, COMFrequencyType, HoldingPoint, METORData, METORDataSample, Runway,
+    },
+    state::Location,
 };
 use rand::rngs::SmallRng;
 use rand::seq::SliceRandom;
@@ -66,10 +69,10 @@ fn generate_start_and_end_aerodromes(
         }
 
         let distance = haversine_distance(
-            start.unwrap().lat,
-            start.unwrap().long,
-            destination.unwrap().lat,
-            destination.unwrap().long,
+            start.unwrap().location.lat,
+            start.unwrap().location.long,
+            destination.unwrap().location.lat,
+            destination.unwrap().location.long,
         );
 
         if distance <= 300.0 {
@@ -172,8 +175,10 @@ pub fn get_large_aerodrome(seed: u64) -> Aerodrome {
         icao: "EGBB".to_string(),
         com_frequencies: vec![atis, tower, ground],
         runways: runways,
-        lat: 51.4700,
-        long: -0.4543,
+        location: Location {
+            lat: 51.4700,
+            long: -0.4543,
+        },
         start_point: "North Side Hangers".to_string(),
         metor_data,
     }
@@ -231,8 +236,10 @@ pub fn get_small_aerodrome(seed: u64) -> Aerodrome {
         icao: "EGBW".to_string(),
         com_frequencies: vec![afis],
         runways: runways,
-        lat: 52.1922,
-        long: -1.6144,
+        location: Location {
+            lat: 52.1922,
+            long: -1.6144,
+        },
         start_point: "South Side Hangers".to_string(),
         metor_data,
     }

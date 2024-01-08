@@ -1,26 +1,65 @@
 <script lang="ts">
+	import { simulatorLocationStore } from '$lib/stores';
+	import type { Location } from '$lib/purets/States';
+	import { onMount } from 'svelte';
+
 	export let enabled: boolean = true;
+	let target: Location;
+	let mounted: boolean = false;
 	var map: any;
+	const BING_MAPS_API_KEY = 'AprGLQ5SC_xzb5XEsZSx20g6X_LrZl-hsxzRfiLeZLtwBF2j9IudpMxHH5_laRGs';
+
+	simulatorLocationStore.subscribe((value) => {
+		target = value;
+
+		if (mounted) {
+			// If it's already defined, call the initializeMap function immediately
+			updateMap();
+		}
+	});
 
 	function loadMapScenario() {
+		console.log(target);
 		map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-			credentials: 'YOUR_API_KEY',
-			center: new Microsoft.Maps.Location(requiredState?.lat, requiredState?.long),
+			credentials: BING_MAPS_API_KEY,
+			center: new Microsoft.Maps.Location(target?.lat, target?.long),
 			zoom: 12
 		});
 	}
 
 	function updateMap() {
-		var location = new Microsoft.Maps.Location(requiredState?.lat, requiredState?.long);
-		map.setView({ center: location, zoom: 15 });
+		if (!map) loadMapScenario();
+		else {
+			var location = new Microsoft.Maps.Location(target?.lat, target?.long);
+			map.setView({ center: location, zoom: 15 });
+		}
 	}
+
+	onMount(() => {
+		mounted = true;
+
+		if (enabled && !map && target) {
+			// await microsoft loading then call loadMapScenario
+			const script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.src = `https://www.bing.com/api/maps/mapcontrol?key=${BING_MAPS_API_KEY}`;
+
+			script.onload = () => {
+				loadMapScenario();
+			};
+		}
+	});
 </script>
+
+<reference path="types/MicrosoftMaps/Microsoft.Maps.All.d.ts" />
 
 <svelte:head>
 	{#if enabled}
 		<script
 			type="text/javascript"
-			src="https://www.bing.com/api/maps/mapcontrol?key=YOUR_API_KEY"
+			src="https://www.bing.com/api/maps/mapcontrol?key=AprGLQ5SC_xzb5XEsZSx20g6X_LrZl-hsxzRfiLeZLtwBF2j9IudpMxHH5_laRGs"
+			async
+			defer
 		></script>
 	{/if}
 </svelte:head>

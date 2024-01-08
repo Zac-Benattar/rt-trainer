@@ -26,7 +26,8 @@
 		simulatorTransponderStateStore,
 		simulatorUserMessageStore,
 		simulatorATCMessageStore,
-		simulatorCurrentTargetStore
+		simulatorCurrentTargetStore,
+		simulatorLocationStore
 	} from '$lib/stores';
 
 	// Simulator state and settings
@@ -44,7 +45,7 @@
 	// Page settings
 	export let unexpectedEvents: boolean = false;
 	export let seed: string = '0';
-	let mapEnabled = false; // User will need to opt in as the map uses cookies
+	let mapEnabled = true; // User will need to opt in as the map uses cookies
 	let voiceInput: boolean = false;
 	let audioMessages: boolean = false;
 	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
@@ -164,6 +165,8 @@
 			// Update the components with the new state
 			requiredState = newStateMessage.state;
 			simulatorATCMessageStore.set(newStateMessage.message);
+			simulatorCurrentTargetStore.set(newStateMessage.state.current_target);
+			simulatorLocationStore.set(newStateMessage.state.location);
 		}
 	}
 
@@ -176,9 +179,10 @@
 			console.log('Error: No response from server');
 			return 0;
 		} else {
-			console.log(initialState);
+			console.log("Initial State:", initialState);
 			requiredState = initialState;
 			simulatorCurrentTargetStore.set(initialState.current_target);
+			simulatorLocationStore.set(initialState.location);
 		}
 	}
 

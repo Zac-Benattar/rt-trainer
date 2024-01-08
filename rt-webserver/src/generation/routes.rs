@@ -1,7 +1,7 @@
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 
-use crate::models::{aerodrome::{Aerodrome, COMFrequency}, state::{Waypoint, WaypointType}};
+use crate::models::{aerodrome::{Aerodrome, COMFrequency}, state::{Waypoint, WaypointType, Location}};
 
 pub fn haversine_distance(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     const R: f64 = 3440.065; // Earth radius in nautical miles
@@ -39,50 +39,64 @@ fn generate_route(
     let waypoints = vec![
         Waypoint {
             name: "WAYPT1".to_string(),
-            lat: 51.1234,
-            long: -0.5678,
+            location: Location {
+                lat: 51.1234,
+                long: -0.5678,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT2".to_string(),
-            lat: 51.4321,
-            long: -0.9876,
+            location: Location {
+                lat: 51.4321,
+                long: -0.9876,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT3".to_string(),
-            lat: 51.8765,
-            long: -0.1234,
+            location: Location {
+                lat: 51.8765,
+                long: -0.1234,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT4".to_string(),
-            lat: 51.6789,
-            long: -0.4321,
+            location: Location {
+                lat: 51.6789,
+                long: -0.4321,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT5".to_string(),
-            lat: 51.2345,
-            long: -0.8765,
+            location: Location {
+                lat: 51.2345,
+                long: -0.8765,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT6".to_string(),
-            lat: 51.9876,
-            long: -0.6789,
+            location: Location {
+                lat: 51.9876,
+                long: -0.6789,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
         Waypoint {
             name: "WAYPT7".to_string(),
-            lat: 51.3456,
-            long: -0.2345,
+            location: Location {
+                lat: 51.7654,
+                long: -0.9876,
+            },
             com_frequencies: vec![birmingham_tower.clone()],
             waypoint_type: WaypointType::VOR,
         },
@@ -98,10 +112,10 @@ fn generate_route(
 
     for waypoint in shuffled_waypoints {
         let distance = haversine_distance(
-            route.last().unwrap().lat,
-            route.last().unwrap().long,
-            waypoint.lat,
-            waypoint.long,
+            route.last().unwrap().location.lat,
+            route.last().unwrap().location.long,
+            waypoint.location.lat,
+            waypoint.location.long,
         );
 
         if total_distance + distance > 200.0 || route.len() >= max_wayponts {
@@ -124,16 +138,14 @@ pub fn get_route(
 ) {
     let start = Waypoint {
         name: (&start_aerodrome.icao).to_owned(),
-        lat: start_aerodrome.lat,
-        long: start_aerodrome.long,
+        location: start_aerodrome.location,
         com_frequencies: start_aerodrome.com_frequencies.clone(), // Needs improving, should be able to select the correct frequency
         waypoint_type: WaypointType::Aerodrome,
     };
 
     let destination = Waypoint {
         name: (&destination_aerodrome.icao).to_owned(),
-        lat: destination_aerodrome.lat,
-        long: destination_aerodrome.long,
+        location: destination_aerodrome.location,
         com_frequencies: destination_aerodrome.com_frequencies.clone(), // Needs improving, should be able to select the correct frequency
         waypoint_type: WaypointType::Aerodrome,
     };
@@ -144,7 +156,7 @@ pub fn get_route(
     for waypoint in &route {
         println!(
             "{}: ({}, {}) Control Zone: {}",
-            waypoint.name, waypoint.lat, waypoint.long, waypoint.com_frequencies[0].callsign
+            waypoint.name, waypoint.location.lat, waypoint.location.long, waypoint.com_frequencies[0].callsign
         );
     }
 }

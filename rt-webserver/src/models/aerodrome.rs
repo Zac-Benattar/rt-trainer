@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use super::state::Location;
+
 #[derive(Deserialize, Serialize, Clone, Copy)]
 pub enum COMFrequencyType {
     AFIS,
@@ -38,8 +40,7 @@ pub struct Aerodrome {
     pub icao: String,
     pub com_frequencies: Vec<COMFrequency>,
     pub runways: Vec<Runway>,
-    pub lat: f64,
-    pub long: f64,
+    pub location: Location,
     pub start_point: String,
     pub metor_data: METORData,
 }

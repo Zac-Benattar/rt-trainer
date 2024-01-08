@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { RadioState, COMFrequency, SimulatorSettings, TransponderState } from './purets/States';
+import type { RadioState, COMFrequency, SimulatorSettings, TransponderState, Location } from './purets/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
 	prefix: 'STUDENT',
@@ -28,6 +28,11 @@ const initialSimulatorTarget: COMFrequency = {
 	frequency_type: 'AFIS'
 };
 
+const initialSimulatorLocation: Location = {
+	lat: 0,
+	long: 0
+};
+
 export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
 
 export const simulatorCurrentTargetStore = writable<COMFrequency>(initialSimulatorTarget);
@@ -39,6 +44,8 @@ export const simulatorTransponderStateStore = writable<TransponderState>(initial
 export const simulatorUserMessageStore = writable<string>('');
 
 export const simulatorATCMessageStore = writable<string>('');
+
+export const simulatorLocationStore = writable<Location>(initialSimulatorLocation);
 
 export function setSettingsPrefix(prefix: string) {
 	simulatorSettingsStore.update((settings) => {

@@ -44,6 +44,7 @@
   "type": "module",
   "dependencies": {
     "@floating-ui/dom": "1.5.3",
+    "@types/bingmaps": "^0.0.1",
     "@types/dom-speech-recognition": "^0.0.4",
     "axios": "^1.6.2",
     "geist": "^1.0.0"

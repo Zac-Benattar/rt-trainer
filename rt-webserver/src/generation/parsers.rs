@@ -136,8 +136,7 @@ pub fn parse_radio_check(
         status: Status::Parked {
             stage: ParkedStage::PreDepartInfo,
         },
-        lat: start_and_end_aerodrome.0.lat,
-        long: start_and_end_aerodrome.0.long,
+        location: start_and_end_aerodrome.0.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -232,8 +231,7 @@ pub fn parse_departure_information_request(
         status: Status::Parked {
             stage: ParkedStage::PreReadbackDepartInfo,
         },
-        lat: start_and_end_aerodrome.0.lat,
-        long: start_and_end_aerodrome.0.long,
+        location: start_and_end_aerodrome.0.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -314,8 +312,7 @@ pub fn parse_departure_information_readback(
         status: Status::Parked {
             stage: ParkedStage::PreTaxiRequest,
         },
-        lat: start_and_end_aerodrome.0.lat,
-        long: start_and_end_aerodrome.0.long,
+        location: start_and_end_aerodrome.0.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -399,8 +396,7 @@ pub fn parse_taxi_request(
         status: Status::Parked {
             stage: ParkedStage::PreTaxiClearanceReadback,
         },
-        lat: start_and_end_aerodrome.0.lat,
-        long: start_and_end_aerodrome.0.long,
+        location: start_and_end_aerodrome.0.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -481,8 +477,7 @@ pub fn parse_taxi_readback(
         status: Status::Taxiing {
             stage: TaxiingStage::PreReadyForDeparture,
         },
-        lat: start_and_end_aerodrome.0.lat,
-        long: start_and_end_aerodrome.0.long,
+        location: start_and_end_aerodrome.0.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -544,8 +539,7 @@ fn parse_new_airspace(
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
         },
-        lat: current_point.lat,
-        long: current_point.long,
+        location: current_point.location,
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,

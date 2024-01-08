@@ -28,8 +28,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> SentS
         status: Status::Parked {
             stage: ParkedStage::PreRadioCheck,
         },
-        lat: start_aerodrome.lat,
-        long: start_aerodrome.long,
+        location: start_aerodrome.location,
         current_target: COMFrequency {
             frequency_type: start_aerodrome_frequency.frequency_type,
             frequency: start_aerodrome_frequency.frequency,

@@ -112,8 +112,7 @@ pub enum WaypointType {
 #[derive(Deserialize, Serialize, Clone)]
 pub struct Waypoint {
     pub waypoint_type: WaypointType,
-    pub lat: f64,
-    pub long: f64,
+    pub location: Location,
     pub name: String,
     pub com_frequencies: Vec<COMFrequency>,
 }
@@ -123,6 +122,12 @@ pub enum Emergency {
     None,
     Mayday,
     PanPan,
+}
+
+#[derive(Deserialize, Serialize, Clone, Copy)]
+pub struct Location {
+    pub lat: f64,
+    pub long: f64,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -135,8 +140,7 @@ pub struct SentState {
     pub current_target: COMFrequency,
     pub current_radio_frequency: f32,
     pub current_transponder_frequency: u16,
-    pub lat: f64,
-    pub long: f64,
+    pub location: Location,
     pub emergency: Emergency,
     pub aircraft_type: String,
 }
