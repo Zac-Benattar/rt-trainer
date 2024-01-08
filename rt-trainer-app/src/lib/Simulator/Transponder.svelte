@@ -1,9 +1,13 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
-	type TransponderMode = 'NONE' | 'IDENT' | 'VFR';
-	var TransponderDialModes: ArrayMaxLength7MinLength2 = [
+	import { createEventDispatcher } from 'svelte';
+	import type { TransponderState } from '$lib/purets/States';
+	import { simulatorTransponderStateStore } from '$lib/stores';
+
+	const transponderDialModes: ArrayMaxLength7MinLength2 = [
 		'OFF',
 		'SBY',
 		'GND',
@@ -12,6 +16,7 @@
 		'ALT',
 		'TEST'
 	];
+
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
 		string,
@@ -21,46 +26,49 @@
 		string?,
 		string?
 	];
-	let transponderMode: TransponderMode = 'NONE';
-	let transponderDialModeIndex: number = 0;
+
+	// Holds current transponder settings
+	let transponderState: TransponderState = {
+		dial_mode: 'OFF',
+		frequency: 7000,
+		ident_enabled: false,
+		vfr_has_executed: false
+	};
+	let dialModeIndex: number = 0;
 	let displayOn: boolean = false;
 	let digitArr = [7, 0, 0, 0];
+	let frequency: number = 7000;
 	let frequencyDialEnabled: boolean = false;
 	let displayDigitSelected: number = 0;
+	let mounted: boolean = false;
+
+	$: simulatorTransponderStateStore.set(transponderState);
+
+	const dispatch = createEventDispatcher();
+
+	$: if (mounted) {
+		frequency = parseInt(digitArr.join(''));
+	}
 
 	// Trigger onTransponderDialModeChange when transponderDialMode changes
-	$: onTransponderDialModeChange(transponderDialModeIndex);
+	$: onTransponderDialModeChange(dialModeIndex);
 
 	// Click handlers
 	const handleIDENTButtonClick = () => {
-		if (transponderDialModeIndex != 0) {
+		if (transponderState.dial_mode != 'OFF') {
 			const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
-			if (IDENTModeButton != null) {
-				if (transponderMode != 'IDENT') {
-					if (transponderMode === 'VFR') {
-						const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
-						VFRModeButton.classList.remove('active-button');
-					}
-					transponderMode = 'IDENT';
-					IDENTModeButton.classList.add('active-button');
-				}
-			}
+			// Make flash continuously when clicked, untill clicked again
+			IDENTModeButton.classList.toggle('blink-continiously');
+			transponderState.ident_enabled = !transponderState.ident_enabled;
 		}
 	};
 
 	const handleVFRButtonClick = () => {
-		if (transponderDialModeIndex != 0) {
+		if (transponderState.dial_mode != 'OFF') {
 			const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
-			if (VFRModeButton != null) {
-				if (transponderMode != 'VFR') {
-					if (transponderMode === 'IDENT') {
-						const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
-						IDENTModeButton.classList.remove('active-button');
-					}
-					transponderMode = 'VFR';
-					VFRModeButton.classList.add('active-button');
-				}
-			}
+			// Make flash on when pressed then remain off
+			VFRModeButton.classList.toggle('blink-once');
+			transponderState.ident_enabled = true;
 		}
 	};
 
@@ -84,28 +92,35 @@
 		}
 	};
 
-	function onTransponderDialModeChange(newIndex: number) {
-		if (newIndex == 0) {
-			if (transponderMode != 'NONE') {
-				if (transponderMode === 'IDENT') {
-					const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
-					IDENTModeButton.classList.remove('active-button');
-				} else if (transponderMode === 'VFR') {
-					const VFRModeButton = document.getElementById('button-vfr') as HTMLInputElement;
-					VFRModeButton.classList.remove('active-button');
-				}
+	function onTransponderDialModeChange(newModeIndex: number) {
+		if (newModeIndex == 0) {
+			if (transponderState.ident_enabled) {
+				const IDENTModeButton = document.getElementById('button-ident') as HTMLInputElement;
+				IDENTModeButton.classList.remove('active-button');
+				transponderState.ident_enabled = false;
 			}
-			transponderMode = 'NONE';
+			transponderState.dial_mode = 'OFF';
 			displayOn = false;
 			frequencyDialEnabled = false;
 		} else {
+			switch (newModeIndex) {
+				case 1:
+					transponderState.dial_mode = 'SBY';
+				case 2:
+					transponderState.dial_mode = 'GND';
+				case 3:
+					transponderState.dial_mode = 'STBY';
+				case 4:
+					transponderState.dial_mode = 'ON';
+				case 5:
+					transponderState.dial_mode = 'ALT';
+				case 6:
+					transponderState.dial_mode = 'TEST';
+			}
+
 			displayOn = true;
 			frequencyDialEnabled = true;
 		}
-	}
-
-	function getFrequency(): number {
-		return parseInt(digitArr.join(''));
 	}
 
 	function onTransponderFrequencyIncrease(event: Event) {
@@ -123,21 +138,25 @@
 			digitArr[displayDigitSelected] -= 1;
 		}
 	}
+
+	onMount(() => {
+		mounted = true;
+	});
 </script>
 
 <div class="transponder-container-outer relative card">
 	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={TransponderDialModes} bind:CurrentModeIndex={transponderDialModeIndex} />
+		<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 	</div>
 
 	<div class="display-panel flex flex-col justify-center items-center">
 		<TransponderDisplay
 			DisplayOn={displayOn}
-			mode={TransponderDialModes[transponderDialModeIndex]}
+			mode={transponderDialModes[dialModeIndex]}
 			{digitArr}
 			DigitSelected={displayDigitSelected}
 		/>
-		<div class="display-buttons-container">
+		<div class="display-buttons-container relative flex flex-row items-center gap-2">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
 			<button class="button" id="button-enter" on:click={handleENTERButtonClick}>ENT</button>
@@ -161,7 +180,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.mode-selecter {
@@ -170,7 +189,7 @@
 		justify-content: center;
 		object-position: left;
 		width: 200px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.display-panel {
@@ -179,14 +198,11 @@
 		justify-content: center;
 		object-position: center;
 		width: 600px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.display-buttons-container {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		object-position: center bottom;
+		padding-top: 10px;
 	}
 
 	.frequency-selecter {
@@ -195,7 +211,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.button {
@@ -205,7 +221,27 @@
 	/* Global flag required otherwise .active-button is unused at page load 
     and hence removed by the compiler */
 	:global(.active-button) {
-		background-color: #afa548;
+		background-color: rgb(175, 165, 72);
 		color: black;
+	}
+
+	:global(.blink-continiouosly) {
+		animation: blinker 2s linear infinite;
+	}
+
+	:global(.blink-once) {
+		animation: blinker 2s linear 1;
+	}
+
+	@keyframes blinker {
+		25% {
+			background-color: rgb(175, 165, 72, 1);
+		}
+		50% {
+			background-color: rgba(175, 165, 72, 0);
+		}
+		75% {
+			background-color: rgba(175, 165, 72, 1);
+		}
 	}
 </style>

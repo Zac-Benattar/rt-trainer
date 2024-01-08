@@ -1,33 +1,60 @@
 <script lang="ts">
-	// Clears input box
+	export let contents: string = '';
+
+	const handleKeypress = () => {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		contents = inputBox.textContent ? inputBox.textContent : '';
+	};
+
 	const handleDelete = () => {
-		const inputBox = document.querySelector('.input-box') as HTMLInputElement;
-        var deleteIcon = document.createElement('img');
-		// Create new inner html
-        deleteIcon.setAttribute('class', 'icon');
-        deleteIcon.setAttribute('src', '/images/delete.png');
-        deleteIcon.addEventListener('click', handleDelete);
-		inputBox.innerHTML = ''; // Clear existing innerHTML
-        inputBox.appendChild(deleteIcon); // Add new innerHTML
+		resetBox();
+	};
+
+	const handleFocus = () => {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		if (inputBox.textContent === 'Make notes here.') {
+			inputBox.textContent = '';
+		}
+	};
+
+	const handleFocusOut = () => {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		if (!inputBox.textContent || !inputBox.textContent.replace(/\s/g, '').length) {
+			resetBox();
+		}
+	};
+
+	const resetBox = () => {
+		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
+		inputBox.textContent = 'Make notes here.';
 	};
 </script>
 
-<div class="kneeboard">
-	<p contenteditable="true" class="input-box">
-		Take notes here
-		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
-		<!-- svelte-ignore a11y-missing-attribute -->
-		<img class="icon" src="/images/delete.png" on:click={handleDelete} on:keypress={handleDelete}/>
+<div class="kneeboard-container flex flex-col grid-cols-1 items-end">
+	<p
+		id="kneeboard-input"
+		contenteditable="true"
+		class="input-box"
+		on:focus={handleFocus}
+		on:focusout={handleFocusOut}
+		on:change={handleFocus}
+		on:keypress={handleKeypress}
+		on:input={handleKeypress}
+	>
+		Make notes here.
 	</p>
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+	<!-- svelte-ignore a11y-missing-attribute -->
+	<input class="delete-button btn" type="image" src="/images/delete.png" on:click={handleDelete} />
 </div>
 
 <style lang="postcss">
-	.input-box {
-		position: relative;
-		width: 100%;
+	.kneeboard-container {
+		box-sizing: border-box;
+		background-clip: padding-box;
 		min-width: 490px;
-		min-height: 360px;
-		max-height: 1000px;
+		max-width: 490px;
+		height: 390px;
 		background-color: #fff;
 		padding: 20px;
 		outline: solid 1px #ccc;
@@ -35,11 +62,23 @@
 		color: black;
 	}
 
-    :global(.icon) {
-		width: 25px;
-		position: absolute;
-		bottom: 15px;
-		right: 15px;
-		cursor: pointer;
+	.input-box {
+		width: 100%;
+		height: 430px;
+		resize: none;
+		overflow: auto;
+	}
+
+	.input-box:focus {
+		outline: none;
+	}
+
+	.delete-button {
+		padding-right: 0px;
+		padding-bottom: 0px;
+		padding-top: 0px;
+		padding-left: 10px;
+		width: 60px;
+		height: 40px;
 	}
 </style>

@@ -3,7 +3,8 @@
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
 	import TransmitButton from './TransmitButton.svelte';
-	type RadioMode = 'COM' | 'NAV';
+	import { simulatorRadioStateStore } from '$lib/stores';
+	import type { RadioState } from '$lib/purets/States';
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
@@ -14,27 +15,33 @@
 		string?,
 		string?
 	];
-	export let radioMode: RadioMode = 'COM';
-	export let radioDialMode: string = 'OFF';
-	export let activeFrequency: number = 126.41;
-	export let standbyFrequency: number = 123.17;
-	export let tertiaryFrequency: number = 177.2;
-	export let displayOn: boolean = false;
-	export let frequencyDialEnabled: boolean = false;
-	export let transmitButtonEnabled: boolean = false;
-	export let transmitting: boolean = false;
+
+	// Holds current radio settings
+	let radioState: RadioState = {
+		mode: 'OFF',
+		dial_mode: 'OFF',
+		active_frequency: 123.030,
+		standby_frequency: 180.030,
+		tertiary_frequency: 177.200
+	};
+	let displayOn: boolean = false;
+	let frequencyDialEnabled: boolean = false;
+	let transmitButtonEnabled: boolean = false;
+	let transmitting: boolean = false;
+
+	$: simulatorRadioStateStore.set(radioState);
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
-		if (radioDialMode != 'OFF') {
+		if (radioState.dial_mode != 'OFF') {
 			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 			if (COMModeButton != null) {
-				if (radioMode != 'COM') {
-					if (radioMode === 'NAV') {
+				if (radioState.mode != 'COM') {
+					if (radioState.mode === 'NAV') {
 						const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
 						NAVModeButton.classList.remove('active-button');
 					}
-					radioMode = 'COM';
+					radioState.mode = 'COM';
 					COMModeButton.classList.add('active-button');
 				}
 			}
@@ -42,15 +49,15 @@
 	};
 
 	const handleNAVButtonClick = () => {
-		if (radioDialMode != 'OFF') {
+		if (radioState.dial_mode != 'OFF') {
 			const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
 			if (NAVModeButton != null) {
-				if (radioMode != 'NAV') {
-					if (radioMode === 'COM') {
+				if (radioState.mode != 'NAV') {
+					if (radioState.mode === 'COM') {
 						const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 						COMModeButton.classList.remove('active-button');
 					}
-					radioMode = 'NAV';
+					radioState.mode = 'NAV';
 					NAVModeButton.classList.add('active-button');
 				}
 			}
@@ -58,10 +65,10 @@
 	};
 
 	const handleSWAPButtonClick = () => {
-		if (radioDialMode != 'OFF') {
-			let tempFrequency = activeFrequency;
-			activeFrequency = standbyFrequency;
-			standbyFrequency = tempFrequency;
+		if (radioState.dial_mode != 'OFF') {
+			let tempFrequency = radioState.active_frequency;
+			radioState.active_frequency = radioState.standby_frequency;
+			radioState.standby_frequency = tempFrequency;
 		}
 	};
 
@@ -69,13 +76,13 @@
 		// Fix this hack
 		var newDialModeIndex = (<any>event).detail;
 		if (newDialModeIndex == 0) {
-			if (radioMode === 'COM') {
+			if (radioState.mode === 'COM') {
 				const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 				COMModeButton.classList.remove('active-button');
-			} else if (radioMode === 'NAV') {
+			} else if (radioState.mode === 'NAV') {
 				const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
 				NAVModeButton.classList.remove('active-button');
-				radioMode = 'COM';
+				radioState.mode = 'COM';
 			}
 			displayOn = false;
 			frequencyDialEnabled = false;
@@ -87,24 +94,29 @@
 			frequencyDialEnabled = true;
 			transmitButtonEnabled = true;
 		}
-		radioDialMode = RadioDialModes[newDialModeIndex];
+
+		if (newDialModeIndex == 0) {
+			radioState.dial_mode = 'OFF';
+		} else {
+			radioState.dial_mode = 'SBY';
+		}
 	}
 
-	function onRadioFrequencyIncreaseLarge(event: Event) {
-		standbyFrequency += 1;
+	function onRadioFrequencyIncreaseLarge() {
+		radioState.standby_frequency += 1;
 	}
 
-	function onRadioFrequencyReduceLarge(event: Event) {
-		standbyFrequency -= 1;
+	function onRadioFrequencyReduceLarge() {
+		radioState.standby_frequency -= 1;
 	}
 
 	// Precision errors are a problem here
-	function onRadioFrequencyIncreaseSmall(event: Event) {
-		standbyFrequency += 0.005;
+	function onRadioFrequencyIncreaseSmall() {
+		radioState.standby_frequency = parseFloat((radioState.standby_frequency + 0.005).toPrecision(6));
 	}
 
-	function onRadioFrequencyReduceSmall(event: Event) {
-		standbyFrequency -= 0.005;
+	function onRadioFrequencyReduceSmall() {
+		radioState.standby_frequency = parseFloat((radioState.standby_frequency - 0.005).toPrecision(6));
 	}
 </script>
 
@@ -113,7 +125,10 @@
 		<div class="power-selector-container content-center">
 			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 		</div>
-		<div class="transmit-button-container absolute" style="width: 55px; height: 55px; left: 120px; top: 115px;">
+		<div
+			class="transmit-button-container absolute"
+			style="width: 55px; height: 55px; left: 130px; top: 85px;"
+		>
 			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 		</div>
 	</div>
@@ -125,10 +140,10 @@
 		</div>
 		<RadioDisplay
 			DisplayOn={displayOn}
-			mode={radioMode}
-			{activeFrequency}
-			{standbyFrequency}
-			{tertiaryFrequency}
+			bind:mode={radioState.mode}
+			bind:activeFrequency={radioState.active_frequency}
+			bind:standbyFrequency={radioState.standby_frequency}
+			bind:tertiaryFrequency={radioState.tertiary_frequency}
 		/>
 		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
@@ -155,7 +170,7 @@
 		justify-content: center;
 		background-color: rgb(65, 65, 65);
 		width: 1000px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.left-container {
@@ -163,7 +178,7 @@
 		flex-direction: row;
 		object-position: left;
 		width: 200px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.power-selector-container {
@@ -183,7 +198,7 @@
 		justify-content: center;
 		object-position: center;
 		width: 600px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.display-buttons-container {
@@ -199,7 +214,7 @@
 		justify-content: center;
 		object-position: right;
 		width: 200px;
-		height: 200px;
+		height: 160px;
 	}
 
 	.button {

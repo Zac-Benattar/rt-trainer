@@ -2,14 +2,15 @@
 	import '../app.postcss';
 	import { AppShell } from '@skeletonlabs/skeleton';
 	import { autoModeWatcher } from '@skeletonlabs/skeleton';
-	import Navigation from '$lib/Navigation/Navigation.svelte';
-	import TopAppBar from '$lib/Navigation/TopAppBar.svelte';
+	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
 	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
-
-	// Floating UI for Popups - Used in drawers
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
+	import Navigation from '$lib/Sidebars/NavigationSidebar.svelte';
+	import type { SimulatorSettings } from '$lib/purets/States';
+	import { Modal } from '@skeletonlabs/skeleton';
+	import SimulatorSettingsSidebar from '$lib/Sidebars/SimulatorSettingsSidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -25,6 +26,7 @@
 	let classesAppBar: string;
 	let burgerButton: string;
 	let topBarEnabled: boolean;
+
 	// Reactive Classes
 	$: if ($page.url.pathname === '/') {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
@@ -53,23 +55,49 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
-<!-- Navigation Drawer -->
+<!-- Settings Drawer -->
 <Drawer width="w-64">
-	<h2 class="p-4">Navigation</h2>
+	<h2 class="p-4">Simulator Settings</h2>
 	<hr />
-	<Navigation />
+	{#if classesSidebar == 'w-0'}
+		<SimulatorSettingsSidebar />
+	{:else}
+		<Navigation />
+	{/if}
 </Drawer>
 
+<Modal />
+
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader="{classesAppBar}">
+<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen}/>
+		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		<Navigation />
+		{#if classesSidebar == 'w-0'}
+			<SimulatorSettingsSidebar />
+		{:else}
+			<Navigation />
+		{/if}
 	</svelte:fragment>
 	<!-- Page Route Content -->
 	<slot />
 </AppShell>
+
+<style lang="postcss">
+	@font-face {
+		font-family: 'Geist';
+		font-style: normal;
+		font-weight: 100;
+		src: url('/fonts/GeistVF.woff2') format('woff2');
+	}
+
+	@font-face {
+		font-family: 'DSEG7ClassicMini';
+		font-style: normal;
+		font-weight: 100;
+		src: url('/fonts/DSEG7ClassicMini-Regular.woff2') format('woff2');
+	}
+</style>

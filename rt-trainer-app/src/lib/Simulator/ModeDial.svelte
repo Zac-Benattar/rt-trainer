@@ -76,7 +76,7 @@
 		var radius = 60;
 		if (centerDiv != null) {
 			for (let i = 0; i < Modes.length; i++) {
-				if (Modes[i] != null) {
+				if (Modes[i] != undefined) {
 					addMode(
 						Modes[i],
 						radius * Math.sin(angle),
@@ -106,7 +106,6 @@
 		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
 		if (ModeDial != null) {
 			if (Modes.length == 2) {
-				console.log('Setting mode' + modeIndex);
 				if (modeIndex == 0) {
 					ModeDial.style.transform = 'rotate(-150deg)';
 					DialEnabled = false;

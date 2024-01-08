@@ -16,9 +16,9 @@
 	};
 </script>
 
-<div>
+<div class="card flex flex-col gap-3">
 	<div class="text-2xl">Generate a scenario</div>
-	<div>
+	<div class="flex justify-center">
 		<SlideToggle
 			id="enable-random-events"
 			name="slider-medium"
@@ -27,7 +27,12 @@
 			size="md">Random events</SlideToggle
 		>
 	</div>
-	<div>
-		<button type="button" class="btn variant-filled" on:click={handleClick}>Generate</button>
-	</div>
+	<button type="button" class="btn variant-filled" on:click={handleClick}>Generate</button>
 </div>
+
+<style lang="postcss">
+	.card {
+		padding: 1rem;
+		width: 259px;
+	}
+</style>

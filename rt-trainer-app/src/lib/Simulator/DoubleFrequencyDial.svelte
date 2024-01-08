@@ -3,6 +3,11 @@
 	export let DialEnabled: boolean = false; // Dial not interactive if disabled
 	let internalName = Math.random().toString(36).substring(7); // like a uuid, useful if more than one instance used
 	let mounted: boolean = false;
+	let intervalId: any;
+	let defaultIntervalDuration: number = 200;
+	let intervalDuration: number = defaultIntervalDuration;
+	const minIntervalDuration: number = 20;
+	const intervalStep: number = 10;
 
 	// Ensures that dial is mounted before modifying its properties
 	$: if (mounted) {
@@ -14,6 +19,10 @@
 		} else {
 			frequencyDial.classList.remove('enabled');
 		}
+	}
+
+	$: if (!DialEnabled) {
+		clearInterval(intervalId);
 	}
 
 	const dispatch = createEventDispatcher();
@@ -34,6 +43,67 @@
 		dispatch('dialInnerClockwiseTurn');
 	};
 
+	function startIncrementingInnerAntiClockwiseHold() {
+		onDialInnerAntiClockwiseTurn();
+		intervalId = setInterval(() => {
+			onDialInnerAntiClockwiseTurn();
+			updateIntervalDuration(startIncrementingInnerAntiClockwiseHold);
+		}, intervalDuration);
+	}
+
+	function stopIncrementingInnerAntiClockwiseHold() {
+		clearInterval(intervalId);
+		intervalDuration = defaultIntervalDuration;
+	}
+
+	function startIncrementingInnerClockwiseHold() {
+		onDialInnerClockwiseTurn();
+		intervalId = setInterval(() => {
+			onDialInnerClockwiseTurn();
+			updateIntervalDuration(startIncrementingInnerClockwiseHold);
+		}, intervalDuration);
+	}
+
+	function stopIncrementingInnerClockwiseHold() {
+		clearInterval(intervalId);
+		intervalDuration = defaultIntervalDuration;
+	}
+
+	function startIncrementingOuterAntiClockwiseHold() {
+		onDialOuterAntiClockwiseTurn();
+		intervalId = setInterval(() => {
+			onDialOuterAntiClockwiseTurn();
+			updateIntervalDuration(startIncrementingOuterAntiClockwiseHold);
+		}, intervalDuration);
+	}
+
+	function stopIncrementingOuterAntiClockwiseHold() {
+		clearInterval(intervalId);
+		intervalDuration = defaultIntervalDuration;
+	}
+
+	function startIncrementingOuterClockwiseHold() {
+		onDialOuterClockwiseTurn();
+		intervalId = setInterval(() => {
+			onDialOuterClockwiseTurn();
+			updateIntervalDuration(startIncrementingOuterClockwiseHold);
+		}, intervalDuration);
+
+	}
+
+	function stopIncrementingOuterClockwiseHold() {
+		clearInterval(intervalId);
+		intervalDuration = defaultIntervalDuration;
+	}
+
+	function updateIntervalDuration(incrementMethod: Function) {
+		if (intervalDuration > minIntervalDuration) {
+			clearInterval(intervalId);
+			intervalDuration -= intervalStep;
+			incrementMethod();
+		}
+	}
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -50,7 +120,10 @@
 			class="absolute"
 			style="top: 50%; left: 50%; position: absolute; margin: auto;"
 		/>
-		<button id={'double-frequency-dial-outer-' + internalName} class="double-frequency-dial-outer flex">
+		<button
+			id={'double-frequency-dial-outer-' + internalName}
+			class="double-frequency-dial-outer flex"
+		>
 			<div class="absolute" style="left: 8px; top: 30%; width: 12px; pointer-events: none;">
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.97 9.43"
 					><g opacity="0.25"
@@ -87,11 +160,18 @@
 				<div
 					class="relative"
 					style="width: 50%;"
-					on:click={onDialOuterAntiClockwiseTurn}
+					on:mousedown={startIncrementingOuterAntiClockwiseHold}
+					on:mouseup={stopIncrementingOuterAntiClockwiseHold}
+					on:mouseleave={stopIncrementingOuterAntiClockwiseHold}
 				/>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div style="width: 50%;" on:click={onDialOuterClockwiseTurn} />
+				<div
+					style="width: 50%;"
+					on:mousedown={startIncrementingOuterClockwiseHold}
+					on:mouseup={stopIncrementingOuterClockwiseHold}
+					on:mouseleave={stopIncrementingOuterClockwiseHold}
+				/>
 			</div>
 			<button
 				id={'double-frequency-dial-inner-' + internalName}
@@ -123,23 +203,24 @@
 						></svg
 					>
 				</div>
-				<div
-					class="absolute flex flex-row"
-					style="top: 0px; left: 0px; width:100%; height:100%;"
-				>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<div class="absolute flex flex-row" style="top: 0px; left: 0px; width:100%; height:100%;">
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<div
 						class="relative"
 						style="width: 50%;"
-						on:click={onDialInnerAntiClockwiseTurn}
-						on:keypress={onDialInnerAntiClockwiseTurn}
+						on:mousedown={startIncrementingInnerAntiClockwiseHold}
+						on:mouseup={stopIncrementingInnerAntiClockwiseHold}
+						on:mouseleave={stopIncrementingInnerAntiClockwiseHold}
 					/>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						class="relative"
 						style="width: 50%;"
-						on:click={onDialInnerClockwiseTurn}
-						on:keypress={onDialInnerClockwiseTurn}
+						on:mousedown={startIncrementingInnerClockwiseHold}
+						on:mouseup={stopIncrementingInnerClockwiseHold}
+						on:mouseleave={stopIncrementingInnerClockwiseHold}
 					/>
 				</div></button
 			>

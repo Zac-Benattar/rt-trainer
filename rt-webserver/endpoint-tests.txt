@@ -1,0 +1,134 @@
+initiate scenario:
+http://127.0.0.1:3000/initiatescenario
+{
+  "scenario_seed": 1,
+  "weather_seed": 1,
+  "prefix": "STUDENT",
+  "user_callsign": "G-OFLY",
+  "radio_frequency": 180.030,
+  "transponder_frequency": 7000
+}
+
+radio check:
+http://127.0.0.1:3000/nextstate
+{
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreRadioCheck"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None",
+  "aircraft_type": "Cessna 172"
+  },
+  "message": "Wellesbourne Information, G-OFLY, radio check 180.030 excess to trim 5.0",
+  "scenario_seed": 1,
+  "weather_seed": 1
+}
+
+request departure information:
+http://127.0.0.1:3000/nextstate
+{
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreDepartInfo"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None",
+  "aircraft_type": "Cessna 172"
+  },
+  "message": "G-OFLY, request departure information.",
+  "scenario_seed": 1,
+  "weather_seed": 1
+}
+
+readback departure information:
+http://127.0.0.1:3000/nextstate
+{
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreReadbackDepartInfo"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-LY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None",
+  "aircraft_type": "Cessna 172"
+  },
+  "message": "Runway 36, QNH 997, G-LY",
+  "scenario_seed": 1,
+  "weather_seed": 1
+}
+
+readback taxi clearance:
+http://127.0.0.1:3000/nextstate
+{
+  "state" :{
+  "status": {
+    "Parked": {
+      "position": "A1",
+      "stage": "PreTaxiClearanceReadback"
+    }
+  },
+  "prefix": "STUDENT",
+  "callsign": "G-OFLY",
+  "target_allocated_callsign": "G-OFLY",
+  "squark": false,
+  "current_target": {
+    "frequency_type": "AFIS",
+    "frequency": 124.03,
+    "callsign": "Wellesbourne Information"
+  },
+  "current_radio_frequency": 180.030,
+  "current_transponder_frequency": 7000,
+  "lat": 52.1922,
+  "long": -1.6144,
+  "emergency": "None",
+  "aircraft_type": "Cessna 172"
+  },
+  "message": "Taxi holding point A1 runway 36 qnh 958 g-ofly",
+  "scenario_seed": 1,
+  "weather_seed": 1
+}

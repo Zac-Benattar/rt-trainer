@@ -3,7 +3,6 @@
 
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'COM';
-	export let DigitSelected: number = 0;
 	export let activeFrequency: number = 123.17;
 	export let standbyFrequency: number = 126.41;
 	export let tertiaryFrequency: number = 177.2;
@@ -21,10 +20,14 @@
 			mode = 'COM';
 		}
 	}
-	$: {
+	$: if (mounted) {
 		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
+
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
@@ -40,10 +43,13 @@
 		SFDigitArr[4] = newDigitArrRight[1];
 		SFDigitArr[5] = newDigitArrRight[2];
 	}
-	$: {
+	$: if (mounted) {
 		let split = activeFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
@@ -59,10 +65,13 @@
 		AFDigitArr[4] = newDigitArrRight[1];
 		AFDigitArr[5] = newDigitArrRight[2];
 	}
-	$: {
+	$: if (mounted) {
 		let split = tertiaryFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight = split[1].split('');
+		let newDigitArrRight: string[] = ["0", "0", "0"];
+		if (split.length >= 2) {
+			newDigitArrRight = split[1].split('');
+		}
 		for (let i = 0; i < 4; i++) {
 			if (newDigitArrLeft[i] == null) {
 				newDigitArrLeft[i] = '0';
@@ -83,13 +92,6 @@
 		mounted = true;
 	});
 </script>
-
-<link
-	rel="stylesheet"
-	media="screen"
-	href="https://fontlibrary.org//face/segment7"
-	type="text/css"
-/>
 
 <div
 	class="radio-segdisplay {showDisplayText} card flex flex-row nowrap items-center place-content-between"
@@ -119,6 +121,9 @@
 			<div id="primary-rdigit-dp-1" class="rdigit">{SFDigitArr[4]}</div>
 			<div id="primary-rdigit-dp-2" class="rdigit">{SFDigitArr[5]}</div>
 		</div>
+		<!-- <div>
+			<div class="padding" style="width: 50px;"></div>
+		</div> -->
 		<div class="tertiary-frequency flex flex-row">
 			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
 			<div id="tertiary-rdigit-1" class="rdigit">{TFDigitArr[1]}</div>
@@ -147,7 +152,7 @@
 	}
 
 	.radio-segdisplay .mode-icon {
-		font-family: Segment7Standard;
+		font-family: DSEG7ClassicMini;
 		font-size: 20px;
 		text-algin: left;
 		padding: 2px;
@@ -162,13 +167,14 @@
 	}
 
 	.radio-segdisplay .rdigit {
-		font-family: Segment7Standard;
+		font-family: DSEG7ClassicMini;
+		font-size: 30px;
 		text-algin: right;
 		padding: 8px 0px;
 	}
 
 	.radio-segdisplay .rdecimal-point {
-		font-family: Segment7Standard;
+		font-family: DSEG7ClassicMini;
 		text-algin: right;
 		padding: 8px 0px;
 	}
