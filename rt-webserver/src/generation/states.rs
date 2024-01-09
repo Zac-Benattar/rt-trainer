@@ -200,6 +200,20 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
+                AirborneEvent::PreVFRPositionReport => {
+                    // Parse new airspace VFR position report
+                    return parse_vfr_position_report(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        flight_rules,
+                        altitude,
+                        heading,
+                        speed,
+                        current_point,
+                        &current_state,
+                    );
+                }
             }
         }
         Status::Landing { runway } => todo!(),

@@ -78,7 +78,8 @@ pub enum AirborneEvent {
     PreChangeHeadingWilco,
     PreChangeSpeedWilco,
     PreChangeRouteWilco,
-    PreWilco
+    PreWilco,
+    PreVFRPositionReport,
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]

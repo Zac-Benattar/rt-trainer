@@ -905,3 +905,94 @@ pub fn parse_wilco(
         message: atc_response,
     }))
 }
+
+/* Parse VFR position report.
+Should contain the aircraft callsign, location relative to a waypoint,
+and the flight level/altitude including passing level and cleared level
+if not in level flight. */
+/* Parse Wilco in response to an instruction from ATC unit.
+Should consist of Wilco followed by aircraft callsign */
+pub fn parse_vfr_position_report(
+    scenario_seed: &u64,
+    weather_seed: &u64,
+    radiocall: &String,
+    flight_rules: &FlightRules,
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+    // May need more details to be accurate to specific situation
+    let expected_radiocall: String = format!(
+        "{0} {1}, overhead {2}, {3} feet",
+        current_state.prefix.to_ascii_lowercase(),
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+        current_point.name.to_ascii_lowercase(),
+        altitude,
+    );
+
+    if !radiocall.contains(current_state.callsign.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!(
+                "Remember to include your own callsign at the start of your radio call.",
+            ),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    if !radiocall.contains(current_point.name.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your current location in your radio call.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    if !radiocall.contains(altitude.to_string().to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your altitude in your radio call.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    let atc_response: String = String::new();
+
+    // Logic required to figure out next state
+    let next_state: SentState = SentState {
+        status: Status::Airborne {
+            // These need to be updated with the information for the next waypoint
+            flight_rules: flight_rules.to_owned(),
+            altitude: altitude.to_owned(),
+            heading: heading.to_owned(),
+            speed: speed.to_owned(),
+            current_point: current_point.to_owned(),
+            airborne_event: AirborneEvent::PreWilco,
+        },
+        location: current_point.location,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: shorten_callsign(
+            scenario_seed,
+            &current_state.aircraft_type,
+            &current_state.callsign,
+        ), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(ServerResponse::StateMessage(SentStateMessage {
+        state: next_state,
+        message: atc_response,
+    }))
+}
