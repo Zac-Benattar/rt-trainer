@@ -6,6 +6,8 @@
 	export let enabled: boolean = true;
 	let target: Location;
 	let mounted: boolean = false;
+	let marker: any;
+	let zoomLevel: number = 13;
 	var map: any;
 
 	simulatorLocationStore.subscribe((value) => {
@@ -18,20 +20,23 @@
 	});
 
 	function loadMapScenario() {
-		console.log(target);
-		// map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-		// 	credentials: BING_MAPS_API_KEY,
-		// 	center: new Microsoft.Maps.Location(target?.lat, target?.long),
-		// 	zoom: 12
-		// });
+		map = L.map('myMap').setView([target?.lat, target?.long], zoomLevel);
+		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 17,
+			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		}).addTo(map);
 
-		map = L.map('myMap').setView([target?.lat, target?.long], 13);
+		// Removes any existing marker and sets new one
+		marker = L.marker([target.lat, target.long]).addTo(map);
 	}
 
 	function updateMap() {
 		if (!map) loadMapScenario();
 		else {
-			map.setView([target?.lat, target?.long], 13);
+			map.setView([target?.lat, target?.long], zoomLevel);
+
+			// Removes any existing marker and sets new one
+			marker = L.marker([target.lat, target.long]).addTo(map);
 		}
 	}
 
@@ -53,20 +58,26 @@
 	});
 </script>
 
-<reference path="types/MicrosoftMaps/Microsoft.Maps.All.d.ts" />
-
 <svelte:head>
 	{#if enabled}
-	<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
-	integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
-	crossorigin=""></script>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+			integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+			crossorigin=""
+		/>
+		<script
+			src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+			integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+			crossorigin=""
+		></script>
 	{/if}
 </svelte:head>
 
 <div class="map-container">
 	<h1>Map</h1>
 	{#if enabled}
-		<div id="myMap" style="position: relative; width: 100%; height: 100%;" />
+		<div id="myMap" style="position: relative; width: 450px; height: 350px;" />
 	{/if}
 	{#if !enabled}
 		<p>Map is disabled</p>
