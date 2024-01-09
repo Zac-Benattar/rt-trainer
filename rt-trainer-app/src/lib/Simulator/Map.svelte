@@ -65,9 +65,8 @@
 </svelte:head>
 
 <div class="map-container">
-	<h1>Map</h1>
 	{#if enabled}
-		<div id="myMap" style="position: relative; width: 100%; height: 326px;" />
+		<div id="myMap" style="position: relative; width: 100%; height: 100%;" />
 	{/if}
 	{#if !enabled}
 		<p>Map is disabled</p>
