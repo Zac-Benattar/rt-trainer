@@ -6,9 +6,11 @@
 	export let enabled: boolean = true;
 	let target: Location;
 	let mounted: boolean = false;
-	let marker: any;
+	let currentLocationMarker: any;
+	let markers: any[] = [];
 	let zoomLevel: number = 13;
 	var map: any;
+	let planeIcon: any;
 
 	simulatorLocationStore.subscribe((value) => {
 		target = value;
@@ -20,13 +22,22 @@
 
 	function loadMapScenario() {
 		map = L.map('myMap').setView([target?.lat, target?.long], zoomLevel);
+
+		planeIcon = L.icon({
+			iconUrl: '/images/plane.png',
+
+			iconSize: [40, 40], // size of the icon
+			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+		});
+
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 17,
 			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
 
 		// Removes any existing marker and sets new one
-		marker = L.marker([target.lat, target.long]).addTo(map);
+		currentLocationMarker = L.marker([target.lat, target.long], {icon: planeIcon}).addTo(map);
 	}
 
 	function updateMap() {
@@ -35,8 +46,37 @@
 			map.setView([target?.lat, target?.long], zoomLevel);
 
 			// Removes any existing marker and sets new one
-			marker = L.marker([target.lat, target.long]).addTo(map);
+			currentLocationMarker = L.marker([target.lat, target.long], {icon: planeIcon}).addTo(map);
 		}
+	}
+
+	function addMarker(lat: number, long: number, name: string) {
+		markers.push(L.marker([lat, long]).bindPopup(name).addTo(map));
+	}
+
+	function removeMarkers() {
+		markers.forEach((marker) => {
+			map.removeLayer(marker);
+		});
+		markers = [];
+	}
+
+	function connectMarkers() {
+		if (markers.length > 1) {
+			for (let i = 0; i < markers.length - 1; i++) {
+				L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
+					color: 'red',
+					weight: 3,
+					opacity: 0.5,
+					smoothFactor: 1
+				}).addTo(map);
+			}
+		}
+	}
+
+	function clearMap() {
+		removeMarkers();
+		connectMarkers();
 	}
 
 	onMount(() => {
