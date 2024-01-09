@@ -1,3 +1,5 @@
+use std::fmt;
+
 use serde::{Deserialize, Serialize};
 
 use super::aerodrome::{COMFrequency, HoldingPoint, Runway};
@@ -66,6 +68,33 @@ pub enum LandedToParkedStage {
 }
 
 #[derive(Deserialize, Serialize)]
+pub enum AirbourneEvent {
+    NewAirspaceInitialContact,
+    NewAirspaceFullContact,
+    NewAirspaceChangeFrequency,
+    NewAirspaceChangeSquark,
+    NewAirspaceChangeTransponder,
+    NewAirspaceChangeAltitude,
+    NewAirspaceChangeHeading,
+    NewAirspaceChangeSpeed,
+    NewAirspaceChangeRoute,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub enum FlightRules {
+    IFR,
+    VFR,
+}
+
+impl fmt::Display for FlightRules {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+        // or, alternatively:
+        // fmt::Debug::fmt(self, f)
+    }
+}
+
+#[derive(Deserialize, Serialize)]
 pub enum Status {
     Parked {
         stage: ParkedStage,
@@ -81,10 +110,12 @@ pub enum Status {
         runway: Runway,
     },
     Airbourne {
+        flight_rules: FlightRules,
         altitude: u32,
         heading: u32,
         speed: u32,
         current_point: Waypoint,
+        airbourne_event: AirbourneEvent,
     },
     Descent {},
     Approach {},
@@ -100,9 +131,9 @@ pub enum Status {
 #[derive(Deserialize, Serialize, Clone)]
 pub enum WaypointType {
     Aerodrome,
-    NDB, // Non-directional beacon - helps with positioning
-    VOR, // VHF Omnidirectional Range station - helps with positioning
-    Fix, // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir
+    NDB,          // Non-directional beacon - helps with positioning
+    VOR,          // VHF Omnidirectional Range station - helps with positioning
+    Fix,          // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir
     DME, // Distance Measuring Equipment - helps with positioning by measuring distance from a VOR
     GPS, // GPS waypoint - arbitrary point defined in terms of lat/long
     Intersection, // Intersection of two or more airways
@@ -175,8 +206,9 @@ pub struct SentStateMessage {
 
 #[derive(Deserialize, Serialize)]
 pub struct Mistake {
+    pub call_expected: String,
+    pub call_found: String,
     pub details: String,
-    pub message: String,
 }
 
 #[derive(Deserialize, Serialize)]

@@ -2,10 +2,10 @@ use anyhow::Error;
 
 use crate::models::{
     aerodrome::Aerodrome,
-    aerodrome::COMFrequency,
+    aerodrome::{COMFrequency, Runway},
     state::{
-        Emergency, Mistake, ParkedStage, RecievedState, SentState, SentStateMessage,
-        ServerResponse, Status, TaxiingStage, WaypointType, Waypoint,
+        AirbourneEvent, Emergency, FlightRules, Mistake, ParkedStage, RecievedState, SentState,
+        SentStateMessage, ServerResponse, Status, TaxiingStage, Waypoint,
     },
 };
 
@@ -51,8 +51,15 @@ pub fn parse_radio_check(
     radio_check: &String,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let message = radio_check;
-    let message_words = message.split_whitespace().collect::<Vec<&str>>();
+    let expected_radiocall = format!(
+        "{0}, {1}, radio check {2}",
+        current_state.current_target.callsign,
+        current_state.callsign,
+        current_state.current_radio_frequency
+    );
+
+    let message: &String = radio_check;
+    let message_words: Vec<&str> = message.split_whitespace().collect::<Vec<&str>>();
 
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
@@ -66,8 +73,9 @@ pub fn parse_radio_check(
         Some(index) => index,
         None => {
             return Ok(ServerResponse::Mistake(Mistake {
+                call_expected: expected_radiocall,
                 details: "Frequency missing".to_string(),
-                message: message.to_string(),
+                call_found: message.to_string(),
             }));
         }
     };
@@ -77,33 +85,36 @@ pub fn parse_radio_check(
         Ok(frequency) => frequency,
         Err(_) => {
             return Ok(ServerResponse::Mistake(Mistake {
+                call_expected: expected_radiocall,
                 details: "Frequency not recognised".to_string(),
-                message: message.to_string(),
+                call_found: message.to_string(),
             }));
         }
     };
 
-    let callsign_expected = current_state.current_target.callsign.to_ascii_lowercase();
-    let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
+    let callsign_expected: String = current_state.current_target.callsign.to_ascii_lowercase();
+    let callsign_words: &Vec<&str> = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
             return Ok(ServerResponse::Mistake(Mistake {
+                call_expected: expected_radiocall,
                 details: format!(
                     "Callsign not recognised: {}",
                     message_words[..callsign_words.len()].join(" ")
                 ),
-                message: message.to_string(),
+                call_found: message.to_string(),
             }));
         }
     }
 
     if message_words[callsign_words.len()] != current_state.callsign.to_ascii_lowercase() {
         return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
             details: format!(
                 "Callsign not recognised: {}",
                 message_words[..callsign_words.len()].join(" ")
             ),
-            message: message.to_string(),
+            call_found: message.to_string(),
         }));
     }
 
@@ -111,28 +122,30 @@ pub fn parse_radio_check(
         || message_words[radio_freq_index - 1] != "check"
     {
         return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
             details: "Expected 'radio check' in message".to_string(),
-            message: message.to_string(),
+            call_found: message.to_string(),
         }));
     }
 
     // Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
     if radio_freq_stated != current_state.current_radio_frequency {
         return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
             details: format!(
                 "Frequency incorrect: {0} \n Expected: {1}",
                 radio_freq_stated, current_state.current_radio_frequency
             ),
-            message: message.to_string(),
+            call_found: message.to_string(),
         }));
     }
 
-    let atc_response = format!(
+    let atc_response: String = format!(
         "{0}, {1}, reading you 5",
         &current_state.callsign, &current_state.current_target.callsign
     );
 
-    let next_state = SentState {
+    let next_state: SentState = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreDepartInfo,
         },
@@ -164,16 +177,25 @@ pub fn parse_departure_information_request(
     departure_information_request: &String,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let message_words = departure_information_request
+    let expected_radiocall = format!(
+        "{0} request departure information",
+        current_state.callsign.to_ascii_lowercase()
+    );
+
+    let message_words: Vec<&str> = departure_information_request
         .split_whitespace()
         .collect::<Vec<&str>>();
-    let callsign_expected = current_state.callsign.to_ascii_lowercase();
-    let callsign_words = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
+    let callsign_expected: String = current_state.callsign.to_ascii_lowercase();
+    let callsign_words: &Vec<&str> = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
     for i in 0..callsign_words.len() {
         if message_words[i] != callsign_words[i] {
             return Ok(ServerResponse::Mistake(Mistake {
-                details: "Callsign not recognised".to_string(),
-                message: departure_information_request.to_string(),
+                call_expected: format!(
+                    "{0} request departure information",
+                    current_state.callsign.to_ascii_lowercase()
+                ),
+                details: "Remeber to include your whole callsign in your message".to_string(),
+                call_found: departure_information_request.to_string(),
             }));
         }
     }
@@ -186,33 +208,36 @@ pub fn parse_departure_information_request(
             }
         };
 
-    let metor_sample =
+    let metor_sample: crate::models::aerodrome::METORDataSample =
         get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
     let runway_index: usize =
         (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
-    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
+    let runway: &Runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Ok(ServerResponse::Mistake(Mistake {
+                call_expected: expected_radiocall,
                 details: "Runway not recognised".to_string(),
-                message: departure_information_request.to_string(),
+                call_found: departure_information_request.to_string(),
             }));
         }
     };
 
     if !departure_information_request.contains("request departure information") {
         return Ok(ServerResponse::Mistake(Mistake {
-            details: format!(
-                "Expected: {0} request departure information \n Found: {1}",
-                &current_state.callsign.to_ascii_lowercase(),
-                departure_information_request.to_string()
+            call_expected: format!(
+                "{0} request departure information",
+                current_state.callsign.to_ascii_lowercase()
             ),
-            message: departure_information_request.to_string(),
+            details: format!(
+                "Make sure to include the departure information request in your message.",
+            ),
+            call_found: departure_information_request.to_string(),
         }));
     }
 
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
-    let atc_response = format!(
+    let atc_response: String = format!(
         "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
         shorten_callsign(
             scenario_seed,
@@ -227,7 +252,7 @@ pub fn parse_departure_information_request(
         metor_sample.dewpoint,
     );
 
-    let next_state = SentState {
+    let next_state: SentState = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreReadbackDepartInfo,
         },
@@ -263,10 +288,6 @@ pub fn parse_departure_information_readback(
     departure_information_readback: &String,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let message_words = departure_information_readback
-        .split_whitespace()
-        .collect::<Vec<&str>>();
-
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
@@ -275,40 +296,48 @@ pub fn parse_departure_information_readback(
             }
         };
 
-    let metor_sample =
+    let metor_sample: crate::models::aerodrome::METORDataSample =
         get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
     let runway_index: usize =
         (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
-    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
+    let runway: &Runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
         Some(runway) => runway,
         None => {
             return Err(Error::msg("Runway not generated"));
         }
     };
 
-    let runway_string = format!("runway {}", runway.name);
-    let pressure_string = format!("qnh {}", metor_sample.pressure,);
+    let runway_string: String = format!("runway {}", runway.name);
+    let pressure_string: String = format!("qnh {}", metor_sample.pressure,);
+
+    let expected_radiocall: String = format!(
+        "{0} runway {1} qnh {2} {3}",
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+        runway.name.to_ascii_lowercase(),
+        metor_sample.pressure,
+        current_state.target_allocated_callsign.to_ascii_lowercase()
+    );
+
+    let message_words: Vec<&str> = departure_information_readback
+        .split_whitespace()
+        .collect::<Vec<&str>>();
+
     if !departure_information_readback.contains(runway_string.as_str())
         || !departure_information_readback.contains(pressure_string.as_str())
         || message_words[message_words.len() - 1]
             != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
         return Ok(ServerResponse::Mistake(Mistake {
-            details: format!(
-                "Expected: {0} runway {1} qnh {2} {3}",
-                &current_state.callsign.to_ascii_lowercase(),
-                runway.name.to_ascii_lowercase(),
-                metor_sample.pressure,
-                current_state.target_allocated_callsign.to_ascii_lowercase()
-            ),
-            message: departure_information_readback.to_string(),
+            call_expected: expected_radiocall,
+            details: format!("Make sure to include the runway and air pressure in your readback.",),
+            call_found: departure_information_readback.to_string(),
         }));
     }
 
     // ATC does not respond to this message
     let atc_response: String = String::new();
 
-    let next_state = SentState {
+    let next_state: SentState = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreTaxiRequest,
         },
@@ -340,8 +369,6 @@ pub fn parse_taxi_request(
     taxi_request: &String,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
-
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
             Some(aerodromes) => aerodromes,
@@ -349,17 +376,27 @@ pub fn parse_taxi_request(
                 return Err(Error::msg("Aerodromes not generated"));
             }
         };
-    let metor_sample =
+    let metor_sample: crate::models::aerodrome::METORDataSample =
         get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
 
     let runway_index: usize =
         (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
-    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
-        Some(runway) => runway,
+    let runway: Runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
+        Some(runway) => runway.to_owned(),
         None => {
             return Err(Error::msg("Runway not generated"));
         }
     };
+
+    let expected_radiocall: String = format!(
+        "{0} {1} at {2} request taxi VFR to {3}",
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+        current_state.aircraft_type.to_ascii_lowercase(),
+        start_and_end_aerodrome.0.start_point.to_ascii_lowercase(),
+        start_and_end_aerodrome.1.name.to_ascii_lowercase(),
+    );
+
+    let message_words: Vec<&str> = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     if message_words[0] != current_state.target_allocated_callsign.to_ascii_lowercase()
         || message_words[1] != current_state.aircraft_type.to_ascii_lowercase()
@@ -373,18 +410,15 @@ pub fn parse_taxi_request(
         || message_words.contains(&start_and_end_aerodrome.1.name.to_ascii_lowercase().as_str())
     {
         return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
             details: format!(
-                "Expected: {0} {1} at {2} request taxi VFR to {3}",
-                current_state.target_allocated_callsign.to_ascii_lowercase(),
-                current_state.aircraft_type.to_ascii_lowercase(),
-                start_and_end_aerodrome.0.start_point.to_ascii_lowercase(),
-                start_and_end_aerodrome.1.name.to_ascii_lowercase(),
+                "Make sure to include the aircraft type, start point and destination in your request.",
             ),
-            message: taxi_request.to_string(),
+            call_found: taxi_request.to_string(),
         }));
     }
 
-    let atc_response = format!(
+    let atc_response: String = format!(
         "{0}, taxi to holding point {1}, runway {2}, QNH {3}",
         current_state.target_allocated_callsign,
         runway.holding_points[0].name,
@@ -392,7 +426,7 @@ pub fn parse_taxi_request(
         metor_sample.pressure,
     );
 
-    let next_state = SentState {
+    let next_state: SentState = SentState {
         status: Status::Parked {
             stage: ParkedStage::PreTaxiClearanceReadback,
         },
@@ -424,7 +458,7 @@ pub fn parse_taxi_readback(
     taxi_request: &String,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let message_words = taxi_request.split_whitespace().collect::<Vec<&str>>();
+    let message_words: Vec<&str> = taxi_request.split_whitespace().collect::<Vec<&str>>();
 
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
         match get_start_and_end_aerodromes(*scenario_seed) {
@@ -434,17 +468,27 @@ pub fn parse_taxi_readback(
             }
         };
 
-    let metor_sample =
+    let metor_sample: crate::models::aerodrome::METORDataSample =
         get_metor_sample(*weather_seed, start_and_end_aerodrome.0.metor_data.clone());
 
     let runway_index: usize =
         (scenario_seed % (start_and_end_aerodrome.0.runways.len() as u64)) as usize;
-    let runway = match start_and_end_aerodrome.0.runways.get(runway_index) {
-        Some(runway) => runway,
-        None => {
-            return Err(Error::msg("Runway not generated"));
-        }
-    };
+    let runway: &crate::models::aerodrome::Runway =
+        match start_and_end_aerodrome.0.runways.get(runway_index) {
+            Some(runway) => runway,
+            None => {
+                return Err(Error::msg("Runway not generated"));
+            }
+        };
+
+    let expected_radiocall: String = format!(
+        "{0} taxi holding point {1} runway {2} qnh {3} {4}",
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+        runway.holding_points[0].name.to_ascii_lowercase(),
+        runway.name.to_ascii_lowercase(),
+        metor_sample.pressure,
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+    );
 
     if !(taxi_request.contains("taxi holding point")
         || taxi_request.contains("taxi to holding point"))
@@ -453,15 +497,9 @@ pub fn parse_taxi_readback(
             != current_state.target_allocated_callsign.to_ascii_lowercase()
     {
         return Ok(ServerResponse::Mistake(Mistake {
-            details: format!(
-                "Expected: {0} taxi holding point {1} runway {2} qnh {3} {4}",
-                current_state.target_allocated_callsign.to_ascii_lowercase(),
-                runway.holding_points[0].name.to_ascii_lowercase(),
-                runway.name.to_ascii_lowercase(),
-                metor_sample.pressure,
-                current_state.target_allocated_callsign.to_ascii_lowercase(),
-            ),
-            message: taxi_request.to_string(),
+            call_expected: expected_radiocall,
+            details: format!("Make sure to include the holding point and runway in your readback.",),
+            call_found: taxi_request.to_string(),
         }));
     }
 
@@ -471,9 +509,9 @@ pub fn parse_taxi_readback(
         &start_and_end_aerodrome.1,
     );
 
-    let atc_response = String::new();
+    let atc_response: String = String::new();
 
-    let next_state = SentState {
+    let next_state: SentState = SentState {
         status: Status::Taxiing {
             stage: TaxiingStage::PreReadyForDeparture,
         },
@@ -499,45 +537,187 @@ pub fn parse_taxi_readback(
     }))
 }
 
-pub fn parse_waypoint_arrival(
+/* Parse initial contact with ATC unit.
+Should consist of ATC callsign and aircraft callsign */
+pub fn parse_new_airspace_initial_contact(
+    scenario_seed: &u64,
+    weather_seed: &u64,
+    radiocall: &String,
+    flight_rules: &FlightRules,
     altitude: &u32,
     heading: &u32,
     speed: &u32,
     current_point: &Waypoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
-    let atc_response = String::new();
+    let expected_radiocall: String = format!(
+        "{0}, {1}",
+        current_state.current_target.callsign.to_ascii_lowercase(),
+        current_state.callsign.to_ascii_lowercase(),
+    );
 
-    match current_point.waypoint_type {
-        WaypointType::Aerodrome {} => todo!(),
-        WaypointType::NDB {} => todo!(),
-        WaypointType::VOR {} => todo!(),
-        WaypointType::DME {} => todo!(),
-        WaypointType::Fix {} => todo!(),
-        WaypointType::GPS {} => todo!(),
-        WaypointType::NewAirspace {} => {
-            parse_new_airspace(altitude, heading, speed, current_point, current_state)
-        }
-        WaypointType::Intersection {} => todo!(),
+    if !radiocall.contains(
+        current_state
+            .current_target
+            .callsign
+            .to_ascii_lowercase()
+            .as_str(),
+    ) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!(
+                "Remember to include the target callsign at the start of your initial message.",
+            ),
+            call_found: radiocall.to_string(),
+        }));
     }
-}
 
-fn parse_new_airspace(
-    altitude: &u32,
-    heading: &u32,
-    speed: &u32,
-    current_point: &Waypoint,
-    current_state: &RecievedState,
-) -> Result<ServerResponse, Error> {
+    if !radiocall.contains(current_state.callsign.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your own callsign in your initial message.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
 
-    let atc_response = String::new();
+    let message_words: Vec<&str> = radiocall.split_whitespace().collect::<Vec<&str>>();
+    let callsign_expected: String = current_state.callsign.to_ascii_lowercase();
+    let callsign_words: &Vec<&str> = &callsign_expected.split_whitespace().collect::<Vec<&str>>();
+    let target_callsign_expected: String =
+        current_state.current_target.callsign.to_ascii_lowercase();
+    let target_callsign_words: &Vec<&str> = &target_callsign_expected
+        .split_whitespace()
+        .collect::<Vec<&str>>();
 
-    let next_state = SentState {
-        status: Status::Airbourne { // These need to be updated with the information for the next waypoint
+    if message_words.len() > callsign_words.len() + target_callsign_words.len() {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Keep your calls brief.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    let atc_response: String = format!(
+        "{0}, {1}.",
+        current_state.callsign, current_state.current_target.callsign,
+    );
+
+    let next_state: SentState = SentState {
+        status: Status::Airbourne {
+            // These need to be updated with the information for the next waypoint
+            flight_rules: flight_rules.to_owned(),
             altitude: altitude.to_owned(),
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
+            airbourne_event: AirbourneEvent::NewAirspaceFullContact,
+        },
+        location: current_point.location,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(ServerResponse::StateMessage(SentStateMessage {
+        state: next_state,
+        message: atc_response,
+    }))
+}
+
+/* Parse response to ATC unit acknowledging initial contact
+call. Should consist of aircraft callsign and type, flight
+rules, departure and destination aerodromes, position,
+flight level/altitude including passing/cleared level if not
+in level flight, and additional details such as next waypoint(s)
+accompanied with the planned times to reach them */
+pub fn parse_new_airspace_reply_to_acknowledge(
+    scenario_seed: &u64,
+    weather_seed: &u64,
+    radiocall: &String,
+    flight_rules: &FlightRules,
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(*scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(Error::msg("Aerodromes not generated"));
+            }
+        };
+
+    let nearest_waypoint: &str = "Test Waypoint";
+    let distance_from_nearest_waypoint: f64 = 0.0;
+    let direction_to_nearest_waypoint: &str = "Direction";
+
+    let next_waypoint: &str = "Next Waypoint";
+
+    let expected_radiocall: String = format!(
+        "{0} {1}, {2} {3} from {4} to {5}, {6} miles {7} of {8}, {9}, {10}",
+        current_state.prefix.to_ascii_lowercase(),
+        current_state.callsign.to_ascii_lowercase(),
+        current_state.aircraft_type.to_ascii_lowercase(),
+        flight_rules.to_string(),
+        start_and_end_aerodrome.0.name.to_ascii_lowercase(),
+        start_and_end_aerodrome.1.name.to_ascii_lowercase(),
+        distance_from_nearest_waypoint,
+        direction_to_nearest_waypoint,
+        nearest_waypoint,
+        altitude,
+        next_waypoint,
+    );
+
+    if !radiocall.contains(
+        current_state
+            .current_target
+            .callsign
+            .to_ascii_lowercase()
+            .as_str(),
+    ) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!(
+                "Remember to include the target callsign at the start of your initial message.",
+            ),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    if !radiocall.contains(current_state.callsign.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your own callsign in your initial message.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    let atc_response: String = String::new();
+
+    // -----------------------------------------------------------------------------------------
+    // Current target and current point need to be updated here with next waypoint
+    // -----------------------------------------------------------------------------------------
+    let next_state: SentState = SentState {
+        status: Status::Airbourne {
+            // These need to be updated with the information for the next waypoint
+            flight_rules: flight_rules.to_owned(),
+            altitude: altitude.to_owned(),
+            heading: heading.to_owned(),
+            speed: speed.to_owned(),
+            current_point: current_point.to_owned(),
+            airbourne_event: AirbourneEvent::NewAirspaceFullContact,
         },
         location: current_point.location,
         current_target: COMFrequency {

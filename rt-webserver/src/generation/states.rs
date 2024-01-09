@@ -123,11 +123,65 @@ pub fn generate_next_state(
         }
         Status::Takeoff { runway } => todo!(),
         Status::Airbourne {
+            flight_rules,
             altitude,
             heading,
             speed,
             current_point,
-        } => todo!(),
+            airbourne_event,
+        } => {
+            match airbourne_event {
+                AirbourneEvent::NewAirspaceInitialContact => {
+                    // Parse new airspace initial contact
+                    return parse_new_airspace_initial_contact(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
+                }
+                AirbourneEvent::NewAirspaceFullContact => {
+                    // Parse new airspace full contact
+                    return parse_new_airspace_reply_to_acknowledge(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
+                }
+                AirbourneEvent::NewAirspaceChangeFrequency => {
+                    // Parse new airspace change frequency
+                }
+                AirbourneEvent::NewAirspaceChangeSquark => {
+                    // Parse new airspace change squark
+                }
+                AirbourneEvent::NewAirspaceChangeTransponder => {
+                    // Parse new airspace change transponder
+                }
+                AirbourneEvent::NewAirspaceChangeAltitude => {
+                    // Parse new airspace change altitude
+                }
+                AirbourneEvent::NewAirspaceChangeHeading => {
+                    // Parse new airspace change heading
+                }
+                AirbourneEvent::NewAirspaceChangeSpeed => {
+                    // Parse new airspace change speed
+                }
+                AirbourneEvent::NewAirspaceChangeRoute => {
+                    // Parse new airspace change route
+                }
+            }
+        }
         Status::Landing { runway } => todo!(),
         Status::LandingToParked { position, stage } => todo!(),
         Status::Descent {} => todo!(),
@@ -135,7 +189,8 @@ pub fn generate_next_state(
     }
 
     Ok(ServerResponse::Mistake(Mistake {
+        call_expected: "Unknown expected".to_owned(),
+        call_found: "Unknown message".to_owned(),
         details: "Unknown error".to_owned(),
-        message: "Unknown message".to_owned(),
     }))
 }
