@@ -7,7 +7,6 @@
 	let target: Location;
 	let mounted: boolean = false;
 	var map: any;
-	const BING_MAPS_API_KEY = 'AprGLQ5SC_xzb5XEsZSx20g6X_LrZl-hsxzRfiLeZLtwBF2j9IudpMxHH5_laRGs';
 
 	simulatorLocationStore.subscribe((value) => {
 		target = value;
@@ -20,18 +19,19 @@
 
 	function loadMapScenario() {
 		console.log(target);
-		map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
-			credentials: BING_MAPS_API_KEY,
-			center: new Microsoft.Maps.Location(target?.lat, target?.long),
-			zoom: 12
-		});
+		// map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+		// 	credentials: BING_MAPS_API_KEY,
+		// 	center: new Microsoft.Maps.Location(target?.lat, target?.long),
+		// 	zoom: 12
+		// });
+
+		map = L.map('myMap').setView([target?.lat, target?.long], 13);
 	}
 
 	function updateMap() {
 		if (!map) loadMapScenario();
 		else {
-			var location = new Microsoft.Maps.Location(target?.lat, target?.long);
-			map.setView({ center: location, zoom: 15 });
+			map.setView([target?.lat, target?.long], 13);
 		}
 	}
 
@@ -39,14 +39,16 @@
 		mounted = true;
 
 		if (enabled && !map && target) {
-			// await microsoft loading then call loadMapScenario
-			const script = document.createElement('script');
-			script.type = 'text/javascript';
-			script.src = `https://www.bing.com/api/maps/mapcontrol?key=${BING_MAPS_API_KEY}`;
+			// // await microsoft loading then call loadMapScenario
+			// const script = document.createElement('script');
+			// script.type = 'text/javascript';
+			// script.src = `https://www.bing.com/api/maps/mapcontrol?key=${BING_MAPS_API_KEY}`;
 
-			script.onload = () => {
-				loadMapScenario();
-			};
+			// script.onload = () => {
+			// 	loadMapScenario();
+			// };
+
+			loadMapScenario();
 		}
 	});
 </script>
@@ -55,12 +57,9 @@
 
 <svelte:head>
 	{#if enabled}
-		<script
-			type="text/javascript"
-			src="https://www.bing.com/api/maps/mapcontrol?key=AprGLQ5SC_xzb5XEsZSx20g6X_LrZl-hsxzRfiLeZLtwBF2j9IudpMxHH5_laRGs"
-			async
-			defer
-		></script>
+	<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+	integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+	crossorigin=""></script>
 	{/if}
 </svelte:head>
 
