@@ -176,8 +176,8 @@ pub fn get_large_aerodrome(seed: u64) -> Aerodrome {
         com_frequencies: vec![atis, tower, ground],
         runways: runways,
         location: Location {
-            lat: 51.4700,
-            long: -0.4543,
+            lat: 52.452997,
+            long: -1.740041,
         },
         start_point: "North Side Hangers".to_string(),
         metor_data,
