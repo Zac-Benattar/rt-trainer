@@ -14,7 +14,6 @@
 		target = value;
 
 		if (mounted) {
-			// If it's already defined, call the initializeMap function immediately
 			updateMap();
 		}
 	});
@@ -44,15 +43,6 @@
 		mounted = true;
 
 		if (enabled && !map && target) {
-			// // await microsoft loading then call loadMapScenario
-			// const script = document.createElement('script');
-			// script.type = 'text/javascript';
-			// script.src = `https://www.bing.com/api/maps/mapcontrol?key=${BING_MAPS_API_KEY}`;
-
-			// script.onload = () => {
-			// 	loadMapScenario();
-			// };
-
 			loadMapScenario();
 		}
 	});
@@ -77,7 +67,7 @@
 <div class="map-container">
 	<h1>Map</h1>
 	{#if enabled}
-		<div id="myMap" style="position: relative; width: 450px; height: 350px;" />
+		<div id="myMap" style="position: relative; width: 100%; height: 326px;" />
 	{/if}
 	{#if !enabled}
 		<p>Map is disabled</p>
@@ -88,6 +78,7 @@
 	.map-container {
 		position: relative;
 		width: 100%;
+		height: 100%;
 		min-width: 490px;
 		min-height: 390px;
 		background-color: #fff;
