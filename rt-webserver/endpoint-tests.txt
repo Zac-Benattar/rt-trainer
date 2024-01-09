@@ -137,7 +137,7 @@ New Airspace Initial Contact:
 {
   "state": {
     "status": {
-      "Airbourne": {
+      "Airborne": {
         "altitude": 1800,
         "heading": 180,
         "speed": 150,
@@ -156,7 +156,7 @@ New Airspace Initial Contact:
             }
           ]
         },
-        "airbourne_event": "NewAirspaceInitialContact",
+        "airborne_event": "PreNewAirspaceInitialCall",
         "flight_rules": "VFR"
       }
     },

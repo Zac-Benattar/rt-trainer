@@ -68,16 +68,17 @@ pub enum LandedToParkedStage {
 }
 
 #[derive(Deserialize, Serialize)]
-pub enum AirbourneEvent {
-    NewAirspaceInitialContact,
-    NewAirspaceFullContact,
-    NewAirspaceChangeFrequency,
-    NewAirspaceChangeSquark,
-    NewAirspaceChangeTransponder,
-    NewAirspaceChangeAltitude,
-    NewAirspaceChangeHeading,
-    NewAirspaceChangeSpeed,
-    NewAirspaceChangeRoute,
+pub enum AirborneEvent {
+    PreNewAirspaceInitialCall,
+    PreNewAirspaceFlightDetailsGiven,
+    PreNewAirspaceSquark {
+        squark: u16,
+    },
+    PreChangeAltitudeWilco,
+    PreChangeHeadingWilco,
+    PreChangeSpeedWilco,
+    PreChangeRouteWilco,
+    PreWilco
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -109,13 +110,13 @@ pub enum Status {
     Takeoff {
         runway: Runway,
     },
-    Airbourne {
+    Airborne {
         flight_rules: FlightRules,
         altitude: u32,
         heading: u32,
         speed: u32,
         current_point: Waypoint,
-        airbourne_event: AirbourneEvent,
+        airborne_event: AirborneEvent,
     },
     Descent {},
     Approach {},

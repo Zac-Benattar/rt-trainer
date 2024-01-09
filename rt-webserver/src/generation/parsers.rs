@@ -4,7 +4,7 @@ use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::{COMFrequency, Runway},
     state::{
-        AirbourneEvent, Emergency, FlightRules, Mistake, ParkedStage, RecievedState, SentState,
+        AirborneEvent, Emergency, FlightRules, Mistake, ParkedStage, RecievedState, SentState,
         SentStateMessage, ServerResponse, Status, TaxiingStage, Waypoint,
     },
 };
@@ -603,14 +603,14 @@ pub fn parse_new_airspace_initial_contact(
     );
 
     let next_state: SentState = SentState {
-        status: Status::Airbourne {
+        status: Status::Airborne {
             // These need to be updated with the information for the next waypoint
             flight_rules: flight_rules.to_owned(),
             altitude: altitude.to_owned(),
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airbourne_event: AirbourneEvent::NewAirspaceFullContact,
+            airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
         },
         location: current_point.location,
         current_target: COMFrequency {
@@ -640,7 +640,7 @@ rules, departure and destination aerodromes, position,
 flight level/altitude including passing/cleared level if not
 in level flight, and additional details such as next waypoint(s)
 accompanied with the planned times to reach them */
-pub fn parse_new_airspace_reply_to_acknowledge(
+pub fn parse_new_airspace_give_flight_information_to_atc(
     scenario_seed: &u64,
     weather_seed: &u64,
     radiocall: &String,
@@ -710,14 +710,14 @@ pub fn parse_new_airspace_reply_to_acknowledge(
     // Current target and current point need to be updated here with next waypoint
     // -----------------------------------------------------------------------------------------
     let next_state: SentState = SentState {
-        status: Status::Airbourne {
+        status: Status::Airborne {
             // These need to be updated with the information for the next waypoint
             flight_rules: flight_rules.to_owned(),
             altitude: altitude.to_owned(),
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airbourne_event: AirbourneEvent::NewAirspaceFullContact,
+            airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
         },
         location: current_point.location,
         current_target: COMFrequency {
@@ -728,6 +728,171 @@ pub fn parse_new_airspace_reply_to_acknowledge(
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
         target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(ServerResponse::StateMessage(SentStateMessage {
+        state: next_state,
+        message: atc_response,
+    }))
+}
+
+/* Parse response to ATC unit requesting squark.
+Should consist of aircraft callsign and squark code */
+pub fn parse_new_airspace_squark(
+    scenario_seed: &u64,
+    weather_seed: &u64,
+    radiocall: &String,
+    sqwark: &u16,
+    flight_rules: &FlightRules,
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+    let expected_radiocall: String = format!(
+        "Squawk {0}, {1} {2}",
+        sqwark,
+        current_state.prefix.to_ascii_lowercase(),
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+    );
+
+    if !radiocall.contains(sqwark.to_string().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!(
+                "Remember to include the sqwark code at the start of your initial message.",
+            ),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    if !radiocall.contains(current_state.callsign.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your own callsign in your initial message.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    let nearest_waypoint: &str = "Test Waypoint";
+    let distance_from_nearest_waypoint: f64 = 0.0;
+    let direction_to_nearest_waypoint: &str = "Direction";
+    let next_waypoint: &str = "Next Waypoint";
+
+    let atc_response: String = format!(
+        "{0} {1}, identified {2} miles {3} of {4}. Next report at {5}",
+        current_state.prefix,
+        current_state.target_allocated_callsign,
+        nearest_waypoint,
+        distance_from_nearest_waypoint,
+        direction_to_nearest_waypoint,
+        next_waypoint,
+    );
+
+    let next_state: SentState = SentState {
+        status: Status::Airborne {
+            // These need to be updated with the information for the next waypoint
+            flight_rules: flight_rules.to_owned(),
+            altitude: altitude.to_owned(),
+            heading: heading.to_owned(),
+            speed: speed.to_owned(),
+            current_point: current_point.to_owned(),
+            airborne_event: AirborneEvent::PreWilco,
+        },
+        location: current_point.location,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: shorten_callsign(
+            scenario_seed,
+            &current_state.aircraft_type,
+            &current_state.callsign,
+        ), // Replaced by ATSU when needed
+        emergency: Emergency::None,
+        squark: false,
+        current_radio_frequency: current_state.current_radio_frequency,
+        current_transponder_frequency: current_state.current_transponder_frequency,
+        aircraft_type: current_state.aircraft_type.to_owned(),
+    };
+
+    Ok(ServerResponse::StateMessage(SentStateMessage {
+        state: next_state,
+        message: atc_response,
+    }))
+}
+
+/* Parse Wilco in response to an instruction from ATC unit.
+Should consist of Wilco followed by aircraft callsign */
+pub fn parse_wilco(
+    scenario_seed: &u64,
+    weather_seed: &u64,
+    radiocall: &String,
+    flight_rules: &FlightRules,
+    altitude: &u32,
+    heading: &u32,
+    speed: &u32,
+    current_point: &Waypoint,
+    current_state: &RecievedState,
+) -> Result<ServerResponse, Error> {
+    let expected_radiocall: String = format!(
+        "Wilco, {0} {1}",
+        current_state.prefix.to_ascii_lowercase(),
+        current_state.target_allocated_callsign.to_ascii_lowercase(),
+    );
+
+    if !radiocall.contains("wilco".to_string().as_str())
+        || !radiocall.contains("will comply".to_string().as_str())
+    {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include wilco at the start of your initial message.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    if !radiocall.contains(current_state.callsign.to_ascii_lowercase().as_str()) {
+        return Ok(ServerResponse::Mistake(Mistake {
+            call_expected: expected_radiocall,
+            details: format!("Remember to include your own callsign in your initial message.",),
+            call_found: radiocall.to_string(),
+        }));
+    }
+
+    let atc_response: String = String::new();
+
+    let next_state: SentState = SentState {
+        status: Status::Airborne {
+            // These need to be updated with the information for the next waypoint
+            flight_rules: flight_rules.to_owned(),
+            altitude: altitude.to_owned(),
+            heading: heading.to_owned(),
+            speed: speed.to_owned(),
+            current_point: current_point.to_owned(),
+            airborne_event: AirborneEvent::PreWilco,
+        },
+        location: current_point.location,
+        current_target: COMFrequency {
+            frequency_type: current_state.current_target.frequency_type,
+            frequency: current_state.current_target.frequency,
+            callsign: current_state.current_target.callsign.clone(),
+        },
+        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
+        callsign: current_state.callsign.to_owned(),
+        target_allocated_callsign: shorten_callsign(
+            scenario_seed,
+            &current_state.aircraft_type,
+            &current_state.callsign,
+        ), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,

@@ -117,22 +117,22 @@ pub fn generate_next_state(
                 }
                 HoldingStage::PreReadbackClearedForTakeoff => {
                     // Parse pretakeoff cleared for takeoff readback
-                    // Move to airbourne status
+                    // Move to airborne status
                 }
             }
         }
         Status::Takeoff { runway } => todo!(),
-        Status::Airbourne {
+        Status::Airborne {
             flight_rules,
             altitude,
             heading,
             speed,
             current_point,
-            airbourne_event,
+            airborne_event,
         } => {
-            match airbourne_event {
-                AirbourneEvent::NewAirspaceInitialContact => {
-                    // Parse new airspace initial contact
+            match airborne_event {
+                AirborneEvent::PreNewAirspaceInitialCall => {
+                    // Parse new airspace initial call
                     return parse_new_airspace_initial_contact(
                         &scenario_seed,
                         &weather_seed,
@@ -145,9 +145,9 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
-                AirbourneEvent::NewAirspaceFullContact => {
-                    // Parse new airspace full contact
-                    return parse_new_airspace_reply_to_acknowledge(
+                AirborneEvent::PreNewAirspaceFlightDetailsGiven => {
+                    // Parse new airspace flight details given
+                    return parse_new_airspace_give_flight_information_to_atc(
                         &scenario_seed,
                         &weather_seed,
                         &radiocall,
@@ -159,26 +159,46 @@ pub fn generate_next_state(
                         &current_state,
                     );
                 }
-                AirbourneEvent::NewAirspaceChangeFrequency => {
-                    // Parse new airspace change frequency
+                AirborneEvent::PreNewAirspaceSquark { squark } => {
+                    // Parse new airspace squark
+                    return parse_new_airspace_squark(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &squark,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
                 }
-                AirbourneEvent::NewAirspaceChangeSquark => {
-                    // Parse new airspace change squark
-                }
-                AirbourneEvent::NewAirspaceChangeTransponder => {
-                    // Parse new airspace change transponder
-                }
-                AirbourneEvent::NewAirspaceChangeAltitude => {
+                AirborneEvent::PreChangeAltitudeWilco => {
                     // Parse new airspace change altitude
                 }
-                AirbourneEvent::NewAirspaceChangeHeading => {
+                AirborneEvent::PreChangeHeadingWilco => {
                     // Parse new airspace change heading
                 }
-                AirbourneEvent::NewAirspaceChangeSpeed => {
+                AirborneEvent::PreChangeSpeedWilco => {
                     // Parse new airspace change speed
                 }
-                AirbourneEvent::NewAirspaceChangeRoute => {
+                AirborneEvent::PreChangeRouteWilco => {
                     // Parse new airspace change route
+                }
+                AirborneEvent::PreWilco => {
+                    // Parse new airspace wilco
+                    return parse_wilco(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        flight_rules,
+                        altitude,
+                        heading,
+                        speed,
+                        current_point,
+                        &current_state,
+                    );
                 }
             }
         }
