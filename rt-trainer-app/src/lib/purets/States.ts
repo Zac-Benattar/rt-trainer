@@ -23,7 +23,9 @@ export type Location = {
 
 export type Pose = {
     location: Location,
-    heading: number
+    heading: number,
+    altitude: number,
+    airspeed: number,
 }
 
 export enum WaypointType {

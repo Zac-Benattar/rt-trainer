@@ -41,6 +41,8 @@ const initialSimulatorPose: Pose = {
 		long: 0
 	},
 	heading: 0,
+	altitude: 0,
+	airspeed: 0,
 };
 
 const initialWaypoints: Waypoint[] = [];

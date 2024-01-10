@@ -8,6 +8,7 @@
 	import type { Pose, Waypoint } from '$lib/purets/States';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import type { Control } from 'leaflet';
 
 	export let enabled: boolean = true;
 	let leaflet: any;
@@ -20,6 +21,8 @@
 	let zoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
+	let flightInformationOverlay: HTMLDivElement;
+	let FlightInformationTextBox: any;
 
 	simulatorPoseStore.subscribe((value) => {
 		targetPose = value;
@@ -66,6 +69,8 @@
 			rotationAngle: targetPose.heading,
 			rotationOrigin: 'center'
 		}).addTo(map);
+
+		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	}
 
 	function updateMap() {
@@ -88,6 +93,10 @@
 				rotationAngle: targetPose.heading,
 				rotationOrigin: 'center'
 			}).addTo(map);
+
+			flightInformationOverlay.remove();
+
+			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 		}
 	}
 
@@ -126,6 +135,18 @@
 
 			leaflet = await import('leaflet');
 			rotated_marker = await import('leaflet-rotatedmarker');
+
+			FlightInformationTextBox = L.Control.extend({
+				onAdd: function () {
+					var text = L.DomUtil.create('div');
+					text.id = 'heading_text';
+					text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+					text.style.color = 'black';
+					text.style.backgroundColor = 'white';
+					text.innerHTML = '<p> Heading: ' + targetPose.heading + '<br> Altitude: ' + targetPose.altitude + '<br> Airspeed: ' + targetPose.airspeed + '</p>';
+					return text;
+				}
+			});
 
 			loadMapScenario();
 		}
