@@ -1,19 +1,27 @@
 <script lang="ts">
-	import { simulatorLocationStore } from '$lib/stores';
-	import type { Location } from '$lib/purets/States';
+	/* This file is not correctly typed due to the way SvelteKit builds its production
+	bundle and how Leaflet depends on the window object. Read more here about the issue 
+	and solution in the blog post by Stanislav Khromov below.
+	https://khromov.se/using-leaflet-with-sveltekit/ */
+
+	import { simulatorPoseStore } from '$lib/stores';
+	import type { Pose } from '$lib/purets/States';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	export let enabled: boolean = true;
-	let target: Location;
+	let leaflet: any;
+	let rotated_marker: any;
+	let targetPose: Pose;
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
 	let markers: any[] = [];
 	let zoomLevel: number = 13;
-	var map: any;
+	let map: any;
 	let planeIcon: any;
 
-	simulatorLocationStore.subscribe((value) => {
-		target = value;
+	simulatorPoseStore.subscribe((value) => {
+		targetPose = value;
 
 		if (mounted) {
 			updateMap();
@@ -21,7 +29,7 @@
 	});
 
 	function loadMapScenario() {
-		map = L.map('myMap').setView([target?.lat, target?.long], zoomLevel);
+		map = L.map('myMap').setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
 
 		planeIcon = L.icon({
 			iconUrl: '/images/plane.png',
@@ -37,16 +45,24 @@
 		}).addTo(map);
 
 		// Removes any existing marker and sets new one
-		currentLocationMarker = L.marker([target.lat, target.long], {icon: planeIcon}).addTo(map);
+		currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+			icon: planeIcon,
+			rotationAngle: targetPose.heading,
+			rotationOrigin: 'center'
+		}).addTo(map);
 	}
 
 	function updateMap() {
 		if (!map) loadMapScenario();
 		else {
-			map.setView([target?.lat, target?.long], zoomLevel);
+			map.setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
 
 			// Removes any existing marker and sets new one
-			currentLocationMarker = L.marker([target.lat, target.long], {icon: planeIcon}).addTo(map);
+			currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+				icon: planeIcon,
+				rotationAngle: targetPose.heading,
+				rotationOrigin: 'center'
+			}).addTo(map);
 		}
 	}
 
@@ -79,10 +95,13 @@
 		connectMarkers();
 	}
 
-	onMount(() => {
-		mounted = true;
+	onMount(async () => {
+		if (enabled && browser) {
+			mounted = true;
 
-		if (enabled && !map && target) {
+			leaflet = await import('leaflet');
+			rotated_marker = await import('leaflet-rotatedmarker');
+
 			loadMapScenario();
 		}
 	});
@@ -96,11 +115,6 @@
 			integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
 			crossorigin=""
 		/>
-		<script
-			src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
-			integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
-			crossorigin=""
-		></script>
 	{/if}
 </svelte:head>
 

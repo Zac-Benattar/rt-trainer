@@ -27,7 +27,7 @@
 		simulatorUserMessageStore,
 		simulatorATCMessageStore,
 		simulatorCurrentTargetStore,
-		simulatorLocationStore
+		simulatorPoseStore
 	} from '$lib/stores';
 
 	// Simulator state and settings
@@ -166,7 +166,10 @@
 			requiredState = newStateMessage.state;
 			simulatorATCMessageStore.set(newStateMessage.message);
 			simulatorCurrentTargetStore.set(newStateMessage.state.current_target);
-			simulatorLocationStore.set(newStateMessage.state.location);
+			simulatorPoseStore.set({
+				location: newStateMessage.state.location,
+				heading: newStateMessage.state.status.heading
+			});
 		}
 	}
 
@@ -179,10 +182,13 @@
 			console.log('Error: No response from server');
 			return 0;
 		} else {
-			console.log("Initial State:", initialState);
+			console.log('Initial State:', initialState);
 			requiredState = initialState;
 			simulatorCurrentTargetStore.set(initialState.current_target);
-			simulatorLocationStore.set(initialState.location);
+			simulatorPoseStore.set({
+				location: initialState.location,
+				heading: 0
+			});
 		}
 	}
 

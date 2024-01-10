@@ -21,6 +21,11 @@ export type Location = {
     long: number
 }
 
+export type Pose = {
+    location: Location,
+    heading: number
+}
+
 export type HoldingPoint = {
     name: string
 }

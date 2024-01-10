@@ -47,6 +47,8 @@
     "@types/dom-speech-recognition": "^0.0.4",
     "@types/leaflet": "^1.9.8",
     "axios": "^1.6.2",
-    "geist": "^1.0.0"
+    "geist": "^1.0.0",
+    "leaflet": "^1.9.4",
+    "leaflet-rotatedmarker": "^0.2.0"
   }
 }
