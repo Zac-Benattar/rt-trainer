@@ -4,8 +4,8 @@ import type {
 	COMFrequency,
 	SimulatorSettings,
 	TransponderState,
-	Location,
-	Pose
+	Pose,
+	Waypoint
 } from './purets/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
@@ -43,6 +43,8 @@ const initialSimulatorPose: Pose = {
 	heading: 0,
 };
 
+const initialWaypoints: Waypoint[] = [];
+
 export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
 
 export const simulatorCurrentTargetStore = writable<COMFrequency>(initialSimulatorTarget);
@@ -56,6 +58,8 @@ export const simulatorUserMessageStore = writable<string>('');
 export const simulatorATCMessageStore = writable<string>('');
 
 export const simulatorPoseStore = writable<Pose>(initialSimulatorPose);
+
+export const simulatorRouteStore = writable<Waypoint[]>(initialWaypoints);
 
 export function setSettingsPrefix(prefix: string) {
 	simulatorSettingsStore.update((settings) => {

@@ -26,6 +26,24 @@ export type Pose = {
     heading: number
 }
 
+export enum WaypointType {
+    Aerodrome,
+    NDB, // Non-directional beacon - helps with positioning
+    VOR, // VHF Omnidirectional Range station - helps with positioning
+    Fix, // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir
+    DME, // Distance Measuring Equipment - helps with positioning by measuring distance from a VOR
+    GPS, // GPS waypoint - arbitrary point defined in terms of lat/long
+    Intersection, // Intersection of two or more airways
+    NewAirspace, // Entering new airspace - changing frequency
+}
+
+export type Waypoint = {
+    waypoint_type: WaypointType,
+    location: Location
+    name: string,
+    com_frequencies: COMFrequency[],
+}
+
 export type HoldingPoint = {
     name: string
 }

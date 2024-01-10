@@ -3,6 +3,8 @@
 node_modules
 /build
 /.svelte-kit
+## Doesnt seem to work:
+/.svelte-kit/generated/internal.js 
 /package
 .env
 .env.*
