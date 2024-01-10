@@ -212,9 +212,8 @@
 			scenarioSeed = tempScenarioSeed;
 			weatherSeed = tempWeatherSeed;
 
-			const response = await axios.post(
+			const response = await axios.get(
 				'http://localhost:3000/route/' + scenarioSeed,
-				{},
 				{
 					headers: {
 						'Content-Type': 'application/json',

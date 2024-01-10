@@ -4,8 +4,8 @@
 	and solution in the blog post by Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { simulatorPoseStore } from '$lib/stores';
-	import type { Pose } from '$lib/purets/States';
+	import { simulatorPoseStore, simulatorRouteStore } from '$lib/stores';
+	import type { Pose, Waypoint } from '$lib/purets/States';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
@@ -15,6 +15,7 @@
 	let targetPose: Pose;
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
+	let waypoints: Waypoint[] = [];
 	let markers: any[] = [];
 	let zoomLevel: number = 13;
 	let map: any;
@@ -22,6 +23,14 @@
 
 	simulatorPoseStore.subscribe((value) => {
 		targetPose = value;
+
+		if (mounted) {
+			updateMap();
+		}
+	});
+
+	simulatorRouteStore.subscribe((value) => {
+		waypoints = value;
 
 		if (mounted) {
 			updateMap();
@@ -44,7 +53,14 @@
 			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
 
-		// Removes any existing marker and sets new one
+		// Adds all waypoints to the map
+		waypoints.forEach((waypoint) => {
+			addMarker(waypoint.location.lat, waypoint.location.long, waypoint.name);
+		});
+
+		connectMarkers();
+
+		// Sets the current location marker, done last to make sure it is on top
 		currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
 			icon: planeIcon,
 			rotationAngle: targetPose.heading,
@@ -57,7 +73,16 @@
 		else {
 			map.setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
 
-			// Removes any existing marker and sets new one
+			removeMarkers();
+
+			// Adds all waypoints to the map
+			waypoints.forEach((waypoint) => {
+				addMarker(waypoint.location.lat, waypoint.location.long, waypoint.name);
+			});
+
+			connectMarkers();
+
+			// Updates the current location marker, done last to make sure it is on top
 			currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
 				icon: planeIcon,
 				rotationAngle: targetPose.heading,
