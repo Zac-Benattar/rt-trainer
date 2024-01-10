@@ -1,7 +1,15 @@
+use anyhow::Error;
+use anyhow::Ok;
+
 use rand::seq::SliceRandom;
 use rand::SeedableRng;
 
-use crate::models::{aerodrome::{Aerodrome, COMFrequency}, state::{Waypoint, WaypointType, Location}};
+use crate::models::{
+    aerodrome::{Aerodrome, COMFrequency},
+    state::{Location, Waypoint, WaypointType},
+};
+
+use super::aerodrome_generators::get_start_and_end_aerodromes;
 
 pub fn haversine_distance(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     const R: f64 = 3440.065; // Earth radius in nautical miles
@@ -20,7 +28,7 @@ pub fn haversine_distance(lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> f64 {
     R * c
 }
 
-fn generate_route(
+fn generate_route_waypoints(
     seed: u64,
     start: &Waypoint,
     destination: &Waypoint,
@@ -135,7 +143,7 @@ pub fn get_route(
     scenario_seed: u64,
     start_aerodrome: &Aerodrome,
     destination_aerodrome: &Aerodrome,
-) {
+) -> Vec<Waypoint> {
     let start = Waypoint {
         name: (&start_aerodrome.icao).to_owned(),
         location: start_aerodrome.location,
@@ -150,13 +158,30 @@ pub fn get_route(
         waypoint_type: WaypointType::Aerodrome,
     };
 
-    let route = generate_route(scenario_seed, &start, &destination, 5);
+    let route = generate_route_waypoints(scenario_seed, &start, &destination, 5);
 
     println!("Generated Route:");
     for waypoint in &route {
         println!(
             "{}: ({}, {}) Control Zone: {}",
-            waypoint.name, waypoint.location.lat, waypoint.location.long, waypoint.com_frequencies[0].callsign
+            waypoint.name,
+            waypoint.location.lat,
+            waypoint.location.long,
+            waypoint.com_frequencies[0].callsign
         );
     }
+
+    route
+}
+
+pub fn generate_route_from_seed(seed:u64) -> Result<Vec<Waypoint>, Error> {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+    match get_start_and_end_aerodromes(seed) {
+        Some(aerodromes) => aerodromes,
+        None => {
+            return Err(Error::msg("Aerodromes not generated"));
+        }
+    };
+
+    Ok(get_route(seed, &start_and_end_aerodrome.0, &start_and_end_aerodrome.1))
 }

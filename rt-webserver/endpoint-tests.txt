@@ -132,3 +132,51 @@ http://127.0.0.1:3000/nextstate
   "scenario_seed": 1,
   "weather_seed": 1
 }
+
+New Airspace Initial Contact:
+{
+  "state": {
+    "status": {
+      "Airborne": {
+        "altitude": 1800,
+        "heading": 180,
+        "speed": 150,
+        "current_point": {
+          "waypoint_type": "NewAirspace",
+          "location": {
+            "lat": 51.1922,
+            "long": -0.8765
+          },
+          "name": "WAYPT5",
+          "com_frequencies": [
+            {
+              "frequency_type": "AFIS",
+              "frequency": 180.030,
+              "callsign": "Birmingham Radar"
+            }
+          ]
+        },
+        "airborne_event": "PreNewAirspaceInitialCall",
+        "flight_rules": "VFR"
+      }
+    },
+    "prefix": "STUDENT",
+    "callsign": "G-OFLY",
+    "target_allocated_callsign": "G-OFLY",
+    "squark": false,
+    "current_target": {
+      "frequency_type": "AFIS",
+      "frequency": 124.03,
+      "callsign": "Wellesbourne Information"
+    },
+    "current_radio_frequency": 180.030,
+    "current_transponder_frequency": 7000,
+    "lat": 52.1922,
+    "long": -1.6144,
+    "emergency": "None",
+    "aircraft_type": "Cessna 172"
+  },
+  "message": "Wellesbourne Information, G-OFLY",
+  "scenario_seed": 1,
+  "weather_seed": 1
+}

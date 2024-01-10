@@ -1,23 +1,26 @@
 use axum::http::StatusCode;
-
+use axum::extract::Path;
 use axum::Json;
 // use axum_macros::debug_handler;
 
-use crate::generation::states::{self, generate_initial_state, generate_next_state};
+use crate::generation::route_generator::generate_route_from_seed;
+use crate::generation::state_generator::{self, generate_initial_state, generate_next_state};
 // Text formatting
 use crate::errors::CustomError;
 use crate::helpers::jsoncheckers::{
     invalid_scenario_generation_parameters_json, invalid_state_message_seed_data_json,
 };
 use crate::helpers::preprocessors::process_string;
-use crate::models::state::{SentState, SentStateMessage, RecievedStateMessageSeed, ServerResponse};
+use crate::models::state::{
+    RecievedStateMessageSeed, SentState, SentStateMessage, ServerResponse, Waypoint,
+};
 
 /* Gets the first state that the frontend should match.
 The frontend will then ensure the radio and transponder are set to the
 required settings defined in the returned state. The next state is then requested (get_next_state)
 along with the seed and radio call. If radio call is correct next state is given. */
 pub async fn get_initial_state(
-    Json(scenario_generation_parameters): Json<states::ScenarioGenerationParameters>,
+    Json(scenario_generation_parameters): Json<state_generator::ScenarioGenerationParameters>,
 ) -> Result<(StatusCode, Json<SentState>), CustomError> {
     // Filter out empty json
     if invalid_scenario_generation_parameters_json(Json(&scenario_generation_parameters)) {
@@ -56,4 +59,19 @@ pub async fn get_next_state(
     };
 
     Ok((StatusCode::OK, Json(next_state_and_message)))
+}
+
+pub async fn get_route_points(
+    Path(id): Path<u64>,
+) -> Result<(StatusCode, Json<Vec<Waypoint>>), CustomError> {
+    let result = generate_route_from_seed(id);
+    let route_points: Vec<Waypoint> = match result {
+        Ok(route) => route,
+        Err(error) => {
+            println!("Error: {:?}", error.to_string());
+            return Err(CustomError::BadRequest);
+        }
+    };
+
+    Ok((StatusCode::OK, Json(route_points)))
 }

@@ -1,11 +1,11 @@
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
 
-use crate::generation::parsers::*;
+use crate::generation::call_parsers::*;
 use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
 
-use super::aerodromes::get_start_and_end_aerodromes;
+use super::aerodrome_generators::get_start_and_end_aerodromes;
 
 #[derive(Deserialize, Serialize)]
 pub struct ScenarioGenerationParameters {
@@ -117,17 +117,105 @@ pub fn generate_next_state(
                 }
                 HoldingStage::PreReadbackClearedForTakeoff => {
                     // Parse pretakeoff cleared for takeoff readback
-                    // Move to airbourne status
+                    // Move to airborne status
                 }
             }
         }
         Status::Takeoff { runway } => todo!(),
-        Status::Airbourne {
+        Status::Airborne {
+            flight_rules,
             altitude,
             heading,
             speed,
             current_point,
-        } => todo!(),
+            airborne_event,
+        } => {
+            match airborne_event {
+                AirborneEvent::PreNewAirspaceInitialCall => {
+                    // Parse new airspace initial call
+                    return parse_new_airspace_initial_contact(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
+                }
+                AirborneEvent::PreNewAirspaceFlightDetailsGiven => {
+                    // Parse new airspace flight details given
+                    return parse_new_airspace_give_flight_information_to_atc(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
+                }
+                AirborneEvent::PreNewAirspaceSquark { squark } => {
+                    // Parse new airspace squark
+                    return parse_new_airspace_squark(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        &squark,
+                        &flight_rules,
+                        &altitude,
+                        &heading,
+                        &speed,
+                        &current_point,
+                        &current_state,
+                    );
+                }
+                AirborneEvent::PreChangeAltitudeWilco => {
+                    // Parse new airspace change altitude
+                }
+                AirborneEvent::PreChangeHeadingWilco => {
+                    // Parse new airspace change heading
+                }
+                AirborneEvent::PreChangeSpeedWilco => {
+                    // Parse new airspace change speed
+                }
+                AirborneEvent::PreChangeRouteWilco => {
+                    // Parse new airspace change route
+                }
+                AirborneEvent::PreWilco => {
+                    // Parse new airspace wilco
+                    return parse_wilco(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        flight_rules,
+                        altitude,
+                        heading,
+                        speed,
+                        current_point,
+                        &current_state,
+                    );
+                }
+                AirborneEvent::PreVFRPositionReport => {
+                    // Parse new airspace VFR position report
+                    return parse_vfr_position_report(
+                        &scenario_seed,
+                        &weather_seed,
+                        &radiocall,
+                        flight_rules,
+                        altitude,
+                        heading,
+                        speed,
+                        current_point,
+                        &current_state,
+                    );
+                }
+            }
+        }
         Status::Landing { runway } => todo!(),
         Status::LandingToParked { position, stage } => todo!(),
         Status::Descent {} => todo!(),
@@ -135,7 +223,8 @@ pub fn generate_next_state(
     }
 
     Ok(ServerResponse::Mistake(Mistake {
+        call_expected: "Unknown expected".to_owned(),
+        call_found: "Unknown message".to_owned(),
         details: "Unknown error".to_owned(),
-        message: "Unknown message".to_owned(),
     }))
 }

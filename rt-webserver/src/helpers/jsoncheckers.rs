@@ -1,19 +1,19 @@
 use axum::Json;
 
 use crate::{
-    generation::states,
+    generation::state_generator,
     models::state::{SentState, RecievedStateMessageSeed},
 };
 
 // Following functions are pretty much unimplemented but are here to show how the code should be structured
 pub fn invalid_scenario_generation_parameters_json(
-    Json(scenario_generation_parameters): Json<&states::ScenarioGenerationParameters>,
+    Json(scenario_generation_parameters): Json<&state_generator::ScenarioGenerationParameters>,
 ) -> bool {
     empty_scenario_generation_parameters_json(Json(scenario_generation_parameters))
 }
 
 pub fn empty_scenario_generation_parameters_json(
-    Json(scenario_generation_parameters): Json<&states::ScenarioGenerationParameters>,
+    Json(scenario_generation_parameters): Json<&state_generator::ScenarioGenerationParameters>,
 ) -> bool {
     !(scenario_generation_parameters.prefix.is_empty()
         || scenario_generation_parameters

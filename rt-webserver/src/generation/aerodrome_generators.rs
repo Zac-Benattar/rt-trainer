@@ -9,7 +9,7 @@ use rand::seq::SliceRandom;
 use rand::SeedableRng;
 use rand_distr::{Distribution, Normal};
 
-use super::routes::haversine_distance;
+use super::route_generator::haversine_distance;
 
 enum Season {
     Spring,

@@ -1,4 +1,4 @@
-pub mod aerodromes;
-pub mod states;
-pub mod parsers;
-pub mod routes;
+pub mod aerodrome_generators;
+pub mod state_generator;
+pub mod call_parsers;
+pub mod route_generator;
