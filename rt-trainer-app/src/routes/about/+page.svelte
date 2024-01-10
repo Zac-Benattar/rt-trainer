@@ -33,4 +33,27 @@
 			<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>
 		</p>
 	</div>
+
+	<div>
+		<h2>Attributions</h2>
+	</div>
+	<div>
+		<p>
+			<b>Map</b> - The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
+			<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
+			<a href="https://www.mapbox.com/">Mapbox</a> tiles.
+		</p>
+		<p>
+			<b>Icons</b>
+			<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
+				>Plane icon created by Freepik - Flaticon</a
+			>
+		</p>
+		<p>
+			<b>Images</b>
+		</p>
+		<p>
+			<b>Audio</b>
+		</p>
+	</div>
 </div>

@@ -1,5 +1,12 @@
 import { writable } from 'svelte/store';
-import type { RadioState, COMFrequency, SimulatorSettings, TransponderState, Location } from './purets/States';
+import type {
+	RadioState,
+	COMFrequency,
+	SimulatorSettings,
+	TransponderState,
+	Pose,
+	Waypoint
+} from './purets/States';
 
 const initialSimulatorSettings: SimulatorSettings = {
 	prefix: 'STUDENT',
@@ -12,14 +19,14 @@ const initialRadioState: RadioState = {
 	dial_mode: 'OFF',
 	active_frequency: 0,
 	standby_frequency: 0,
-	tertiary_frequency: 0,
+	tertiary_frequency: 0
 };
 
 const initialTransponderState: TransponderState = {
 	dial_mode: 'OFF',
 	frequency: 0,
 	ident_enabled: false,
-	vfr_has_executed: false,
+	vfr_has_executed: false
 };
 
 const initialSimulatorTarget: COMFrequency = {
@@ -28,10 +35,15 @@ const initialSimulatorTarget: COMFrequency = {
 	frequency_type: 'AFIS'
 };
 
-const initialSimulatorLocation: Location = {
-	lat: 0,
-	long: 0
+const initialSimulatorPose: Pose = {
+	location: {
+		lat: 0,
+		long: 0
+	},
+	heading: 0,
 };
+
+const initialWaypoints: Waypoint[] = [];
 
 export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
 
@@ -45,7 +57,9 @@ export const simulatorUserMessageStore = writable<string>('');
 
 export const simulatorATCMessageStore = writable<string>('');
 
-export const simulatorLocationStore = writable<Location>(initialSimulatorLocation);
+export const simulatorPoseStore = writable<Pose>(initialSimulatorPose);
+
+export const simulatorRouteStore = writable<Waypoint[]>(initialWaypoints);
 
 export function setSettingsPrefix(prefix: string) {
 	simulatorSettingsStore.update((settings) => {

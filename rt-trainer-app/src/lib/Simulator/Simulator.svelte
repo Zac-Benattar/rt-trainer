@@ -15,7 +15,8 @@
 		ScenarioState,
 		StateMessage,
 		RadioState,
-		TransponderState
+		TransponderState,
+		Waypoint
 	} from '$lib/purets/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -27,7 +28,10 @@
 		simulatorUserMessageStore,
 		simulatorATCMessageStore,
 		simulatorCurrentTargetStore,
-		simulatorLocationStore
+		simulatorPoseStore,
+
+		simulatorRouteStore
+
 	} from '$lib/stores';
 
 	// Simulator state and settings
@@ -166,23 +170,62 @@
 			requiredState = newStateMessage.state;
 			simulatorATCMessageStore.set(newStateMessage.message);
 			simulatorCurrentTargetStore.set(newStateMessage.state.current_target);
-			simulatorLocationStore.set(newStateMessage.state.location);
+			simulatorPoseStore.set({
+				location: newStateMessage.state.location,
+				heading: newStateMessage.state.status.heading
+			});
 		}
 	}
 
 	async function initiateScenario() {
 		// Get the state from the server
 		let initialState = await getInitialState();
+		let scenarioRoute = await getScenarioRoute();
 		// Update the components with the new state
 		if (initialState === undefined) {
 			// Handle error
-			console.log('Error: No response from server');
+			console.log('Initial State Error: No response from server');
 			return 0;
 		} else {
-			console.log("Initial State:", initialState);
+			console.log('Initial State:', initialState);
 			requiredState = initialState;
 			simulatorCurrentTargetStore.set(initialState.current_target);
-			simulatorLocationStore.set(initialState.location);
+			simulatorPoseStore.set({
+				location: initialState.location,
+				heading: 0
+			});
+		}
+
+		if (scenarioRoute === undefined) {
+			// Handle error
+			console.log('Route Error: No response from server');
+			return 0;
+		} else {
+			console.log('Scenario Route:', scenarioRoute);
+			simulatorRouteStore.set(scenarioRoute);
+		}
+	}
+
+	async function getScenarioRoute(): Promise<Waypoint[] | undefined> {
+		try {
+			const [tempScenarioSeed, tempWeatherSeed] = splitAndPadNumber(simpleHash(seed));
+			scenarioSeed = tempScenarioSeed;
+			weatherSeed = tempWeatherSeed;
+
+			const response = await axios.post(
+				'http://localhost:3000/route/' + scenarioSeed,
+				{},
+				{
+					headers: {
+						'Content-Type': 'application/json',
+						'Access-Control-Allow-Origin': '*'
+					}
+				}
+			);
+
+			return response.data;
+		} catch (error) {
+			console.error('Error: ', error);
 		}
 	}
 
@@ -213,30 +256,30 @@
 		} catch (error) {
 			console.error('Error: ', error);
 		}
+	}
 
-		function splitAndPadNumber(input: number): [number, number] {
-			const numberString = input.toString();
-			const halfLength = Math.ceil(numberString.length / 2);
-			const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
-			const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
-			return [firstHalf, secondHalf];
-		}
+	function splitAndPadNumber(input: number): [number, number] {
+		const numberString = input.toString();
+		const halfLength = Math.ceil(numberString.length / 2);
+		const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
+		const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
+		return [firstHalf, secondHalf];
+	}
 
-		function simpleHash(str: string) {
-			let hash = 0;
+	function simpleHash(str: string) {
+		let hash = 0;
 
-			if (str.length === 0) {
-				return hash;
-			}
-
-			for (let i = 0; i < str.length; i++) {
-				const char = str.charCodeAt(i);
-				hash = (hash << 5) - hash + char;
-				// The above line is a simple hash function: hash * 31 + char
-			}
-
+		if (str.length === 0) {
 			return hash;
 		}
+
+		for (let i = 0; i < str.length; i++) {
+			const char = str.charCodeAt(i);
+			hash = (hash << 5) - hash + char;
+			// The above line is a simple hash function: hash * 31 + char
+		}
+
+		return hash;
 	}
 
 	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
