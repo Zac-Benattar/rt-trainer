@@ -1,11 +1,11 @@
 use anyhow::Error;
 use serde::{Deserialize, Serialize};
 
-use crate::generation::parsers::*;
+use crate::generation::call_parsers::*;
 use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
 
-use super::aerodromes::get_start_and_end_aerodromes;
+use super::aerodrome_generators::get_start_and_end_aerodromes;
 
 #[derive(Deserialize, Serialize)]
 pub struct ScenarioGenerationParameters {

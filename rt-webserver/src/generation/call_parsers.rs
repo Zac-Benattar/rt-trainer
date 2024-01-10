@@ -10,8 +10,8 @@ use crate::models::{
 };
 
 use super::{
-    aerodromes::{get_metor_sample, get_start_and_end_aerodromes},
-    routes::get_route,
+    aerodrome_generators::{get_metor_sample, get_start_and_end_aerodromes},
+    route_generator::get_route,
 };
 
 pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &String) -> String {

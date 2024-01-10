@@ -55,19 +55,20 @@ async fn main() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/test", get(test))
-        .route("/useraccounts", get(controllers::user::all_user_accounts))
-        .route("/useraccount", post(controllers::user::new_user_account))
+        .route("/useraccounts", get(controllers::user_account_controller::all_user_accounts))
+        .route("/useraccount", post(controllers::user_account_controller::new_user_account))
         .route(
             "/useraccount/:id",
-            get(controllers::user::user_account)
-                .put(controllers::user::update_user_account)
-                .delete(controllers::user::delete_user_account),
+            get(controllers::user_account_controller::user_account)
+                .put(controllers::user_account_controller::update_user_account)
+                .delete(controllers::user_account_controller::delete_user_account),
         )
         .route(
             "/initialstate",
-            post(controllers::generator::get_initial_state),
+            post(controllers::simulation_controller::get_initial_state),
         )
-        .route("/nextstate", post(controllers::generator::get_next_state))
+        .route("/nextstate", post(controllers::simulation_controller::get_next_state))
+        .route("/route/:id", get(controllers::simulation_controller::get_route_points))
         .layer(
             ServiceBuilder::new()
                 // .layer(Extension(pool))
