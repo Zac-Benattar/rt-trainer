@@ -1,19 +1,17 @@
-use std::thread::current;
-
 use anyhow::Error;
 
 use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::{COMFrequency, Runway},
     state::{
-        AirborneEvent, Emergency, FlightRules, Mistake, ParkedStage, Pose, RecievedState,
-        SentState, SentStateMessage, ServerResponse, Status, TaxiingStage, Waypoint,
+        WaypointStage, Emergency, FlightRules, Mistake, ParkedStage, Pose, RecievedState,
+        SentState, SentStateMessage, ServerResponse, TaxiingStage, RoutePoint,
     },
 };
 
 use super::{
     aerodrome_generators::{get_metor_sample, get_start_and_end_aerodromes},
-    route_generator::get_route,
+    route_generator::{generate_route_from_seed, get_pre_requesting_depart_info_stage},
 };
 
 pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &String) -> String {
@@ -147,29 +145,11 @@ pub fn parse_radio_check(
         &current_state.callsign, &current_state.current_target.callsign
     );
 
-    let next_state: SentState = SentState {
-        status: Status::Parked {
-            stage: ParkedStage::PreDepartInfo,
-        },
-        pose: Pose {
-            location: start_and_end_aerodrome.0.location,
-            altitude: start_and_end_aerodrome.0.altitude,
-            heading: 0,
-            air_speed: 0,
-        },
-        current_target: COMFrequency {
-            frequency_type: current_state.current_target.frequency_type,
-            frequency: current_state.current_target.frequency,
-            callsign: current_state.current_target.callsign.clone(),
-        },
-        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
-        emergency: Emergency::None,
-        squark: false,
-        current_radio_frequency: current_state.current_radio_frequency,
-        current_transponder_frequency: current_state.current_transponder_frequency,
-        aircraft_type: current_state.aircraft_type.to_owned(),
+    let next_state = match get_pre_requesting_depart_info_stage(*scenario_seed) {
+        Ok(stage) => stage,
+        Err(_) => {
+            return Err(Error::msg("Could not get pre-requesting departure information stage"));
+        }
     };
 
     Ok(ServerResponse::StateMessage(SentStateMessage {
@@ -276,7 +256,7 @@ pub fn parse_departure_information_request(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: shorten_callsign(
+        callsign_modified: shorten_callsign(
             scenario_seed,
             &current_state.aircraft_type,
             &current_state.target_allocated_callsign.to_owned(),
@@ -366,7 +346,7 @@ pub fn parse_departure_information_readback(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
@@ -460,7 +440,7 @@ pub fn parse_taxi_request(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
@@ -525,7 +505,7 @@ pub fn parse_taxi_readback(
         }));
     }
 
-    get_route(
+    generate_route_from_seed(
         *scenario_seed,
         &start_and_end_aerodrome.0,
         &start_and_end_aerodrome.1,
@@ -550,7 +530,7 @@ pub fn parse_taxi_readback(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
@@ -574,7 +554,7 @@ pub fn parse_new_airspace_initial_contact(
     altitude: &u32,
     heading: &u32,
     speed: &u32,
-    current_point: &Waypoint,
+    current_point: &RoutePoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let expected_radiocall: String = format!(
@@ -637,7 +617,7 @@ pub fn parse_new_airspace_initial_contact(
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
+            airborne_event: WaypointStage::PreNewAirspaceFlightDetailsGiven,
         },
         pose: Pose {
             location: current_point.location,
@@ -652,7 +632,7 @@ pub fn parse_new_airspace_initial_contact(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
@@ -680,7 +660,7 @@ pub fn parse_new_airspace_give_flight_information_to_atc(
     altitude: &u32,
     heading: &u32,
     speed: &u32,
-    current_point: &Waypoint,
+    current_point: &RoutePoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
@@ -749,7 +729,7 @@ pub fn parse_new_airspace_give_flight_information_to_atc(
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
+            airborne_event: WaypointStage::PreNewAirspaceFlightDetailsGiven,
         },
         pose: Pose {
             location: current_point.location,
@@ -764,7 +744,7 @@ pub fn parse_new_airspace_give_flight_information_to_atc(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
+        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
         emergency: Emergency::None,
         squark: false,
         current_radio_frequency: current_state.current_radio_frequency,
@@ -789,7 +769,7 @@ pub fn parse_new_airspace_squark(
     altitude: &u32,
     heading: &u32,
     speed: &u32,
-    current_point: &Waypoint,
+    current_point: &RoutePoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let expected_radiocall: String = format!(
@@ -840,7 +820,7 @@ pub fn parse_new_airspace_squark(
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airborne_event: AirborneEvent::PreWilco,
+            airborne_event: WaypointStage::PreWilco,
         },
         pose: Pose {
             location: current_point.location,
@@ -855,7 +835,7 @@ pub fn parse_new_airspace_squark(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: shorten_callsign(
+        callsign_modified: shorten_callsign(
             scenario_seed,
             &current_state.aircraft_type,
             &current_state.callsign,
@@ -883,7 +863,7 @@ pub fn parse_wilco(
     altitude: &u32,
     heading: &u32,
     speed: &u32,
-    current_point: &Waypoint,
+    current_point: &RoutePoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     let expected_radiocall: String = format!(
@@ -920,7 +900,7 @@ pub fn parse_wilco(
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airborne_event: AirborneEvent::PreWilco,
+            airborne_event: WaypointStage::PreWilco,
         },
         pose: Pose {
             location: current_point.location,
@@ -935,7 +915,7 @@ pub fn parse_wilco(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: shorten_callsign(
+        callsign_modified: shorten_callsign(
             scenario_seed,
             &current_state.aircraft_type,
             &current_state.callsign,
@@ -967,7 +947,7 @@ pub fn parse_vfr_position_report(
     altitude: &u32,
     heading: &u32,
     speed: &u32,
-    current_point: &Waypoint,
+    current_point: &RoutePoint,
     current_state: &RecievedState,
 ) -> Result<ServerResponse, Error> {
     // May need more details to be accurate to specific situation
@@ -1016,7 +996,7 @@ pub fn parse_vfr_position_report(
             heading: heading.to_owned(),
             speed: speed.to_owned(),
             current_point: current_point.to_owned(),
-            airborne_event: AirborneEvent::PreWilco,
+            airborne_event: WaypointStage::PreWilco,
         },
         pose: Pose {
             location: current_point.location,
@@ -1031,7 +1011,7 @@ pub fn parse_vfr_position_report(
         },
         prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
         callsign: current_state.callsign.to_owned(),
-        target_allocated_callsign: shorten_callsign(
+        callsign_modified: shorten_callsign(
             scenario_seed,
             &current_state.aircraft_type,
             &current_state.callsign,

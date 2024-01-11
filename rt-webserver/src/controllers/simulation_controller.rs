@@ -12,7 +12,7 @@ use crate::helpers::jsoncheckers::{
 };
 use crate::helpers::preprocessors::process_string;
 use crate::models::state::{
-    RecievedStateMessageSeed, SentState, SentStateMessage, ServerResponse, Waypoint,
+    RecievedStateMessageSeed, SentState, ServerResponse, Route,
 };
 
 /* Gets the first state that the frontend should match.
@@ -61,11 +61,11 @@ pub async fn get_next_state(
     Ok((StatusCode::OK, Json(next_state_and_message)))
 }
 
-pub async fn get_route_points(
+pub async fn get_route(
     Path(id): Path<u64>,
-) -> Result<(StatusCode, Json<Vec<Waypoint>>), CustomError> {
+) -> Result<(StatusCode, Json<Route>), CustomError> {
     let result = generate_route_from_seed(id);
-    let route_points: Vec<Waypoint> = match result {
+    let route: Route = match result {
         Ok(route) => route,
         Err(error) => {
             println!("Error: {:?}", error.to_string());
@@ -73,5 +73,5 @@ pub async fn get_route_points(
         }
     };
 
-    Ok((StatusCode::OK, Json(route_points)))
+    Ok((StatusCode::OK, Json(route)))
 }

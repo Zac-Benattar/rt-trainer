@@ -37,11 +37,7 @@ pub fn empty_scenario_generation_parameters_json(
 }
 
 pub fn invalid_state_data_json(Json(state): Json<&SentState>) -> bool {
-    empty_state_data_json(Json(state))
-}
-
-pub fn empty_state_data_json(Json(state): Json<&SentState>) -> bool {
-    state.callsign.is_empty() || state.prefix.is_empty()
+    todo!()
 }
 
 pub fn invalid_state_message_seed_data_json(Json(state_message): Json<&RecievedStateMessageSeed>) -> bool {

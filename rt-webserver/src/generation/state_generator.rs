@@ -25,7 +25,7 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> SentS
     // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
     SentState {
-        status: Status::Parked {
+        stage: RoutePointStage::Parked {
             stage: ParkedStage::PreRadioCheck,
         },
         pose: Pose {
@@ -39,14 +39,10 @@ pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> SentS
             frequency: start_aerodrome_frequency.frequency,
             callsign: start_aerodrome_frequency.callsign.clone(),
         },
-        prefix: parameters.prefix, // Set by user: none, student, helicopter, police, etc...
-        callsign: (&parameters.user_callsign).to_owned(),
-        target_allocated_callsign: parameters.user_callsign, // Replaced by ATSU when needed
+        callsign_modified: false, // States whether callsign has been modified by ATC, e.g. shortened
         emergency: Emergency::None,
         squark: false,
-        current_radio_frequency: start_aerodrome_frequency.frequency,
         current_transponder_frequency: 7000,
-        aircraft_type: parameters.aircraft_type,
     }
 }
 
@@ -56,8 +52,8 @@ pub fn generate_next_state(
     radiocall: String,
     current_state: RecievedState,
 ) -> Result<ServerResponse, Error> {
-    match &current_state.status {
-        Status::Parked { stage } => {
+    match &current_state.stage {
+        &RoutePointStage::Parked { stage } => {
             match stage {
                 ParkedStage::PreRadioCheck => {
                     // Parse pretakeoff radio check request
@@ -102,7 +98,7 @@ pub fn generate_next_state(
                 }
             }
         }
-        Status::Taxiing { stage } => {
+        &RoutePointStage::Taxiing { stage } => {
             match stage {
                 TaxiingStage::PreReadyForDeparture => {
                     // Parse pretakeoff ready for departure
@@ -112,7 +108,7 @@ pub fn generate_next_state(
                 }
             }
         }
-        Status::Holding {
+        &RoutePointStage::Holding {
             stage,
             holding_point,
         } => {
@@ -126,96 +122,62 @@ pub fn generate_next_state(
                 }
             }
         }
-        Status::Takeoff { runway } => todo!(),
-        Status::Airborne {
+        &RoutePointStage::Takeoff { runway } => todo!(),
+        &RoutePointStage::NewAirspace {
+            stage,
             flight_rules,
-            altitude,
-            heading,
-            speed,
-            current_point,
             airborne_event,
         } => {
             match airborne_event {
-                AirborneEvent::PreNewAirspaceInitialCall => {
+                WaypointStage::PreNewAirspaceInitialCall => {
                     // Parse new airspace initial call
                     return parse_new_airspace_initial_contact(
                         &scenario_seed,
                         &weather_seed,
                         &radiocall,
                         &flight_rules,
-                        &altitude,
-                        &heading,
-                        &speed,
-                        &current_point,
                         &current_state,
                     );
                 }
-                AirborneEvent::PreNewAirspaceFlightDetailsGiven => {
+                WaypointStage::PreNewAirspaceFlightDetailsGiven => {
                     // Parse new airspace flight details given
                     return parse_new_airspace_give_flight_information_to_atc(
                         &scenario_seed,
                         &weather_seed,
                         &radiocall,
-                        &flight_rules,
-                        &altitude,
-                        &heading,
-                        &speed,
-                        &current_point,
                         &current_state,
                     );
                 }
-                AirborneEvent::PreNewAirspaceSquark { squark } => {
+                WaypointStage::PreNewAirspaceSquark { squark } => {
                     // Parse new airspace squark
                     return parse_new_airspace_squark(
                         &scenario_seed,
                         &weather_seed,
                         &radiocall,
-                        &squark,
-                        &flight_rules,
-                        &altitude,
-                        &heading,
-                        &speed,
-                        &current_point,
                         &current_state,
                     );
                 }
-                AirborneEvent::PreChangeAltitudeWilco => {
+                WaypointStage::PreChangeAltitudeWilco => {
                     // Parse new airspace change altitude
                 }
-                AirborneEvent::PreChangeHeadingWilco => {
+                WaypointStage::PreChangeHeadingWilco => {
                     // Parse new airspace change heading
                 }
-                AirborneEvent::PreChangeSpeedWilco => {
+                WaypointStage::PreChangeSpeedWilco => {
                     // Parse new airspace change speed
                 }
-                AirborneEvent::PreChangeRouteWilco => {
+                WaypointStage::PreChangeRouteWilco => {
                     // Parse new airspace change route
                 }
-                AirborneEvent::PreWilco => {
+                WaypointStage::PreWilco => {
                     // Parse new airspace wilco
-                    return parse_wilco(
-                        &scenario_seed,
-                        &weather_seed,
-                        &radiocall,
-                        flight_rules,
-                        altitude,
-                        heading,
-                        speed,
-                        current_point,
-                        &current_state,
-                    );
+                    return parse_wilco(&scenario_seed, &weather_seed, &radiocall, &current_state);
                 }
-                AirborneEvent::PreVFRPositionReport => {
+                WaypointStage::PreVFRPositionReport => {
                     // Parse new airspace VFR position report
                     return parse_vfr_position_report(
                         &scenario_seed,
                         &weather_seed,
-                        &radiocall,
-                        flight_rules,
-                        altitude,
-                        heading,
-                        speed,
-                        current_point,
                         &current_state,
                     );
                 }

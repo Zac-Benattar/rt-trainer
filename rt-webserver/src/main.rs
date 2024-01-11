@@ -68,7 +68,7 @@ async fn main() -> anyhow::Result<()> {
             post(controllers::simulation_controller::get_initial_state),
         )
         .route("/nextstate", post(controllers::simulation_controller::get_next_state))
-        .route("/route/:id", get(controllers::simulation_controller::get_route_points))
+        .route("/route/:id", get(controllers::simulation_controller::get_route))
         .layer(
             ServiceBuilder::new()
                 // .layer(Extension(pool))
