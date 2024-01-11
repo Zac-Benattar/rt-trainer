@@ -10,11 +10,13 @@
 		COMFrequency,
 		Mistake,
 		AircraftDetails,
-		ScenarioState,
-		StateMessage,
+		SentState,
+		SentStateMessageSeeds,
+		RecievedStateMessage,
 		RadioState,
 		TransponderState,
-		Waypoint
+		Waypoint,
+		RecievedState
 	} from '$lib/ts/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -38,7 +40,7 @@
 	// Simulator state and settings
 	let scenarioSeed: number = 0;
 	let weatherSeed: number = 0;
-	let requiredState: ScenarioState | undefined; // Required state for user to match
+	let requiredState: RecievedState | undefined; // Required state for user to match
 	let simulatorSettings: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
@@ -54,7 +56,19 @@
 	let unexpectedEvents: boolean = true; // Unexpected events are enabled by default
 	let speechInput: boolean = false; // Users must opt in to speech input
 	let readRecievedCalls: boolean = false;
+
+	// Server state
+	let serverNotResponding: boolean = false;
+
 	const modalStore = getModalStore();
+
+	$: if (serverNotResponding) {
+		modalStore.trigger({
+			type: 'alert',
+			title: 'Connection to server failed',
+			body: 'This may be due to the server being offline. Come back later and try again.'
+		});
+	}
 
 	$: if (readRecievedCalls && atcMessage) {
 		speakATCMessage();
@@ -123,8 +137,19 @@
 	async function handleSubmit() {
 		// Check state matches expected state
 		if (!requiredState) {
-			console.log('Error: No state');
-			return;
+
+			// Attempt to get state from server
+			initiateScenario();
+
+			if (!requiredState) {
+				console.log('Error: No state');
+				modalStore.trigger({
+					type: 'alert',
+					title: 'Connection to server failed',
+					body: 'This may be due to the server being offline. Come back later and try again.'
+				});
+				return;
+			}
 		}
 
 		if (radioState.dial_mode == 'OFF') {
@@ -142,7 +167,7 @@
 			});
 			return;
 		} else if (
-			radioState.active_frequency.toFixed(3) != requiredState.current_radio_frequency.toFixed(3)
+			radioState.active_frequency.toFixed(3) != requiredState.current_target.frequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -164,7 +189,12 @@
 		console.log('Received state: ', newStateMessage);
 		if (newStateMessage === undefined) {
 			// Handle error
-			console.log('Error: No response from server');
+			serverNotResponding = true;
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Connection to server failed',
+				body: 'This may be due to the server being offline. Come back later and try again.'
+			});
 		} else if (isMistake(newStateMessage)) {
 			// Handle mistake
 
@@ -192,7 +222,8 @@
 		// Update the components with the new state
 		if (initialState === undefined) {
 			// Handle error
-			console.log('Initial State Error: No response from server');
+			serverNotResponding = true;
+
 			return 0;
 		} else {
 			console.log('Initial State:', initialState);
@@ -203,7 +234,7 @@
 
 		if (scenarioRoute === undefined) {
 			// Handle error
-			console.log('Route Error: No response from server');
+			serverNotResponding = true;
 			return 0;
 		} else {
 			console.log('Scenario Route:', scenarioRoute);
@@ -222,11 +253,15 @@
 
 			return response.data;
 		} catch (error) {
-			console.error('Error: ', error);
+			if (error.message === 'Network Error') {
+				serverNotResponding = true;
+			} else {
+				console.error('Error: ', error);
+			}
 		}
 	}
 
-	async function getInitialState(): Promise<ScenarioState | undefined> {
+	async function getInitialState(): Promise<RecievedState | undefined> {
 		try {
 			const response = await axios.post(
 				'http://localhost:3000/initialstate',
@@ -247,26 +282,29 @@
 
 			return response.data;
 		} catch (error) {
-			console.error('Error: ', error);
+			if (error.message === 'Network Error') {
+				serverNotResponding = true;
+			} else {
+				console.error('Error: ', error);
+			}
 		}
 	}
 
-	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
+	async function getNextState(): Promise<RecievedStateMessage | Mistake | undefined> {
 		if (!requiredState) {
 			console.log('Error: No state');
 			return;
 		}
 		try {
-			const stateMessage: StateMessage = {
+			const stateMessage: SentStateMessageSeeds = {
 				state: {
-					status: {
+					stage: {
 						Parked: {
 							stage: 'PreRadioCheck'
 						}
 					},
 					prefix: simulatorSettings.prefix,
 					callsign: simulatorSettings.callsign,
-					target_allocated_callsign: requiredState.target_allocated_callsign,
 					squark: false,
 					current_target: {
 						frequency_type: currentTarget.frequency_type,
@@ -275,7 +313,6 @@
 					},
 					current_radio_frequency: radioState.active_frequency,
 					current_transponder_frequency: transponderState.frequency,
-					emergency: 'None',
 					aircraft_type: simulatorSettings.aircraft_type
 				},
 				message: userMessage,
@@ -288,11 +325,11 @@
 			const response = await axios.post('http://localhost:3000/nextstate', stateMessage);
 
 			if (response.data.StateMessage != undefined) {
-				return response.data.StateMessage as StateMessage;
+				return response.data.StateMessage as RecievedStateMessage;
 			} else if (response.data.Mistake != undefined) {
 				return response.data.Mistake as Mistake;
 			} else {
-				console.log('Error: No response from server');
+				serverNotResponding = true;
 				return;
 			}
 		} catch (error) {
@@ -301,22 +338,12 @@
 	}
 
 	onMount(async () => {
-		if (!initiateScenario())
-			modalStore.trigger({
-				type: 'alert',
-				title: 'Fatal Error',
-				body: 'No response from server'
-			});
+		if (!initiateScenario()) serverNotResponding = true;
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;
 		} else {
 			speechRecognitionSupported = false;
-			modalStore.trigger({
-				type: 'alert',
-				title: 'Speech Recognition Error',
-				body: 'Speech recognition is not supported in this browser. Please use a different browser if you would like to use this feature.'
-			});
 		}
 	});
 </script>

@@ -10,6 +10,12 @@ export enum Status {
 	'Landed'
 }
 
+export enum EmergencyType {
+	'None',
+	'Mayday',
+	'PanPan'
+}
+
 export type COMFrequency = {
 	frequency_type: 'AFIS' | 'TWR' | 'GND';
 	frequency: number;
@@ -86,18 +92,38 @@ export type Aerodrome = {
 	metor_data: METORData;
 };
 
-export type ScenarioState = {
-	status: Status;
+export enum RoutePointType {
+	Aerodrome,
+	Waypoint,
+};
+
+export type RoutePoint = {
+	point_type: RoutePointType;
+	location: Location;
+	name: string;
+	com_frequencies: COMFrequency[];
+	states: RecievedState[];
+}
+
+export type SentState = {
+	stage: RoutePointStage;
 	prefix: string;
 	callsign: string;
-	target_allocated_callsign: string;
 	squark: boolean;
 	current_target: COMFrequency;
 	current_radio_frequency: number;
 	current_transponder_frequency: number;
-	pose: Pose;
-	emergency: 'None' | 'Mayday';
 	aircraft_type: string;
+};
+
+export type RecievedState = {
+	stage: RoutePointStage;
+	callsign_modified: boolean;
+	squark: boolean;
+	current_target: COMFrequency;
+	current_transponder_frequency: number;
+	pose: Pose;
+	emergency: EmergencyType;
 };
 
 export type TransponderDialMode = 'OFF' | 'SBY' | 'GND' | 'STBY' | 'ON' | 'ALT' | 'TEST';
@@ -106,15 +132,15 @@ export type RadioMode = 'OFF' | 'COM' | 'NAV';
 
 export type RadioDialMode = 'OFF' | 'SBY';
 
-export type StateMessageSeeds = {
-	state: ScenarioState;
+export type SentStateMessageSeeds = {
+	state: SentState;
 	message: string;
 	scenario_seed: number;
 	weather_seed: number;
 };
 
-export type StateMessage = {
-	state: ScenarioState;
+export type RecievedStateMessage = {
+	state: RecievedState;
 	message: string;
 };
 
