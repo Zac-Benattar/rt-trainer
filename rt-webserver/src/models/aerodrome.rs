@@ -41,6 +41,7 @@ pub struct Aerodrome {
     pub com_frequencies: Vec<COMFrequency>,
     pub runways: Vec<Runway>,
     pub location: Location,
+    pub altitude: i32,
     pub start_point: String,
     pub metor_data: METORData,
 }

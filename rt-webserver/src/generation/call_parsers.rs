@@ -1,11 +1,13 @@
+use std::thread::current;
+
 use anyhow::Error;
 
 use crate::models::{
     aerodrome::Aerodrome,
     aerodrome::{COMFrequency, Runway},
     state::{
-        AirborneEvent, Emergency, FlightRules, Mistake, ParkedStage, RecievedState, SentState,
-        SentStateMessage, ServerResponse, Status, TaxiingStage, Waypoint,
+        AirborneEvent, Emergency, FlightRules, Mistake, ParkedStage, Pose, RecievedState,
+        SentState, SentStateMessage, ServerResponse, Status, TaxiingStage, Waypoint,
     },
 };
 
@@ -149,7 +151,12 @@ pub fn parse_radio_check(
         status: Status::Parked {
             stage: ParkedStage::PreDepartInfo,
         },
-        location: start_and_end_aerodrome.0.location,
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -256,7 +263,12 @@ pub fn parse_departure_information_request(
         status: Status::Parked {
             stage: ParkedStage::PreReadbackDepartInfo,
         },
-        location: start_and_end_aerodrome.0.location,
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -341,7 +353,12 @@ pub fn parse_departure_information_readback(
         status: Status::Parked {
             stage: ParkedStage::PreTaxiRequest,
         },
-        location: start_and_end_aerodrome.0.location,
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -430,7 +447,12 @@ pub fn parse_taxi_request(
         status: Status::Parked {
             stage: ParkedStage::PreTaxiClearanceReadback,
         },
-        location: start_and_end_aerodrome.0.location,
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -515,7 +537,12 @@ pub fn parse_taxi_readback(
         status: Status::Taxiing {
             stage: TaxiingStage::PreReadyForDeparture,
         },
-        location: start_and_end_aerodrome.0.location,
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -612,7 +639,12 @@ pub fn parse_new_airspace_initial_contact(
             current_point: current_point.to_owned(),
             airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
         },
-        location: current_point.location,
+        pose: Pose {
+            location: current_point.location,
+            altitude: 0,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -719,7 +751,12 @@ pub fn parse_new_airspace_give_flight_information_to_atc(
             current_point: current_point.to_owned(),
             airborne_event: AirborneEvent::PreNewAirspaceFlightDetailsGiven,
         },
-        location: current_point.location,
+        pose: Pose {
+            location: current_point.location,
+            altitude: 0,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -805,7 +842,12 @@ pub fn parse_new_airspace_squark(
             current_point: current_point.to_owned(),
             airborne_event: AirborneEvent::PreWilco,
         },
-        location: current_point.location,
+        pose: Pose {
+            location: current_point.location,
+            altitude: 0,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -880,7 +922,12 @@ pub fn parse_wilco(
             current_point: current_point.to_owned(),
             airborne_event: AirborneEvent::PreWilco,
         },
-        location: current_point.location,
+        pose: Pose {
+            location: current_point.location,
+            altitude: 0,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,
@@ -971,7 +1018,12 @@ pub fn parse_vfr_position_report(
             current_point: current_point.to_owned(),
             airborne_event: AirborneEvent::PreWilco,
         },
-        location: current_point.location,
+        pose: Pose {
+            location: current_point.location,
+            altitude: 0,
+            heading: 0,
+            air_speed: 0,
+        },
         current_target: COMFrequency {
             frequency_type: current_state.current_target.frequency_type,
             frequency: current_state.current_target.frequency,

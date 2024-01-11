@@ -179,6 +179,7 @@ pub fn get_large_aerodrome(seed: u64) -> Aerodrome {
             lat: 52.452997,
             long: -1.740041,
         },
+        altitude: 327,
         start_point: "North Side Hangers".to_string(),
         metor_data,
     }
@@ -240,6 +241,7 @@ pub fn get_small_aerodrome(seed: u64) -> Aerodrome {
             lat: 52.1922,
             long: -1.6144,
         },
+        altitude: 163,
         start_point: "South Side Hangers".to_string(),
         metor_data,
     }

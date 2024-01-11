@@ -55,7 +55,7 @@
 					'<br> Altitude: ' +
 					targetPose.altitude +
 					'<br> Airspeed: ' +
-					targetPose.airspeed +
+					targetPose.air_speed +
 					'</p>';
 				return text;
 			}

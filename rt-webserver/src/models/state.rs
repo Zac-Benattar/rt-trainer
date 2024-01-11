@@ -164,6 +164,14 @@ pub struct Location {
 }
 
 #[derive(Deserialize, Serialize)]
+pub struct Pose {
+    pub location: Location,
+    pub altitude: i32,
+    pub heading: u32,
+    pub air_speed: u32,
+}
+
+#[derive(Deserialize, Serialize)]
 pub struct SentState {
     pub status: Status,
     pub prefix: String,
@@ -173,7 +181,7 @@ pub struct SentState {
     pub current_target: COMFrequency,
     pub current_radio_frequency: f32,
     pub current_transponder_frequency: u16,
-    pub location: Location,
+    pub pose: Pose,
     pub emergency: Emergency,
     pub aircraft_type: String,
 }
