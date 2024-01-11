@@ -192,7 +192,9 @@
 			simulatorCurrentTargetStore.set(initialState.current_target);
 			simulatorPoseStore.set({
 				location: initialState.location,
-				heading: 0
+				heading: 0,
+				altitude: 0,
+				airspeed: 0
 			});
 		}
 

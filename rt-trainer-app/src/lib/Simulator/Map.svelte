@@ -1,14 +1,15 @@
 <script lang="ts">
 	/* This file is not correctly typed due to the way SvelteKit builds its production
-	bundle and how Leaflet depends on the window object. Read more here about the issue 
-	and solution in the blog post by Stanislav Khromov below.
+	bundle and how Leaflet depends on the window object. This presented issues with loading
+	leaflet but the compromise is to not import Leaflet with an import statement at the 
+	top of the file. Read more here about the issue and solution in the blog post by 
+	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
 	import { simulatorPoseStore, simulatorRouteStore } from '$lib/stores';
 	import type { Pose, Waypoint } from '$lib/purets/States';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import type { Control } from 'leaflet';
 
 	export let enabled: boolean = true;
 	let leaflet: any;
@@ -40,7 +41,26 @@
 		}
 	});
 
-	function loadMapScenario() {
+	async function loadMapScenario() {
+		FlightInformationTextBox = L.Control.extend({
+			onAdd: function () {
+				var text = L.DomUtil.create('div');
+				text.id = 'heading_text';
+				text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+				text.style.color = 'black';
+				text.style.backgroundColor = 'white';
+				text.innerHTML =
+					'<p> Heading: ' +
+					targetPose.heading +
+					'<br> Altitude: ' +
+					targetPose.altitude +
+					'<br> Airspeed: ' +
+					targetPose.airspeed +
+					'</p>';
+				return text;
+			}
+		});
+
 		map = L.map('myMap').setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
 
 		planeIcon = L.icon({
@@ -73,9 +93,10 @@
 		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	}
 
-	function updateMap() {
-		if (!map) loadMapScenario();
-		else {
+	async function updateMap() {
+		if (mounted) {
+			await map;
+
 			map.setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
 
 			removeMarkers();
@@ -98,20 +119,23 @@
 
 			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 		}
+		else {
+			console.log('Map not mounted');
+		}
 	}
 
-	function addMarker(lat: number, long: number, name: string) {
+	async function addMarker(lat: number, long: number, name: string) {
 		markers.push(L.marker([lat, long]).bindPopup(name).addTo(map));
 	}
 
-	function removeMarkers() {
+	async function removeMarkers() {
 		markers.forEach((marker) => {
 			map.removeLayer(marker);
 		});
 		markers = [];
 	}
 
-	function connectMarkers() {
+	async function connectMarkers() {
 		if (markers.length > 1) {
 			for (let i = 0; i < markers.length - 1; i++) {
 				L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
@@ -124,31 +148,13 @@
 		}
 	}
 
-	function clearMap() {
-		removeMarkers();
-		connectMarkers();
-	}
-
 	onMount(async () => {
 		if (enabled && browser) {
-			mounted = true;
-
 			leaflet = await import('leaflet');
 			rotated_marker = await import('leaflet-rotatedmarker');
 
-			FlightInformationTextBox = L.Control.extend({
-				onAdd: function () {
-					var text = L.DomUtil.create('div');
-					text.id = 'heading_text';
-					text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
-					text.style.color = 'black';
-					text.style.backgroundColor = 'white';
-					text.innerHTML = '<p> Heading: ' + targetPose.heading + '<br> Altitude: ' + targetPose.altitude + '<br> Airspeed: ' + targetPose.airspeed + '</p>';
-					return text;
-				}
-			});
-
-			loadMapScenario();
+			await loadMapScenario();
+			mounted = true;
 		}
 	});
 </script>
