@@ -5,57 +5,58 @@
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
 	import Kneeboard from './Kneeboard.svelte';
-	import { clipboard } from '@skeletonlabs/skeleton';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import type {
 		COMFrequency,
 		Mistake,
-		SimulatorSettings,
+		AircraftDetails,
 		ScenarioState,
 		StateMessage,
 		RadioState,
 		TransponderState,
 		Waypoint
-	} from '$lib/purets/States';
+	} from '$lib/ts/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
 	import {
-		simulatorSettingsStore,
-		simulatorRadioStateStore,
-		simulatorTransponderStateStore,
-		simulatorUserMessageStore,
-		simulatorATCMessageStore,
-		simulatorCurrentTargetStore,
-		simulatorPoseStore,
-
-		simulatorRouteStore
-
+		SettingsStore,
+		RadioStateStore,
+		TransponderStateStore,
+		UserMessageStore,
+		ATCMessageStore,
+		CurrentTargetStore,
+		PoseStore,
+		RouteStore,
+		AircraftDetailsStore,
+		SeedStore,
+		KneeboardStore
 	} from '$lib/stores';
+	import SimulatorSettings from './SimulatorSettings.svelte';
+	import ScenarioLink from './ScenarioLink.svelte';
 
 	// Simulator state and settings
 	let scenarioSeed: number = 0;
 	let weatherSeed: number = 0;
 	let requiredState: ScenarioState | undefined; // Required state for user to match
-	let simulatorSettings: SimulatorSettings; // Current settings of the simulator
+	let simulatorSettings: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
 	let currentTarget: COMFrequency;
 	let atcMessage: string;
 	let userMessage: string;
-	let kneeboardTextContent: string = 'Make notes here.';
+	let kneeboardText: string = 'Make notes here.';
 
 	// Page settings
-	export let unexpectedEvents: boolean = false;
-	export let seed: string = '0';
-	let mapEnabled = true; // User will need to opt in as the map uses cookies
-	let voiceInput: boolean = false;
-	let audioMessages: boolean = false;
-	let scenarioLink: string = 'www.rt-trainer.com/scenario/' + seed;
+	let seedString: string = '0';
+	let mapEnabled = true;
+	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
+	let unexpectedEvents: boolean = true; // Unexpected events are enabled by default
+	let speechInput: boolean = false; // Users must opt in to speech input
+	let readRecievedCalls: boolean = false;
 	const modalStore = getModalStore();
 
-	$: if (audioMessages && atcMessage) {
+	$: if (readRecievedCalls && atcMessage) {
 		speakATCMessage();
 	}
 
@@ -63,30 +64,40 @@
 		currentTarget = requiredState.current_target;
 	}
 
-	$: if (unexpectedEvents) {
-		scenarioLink = 'www.rt-trainer.com/scenario/' + seed + '?unexpectedEvents=true';
-	} else {
-		scenarioLink = 'www.rt-trainer.com/scenario/' + seed;
-	}
+	SeedStore.subscribe((value) => {
+		seedString = value.seedString;
+		scenarioSeed = value.scenarioSeed;
+		weatherSeed = value.weatherSeed;
+	});
 
-	simulatorSettingsStore.subscribe((value) => {
+	SettingsStore.subscribe((value) => {
+		unexpectedEvents = value.unexpectedEvents;
+		speechInput = value.speechInput;
+		readRecievedCalls = value.readRecievedCalls;
+	});
+
+	AircraftDetailsStore.subscribe((value) => {
 		simulatorSettings = value;
 	});
 
-	simulatorRadioStateStore.subscribe((value) => {
+	RadioStateStore.subscribe((value) => {
 		radioState = value;
 	});
 
-	simulatorTransponderStateStore.subscribe((value) => {
+	TransponderStateStore.subscribe((value) => {
 		transponderState = value;
 	});
 
-	simulatorUserMessageStore.subscribe((value) => {
+	UserMessageStore.subscribe((value) => {
 		userMessage = value;
 	});
 
-	simulatorATCMessageStore.subscribe((value) => {
+	ATCMessageStore.subscribe((value) => {
 		atcMessage = value;
+	});
+
+	KneeboardStore.subscribe((value) => {
+		kneeboardText = value;
 	});
 
 	function speakATCMessage() {
@@ -168,12 +179,9 @@
 		} else {
 			// Update the components with the new state
 			requiredState = newStateMessage.state;
-			simulatorATCMessageStore.set(newStateMessage.message);
-			simulatorCurrentTargetStore.set(newStateMessage.state.current_target);
-			simulatorPoseStore.set({
-				location: newStateMessage.state.location,
-				heading: newStateMessage.state.status.heading
-			});
+			ATCMessageStore.set(newStateMessage.message);
+			CurrentTargetStore.set(newStateMessage.state.current_target);
+			PoseStore.set(newStateMessage.state.pose);
 		}
 	}
 
@@ -189,13 +197,8 @@
 		} else {
 			console.log('Initial State:', initialState);
 			requiredState = initialState;
-			simulatorCurrentTargetStore.set(initialState.current_target);
-			simulatorPoseStore.set({
-				location: initialState.location,
-				heading: 0,
-				altitude: 0,
-				airspeed: 0
-			});
+			CurrentTargetStore.set(initialState.current_target);
+			PoseStore.set(initialState.pose);
 		}
 
 		if (scenarioRoute === undefined) {
@@ -204,25 +207,18 @@
 			return 0;
 		} else {
 			console.log('Scenario Route:', scenarioRoute);
-			simulatorRouteStore.set(scenarioRoute);
+			RouteStore.set(scenarioRoute);
 		}
 	}
 
 	async function getScenarioRoute(): Promise<Waypoint[] | undefined> {
 		try {
-			const [tempScenarioSeed, tempWeatherSeed] = splitAndPadNumber(simpleHash(seed));
-			scenarioSeed = tempScenarioSeed;
-			weatherSeed = tempWeatherSeed;
-
-			const response = await axios.get(
-				'http://localhost:3000/route/' + scenarioSeed,
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*'
-					}
+			const response = await axios.get('http://localhost:3000/route/' + scenarioSeed, {
+				headers: {
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin': '*'
 				}
-			);
+			});
 
 			return response.data;
 		} catch (error) {
@@ -232,10 +228,6 @@
 
 	async function getInitialState(): Promise<ScenarioState | undefined> {
 		try {
-			const [tempScenarioSeed, tempWeatherSeed] = splitAndPadNumber(simpleHash(seed));
-			scenarioSeed = tempScenarioSeed;
-			weatherSeed = tempWeatherSeed;
-
 			const response = await axios.post(
 				'http://localhost:3000/initialstate',
 				{
@@ -243,7 +235,7 @@
 					weather_seed: weatherSeed,
 					prefix: simulatorSettings.prefix,
 					user_callsign: simulatorSettings.callsign,
-					aircraft_type: simulatorSettings.aircraftType
+					aircraft_type: simulatorSettings.aircraft_type
 				},
 				{
 					headers: {
@@ -257,30 +249,6 @@
 		} catch (error) {
 			console.error('Error: ', error);
 		}
-	}
-
-	function splitAndPadNumber(input: number): [number, number] {
-		const numberString = input.toString();
-		const halfLength = Math.ceil(numberString.length / 2);
-		const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
-		const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
-		return [firstHalf, secondHalf];
-	}
-
-	function simpleHash(str: string) {
-		let hash = 0;
-
-		if (str.length === 0) {
-			return hash;
-		}
-
-		for (let i = 0; i < str.length; i++) {
-			const char = str.charCodeAt(i);
-			hash = (hash << 5) - hash + char;
-			// The above line is a simple hash function: hash * 31 + char
-		}
-
-		return hash;
 	}
 
 	async function getNextState(): Promise<StateMessage | Mistake | undefined> {
@@ -308,7 +276,7 @@
 					current_radio_frequency: radioState.active_frequency,
 					current_transponder_frequency: transponderState.frequency,
 					emergency: 'None',
-					aircraft_type: simulatorSettings.aircraftType
+					aircraft_type: simulatorSettings.aircraft_type
 				},
 				message: userMessage,
 				scenario_seed: scenarioSeed,
@@ -339,52 +307,32 @@
 				title: 'Fatal Error',
 				body: 'No response from server'
 			});
+
+		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+			speechRecognitionSupported = true;
+		} else {
+			speechRecognitionSupported = false;
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Speech Recognition Error',
+				body: 'Speech recognition is not supported in this browser. Please use a different browser if you would like to use this feature.'
+			});
+		}
 	});
 </script>
 
 <div class="relative flex">
 	<div class="flex flex-col items-center gap-10" style="width:1000px">
-		<div class="settings-container relative flex flex-row items-center gap-5">
-			<SlideToggle
-				id="enable-random-events"
-				name="slider-small"
-				checked={unexpectedEvents}
-				active="bg-primary-500"
-				size="sm"
-				on:click={() => (unexpectedEvents = !unexpectedEvents)}
-				>Unexpected events
-			</SlideToggle>
-			<SlideToggle
-				id="enable-voice-input"
-				name="slider-small"
-				checked={voiceInput}
-				active="bg-primary-500"
-				size="sm"
-				on:click={() => (voiceInput = !voiceInput)}
-				>Voice input
-			</SlideToggle>
-			<SlideToggle
-				id="enabled-audio-messages"
-				name="slider-small"
-				active="bg-primary-500"
-				size="sm"
-				on:click={() => (audioMessages = !audioMessages)}
-				>Audio messages
-			</SlideToggle>
-		</div>
+		<SimulatorSettings {speechRecognitionSupported} />
 
 		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
-			{#if !voiceInput}
-				<div class="rt-message-input-container">
-					<MessageInput on:submit={handleSubmit} />
-				</div>
-			{/if}
+			<div class="rt-message-input-container">
+				<MessageInput on:submit={handleSubmit} />
+			</div>
 
-			{#if !audioMessages}
-				<div class="rt-message-output-container">
-					<MessageOutput />
-				</div>
-			{/if}
+			<div class="rt-message-output-container">
+				<MessageOutput />
+			</div>
 		</div>
 
 		<div class="radio-transponder-container flex flex-col items center gap-10">
@@ -401,18 +349,10 @@
 				<Map enabled={mapEnabled} />
 			</div>
 			<div>
-				<Kneeboard bind:contents={kneeboardTextContent} />
+				<Kneeboard />
 			</div>
 
-			<div
-				class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4"
-			>
-				<div data-clipboard="scenarioLinkElement">{scenarioLink}</div>
-
-				<button use:clipboard={{ element: 'scenarioLinkElement' }} class="btn variant-filled"
-					>Copy</button
-				>
-			</div>
+			<ScenarioLink />
 		</div>
 
 		<div class="h-5" />
@@ -420,19 +360,7 @@
 </div>
 
 <style lang="postcss">
-	.settings-container {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-	}
-
 	.radio-transponder-container {
-		justify-content: center;
-	}
-
-	.copy-link-div {
-		display: flex;
-		flex-direction: row;
 		justify-content: center;
 	}
 </style>

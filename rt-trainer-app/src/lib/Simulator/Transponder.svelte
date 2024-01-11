@@ -3,9 +3,8 @@
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
-	import { createEventDispatcher } from 'svelte';
-	import type { TransponderState } from '$lib/purets/States';
-	import { simulatorTransponderStateStore } from '$lib/stores';
+	import type { TransponderState } from '$lib/ts/States';
+	import { TransponderStateStore } from '$lib/stores';
 
 	const transponderDialModes: ArrayMaxLength7MinLength2 = [
 		'OFF',
@@ -42,9 +41,7 @@
 	let displayDigitSelected: number = 0;
 	let mounted: boolean = false;
 
-	$: simulatorTransponderStateStore.set(transponderState);
-
-	const dispatch = createEventDispatcher();
+	$: TransponderStateStore.set(transponderState);
 
 	$: if (mounted) {
 		frequency = parseInt(digitArr.join(''));

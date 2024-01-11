@@ -3,8 +3,9 @@
 	import Dial from './ModeDial.svelte';
 	import RadioDisplay from './RadioDisplay.svelte';
 	import TransmitButton from './TransmitButton.svelte';
-	import { simulatorRadioStateStore } from '$lib/stores';
-	import type { RadioState } from '$lib/purets/States';
+	import { RadioStateStore } from '$lib/stores';
+	import type { RadioState } from '$lib/ts/States';
+
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
 		string,
@@ -20,16 +21,16 @@
 	let radioState: RadioState = {
 		mode: 'OFF',
 		dial_mode: 'OFF',
-		active_frequency: 123.030,
-		standby_frequency: 180.030,
-		tertiary_frequency: 177.200
+		active_frequency: 123.03,
+		standby_frequency: 180.03,
+		tertiary_frequency: 177.2
 	};
 	let displayOn: boolean = false;
 	let frequencyDialEnabled: boolean = false;
 	let transmitButtonEnabled: boolean = false;
 	let transmitting: boolean = false;
 
-	$: simulatorRadioStateStore.set(radioState);
+	$: RadioStateStore.set(radioState);
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
@@ -112,11 +113,15 @@
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall() {
-		radioState.standby_frequency = parseFloat((radioState.standby_frequency + 0.005).toPrecision(6));
+		radioState.standby_frequency = parseFloat(
+			(radioState.standby_frequency + 0.005).toPrecision(6)
+		);
 	}
 
 	function onRadioFrequencyReduceSmall() {
-		radioState.standby_frequency = parseFloat((radioState.standby_frequency - 0.005).toPrecision(6));
+		radioState.standby_frequency = parseFloat(
+			(radioState.standby_frequency - 0.005).toPrecision(6)
+		);
 	}
 </script>
 

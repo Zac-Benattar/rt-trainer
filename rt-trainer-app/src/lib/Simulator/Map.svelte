@@ -6,8 +6,8 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { simulatorPoseStore, simulatorRouteStore } from '$lib/stores';
-	import type { Pose, Waypoint } from '$lib/purets/States';
+	import { PoseStore, RouteStore } from '$lib/stores';
+	import type { Pose, Waypoint } from '$lib/ts/States';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
@@ -25,7 +25,7 @@
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 
-	simulatorPoseStore.subscribe((value) => {
+	PoseStore.subscribe((value) => {
 		targetPose = value;
 
 		if (mounted) {
@@ -33,7 +33,7 @@
 		}
 	});
 
-	simulatorRouteStore.subscribe((value) => {
+	RouteStore.subscribe((value) => {
 		waypoints = value;
 
 		if (mounted) {

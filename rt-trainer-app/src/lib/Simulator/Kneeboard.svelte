@@ -1,9 +1,9 @@
 <script lang="ts">
-	export let contents: string = '';
+	import { KneeboardStore } from '$lib/stores';
 
 	const handleKeypress = () => {
 		const inputBox = document.getElementById('kneeboard-input') as HTMLInputElement;
-		contents = inputBox.textContent ? inputBox.textContent : '';
+		KneeboardStore.set(inputBox.textContent ? inputBox.textContent : '');
 	};
 
 	const handleDelete = () => {

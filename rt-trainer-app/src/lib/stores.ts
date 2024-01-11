@@ -2,16 +2,30 @@ import { writable } from 'svelte/store';
 import type {
 	RadioState,
 	COMFrequency,
-	SimulatorSettings,
+	AircraftDetails,
 	TransponderState,
 	Pose,
-	Waypoint
-} from './purets/States';
+	Waypoint,
+	SimulatorSettings,
+	ScenarioSeed
+} from './ts/States';
 
-const initialSimulatorSettings: SimulatorSettings = {
+const initialSettings: SimulatorSettings = {
+	unexpectedEvents: false,
+	speechInput: false,
+	readRecievedCalls: false
+};
+
+const initialScenarioSeed: ScenarioSeed = {
+	seedString: '0',
+	scenarioSeed: 0,
+	weatherSeed: 0
+};
+
+const initialAircraftDetails: AircraftDetails = {
 	prefix: 'STUDENT',
 	callsign: 'G-OFLY',
-	aircraftType: 'Cessna 172'
+	aircraft_type: 'Cessna 172'
 };
 
 const initialRadioState: RadioState = {
@@ -29,57 +43,63 @@ const initialTransponderState: TransponderState = {
 	vfr_has_executed: false
 };
 
-const initialSimulatorTarget: COMFrequency = {
+const initialTarget: COMFrequency = {
 	frequency: 0,
 	callsign: 'NONE',
 	frequency_type: 'AFIS'
 };
 
-const initialSimulatorPose: Pose = {
+const initialPose: Pose = {
 	location: {
 		lat: 0,
 		long: 0
 	},
 	heading: 0,
 	altitude: 0,
-	airspeed: 0,
+	airspeed: 0
 };
 
 const initialWaypoints: Waypoint[] = [];
 
-export const simulatorSettingsStore = writable<SimulatorSettings>(initialSimulatorSettings);
+export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
-export const simulatorCurrentTargetStore = writable<COMFrequency>(initialSimulatorTarget);
+export const SettingsStore = writable<SimulatorSettings>(initialSettings);
 
-export const simulatorRadioStateStore = writable<RadioState>(initialRadioState);
+export const SeedStore = writable<ScenarioSeed>(initialScenarioSeed);
 
-export const simulatorTransponderStateStore = writable<TransponderState>(initialTransponderState);
+export const CurrentTargetStore = writable<COMFrequency>(initialTarget);
 
-export const simulatorUserMessageStore = writable<string>('');
+export const RadioStateStore = writable<RadioState>(initialRadioState);
 
-export const simulatorATCMessageStore = writable<string>('');
+export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
 
-export const simulatorPoseStore = writable<Pose>(initialSimulatorPose);
+export const UserMessageStore = writable<string>('');
 
-export const simulatorRouteStore = writable<Waypoint[]>(initialWaypoints);
+export const ATCMessageStore = writable<string>('');
 
-export function setSettingsPrefix(prefix: string) {
-	simulatorSettingsStore.update((settings) => {
+export const KneeboardStore = writable<string>('');
+
+export const PoseStore = writable<Pose>(initialPose);
+
+export const RouteStore = writable<Waypoint[]>(initialWaypoints);
+
+export function setDetailsStorePrefix(prefix: string) {
+	AircraftDetailsStore.update((settings) => {
 		settings.prefix = prefix;
 		return settings;
 	});
 }
 
-export function setSettingsCallsign(callsign: string) {
-	simulatorSettingsStore.update((settings) => {
+export function setDetailsStoreCallsign(callsign: string) {
+	AircraftDetailsStore.update((settings) => {
 		settings.callsign = callsign;
 		return settings;
 	});
 }
 
-export function setSettingsAircraftType(aircraftType: string) {
-	simulatorSettingsStore.update((settings) => {
-		settings.aircraftType = aircraftType;
+export function setDetailsStoreAircraftType(aircraftType: string) {
+	AircraftDetailsStore.update((settings) => {
+		settings.aircraft_type = aircraftType;
 		return settings;
 	});
 }

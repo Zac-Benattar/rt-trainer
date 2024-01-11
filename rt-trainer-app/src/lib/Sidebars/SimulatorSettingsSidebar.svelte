@@ -1,46 +1,50 @@
 <script lang="ts">
-	import { LightSwitch, SlideToggle } from '@skeletonlabs/skeleton';
+	import { LightSwitch } from '@skeletonlabs/skeleton';
 	import { getDrawerStore } from '@skeletonlabs/skeleton';
 	import { onMount } from 'svelte';
-	import { simulatorSettingsStore, setSettingsCallsign, setSettingsAircraftType, setSettingsPrefix } from '$lib/stores';
-	import type { SimulatorSettings } from '$lib/purets/States';
+	import {
+		setDetailsStoreCallsign,
+		setDetailsStoreAircraftType,
+		setDetailsStorePrefix,
+		AircraftDetailsStore
+	} from '$lib/stores';
+	import type { AircraftDetails } from '$lib/ts/States';
 
 	let mounted: boolean = false;
 	let prefixInputElement: HTMLInputElement;
 	let callsignInputElement: HTMLInputElement;
 	let aircraftTypeInputElement: HTMLInputElement;
 
-	let simulatorSettings: SimulatorSettings;
-	simulatorSettingsStore.subscribe((value) => {
-		simulatorSettings = value;
+	let aircraftDetails: AircraftDetails;
+	AircraftDetailsStore.subscribe((value) => {
+		aircraftDetails = value;
 	});
 
-	// Untested
 	$: if (mounted) {
-		if (prefixInputElement.value && prefixInputElement.value !== simulatorSettings.prefix) {
-			setSettingsPrefix(prefixInputElement.value);
+		if (prefixInputElement.value && prefixInputElement.value !== aircraftDetails.prefix) {
+			setDetailsStorePrefix(prefixInputElement.value);
 		}
-		if (callsignInputElement.value && callsignInputElement.value !== simulatorSettings.callsign) {
-			setSettingsCallsign(callsignInputElement.value);
+		if (callsignInputElement.value && callsignInputElement.value !== aircraftDetails.callsign) {
+			setDetailsStoreCallsign(callsignInputElement.value);
 		}
 		if (
 			aircraftTypeInputElement.value &&
-			aircraftTypeInputElement.value !== simulatorSettings.aircraftType
+			aircraftTypeInputElement.value !== aircraftDetails.aircraft_type
 		) {
-			setSettingsAircraftType(aircraftTypeInputElement.value);
+			setDetailsStoreAircraftType(aircraftTypeInputElement.value);
 		}
 	}
 
 	const handlePrefixChange = () => {
 		if (
-			prefixInputElement.value !== simulatorSettings.prefix &&
+			prefixInputElement.value !== aircraftDetails.prefix &&
 			(prefixInputElement.value == '' ||
 				prefixInputElement.value == 'STUDENT' ||
 				prefixInputElement.value == 'HELICOPTER' ||
 				prefixInputElement.value == 'POLICE' ||
 				prefixInputElement.value == 'SUPER')
 		) {
-			setSettingsPrefix(prefixInputElement.value);
+			setDetailsStorePrefix(prefixInputElement.value);
 		}
 	};
 
@@ -68,7 +72,7 @@
 				class="prefix-input"
 				type="text"
 				list="prefixes"
-				value={simulatorSettings.prefix}
+				value={aircraftDetails.prefix}
 				on:change={handlePrefixChange}
 				on:click={handlePrefixChange}
 				on:keyup={handlePrefixChange}
@@ -87,7 +91,7 @@
 				id="callsign-input"
 				class="callsign-input"
 				type="text"
-				value={simulatorSettings.callsign}
+				value={aircraftDetails.callsign}
 				minlength="6"
 				maxlength="20"
 				pattern="[\x00-\x7F]+"
@@ -99,7 +103,7 @@
 				id="aircraft-type-input"
 				class="aircraft-type-input"
 				type="text"
-				value={simulatorSettings.aircraftType}
+				value={aircraftDetails.aircraft_type}
 				minlength="6"
 				maxlength="30"
 				pattern="[\x00-\x7F]+"

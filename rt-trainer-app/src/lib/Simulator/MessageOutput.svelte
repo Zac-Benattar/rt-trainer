@@ -1,16 +1,16 @@
 <script lang="ts">
-	import type { COMFrequency } from '$lib/purets/States';
-	import { simulatorCurrentTargetStore, simulatorATCMessageStore } from '$lib/stores';
+	import type { COMFrequency } from '$lib/ts/States';
+	import { CurrentTargetStore, ATCMessageStore } from '$lib/stores';
 
-	let simulatorCurrentTarget: COMFrequency;
+	let currentTarget: COMFrequency;
 
-	simulatorCurrentTargetStore.subscribe((value) => {
-		simulatorCurrentTarget = value;
+	CurrentTargetStore.subscribe((value) => {
+		currentTarget = value;
 	});
 
 	let atcMessage: string;
 
-	simulatorATCMessageStore.subscribe((value) => {
+	ATCMessageStore.subscribe((value) => {
 		atcMessage = value;
 	});
 </script>
@@ -18,9 +18,9 @@
 <div class="kneeboard flex flex-col grid-cols-1">
 	<p class="output-box">{atcMessage}</p>
 	<p class="output-box">
-		Current Target: {simulatorCurrentTarget.callsign}<br />
-		Frequency: {simulatorCurrentTarget.frequency} <br />
-		Type: {simulatorCurrentTarget.frequency_type}
+		Current Target: {currentTarget.callsign}<br />
+		Frequency: {currentTarget.frequency} <br />
+		Type: {currentTarget.frequency_type}
 	</p>
 </div>
 

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { simulatorUserMessageStore } from '$lib/stores';
+	import { UserMessageStore } from '$lib/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { SettingsStore } from '$lib/stores';
 
 	export let enabled: boolean = false;
 	export let speechEnabled: boolean = true; // User's choice
@@ -13,7 +14,10 @@
 	let SpeechGrammarList: any;
 	let SpeechRecognitionEvent: any;
 	let recognition: any;
-	let speechRecognitionSupported: boolean = false;
+
+	SettingsStore.subscribe((value) => {
+		speechEnabled = value.speechInput;
+	});
 
 	$: if (speechEnabled && mounted) {
 		const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
@@ -24,7 +28,7 @@
 		}
 	}
 
-	$: if (speechEnabled && mounted && speechRecognitionSupported) {
+	$: if (speechEnabled && mounted) {
 		SpeechRecognitionType = window.SpeechRecognition || window.webkitSpeechRecognition;
 		SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 		SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
@@ -38,7 +42,7 @@
 			if (event.results[0][0].confidence > 0.5) {
 				console.log('Speech Recognition Success');
 				userMessage = speechInput;
-				simulatorUserMessageStore.set(userMessage);
+				UserMessageStore.set(userMessage);
 			} else {
 				modalStore.trigger({
 					type: 'alert',
@@ -84,19 +88,6 @@
 
 	onMount(() => {
 		mounted = true;
-
-		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
-			speechRecognitionSupported = true;
-			speechEnabled = true;
-		} else {
-			speechEnabled = false;
-			speechRecognitionSupported = false;
-			modalStore.trigger({
-				type: 'alert',
-				title: 'Speech Recognition Error',
-				body: 'Speech recognition is not supported in this browser. Please use a different browser if you would like to use this feature.'
-			});
-		}
 	});
 </script>
 
