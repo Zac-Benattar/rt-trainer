@@ -1,49 +1,10 @@
 use anyhow::Error;
-use serde::{Deserialize, Serialize};
-
 use crate::generation::call_parsers::*;
-use crate::models::aerodrome::{Aerodrome, COMFrequency};
 use crate::models::state::*;
+use super::route_generator::get_pre_radio_check_state;
 
-use super::aerodrome_generators::get_start_and_end_aerodromes;
-
-#[derive(Deserialize, Serialize)]
-pub struct ScenarioGenerationParameters {
-    pub scenario_seed: u64,
-    pub weather_seed: u64,
-    pub prefix: String,
-    pub user_callsign: String,
-    pub aircraft_type: String,
-}
-
-pub fn generate_initial_state(parameters: ScenarioGenerationParameters) -> SentState {
-    let start_aerodrome: Aerodrome = match get_start_and_end_aerodromes(parameters.scenario_seed) {
-        Some((start, _)) => start,
-        None => panic!("Could not find start aerodrome"),
-    };
-    let start_aerodrome_frequency: &COMFrequency = start_aerodrome.com_frequencies.get(0).unwrap();
-    // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
-
-    SentState {
-        stage: RoutePointStage::Parked {
-            stage: ParkedStage::PreRadioCheck,
-        },
-        pose: Pose {
-            location: start_aerodrome.location,
-            altitude: start_aerodrome.altitude,
-            heading: 0,
-            air_speed: 0,
-        },
-        current_target: COMFrequency {
-            frequency_type: start_aerodrome_frequency.frequency_type,
-            frequency: start_aerodrome_frequency.frequency,
-            callsign: start_aerodrome_frequency.callsign.clone(),
-        },
-        callsign_modified: false, // States whether callsign has been modified by ATC, e.g. shortened
-        emergency: Emergency::None,
-        squark: false,
-        current_transponder_frequency: 7000,
-    }
+pub fn generate_initial_state(scenario_seed: u64) -> Result<SentState,Error> {
+    get_pre_radio_check_state(scenario_seed)
 }
 
 pub fn generate_next_state(

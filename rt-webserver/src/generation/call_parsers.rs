@@ -11,7 +11,7 @@ use crate::models::{
 
 use super::{
     aerodrome_generators::{get_metor_sample, get_start_and_end_aerodromes},
-    route_generator::{generate_route_from_seed, get_pre_requesting_depart_info_stage},
+    route_generator::{generate_route_from_seed, get_pre_requesting_depart_info_stage, get_pre_depart_info_readback_stage, get_pre_taxi_request_stage, get_pre_taxi_clearance_readback_stage},
 };
 
 pub fn shorten_callsign(scenario_seed: &u64, aircraft_type: &String, callsign: &String) -> String {
@@ -239,33 +239,11 @@ pub fn parse_departure_information_request(
         metor_sample.dewpoint,
     );
 
-    let next_state: SentState = SentState {
-        status: Status::Parked {
-            stage: ParkedStage::PreReadbackDepartInfo,
-        },
-        pose: Pose {
-            location: start_and_end_aerodrome.0.location,
-            altitude: start_and_end_aerodrome.0.altitude,
-            heading: 0,
-            air_speed: 0,
-        },
-        current_target: COMFrequency {
-            frequency_type: current_state.current_target.frequency_type,
-            frequency: current_state.current_target.frequency,
-            callsign: current_state.current_target.callsign.clone(),
-        },
-        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: current_state.callsign.to_owned(),
-        callsign_modified: shorten_callsign(
-            scenario_seed,
-            &current_state.aircraft_type,
-            &current_state.target_allocated_callsign.to_owned(),
-        ), // Replaced by ATSU when needed
-        emergency: Emergency::None,
-        squark: false,
-        current_radio_frequency: current_state.current_radio_frequency,
-        current_transponder_frequency: current_state.current_transponder_frequency,
-        aircraft_type: current_state.aircraft_type.to_owned(),
+    let next_state = match get_pre_depart_info_readback_stage(*scenario_seed) {
+        Ok(stage) => stage,
+        Err(_) => {
+            return Err(Error::msg("Could not get pre-requesting departure information stage"));
+        }
     };
 
     Ok(ServerResponse::StateMessage(SentStateMessage {
@@ -329,29 +307,11 @@ pub fn parse_departure_information_readback(
     // ATC does not respond to this message
     let atc_response: String = String::new();
 
-    let next_state: SentState = SentState {
-        status: Status::Parked {
-            stage: ParkedStage::PreTaxiRequest,
-        },
-        pose: Pose {
-            location: start_and_end_aerodrome.0.location,
-            altitude: start_and_end_aerodrome.0.altitude,
-            heading: 0,
-            air_speed: 0,
-        },
-        current_target: COMFrequency {
-            frequency_type: current_state.current_target.frequency_type,
-            frequency: current_state.current_target.frequency,
-            callsign: current_state.current_target.callsign.clone(),
-        },
-        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: current_state.callsign.to_owned(),
-        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
-        emergency: Emergency::None,
-        squark: false,
-        current_radio_frequency: current_state.current_radio_frequency,
-        current_transponder_frequency: current_state.current_transponder_frequency,
-        aircraft_type: current_state.aircraft_type.to_owned(),
+    let next_state = match get_pre_taxi_request_stage(*scenario_seed) {
+        Ok(stage) => stage,
+        Err(_) => {
+            return Err(Error::msg("Could not get pre-requesting departure information stage"));
+        }
     };
 
     Ok(ServerResponse::StateMessage(SentStateMessage {
@@ -423,29 +383,11 @@ pub fn parse_taxi_request(
         metor_sample.pressure,
     );
 
-    let next_state: SentState = SentState {
-        status: Status::Parked {
-            stage: ParkedStage::PreTaxiClearanceReadback,
-        },
-        pose: Pose {
-            location: start_and_end_aerodrome.0.location,
-            altitude: start_and_end_aerodrome.0.altitude,
-            heading: 0,
-            air_speed: 0,
-        },
-        current_target: COMFrequency {
-            frequency_type: current_state.current_target.frequency_type,
-            frequency: current_state.current_target.frequency,
-            callsign: current_state.current_target.callsign.clone(),
-        },
-        prefix: current_state.prefix.to_owned(), // Set by user: none, student, helicopter, police, etc...
-        callsign: current_state.callsign.to_owned(),
-        callsign_modified: current_state.target_allocated_callsign.to_owned(), // Replaced by ATSU when needed
-        emergency: Emergency::None,
-        squark: false,
-        current_radio_frequency: current_state.current_radio_frequency,
-        current_transponder_frequency: current_state.current_transponder_frequency,
-        aircraft_type: current_state.aircraft_type.to_owned(),
+    let next_state = match get_pre_taxi_clearance_readback_stage(*scenario_seed) {
+        Ok(stage) => stage,
+        Err(_) => {
+            return Err(Error::msg("Could not get pre-requesting departure information stage"));
+        }
     };
 
     Ok(ServerResponse::StateMessage(SentStateMessage {

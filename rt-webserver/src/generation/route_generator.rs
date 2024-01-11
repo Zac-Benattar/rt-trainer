@@ -165,7 +165,6 @@ pub fn get_pre_radio_check_state(scenario_seed: u64) -> Result<SentState, Error>
 
     let start_aerodrome_frequency: &COMFrequency =
         start_and_end_aerodrome.0.com_frequencies.get(0).unwrap();
-    // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
     Ok(SentState {
         stage: RoutePointStage::Parked {
@@ -201,11 +200,115 @@ pub fn get_pre_requesting_depart_info_stage(scenario_seed: u64) -> Result<SentSt
 
     let start_aerodrome_frequency: &COMFrequency =
         start_and_end_aerodrome.0.com_frequencies.get(0).unwrap();
-    // We don't need to calculate the destination aerodrome at this point as it is determined by the seed
 
     Ok(SentState {
         stage: RoutePointStage::Parked {
             stage: ParkedStage::PreReadbackDepartInfo,
+        },
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
+        current_target: COMFrequency {
+            frequency_type: start_aerodrome_frequency.frequency_type,
+            frequency: start_aerodrome_frequency.frequency,
+            callsign: start_aerodrome_frequency.callsign.clone(),
+        },
+        callsign_modified: false, // States whether callsign has been modified by ATC, e.g. shortened
+        emergency: Emergency::None,
+        squark: false,
+        current_transponder_frequency: 7000,
+    })
+}
+
+// Stage 3
+pub fn get_pre_depart_info_readback_stage(scenario_seed: u64) -> Result<SentState, Error> {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(Error::msg("Aerodromes not generated"));
+            }
+        };
+
+    let start_aerodrome_frequency: &COMFrequency =
+        start_and_end_aerodrome.0.com_frequencies.get(0).unwrap();
+
+    Ok(SentState {
+        stage: RoutePointStage::Parked {
+            stage: ParkedStage::PreDepartInfo,
+        },
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
+        current_target: COMFrequency {
+            frequency_type: start_aerodrome_frequency.frequency_type,
+            frequency: start_aerodrome_frequency.frequency,
+            callsign: start_aerodrome_frequency.callsign.clone(),
+        },
+        callsign_modified: false, // States whether callsign has been modified by ATC, e.g. shortened
+        emergency: Emergency::None,
+        squark: false,
+        current_transponder_frequency: 7000,
+    })
+}
+
+// Stage 4
+pub fn get_pre_taxi_request_stage(scenario_seed: u64) -> Result<SentState, Error> {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(Error::msg("Aerodromes not generated"));
+            }
+        };
+
+    let start_aerodrome_frequency: &COMFrequency =
+        start_and_end_aerodrome.0.com_frequencies.get(0).unwrap();
+
+    Ok(SentState {
+        stage: RoutePointStage::Parked {
+            stage: ParkedStage::PreTaxiRequest,
+        },
+        pose: Pose {
+            location: start_and_end_aerodrome.0.location,
+            altitude: start_and_end_aerodrome.0.altitude,
+            heading: 0,
+            air_speed: 0,
+        },
+        current_target: COMFrequency {
+            frequency_type: start_aerodrome_frequency.frequency_type,
+            frequency: start_aerodrome_frequency.frequency,
+            callsign: start_aerodrome_frequency.callsign.clone(),
+        },
+        callsign_modified: false, // States whether callsign has been modified by ATC, e.g. shortened
+        emergency: Emergency::None,
+        squark: false,
+        current_transponder_frequency: 7000,
+    })
+}
+
+// Stage 5
+pub fn get_pre_taxi_clearance_readback_stage(scenario_seed: u64) -> Result<SentState, Error> {
+    let start_and_end_aerodrome: (Aerodrome, Aerodrome) =
+        match get_start_and_end_aerodromes(scenario_seed) {
+            Some(aerodromes) => aerodromes,
+            None => {
+                return Err(Error::msg("Aerodromes not generated"));
+            }
+        };
+
+    let start_aerodrome_frequency: &COMFrequency =
+        start_and_end_aerodrome.0.com_frequencies.get(0).unwrap();
+
+    Ok(SentState {
+        stage: RoutePointStage::Parked {
+            stage: ParkedStage::PreTaxiClearanceReadback,
         },
         pose: Pose {
             location: start_and_end_aerodrome.0.location,
