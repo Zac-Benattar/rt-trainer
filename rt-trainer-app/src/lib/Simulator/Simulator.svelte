@@ -10,13 +10,13 @@
 		COMFrequency,
 		Mistake,
 		AircraftDetails,
-		SentState,
+		CallParsingData,
 		SentStateMessageSeeds,
 		RecievedStateMessage,
 		RadioState,
 		TransponderState,
 		Waypoint,
-		RecievedState
+		SimulatorUpdateData
 	} from '$lib/ts/States';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -40,7 +40,7 @@
 	// Simulator state and settings
 	let scenarioSeed: number = 0;
 	let weatherSeed: number = 0;
-	let requiredState: RecievedState | undefined; // Required state for user to match
+	let requiredState: SimulatorUpdateData | undefined; // Required state for user to match
 	let simulatorSettings: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
@@ -75,7 +75,7 @@
 	}
 
 	$: if (requiredState) {
-		currentTarget = requiredState.current_target;
+		currentTarget = requiredState.currentTarget;
 	}
 
 	SeedStore.subscribe((value) => {
@@ -152,7 +152,7 @@
 			}
 		}
 
-		if (radioState.dial_mode == 'OFF') {
+		if (radioState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -167,7 +167,7 @@
 			});
 			return;
 		} else if (
-			radioState.active_frequency.toFixed(3) != requiredState.current_target.frequency.toFixed(3)
+			radioState.activeFrequency.toFixed(3) != requiredState.currentTarget.frequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -175,7 +175,7 @@
 				body: 'Radio frequency incorrect'
 			});
 			return;
-		} else if (transponderState.frequency != requiredState.current_transponder_frequency) {
+		} else if (transponderState.frequency != requiredState.currentTransponderFrequency) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -210,7 +210,7 @@
 			// Update the components with the new state
 			requiredState = newStateMessage.state;
 			ATCMessageStore.set(newStateMessage.message);
-			CurrentTargetStore.set(newStateMessage.state.current_target);
+			CurrentTargetStore.set(newStateMessage.state.currentTarget);
 			PoseStore.set(newStateMessage.state.pose);
 		}
 	}
@@ -228,7 +228,7 @@
 		} else {
 			console.log('Initial State:', initialState);
 			requiredState = initialState;
-			CurrentTargetStore.set(initialState.current_target);
+			CurrentTargetStore.set(initialState.currentTarget);
 			PoseStore.set(initialState.pose);
 		}
 
@@ -261,7 +261,7 @@
 		}
 	}
 
-	async function getInitialState(): Promise<RecievedState | undefined> {
+	async function getInitialState(): Promise<SimulatorUpdateData | undefined> {
 		try {
 			const response = await axios.post(
 				'http://localhost:3000/initialstate',
@@ -270,7 +270,7 @@
 					weather_seed: weatherSeed,
 					prefix: simulatorSettings.prefix,
 					user_callsign: simulatorSettings.callsign,
-					aircraft_type: simulatorSettings.aircraft_type
+					aircraft_type: simulatorSettings.aircraftType
 				},
 				{
 					headers: {
@@ -306,18 +306,18 @@
 					prefix: simulatorSettings.prefix,
 					callsign: simulatorSettings.callsign,
 					squark: false,
-					current_target: {
+					currentTarget: {
 						frequency_type: currentTarget.frequency_type,
 						frequency: currentTarget.frequency,
 						callsign: currentTarget.callsign
 					},
-					current_radio_frequency: radioState.active_frequency,
-					current_transponder_frequency: transponderState.frequency,
-					aircraft_type: simulatorSettings.aircraft_type
+					currentRadioFrequency: radioState.activeFrequency,
+					currentTransponderFrequency: transponderState.frequency,
+					aircraftType: simulatorSettings.aircraftType
 				},
 				message: userMessage,
-				scenario_seed: scenarioSeed,
-				weather_seed: weatherSeed
+				scenarioSeed: scenarioSeed,
+				weatherSeed: weatherSeed
 			};
 
 			console.log('Sending state: ', stateMessage);

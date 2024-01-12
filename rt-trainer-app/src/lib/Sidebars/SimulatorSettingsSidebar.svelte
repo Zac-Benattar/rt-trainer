@@ -29,7 +29,7 @@
 		}
 		if (
 			aircraftTypeInputElement.value &&
-			aircraftTypeInputElement.value !== aircraftDetails.aircraft_type
+			aircraftTypeInputElement.value !== aircraftDetails.aircraftType
 		) {
 			setDetailsStoreAircraftType(aircraftTypeInputElement.value);
 		}
@@ -103,7 +103,7 @@
 				id="aircraft-type-input"
 				class="aircraft-type-input"
 				type="text"
-				value={aircraftDetails.aircraft_type}
+				value={aircraftDetails.aircraftType}
 				minlength="6"
 				maxlength="30"
 				pattern="[\x00-\x7F]+"

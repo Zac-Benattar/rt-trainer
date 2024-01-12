@@ -1,20 +1,4 @@
-export enum Status {
-	'Parked',
-	'Taxiing',
-	'Holding',
-	'TakeOff',
-	'Airborne',
-	'Descent',
-	'Approach',
-	'Landing',
-	'Landed'
-}
-
-export enum EmergencyType {
-	'None',
-	'Mayday',
-	'PanPan'
-}
+import { HoldingPointStage, RoutePointStageType } from './FlightStages';
 
 export type COMFrequency = {
 	frequency_type: 'AFIS' | 'TWR' | 'GND';
@@ -45,6 +29,7 @@ export enum WaypointType {
 	NewAirspace // Entering new airspace - changing frequency
 }
 
+/* A waypoint is a point in space that can be navigated to. Visible on the route. */
 export type Waypoint = {
 	waypoint_type: WaypointType;
 	location: Location;
@@ -61,69 +46,131 @@ export type Runway = {
 	holding_points: HoldingPoint[];
 };
 
+/* METORlogical data. */
 export type METORData = {
-	avg_wind_direction: number;
-	mean_wind_speed: number;
-	std_wind_speed: number;
-	mean_pressure: number;
-	std_pressure: number;
-	mean_temperature: number;
-	std_temperature: number;
-	mean_dewpoint: number;
-	std_dewpoint: number;
+	avgWindDirection: number;
+	meanWindSpeed: number;
+	stdWindSpeed: number;
+	meanPressure: number;
+	stdPressure: number;
+	meanTemperature: number;
+	stdTemperature: number;
+	meanDewpoint: number;
+	stdDewpoint: number;
 };
 
+/* METOR data sample. Obtained from taking a random sample of the METOR data model. */
 export type METORDataSample = {
-	wind_direction: number;
-	wind_speed: number;
+	windDirection: number;
+	windSpeed: number;
 	pressure: number;
 	temperature: number;
 	dewpoint: number;
 };
 
+/* Aerodrome data. */
 export type Aerodrome = {
 	name: string;
 	icao: string;
-	com_freqs: COMFrequency[];
+	comFrequencies: COMFrequency[];
 	runways: Runway[];
-	lat: number;
-	long: number;
-	start_point: string;
-	metor_data: METORData;
-};
-
-export enum RoutePointType {
-	Aerodrome,
-	Waypoint,
-};
-
-export type RoutePoint = {
-	point_type: RoutePointType;
 	location: Location;
-	name: string;
-	com_frequencies: COMFrequency[];
-	states: RecievedState[];
+	startPoint: string;
+	metorData: METORData;
+};
+
+/* Point on route. Used for generation and not visible to the user. */
+export class RoutePointState {
+	stageType: RoutePointStageType = RoutePointStageType.Parked;
+	pose: Pose = {
+		location: {
+			lat: 0,
+			long: 0
+		},
+		heading: 0,
+		altitude: 0,
+		air_speed: 0
+	};
 }
 
-export type SentState = {
-	stage: RoutePointStage;
-	prefix: string;
+/* Holding point on route. Used for generation and not visible to the user. */
+export class HoldingPointState extends RoutePointState {
+	stage: HoldingPointStage = HoldingPointStage.ClearedForTakeOff;
+	holding_point: HoldingPoint = {
+		name: ''
+	};
+}
+
+/* Point in the air. Used for generation and may be visible to the user if it conincides with a waypoint. */
+export class AirborneState extends RoutePointState {
+	flightRules: 'IFR' | 'VFR' = 'VFR';
+	airbourneEvent: 'TakeOff' | 'Landing' = 'TakeOff';
+	emergency: 'None' | 'Mayday' | 'Pan' = 'None';
+}
+
+/* The state data which must be sent to the server for use in parsing. */
+export type CallParsingData = {
+	stage: RoutePointState;
+	fix: string;
 	callsign: string;
 	squark: boolean;
-	current_target: COMFrequency;
-	current_radio_frequency: number;
-	current_transponder_frequency: number;
-	aircraft_type: string;
+	currentTarget: COMFrequency;
+	currentRadioFrequency: number;
+	currentTransponderFrequency: number;
+	aircraftType: string;
 };
 
-export type RecievedState = {
-	stage: RoutePointStage;
-	callsign_modified: boolean;
+/* The state data recieved from the server after parsing. Used to update the simulator frontend. */
+export type SimulatorUpdateData = {
+	stage: RoutePointState;
+	callsignModified: boolean;
 	squark: boolean;
-	current_target: COMFrequency;
-	current_transponder_frequency: number;
+	currentTarget: COMFrequency;
+	currentTransponderFrequency: number;
 	pose: Pose;
-	emergency: EmergencyType;
+	emergency: 'None' | 'Mayday' | 'Pan';
+};
+
+/* The simulator data which must be sent to the server to generate the next state. */
+export type SentStateMessageSeeds = {
+	state: CallParsingData;
+	message: string;
+	scenarioSeed: number;
+	weatherSeed: number;
+};
+
+/* The simulator data recieved from the server after generating the next state. Used to update the simulator frontend. */
+export type RecievedStateMessage = {
+	state: SimulatorUpdateData;
+	message: string;
+};
+
+/* The details of a radio call mistake made by the user. */
+export type Mistake = {
+	callExpected: string;
+	callFound: string;
+	details: string;
+};
+
+/* The details of a aircraft selected by the user. */
+export type AircraftDetails = {
+	callsign: string;
+	prefix: string;
+	aircraftType: string;
+};
+
+/* The seed used to generate the scenario and weather. Split into scenario and weather seed for easy access. */
+export type ScenarioSeed = {
+	seedString: string;
+	scenarioSeed: number;
+	weatherSeed: number;
+};
+
+/* The settings for the simulation. */
+export type SimulatorSettings = {
+	unexpectedEvents: boolean;
+	speechInput: boolean;
+	readRecievedCalls: boolean;
 };
 
 export type TransponderDialMode = 'OFF' | 'SBY' | 'GND' | 'STBY' | 'ON' | 'ALT' | 'TEST';
@@ -132,49 +179,16 @@ export type RadioMode = 'OFF' | 'COM' | 'NAV';
 
 export type RadioDialMode = 'OFF' | 'SBY';
 
-export type SentStateMessageSeeds = {
-	state: SentState;
-	message: string;
-	scenario_seed: number;
-	weather_seed: number;
-};
-
-export type RecievedStateMessage = {
-	state: RecievedState;
-	message: string;
-};
-
-export type Mistake = {
-	details: string;
-	message: string;
-};
-
-export type AircraftDetails = {
-	callsign: string;
-	prefix: string;
-	aircraft_type: string;
-};
-
-export type ScenarioSeed = {
-	seedString: string;
-	scenarioSeed: number;
-	weatherSeed: number;
-};
-
-export type SimulatorSettings = {
-	unexpectedEvents: boolean;
-	speechInput: boolean;
-	readRecievedCalls: boolean;
-};
-
+/* The state of the radio. */
 export type RadioState = {
 	mode: RadioMode;
-	dial_mode: RadioDialMode;
-	active_frequency: number;
-	standby_frequency: number;
-	tertiary_frequency: number;
+	dialMode: RadioDialMode;
+	activeFrequency: number;
+	standbyFrequency: number;
+	tertiaryFrequency: number;
 };
 
+/* The state of the transponder. */
 export type TransponderState = {
 	dial_mode: TransponderDialMode;
 	frequency: number;

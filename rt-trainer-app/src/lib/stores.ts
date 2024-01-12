@@ -25,15 +25,15 @@ const initialScenarioSeed: ScenarioSeed = {
 const initialAircraftDetails: AircraftDetails = {
 	prefix: 'STUDENT',
 	callsign: 'G-OFLY',
-	aircraft_type: 'Cessna 172'
+	aircraftType: 'Cessna 172'
 };
 
 const initialRadioState: RadioState = {
 	mode: 'OFF',
-	dial_mode: 'OFF',
-	active_frequency: 0,
-	standby_frequency: 0,
-	tertiary_frequency: 0
+	dialMode: 'OFF',
+	activeFrequency: 0,
+	standbyFrequency: 0,
+	tertiaryFrequency: 0
 };
 
 const initialTransponderState: TransponderState = {
@@ -99,7 +99,7 @@ export function setDetailsStoreCallsign(callsign: string) {
 
 export function setDetailsStoreAircraftType(aircraftType: string) {
 	AircraftDetailsStore.update((settings) => {
-		settings.aircraft_type = aircraftType;
+		settings.aircraftType = aircraftType;
 		return settings;
 	});
 }

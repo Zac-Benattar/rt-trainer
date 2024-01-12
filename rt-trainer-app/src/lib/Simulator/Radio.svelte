@@ -20,10 +20,10 @@
 	// Holds current radio settings
 	let radioState: RadioState = {
 		mode: 'OFF',
-		dial_mode: 'OFF',
-		active_frequency: 123.03,
-		standby_frequency: 180.03,
-		tertiary_frequency: 177.2
+		dialMode: 'OFF',
+		activeFrequency: 123.03,
+		standbyFrequency: 180.03,
+		tertiaryFrequency: 177.2
 	};
 	let displayOn: boolean = false;
 	let frequencyDialEnabled: boolean = false;
@@ -34,7 +34,7 @@
 
 	// Click handlers
 	const handleCOMButtonClick = () => {
-		if (radioState.dial_mode != 'OFF') {
+		if (radioState.dialMode != 'OFF') {
 			const COMModeButton = document.getElementById('button-com') as HTMLInputElement;
 			if (COMModeButton != null) {
 				if (radioState.mode != 'COM') {
@@ -50,7 +50,7 @@
 	};
 
 	const handleNAVButtonClick = () => {
-		if (radioState.dial_mode != 'OFF') {
+		if (radioState.dialMode != 'OFF') {
 			const NAVModeButton = document.getElementById('button-nav') as HTMLInputElement;
 			if (NAVModeButton != null) {
 				if (radioState.mode != 'NAV') {
@@ -66,10 +66,10 @@
 	};
 
 	const handleSWAPButtonClick = () => {
-		if (radioState.dial_mode != 'OFF') {
-			let tempFrequency = radioState.active_frequency;
-			radioState.active_frequency = radioState.standby_frequency;
-			radioState.standby_frequency = tempFrequency;
+		if (radioState.dialMode != 'OFF') {
+			let tempFrequency = radioState.activeFrequency;
+			radioState.activeFrequency = radioState.standbyFrequency;
+			radioState.standbyFrequency = tempFrequency;
 		}
 	};
 
@@ -97,30 +97,30 @@
 		}
 
 		if (newDialModeIndex == 0) {
-			radioState.dial_mode = 'OFF';
+			radioState.dialMode = 'OFF';
 		} else {
-			radioState.dial_mode = 'SBY';
+			radioState.dialMode = 'SBY';
 		}
 	}
 
 	function onRadioFrequencyIncreaseLarge() {
-		radioState.standby_frequency += 1;
+		radioState.standbyFrequency += 1;
 	}
 
 	function onRadioFrequencyReduceLarge() {
-		radioState.standby_frequency -= 1;
+		radioState.standbyFrequency -= 1;
 	}
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall() {
-		radioState.standby_frequency = parseFloat(
-			(radioState.standby_frequency + 0.005).toPrecision(6)
+		radioState.standbyFrequency = parseFloat(
+			(radioState.standbyFrequency + 0.005).toPrecision(6)
 		);
 	}
 
 	function onRadioFrequencyReduceSmall() {
-		radioState.standby_frequency = parseFloat(
-			(radioState.standby_frequency - 0.005).toPrecision(6)
+		radioState.standbyFrequency = parseFloat(
+			(radioState.standbyFrequency - 0.005).toPrecision(6)
 		);
 	}
 </script>
@@ -146,9 +146,9 @@
 		<RadioDisplay
 			DisplayOn={displayOn}
 			bind:mode={radioState.mode}
-			bind:activeFrequency={radioState.active_frequency}
-			bind:standbyFrequency={radioState.standby_frequency}
-			bind:tertiaryFrequency={radioState.tertiary_frequency}
+			bind:activeFrequency={radioState.activeFrequency}
+			bind:standbyFrequency={radioState.standbyFrequency}
+			bind:tertiaryFrequency={radioState.tertiaryFrequency}
 		/>
 		<div class="display-buttons-container">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
