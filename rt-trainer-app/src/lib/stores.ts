@@ -56,7 +56,7 @@ const initialPose: Pose = {
 	},
 	heading: 0,
 	altitude: 0,
-	air_speed: 0
+	airSpeed: 0
 };
 
 const initialWaypoints: Waypoint[] = [];

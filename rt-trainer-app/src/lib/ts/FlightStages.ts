@@ -1,70 +1,70 @@
 /* Type of routepoint. Each type has a different set of stages that can be performed. */
 export enum RoutePointStageType {
-	'Parked',
-	'Taxiing',
-	'Holding',
-	'TakeOff',
-	'Airborne',
-	'Descent',
-	'Approach',
-	'Landing',
-	'Landed'
+	Parked = 'Parked',
+	Taxiing = 'Taxiing',
+	HoldingPoint = 'HoldingPoint',
+	TakeOff = 'TakeOff',
+	Airborne = 'Airborne',
+	Descent = 'Descent',
+	Approach = 'Approach',
+	Landing = 'Landing',
+	Landed = 'Landed',
 }
 
 /* Stages of a route point. Each stage has a different set of actions that can be performed.
 	some of the airborne waypoint stages are optional depending on the generation. */
 export enum ParkedStage {
-	RadioCheck,
-	DepartInfo,
-	ReadbackDepartInfo,
-	TaxiRequest,
-	TaxiClearanceReadback
+	RadioCheck = 'RadioCheck',
+	DepartInfo = 'DepartInfo',
+	ReadbackDepartInfo = 'ReadbackDepartInfo',
+	TaxiRequest = 'TaxiRequest',
+	TaxiClearanceReadback = 'TaxiClearanceReadback',
 }
 
 export enum TaxiingStage {
-	ReadyForDeparture,
-	InfoGivenForDeparture
+	ReadyForDeparture = 'ReadyForDeparture',
+	InfoGivenForDeparture = 'InfoGivenForDeparture',
 }
 
 export enum HoldingPointStage {
-	ClearedForTakeOff,
-	ReadbackClearance
+	ClearedForTakeOff = 'ClearedForTakeOff',
+	ReadbackClearance = 'ReadbackClearance',
 }
 
 export enum InboundForJoinStage {
-	PreHandshake,
-	PreLandingRequest,
-	PreReadbackLandingClearance,
-	PreAcknowledgementRAIS, // RAIS = report airodrome in sight
-	PreAirodromeInSight,
-	PreContactTower,
-	PreAcknowledgeGoAround, // If told to go around by ATC
-	PreAnnounceGoAround // If pilot decides to go around
+	Handshake = 'Handshake',
+	LandingRequest = 'LandingRequest',
+	ReadbackLandingClearance = 'ReadbackLandingClearance',
+	AcknowledgementRAIS = 'AcknowledgementRAIS', // RAIS = report airodrome in sight
+	AirodromeInSight = 'AirodromeInSight',
+	ContactTower = 'ContactTower',
+	AcknowledgeGoAround = 'AcknowledgeGoAround', // If told to go around by ATC
+	AnnounceGoAround = 'AnnounceGoAround' // If pilot decides to go around
 }
 
 export enum JoinCircuitStage {
-	PreHandshake,
-	PreCircuitRequest,
-	PreReadbackCircuitClearance,
-	PreAcknowledgementAltitude,
-	PreReportDescending,
-	PreAcknowledgeGoAround, // If told to go around by ATC
-	PreAnnounceGoAround // If pilot decides to go around
+	Handshake = 'Handshake',
+	CircuitRequest = 'CircuitRequest',
+	ReadbackCircuitClearance = 'ReadbackCircuitClearance',
+	AcknowledgementAltitude = 'AcknowledgementAltitude',
+	ReportDescending = 'ReportDescending',
+	AcknowledgeGoAround = 'AcknowledgeGoAround', // If told to go around by ATC
+	AnnounceGoAround = 'AnnounceGoAround' // If pilot decides to go around
 }
 
 export enum CircuitAndLandingStage {
-	PreReportDownwind,
-	PreReportTrafficInSight, // Optional if told to follow traffic
-	PreReportFinal,
-	PreReadbackContinueApproach,
-	PreReadbackLandingClearance,
-	PreAcknowledgeGoAround, // If told to go around by ATC
-	PreAnnounceGoAround // If pilot decides to go around
+	ReportDownwind = 'ReportDownwind',
+	ReportTrafficInSight = 'ReportTrafficInSight', // Optional if told to follow traffic
+	ReportFinal = 'ReportFinal',
+	ReadbackContinueApproach = 'ReadbackContinueApproach',
+	ReadbackLandingClearance = 'ReadbackLandingClearance',
+	AcknowledgeGoAround = 'AcknowledgeGoAround', // If told to go around by ATC
+	AnnounceGoAround = 'AnnounceGoAround' // If pilot decides to go around
 }
 
 export enum LandingToParkedStage {
-	PreHandshake, // For large airports - may not even be needed
-    PreReadbackVacateRunwayRequest,
-    PreVacatedRunway,
-    PreTaxiClearanceReadback,
+	Handshake = 'Handshake', // For large airports - may not even be needed
+    ReadbackVacateRunwayRequest = 'ReadbackVacateRunwayRequest',
+    VacatedRunway = 'VacatedRunway',
+    TaxiClearanceReadback = 'TaxiClearanceReadback',
 }

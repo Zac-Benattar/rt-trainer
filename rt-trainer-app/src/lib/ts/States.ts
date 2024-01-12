@@ -1,4 +1,8 @@
-import { HoldingPointStage, RoutePointStageType } from './FlightStages';
+import {
+	HoldingPointStage,
+	ParkedStage,
+	RoutePointStageType as RoutePointStateType
+} from './FlightStages';
 
 export type COMFrequency = {
 	frequency_type: 'AFIS' | 'TWR' | 'GND';
@@ -15,7 +19,7 @@ export type Pose = {
 	location: Location;
 	heading: number;
 	altitude: number;
-	air_speed: number;
+	airSpeed: number;
 };
 
 export enum WaypointType {
@@ -75,13 +79,14 @@ export type Aerodrome = {
 	comFrequencies: COMFrequency[];
 	runways: Runway[];
 	location: Location;
+	altitude: number;
 	startPoint: string;
 	metorData: METORData;
 };
 
 /* Point on route. Used for generation and not visible to the user. */
 export class RoutePointState {
-	stageType: RoutePointStageType = RoutePointStageType.Parked;
+	stateType: RoutePointStateType = RoutePointStateType.Parked;
 	pose: Pose = {
 		location: {
 			lat: 0,
@@ -89,16 +94,40 @@ export class RoutePointState {
 		},
 		heading: 0,
 		altitude: 0,
-		air_speed: 0
+		airSpeed: 0
 	};
+
+	constructor(stateType: RoutePointStateType, pose: Pose) {
+		this.stateType = stateType;
+		this.pose = pose;
+	}
+}
+
+export class ParkedState extends RoutePointState {
+	stage: ParkedStage;
+	constructor(stage: ParkedStage, aerodrome: Aerodrome) {
+		super(RoutePointStateType.Parked, {
+			location: aerodrome.location,
+			heading: 0,
+			altitude: aerodrome.altitude,
+			airSpeed: 0
+		});
+		this.stage = stage;
+	}
 }
 
 /* Holding point on route. Used for generation and not visible to the user. */
 export class HoldingPointState extends RoutePointState {
-	stage: HoldingPointStage = HoldingPointStage.ClearedForTakeOff;
+	stage: HoldingPointStage;
 	holding_point: HoldingPoint = {
 		name: ''
 	};
+
+	constructor(stage: HoldingPointStage, holding_point: HoldingPoint, pose: Pose) {
+		super(RoutePointStateType.HoldingPoint, pose);
+		this.stage = stage;
+		this.holding_point = holding_point;
+	}
 }
 
 /* Point in the air. Used for generation and may be visible to the user if it conincides with a waypoint. */
@@ -106,6 +135,18 @@ export class AirborneState extends RoutePointState {
 	flightRules: 'IFR' | 'VFR' = 'VFR';
 	airbourneEvent: 'TakeOff' | 'Landing' = 'TakeOff';
 	emergency: 'None' | 'Mayday' | 'Pan' = 'None';
+
+	constructor(
+		flightRules: 'IFR' | 'VFR',
+		airbourneEvent: 'TakeOff' | 'Landing',
+		emergency: 'None' | 'Mayday' | 'Pan',
+		pose: Pose
+	) {
+		super(RoutePointStateType.Airborne, pose);
+		this.flightRules = flightRules;
+		this.airbourneEvent = airbourneEvent;
+		this.emergency = emergency;
+	}
 }
 
 /* The state data which must be sent to the server for use in parsing. */
@@ -127,7 +168,7 @@ export type SimulatorUpdateData = {
 	squark: boolean;
 	currentTarget: COMFrequency;
 	currentTransponderFrequency: number;
-	pose: Pose;
+	location: Location;
 	emergency: 'None' | 'Mayday' | 'Pan';
 };
 
