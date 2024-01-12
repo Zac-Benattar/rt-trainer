@@ -207,11 +207,17 @@ export type RecievedStateMessage = {
 };
 
 /* The details of a radio call mistake made by the user. */
-export type Mistake = {
+export class Mistake {
 	callExpected: string;
 	callFound: string;
 	details: string;
-};
+
+	constructor(callExpected: string, callFound: string, details: string) {
+		this.callExpected = callExpected;
+		this.callFound = callFound;
+		this.details = details;
+	}
+}
 
 /* The details of a aircraft selected by the user. */
 export type AircraftDetails = {

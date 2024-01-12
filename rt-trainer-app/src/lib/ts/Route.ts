@@ -217,7 +217,7 @@ export default class Route {
 			windSpeed: wind_speed,
 			pressure: pressure,
 			temperature: temperature,
-			dewpoint: temperature * 0.95 - 1.2 // this needs improving
+			dewpoint: temperature * 0.95 - 1.2 // Basic dewpoint aproximation - not based on any actual formula
 		};
 	}
 
@@ -225,7 +225,7 @@ export default class Route {
 	public generateRoute(seed: number): RoutePoint[] {
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
 		const startAerodromeStates: RoutePointState[] = getStartAerodromeStates(seed);
-		let startAerodromeRoutePoint: RoutePoint = {
+		const startAerodromeRoutePoint: RoutePoint = {
 			pose: startAerodromeStates[0].pose,
 			name: startAerodrome.name,
 			comFrequencies: startAerodrome.comFrequencies,
@@ -238,7 +238,7 @@ export default class Route {
 
 		const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
 		const endAerodromeStates: RoutePointState[] = getEndAerodromeStates(seed);
-		let endAerodromeRoutePoint: RoutePoint = {
+		const endAerodromeRoutePoint: RoutePoint = {
 			pose: endAerodromeStates[0].pose,
 			name: endAerodrome.name,
 			comFrequencies: endAerodrome.comFrequencies,
