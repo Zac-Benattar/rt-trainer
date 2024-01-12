@@ -2,19 +2,19 @@
     {
         "name": "Birmingham Airport",
         "icao": "EGBB",
-        "com_frequencies": [
+        "comFrequencies": [
             {
-                "frequency_type": "ATIS",
+                "frequencyType": "ATIS",
                 "frequency": 136.030,
                 "callsign": "Birmingham Info"
             },
             {
-                "frequency_type": "Tower",
+                "frequencyType": "Tower",
                 "frequency": 118.305,
                 "callsign": "Birmingham Tower"
             },
             {
-                "frequency_type": "Ground",
+                "frequencyType": "Ground",
                 "frequency": 121.805,
                 "callsign": "Birmingham Ground"
             }
@@ -22,7 +22,7 @@
         "runways": [
             {
                 "name": "15",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -30,7 +30,7 @@
             },
             {
                 "name": "33",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -42,17 +42,17 @@
             "long": -1.740041
         },
         "altitude": 327,
-        "start_point": "North Side Hangers",
-        "metor_data": {
-            "avg_wind_direction": 260.0,
-            "mean_wind_speed": 5.0,
-            "std_wind_speed": 3.0,
-            "mean_pressure": 960.0,
-            "std_pressure": 1.2,
-            "mean_temp": 10.0,
-            "std_temp": 2.0,
-            "mean_dewpoint": 9.0,
-            "std_dewpoint": 2.0
+        "startPoint": "North Side Hangers",
+        "metorData": {
+            "avgWindDirection": 260.0,
+            "meanWindSpeed": 5.0,
+            "stdWindSpeed": 3.0,
+            "meanPressure": 960.0,
+            "stdPressure": 1.2,
+            "meanTemperature": 10.0,
+            "stdTemperature": 2.0,
+            "meanDewpoint": 9.0,
+            "stdDewpoint": 2.0
         }
     }
 ]

@@ -46,7 +46,7 @@ const initialTransponderState: TransponderState = {
 const initialTarget: COMFrequency = {
 	frequency: 0,
 	callsign: 'NONE',
-	frequency_type: 'AFIS'
+	frequencyType: 'AFIS'
 };
 
 const initialPose: Pose = {

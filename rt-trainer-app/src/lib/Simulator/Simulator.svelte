@@ -307,7 +307,7 @@
 					callsign: simulatorSettings.callsign,
 					squark: false,
 					currentTarget: {
-						frequency_type: currentTarget.frequency_type,
+						frequencyType: currentTarget.frequencyType,
 						frequency: currentTarget.frequency,
 						callsign: currentTarget.callsign
 					},

@@ -2,22 +2,27 @@ import * as RandomSeed from 'random-seed';
 import type { Location } from './States';
 
 // Function to generate a seeded normal distribution
-export function seededNormalDistribution(seed: string, mean: number, standardDeviation: number): number {
-    const rand = RandomSeed.create(seed);
-    
-    // Generate two random numbers using the Box-Muller transform
-    const u1 = rand.random();
-    const u2 = rand.random();
+export function seededNormalDistribution(
+	seed: string,
+	mean: number,
+	standardDeviation: number
+): number {
+	const rand = RandomSeed.create(seed);
 
-    // Box-Muller transform
-    const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+	// Generate two random numbers using the Box-Muller transform
+	const u1 = rand.random();
+	const u2 = rand.random();
 
-    // Scale and shift to get the desired mean and standard deviation
-    const result = z0 * standardDeviation + mean;
+	// Box-Muller transform
+	const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
 
-    return result;
+	// Scale and shift to get the desired mean and standard deviation
+	const result = z0 * standardDeviation + mean;
+
+	return result;
 }
 
+/* Returns the distance between two locations on the earth in metres. */
 export function haversineDistance(location1: Location, location2: Location): number {
 	const R = 6371e3; // metres
 	const φ1 = (location1.lat * Math.PI) / 180; // φ, λ in radians
@@ -35,4 +40,17 @@ export function haversineDistance(location1: Location, location2: Location): num
 			)
 		)
 	);
+}
+
+/* Returns a lower copy of the string with single length spaces and no punctuation. */
+export function processString(str: string): string {
+	return trimSpaces(removePunctuation(str.toLowerCase()));
+}
+
+export function removePunctuation(str: string): string {
+	return str.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '');
+}
+
+export function trimSpaces(str: string): string {
+	return str.replace(/\s/g, ' ');
 }

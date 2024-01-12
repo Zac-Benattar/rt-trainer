@@ -1,11 +1,12 @@
-import type {
-	COMFrequency,
-	Pose,
-	SimulatorUpdateData,
-	Aerodrome,
-	RoutePointState,
-	METORData,
-	METORDataSample
+import {
+	type COMFrequency,
+	type Pose,
+	type SimulatorUpdateData,
+	type Aerodrome,
+	type RoutePointState,
+	type METORData,
+	type METORDataSample,
+	FrequencyType
 } from './States';
 
 import smallAerodromes from '../../data/small_aerodromes.json';
@@ -14,11 +15,99 @@ import { haversineDistance, seededNormalDistribution } from './utils';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 
-enum Season {
-	Spring,
-	Summer,
-	Autumn,
-	Winter
+// enum Season {
+// 	Spring,
+// 	Summer,
+// 	Autumn,
+// 	Winter
+// }
+
+function getSmallAerodromesFromJSON(): Aerodrome[] {
+	const aerodromes: Aerodrome[] = [];
+
+	smallAerodromes.forEach((aerodrome) => {
+		const comFrequencies: COMFrequency[] = [];
+		aerodrome.comFrequencies.forEach((comFrequency) => {
+			let frequencyType: FrequencyType;
+			switch (comFrequency.frequencyType) {
+				case 'AFIS':
+					frequencyType = FrequencyType.AFIS;
+					break;
+				case 'GND':
+					frequencyType = FrequencyType.GND;
+					break;
+				case 'TWR':
+					frequencyType = FrequencyType.TWR;
+					break;
+				default:
+					frequencyType = FrequencyType.TWR;
+					break;
+			}
+
+			comFrequencies.push({
+				frequencyType: frequencyType,
+				frequency: comFrequency.frequency,
+				callsign: comFrequency.callsign
+			});
+		});
+
+		aerodromes.push({
+			name: aerodrome.name,
+			icao: aerodrome.icao,
+			comFrequencies: comFrequencies,
+			runways: aerodrome.runways,
+			location: aerodrome.location,
+			altitude: aerodrome.altitude,
+			startPoint: aerodrome.startPoint,
+			metorData: aerodrome.metorData
+		});
+	});
+
+	return aerodromes;
+}
+
+function getLargeAerodromesFromJSON(): Aerodrome[] {
+	const aerodromes: Aerodrome[] = [];
+
+	largeAerodromes.forEach((aerodrome) => {
+		const comFrequencies: COMFrequency[] = [];
+		aerodrome.comFrequencies.forEach((comFrequency) => {
+			let frequencyType: FrequencyType;
+			switch (comFrequency.frequencyType) {
+				case 'AFIS':
+					frequencyType = FrequencyType.AFIS;
+					break;
+				case 'GND':
+					frequencyType = FrequencyType.GND;
+					break;
+				case 'TWR':
+					frequencyType = FrequencyType.TWR;
+					break;
+				default:
+					frequencyType = FrequencyType.TWR;
+					break;
+			}
+
+			comFrequencies.push({
+				frequencyType: frequencyType,
+				frequency: comFrequency.frequency,
+				callsign: comFrequency.callsign
+			});
+		});
+
+		aerodromes.push({
+			name: aerodrome.name,
+			icao: aerodrome.icao,
+			comFrequencies: comFrequencies,
+			runways: aerodrome.runways,
+			location: aerodrome.location,
+			altitude: aerodrome.altitude,
+			startPoint: aerodrome.startPoint,
+			metorData: aerodrome.metorData
+		});
+	});
+
+	return aerodromes;
 }
 
 /* A point on the route used in generation. Not neccisarily visible to the user */
@@ -35,13 +124,24 @@ export default class Route {
 
 	/* Get a start aerodrome. */
 	public static getStartAerodrome(seed: number): Aerodrome {
-		return smallAerodromes[seed % smallAerodromes.length];
+		if (seed % 2 === 0) {
+			return getLargeAerodromesFromJSON()[seed % largeAerodromes.length];
+		}
+		return getSmallAerodromesFromJSON()[seed % smallAerodromes.length];
 	}
 
 	/* Get an end aerodrome that is within the maximum distance from the start aerodrome. */
 	public static getEndAerodrome(seed: number): Aerodrome {
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
-		let endAerodrome: Aerodrome = largeAerodromes[seed % largeAerodromes.length];
+		const possibleEndAerodromes: Aerodrome[] = [];
+
+		if (seed % 2 === 0) {
+			possibleEndAerodromes.push(...getSmallAerodromesFromJSON());
+		} else {
+			possibleEndAerodromes.push(...getLargeAerodromesFromJSON());
+		}
+
+		let endAerodrome: Aerodrome = possibleEndAerodromes[seed % largeAerodromes.length];
 		let endAerodromeFound: boolean = false;
 
 		// If the end aerodrome is too far from the start aerodrome, find a new one
@@ -53,7 +153,7 @@ export default class Route {
 				break;
 			}
 
-			endAerodrome = largeAerodromes[(seed + i) % largeAerodromes.length];
+			endAerodrome = possibleEndAerodromes[(seed + i) % largeAerodromes.length];
 		}
 
 		if (!endAerodromeFound) {
@@ -73,25 +173,24 @@ export default class Route {
 		metor_data: METORData
 	): METORDataSample {
 		// let season: Season = Season.Spring;
-		let meanTemp: number = 0.0;
+		let meanTemperature: number = 0.0;
 
 		switch (seed % 4) {
 			case 0:
 				// season = Season.Spring;
-				meanTemp = metor_data.meanTemperature * 1.3;
+				meanTemperature = metor_data.meanTemperature * 1.3;
 				break;
 			case 1:
 				// season = Season.Summer;
-				meanTemp = metor_data.meanTemperature * 1.7;
-
+				meanTemperature = metor_data.meanTemperature * 1.7;
 				break;
 			case 2:
 				// season = Season.Autumn;
-				meanTemp = metor_data.meanTemperature * 1.1;
+				meanTemperature = metor_data.meanTemperature * 1.1;
 				break;
 			case 3:
 				// season = Season.Winter;
-				meanTemp = metor_data.meanTemperature * 0.4;
+				meanTemperature = metor_data.meanTemperature * 0.4;
 				break;
 		}
 
@@ -99,7 +198,7 @@ export default class Route {
 		const wind_direction =
 			seededNormalDistribution(seedString, metor_data.avgWindDirection, 10.0) % 360.0;
 
-		const temperature = seededNormalDistribution(seedString, meanTemp, metor_data.stdTemperature);
+		const temperature = seededNormalDistribution(seedString, meanTemperature, metor_data.stdTemperature);
 
 		const wind_speed = seededNormalDistribution(
 			seedString,

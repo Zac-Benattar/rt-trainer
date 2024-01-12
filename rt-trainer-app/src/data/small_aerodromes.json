@@ -2,9 +2,9 @@
     {
         "name": "Wellesbourne Mountford",
         "icao": "EGBW",
-        "com_frequencies": [
+        "comFrequencies": [
             {
-                "frequency_type": "AFIS",
+                "frequencyType": "AFIS",
                 "frequency": 180.030,
                 "callsign": "Wellesbourne Information"
             }
@@ -12,7 +12,7 @@
         "runways": [
             {
                 "name": "18",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -20,7 +20,7 @@
             },
             {
                 "name": "36",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -28,7 +28,7 @@
             },
             {
                 "name": "05",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -36,7 +36,7 @@
             },
             {
                 "name": "23",
-                "holding_points": [
+                "holdingPoints": [
                     {
                         "name": "A1"
                     }
@@ -48,17 +48,17 @@
             "long": -1.6144
         },
         "altitude": 163,
-        "start_point": "South Side Hangers",
-        "metor_data": {
-            "avg_wind_direction": 240.0,
-            "mean_wind_speed": 11.0,
-            "std_wind_speed": 2.5,
-            "mean_pressure": 960.0,
-            "std_pressure": 1.2,
-            "mean_temp": 11.0,
-            "std_temp": 3.0,
-            "mean_dewpoint": 10.0,
-            "std_dewpoint": 3.0
+        "startPoint": "South Side Hangers",
+        "metorData": {
+            "avgWindDirection": 240.0,
+            "meanWindSpeed": 11.0,
+            "stdWindSpeed": 2.5,
+            "meanPressure": 960.0,
+            "stdPressure": 1.2,
+            "meanTemperature": 11.0,
+            "stdTemperature": 3.0,
+            "meanDewpoint": 10.0,
+            "stdDewpoint": 3.0
         }
     }
 ]

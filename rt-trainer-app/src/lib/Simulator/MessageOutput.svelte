@@ -20,7 +20,7 @@
 	<p class="output-box">
 		Current Target: {currentTarget.callsign}<br />
 		Frequency: {currentTarget.frequency} <br />
-		Type: {currentTarget.frequency_type}
+		Type: {currentTarget.frequencyType}
 	</p>
 </div>
 

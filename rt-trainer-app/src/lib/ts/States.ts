@@ -5,8 +5,14 @@ import {
 	TaxiingStage
 } from './FlightStages';
 
+export enum FrequencyType {
+	AFIS = 'AFIS',
+	TWR = 'TWR',
+	GND = 'GND'
+}
+
 export type COMFrequency = {
-	frequency_type: 'AFIS' | 'TWR' | 'GND';
+	frequencyType: FrequencyType;
 	frequency: number;
 	callsign: string;
 };
@@ -39,7 +45,7 @@ export type Waypoint = {
 	waypoint_type: WaypointType;
 	location: Location;
 	name: string;
-	com_frequencies: COMFrequency[];
+	comFrequencies: COMFrequency[];
 };
 
 export type HoldingPoint = {
@@ -48,7 +54,7 @@ export type HoldingPoint = {
 
 export type Runway = {
 	name: string;
-	holding_points: HoldingPoint[];
+	holdingPoints: HoldingPoint[];
 };
 
 /* METORlogical data. */
