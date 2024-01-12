@@ -11,6 +11,11 @@ export enum FrequencyType {
 	GND = 'GND'
 }
 
+export enum FlightRules{
+	IFR = 'IFR',
+	VFR = 'VFR'
+}
+
 export type COMFrequency = {
 	frequencyType: FrequencyType;
 	frequency: number;
@@ -152,12 +157,12 @@ export class HoldingPointState extends RoutePointState {
 
 /* Point in the air. Used for generation and may be visible to the user if it conincides with a waypoint. */
 export class AirborneState extends RoutePointState {
-	flightRules: 'IFR' | 'VFR' = 'VFR';
+	flightRules: FlightRules = FlightRules.IFR;
 	airbourneEvent: 'TakeOff' | 'Landing' = 'TakeOff';
 	emergency: 'None' | 'Mayday' | 'Pan' = 'None';
 
 	constructor(
-		flightRules: 'IFR' | 'VFR',
+		flightRules: FlightRules,
 		airbourneEvent: 'TakeOff' | 'Landing',
 		emergency: 'None' | 'Mayday' | 'Pan',
 		pose: Pose
@@ -174,6 +179,8 @@ export type CallParsingData = {
 	stage: RoutePointState;
 	fix: string;
 	callsign: string;
+	prefix: string;
+	targetAllocatedCallsign: string;
 	squark: boolean;
 	currentTarget: COMFrequency;
 	currentRadioFrequency: number;
@@ -196,8 +203,7 @@ export type SimulatorUpdateData = {
 export type SentStateMessageSeeds = {
 	state: CallParsingData;
 	message: string;
-	scenarioSeed: number;
-	weatherSeed: number;
+	seed: Seed;
 };
 
 /* The simulator data recieved from the server after generating the next state. Used to update the simulator frontend. */
@@ -227,7 +233,7 @@ export type AircraftDetails = {
 };
 
 /* The seed used to generate the scenario and weather. Split into scenario and weather seed for easy access. */
-export type ScenarioSeed = {
+export type Seed = {
 	seedString: string;
 	scenarioSeed: number;
 	weatherSeed: number;

@@ -1,15 +1,16 @@
-import { type Aerodrome, type CallParsingData, type CallParsingDataMessage, type SimulatorUpdateData, Mistake } from "./States";
-import Route from "./Route";
-import { getRadioCheckSimulatorUpdateData } from "./RouteStates";
+import { type Aerodrome, type CallParsingData, type SimulatorUpdateData, Mistake, type METORDataSample, type Seed, type Runway, FlightRules } from "./States";
+import Route, { type RoutePoint } from "./Route";
+import { getGetDepartInfoReadbackSimulatorUpdateData, getGetTaxiClearenceReadbackSimulatorUpdateDate, getRadioCheckSimulatorUpdateData, getTaxiRequestSimulatorUpdateData } from "./RouteStates";
+import { getAbbreviatedCallsign } from "./utils";
 
 export function parseRadioCheck(
-    scenarioSeed: number,
+    seed: Seed,
     radioCheck: string,
     parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let expectedRadioCall: string = `${parsingData.currentTarget.callsign}, ${parsingData.callsign}, radio check ${parsingData.currentRadioFrequency}`;
-    let messageWords: string[] = radioCheck.split(' ');
-    let startAerodrome: Aerodrome = Route.getStartAerodrome(scenarioSeed);
+    const expectedRadioCall: string = `${parsingData.currentTarget.callsign}, ${parsingData.callsign}, radio check ${parsingData.currentRadioFrequency}`;
+    const messageWords: string[] = radioCheck.split(' ');
+    const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
     let radioFreqIndex: number = -1;
 
     // Check if the radio frequency is included in the message
@@ -25,7 +26,7 @@ export function parseRadioCheck(
     }
 
     // Convert frequency string to float and check it is a valid frequency and equal to the correct frequency
-    let radioFreqStated: number = +messageWords[radioFreqIndex];
+    const radioFreqStated: number = +messageWords[radioFreqIndex];
     if (isNaN(radioFreqStated)) {
         return new Mistake(expectedRadioCall, radioCheck, "Frequency not recognised");
     } else if (radioFreqStated != parsingData.currentRadioFrequency) {
@@ -33,8 +34,8 @@ export function parseRadioCheck(
     }
 
     // Split the callsign into its words and do something else not sure what
-    let callsignExpected: string = parsingData.currentTarget.callsign.toLowerCase();
-    let callsignWords: string[] = callsignexpected.split(' ');
+    const callsignExpected: string = parsingData.currentTarget.callsign.toLowerCase();
+    const callsignWords: string[] = callsignExpected.split(' ');
     for (let i = 0; i < callsignWords.length; i++) {
         if (messageWords[i] != callsignWords[i]) {
             return new Mistake(expectedRadioCall, radioCheck, "Callsign not recognised");
@@ -44,7 +45,7 @@ export function parseRadioCheck(
     // Not sure what this does
     if (messageWords[callsignWords.length] != parsingData.callsign.toLowerCase()) {
         return new Mistake (
-            expectedradiocall,
+            expectedRadioCall,
             radioCheck,
                 `Callsign not recognised: ${messageWords.slice(callsignWords.length).join(" ")}`,
         );
@@ -55,7 +56,7 @@ export function parseRadioCheck(
         || messageWords[radioFreqIndex - 1] != "check")
     {
         return new Mistake (
-            expectedradiocall,
+            expectedRadioCall,
             radioCheck,
             "Expected 'radio check' in message"
         );
@@ -64,308 +65,158 @@ export function parseRadioCheck(
     // Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
     if (radioFreqStated != parsingData.currentRadioFrequency) {
         return new Mistake (
-            expectedradiocall,
+            expectedRadioCall,
             radioCheck,
-                `Frequency incorrect: ${radioFreqStated} \n Expected: ${parsingData.currentRadioFrequency}`);
+            `Frequency incorrect: ${radioFreqStated} \n Expected: ${parsingData.currentRadioFrequency}`);
     }
 
-    let atcResponse: string = `${parsingData.callsign}, ${parsingData.currentTarget.callsign}, reading you 5`;
+    const atcResponse: string = `${parsingData.callsign}, ${parsingData.currentTarget.callsign}, reading you 5`;
 
-    return getRadioCheckSimulatorUpdateData(scenarioSeed);
+    return getRadioCheckSimulatorUpdateData(seed.scenarioSeed);
 }
 
 export function parseDepartureInformationRequest(
-    scenarioSeed: number,
-    weatherSeed: number,
+    seed: Seed,
     departureInformationRequest: string,
-    currentState: CallParsingData,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let expectedradiocall = format!(
-        "{0} request departure information",
-        currentstate.callsign.toLowerCase()
-    );
-
-    let messagewords: string[] = departureinformationrequest
-        .splitwhitespace()
-        .collect<string[]>();
-    let callsignExpected: string = currentState.callsign.toLowerCase();
-    let callsignWords: string[] = callsignExpected.split(' ');
+    const expectedRadiocall = `${parsingData.callsign.toLowerCase()} request departure information`;
+        
+    const messageWords: string[] = departureInformationRequest.split(' ');
+    const callsignExpected: string = parsingData.callsign.toLowerCase();
+    const callsignWords: string[] = callsignExpected.split(' ');
     for (let i = 0; i < callsignWords.length; i++) {
-        if (messagewords[i] != callsignwords[i] {
-            return Ok(ServerResponseMistake(Mistake {
-                callexpected: format!(
-                    "{0} request departure information",
-                    currentstate.callsign.toLowerCase()
-                ),
-                details: "Remeber to include your whole callsign in your message".tostring(),
-                callfound: departureinformationrequest.tostring(),
-            }));
+        if (messageWords[i] != callsignWords[i]) {
+            return new Mistake (expectedRadiocall, departureInformationRequest, "Remeber to include your whole callsign in your message");
         }
     }
 
-    let startandendaerodrome: (Aerodrome, Aerodrome) =
-        match getstartandendaerodromes(*scenarioSeed) {
-            Some(aerodromes) => aerodromes,
-            None => {
-                return Err(Errormsg("Aerodromes not generated"));
-            }
-        };
+    const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
 
-    let metorsample: cratemodelsaerodromeMETORDataSample =
-        getmetorsample(*weatherseed, startandendaerodrome.0.metordata.clone());
-    let runwayindex: usize =
-        (scenarioSeed % (startandendaerodrome.0.runways.len() as number)) as usize;
-    let runway: Runway = match startandendaerodrome.0.runways.get(runwayindex) {
-        Some(runway) => runway,
-        None => {
-            return Ok(ServerResponseMistake(Mistake {
-                callexpected: expectedradiocall,
-                details: "Runway not recognised".tostring(),
-                callfound: departureinformationrequest.tostring(),
-            }));
-        }
-    };
+    const metorSample: METORDataSample = Route.getMETORSample(seed, startAerodrome.metorData);
+    const runwayIndex: number = seed.scenarioSeed % startAerodrome.runways.length;
+    const runway: Runway = startAerodrome.runways[runwayIndex];
 
-    if (!departureinformationrequest.contains("request departure information") {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: format!(
-                "{0} request departure information",
-                currentstate.callsign.toLowerCase()
-            ),
-            details: format!(
-                "Make sure to include the departure information request in your message.",
-            ),
-            callfound: departureinformationrequest.tostring(),
-        }));
+    if (!departureInformationRequest.search("request departure information")) {
+        return new Mistake (
+            expectedRadiocall,
+            departureInformationRequest,
+            "Make sure to include the departure information request in your message."
+        );
     }
 
     // Figure out airport runway, come up with some wind, pressure, temp and dewpoint numbers
-    let atcresponse: string = format!(
-        "{0}, runway {1}, wind {2} degrees {3} knots, QNH {4}, temperature {5} dewpoint {6}",
-        shortencallsign(
-            scenarioSeed,
-            currentstate.aircrafttype,
-            currentstate.callsign
-        ),
-        runway.name,
-        metorsample.winddirection,
-        metorsample.windspeed,
-        metorsample.pressure,
-        metorsample.temp,
-        metorsample.dewpoint,
-    );
+    const atcresponse: string = 
+        `${getAbbreviatedCallsign(
+            seed.scenarioSeed,
+            parsingData.aircraftType,
+            parsingData.targetAllocatedCallsign
+        )}, runway ${runway.name}, wind ${metorSample.windDirection} degrees ${metorSample.windSpeed} knots, QNH ${metorSample.pressure}, temperature ${metorSample.temperature} dewpoint ${metorSample.dewpoint}`;
 
-    let nextstate = match getpredepartinforeadbackstage(*scenarioSeed) {
-        Ok(stage) => stage,
-        Err() => {
-            return Err(Errormsg("Could not get pre-requesting departure information stage"));
-        }
-    };
 
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
+    return getGetDepartInfoReadbackSimulatorUpdateData(seed.scenarioSeed);
 }
 
 export function parseDepartureInformationReadback(
-    scenarioSeed: number,
-    weatherseed: number,
-    departureinformationreadback: string,
+    seed: Seed,
+    departureInformationReadback: string,
     parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    const startAerodrome = Route.getStartAerodrome(scenarioSeed);
+    const startAerodrome = Route.getStartAerodrome(seed);
 
-    let metorsample: cratemodelsaerodromeMETORDataSample =
-        getmetorsample(*weatherseed, startandendaerodrome.0.metordata.clone());
-    let runwayindex: usize =
-        (scenarioSeed % (startandendaerodrome.0.runways.len() as number)) as usize;
-    let runway: Runway = match startandendaerodrome.0.runways.get(runwayindex) {
-        Some(runway) => runway,
-        None => {
-            return Err(Errormsg("Runway not generated"));
-        }
-    };
+    const metorSample: METORDataSample = Route.getMETORSample(seed, startAerodrome.metorData);
+    const runwayindex: number = seed.scenarioSeed % startAerodrome.runways.length;
+    const runway: Runway = startAerodrome.runways[runwayindex];
 
-    let runwaystring: string = format!("runway {}", runway.name);
-    let pressurestring: string = format!("qnh {}", metorsample.pressure,);
+    const runwaystring: string = `runway ${runway.name}`;
+    const pressurestring: string = `qnh ${metorSample.pressure}`;
 
-    let expectedradiocall: string = format!(
-        "{0} runway {1} qnh {2} {3}",
-        parsingData.targetallocatedcallsign.toLowerCase(),
-        runway.name.toLowerCase(),
-        metorsample.pressure,
-        parsingData.targetallocatedcallsign.toLowerCase()
-    );
+    const expectedradiocall: string = `${parsingData.callsign.toLowerCase()} runway ${runway.name.toLowerCase()} qnh ${metorSample.pressure} ${parsingData.callsign.toLowerCase()}`;
 
-    let messagewords: string[] = departureinformationreadback
-        .splitwhitespace()
-        .collect<string[]>();
+    const messagewords: string[] = departureInformationReadback.split(' ');
 
-    if (!departureinformationreadback.contains(runwaystring.asstr())
-        || !departureinformationreadback.contains(pressurestring.asstr())
-        || messagewords[messagewords.len() - 1]
-            != parsingData.targetallocatedcallsign.toLowerCase()
+    if (!departureInformationReadback.search(runwaystring)
+        || !departureInformationReadback.search(pressurestring)
+        || messagewords[messagewords.length - 1]
+            != parsingData.targetAllocatedCallsign.toLowerCase())
     {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Make sure to include the runway and air pressure in your readback.",),
-            callfound: departureinformationreadback.tostring(),
-        }));
+        return new Mistake (
+            expectedradiocall,
+            departureInformationReadback,
+            "Make sure to include the runway and air pressure in your readback."
+        );
     }
 
     // ATC does not respond to this message
-    let atcresponse: string = stringnew();
+    const atcresponse: string = '';
 
-    let nextstate = match getpretaxirequeststage(*scenarioSeed) {
-        Ok(stage) => stage,
-        Err() => {
-            return Err(Errormsg("Could not get pre-requesting departure information stage"));
-        }
-    };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
+    return getTaxiRequestSimulatorUpdateData(seed.scenarioSeed);
 }
 
 export function parseTaxiRequest(
-    scenarioSeed: number,
-    weatherSeed: number,
+    seed: Seed,
     taxiRequest: string,
     parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let startandendaerodrome: (Aerodrome, Aerodrome) =
-        match getstartandendaerodromes(*scenarioSeed) {
-            Some(aerodromes) => aerodromes,
-            None => {
-                return Err(Errormsg("Aerodromes not generated"));
-            }
-        };
-    let metorsample: cratemodelsaerodromeMETORDataSample =
-        getmetorsample(*weatherseed, startandendaerodrome.0.metordata.clone());
+    const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
+    const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
+    const metorSample: METORDataSample =
+        Route.getMETORSample(seed, startAerodrome.metorData);
 
-    let runwayindex: usize =
-        (scenarioSeed % (startandendaerodrome.0.runways.len() as number)) as usize;
-    let runway: Runway = match startandendaerodrome.0.runways.get(runwayindex) {
-        Some(runway) => runway.toowned(),
-        None => {
-            return Err(Errormsg("Runway not generated"));
-        }
-    };
+    const runwayindex: number = seed.scenarioSeed % startAerodrome.runways.length;
+    const runway: Runway = startAerodrome.runways[runwayindex];
+    const expectedradiocall: string = `${parsingData.targetAllocatedCallsign.toLowerCase()} ${ parsingData.aircraftType.toLowerCase()} at ${ startAerodrome.startPoint.toLowerCase()} request taxi VFR to ${endAerodrome.name.toLowerCase()}`;
 
-    let expectedradiocall: string = format!(
-        "{0} {1} at {2} request taxi VFR to {3}",
-        currentstate.targetallocatedcallsign.toLowerCase(),
-        currentstate.aircrafttype.toLowerCase(),
-        startandendaerodrome.0.startpoint.toLowerCase(),
-        startandendaerodrome.1.name.toLowerCase(),
-    );
+    const messagewords: string[] = taxiRequest.split(' ');
 
-    let messagewords: string[] = taxirequest.split(' ');
-
-    if (messagewords[0] != currentstate.targetallocatedcallsign.toLowerCase()
-        || messagewords[1] != currentstate.aircrafttype.toLowerCase()
-        || messagewords.contains(
-            startandendaerodrome
-                .0
-                .startpoint
-                .toLowerCase()
-                .asstr(),
-        )
-        || messagewords.contains(startandendaerodrome.1.name.toLowerCase().asstr())
+    if (messagewords[0] != parsingData.targetAllocatedCallsign.toLowerCase()
+        || messagewords[1] != parsingData.aircraftType.toLowerCase()
+        || messagewords.find(x => x == startAerodrome.startPoint.toLowerCase())
+        || messagewords.find(x => x == endAerodrome.name.toLowerCase()))
     {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!(
-                "Make sure to include the aircraft type, start point and destination in your request.",
-            ),
-            callfound: taxirequest.tostring(),
-        }));
+        return new Mistake (
+            expectedradiocall,
+            taxiRequest,
+            "Make sure to include the aircraft type, start point and destination in your request.");
     }
 
-    let atcresponse: string = format!(
-        "{0}, taxi to holding point {1}, runway {2}, QNH {3}",
-        currentstate.targetallocatedcallsign,
-        runway.holdingpoints[0].name,
-        runway.name,
-        metorsample.pressure,
-    );
+    const atcresponse: string = `${parsingData.targetAllocatedCallsign}, taxi to holding point ${runway.holdingPoints[0].name}, runway ${runway.name}, QNH ${metorSample.pressure}`;
 
-    let nextstate = match getpretaxiclearancereadbackstage(*scenarioSeed) {
-        Ok(stage) => stage,
-        Err() => {
-            return Err(Errormsg("Could not get pre-requesting departure information stage"));
-        }
-    };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
+    return getGetTaxiClearenceReadbackSimulatorUpdateDate(seed.scenarioSeed);
 }
 
- parsetaxireadback(
-    scenarioSeed: number,
-    weatherseed: number,
-    taxirequest: string,
-    currentstate: CallParsingData,
+export function parseTaxiReadback(
+    seed: Seed,
+    taxiRequest: string,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let messagewords: string[] = taxirequest.split(' ');
+    const messageWords: string[] = taxiRequest.split(' ');
 
-    let startandendaerodrome: (Aerodrome, Aerodrome) =
-        match getstartandendaerodromes(*scenarioSeed) {
-            Some(aerodromes) => aerodromes,
-            None => {
-                return Err(Errormsg("Aerodromes not generated"));
-            }
-        };
+    const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
+    const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
 
-    let metorsample: cratemodelsaerodromeMETORDataSample =
-        getmetorsample(*weatherseed, startandendaerodrome.0.metordata.clone());
+    const metorsample: METORDataSample = Route.getMETORSample(seed, startAerodrome.metorData);
 
-    let runwayindex: usize =
-        (scenarioSeed % (startandendaerodrome.0.runways.len() as number)) as usize;
-    let runway: cratemodelsaerodromeRunway =
-        match startandendaerodrome.0.runways.get(runwayindex) {
-            Some(runway) => runway,
-            None => {
-                return Err(Errormsg("Runway not generated"));
-            }
-        };
+    const runwayIndex: number = seed.scenarioSeed % startAerodrome.runways.length;
+    const runway: Runway = startAerodrome.runways[runwayIndex];
 
-    let expectedradiocall: string = format!(
-        "{0} taxi holding point {1} runway {2} qnh {3} {4}",
-        currentstate.targetallocatedcallsign.toLowerCase(),
-        runway.holdingpoints[0].name.toLowerCase(),
-        runway.name.toLowerCase(),
-        metorsample.pressure,
-        currentstate.targetallocatedcallsign.toLowerCase(),
-    );
+    const expectedradiocall: string = `${parsingData.targetAllocatedCallsign.toLowerCase()} taxi holding point ${runway.holdingPoints[0].name.toLowerCase()} runway ${runway.name.toLowerCase()} qnh ${ metorsample.pressure} ${parsingData.targetAllocatedCallsign.toLowerCase()}`;
 
-    if (!(taxirequest.contains("taxi holding point")
-        || taxirequest.contains("taxi to holding point"))
-        || !messagewords.contains(runway.holdingpoints[0].name.toLowerCase().asstr())
-        || messagewords[messagewords.len() - 1]
-            != currentstate.targetallocatedcallsign.toLowerCase()
+    if (!(taxiRequest.search("taxi holding point")
+        || taxiRequest.search("taxi to holding point"))
+        || !messageWords.find(x => x == runway.holdingPoints[0].name.toLowerCase())
+        || messageWords[messageWords.length - 1]
+            != parsingData.targetAllocatedCallsign.toLowerCase())
     {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Make sure to include the holding point and runway in your readback.",),
-            callfound: taxirequest.tostring(),
-        }));
+        return new Mistake (
+            expectedradiocall,
+            taxiRequest,
+            "Make sure to include the holding point and runway in your readback.");
     }
 
-    generateroutefromseed(
-        *scenarioSeed,
-        startandendaerodrome.0,
-        startandendaerodrome.1,
-    );
+    const atcResponse: string = '';
 
-    let atcresponse: string = stringnew();
-
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusTaxiing {
             stage: TaxiingStagePreReadyForDeparture,
         },
@@ -380,95 +231,79 @@ export function parseTaxiRequest(
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
-        callsignmodified: currentstate.targetallocatedcallsign.toowned(), // Replaced by ATSU when needed
+        prefix: currentstate.prefix, // Set by r: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
+        callsignmodified: currentstate.targetallocatedcallsign, // Replaced by ATSU when needed
         emergency: EmergencyNone,
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
 
 /* Parse initial contact with ATC unit.
 Should consist of ATC callsign and aircraft callsign */
- parsenewairspaceinitialcontact(
+export function parseNewAirspaceInitialContact(
     scenarioSeed: number,
-    weatherseed: number,
-    radiocall: string,
-    flightrules: FlightRules,
+    weatherSeed: number,
+    radioCall: string,
+    flightRules: FlightRules,
     altitude: number,
     heading: number,
     speed: number,
-    currentpoint: RoutePoint,
-    currentstate: CallParsingData,
+    currentPoint: RoutePoint,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let expectedradiocall: string = format!(
-        "{0}, {1}",
-        currentstate.currenttarget.callsign.toLowerCase(),
-        currentstate.callsign.toLowerCase(),
-    );
+    const expectedradiocall: string = `${parsingData.currentTarget.callsign.toLowerCase()}, ${parsingData.callsign.toLowerCase()}`;
 
-    if (!radiocall.contains(
-        currentstate
-            .currenttarget
+    if (!radioCall.search(
+        parsingData
+            .currentTarget
             .callsign
             .toLowerCase()
-            .asstr(),
-    ) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!(
-                "Remember to include the target callsign at the start of your initial message.",
-            ),
-            callfound: radiocall.tostring(),
-        }));
+    )) {
+        return new Mistake (
+            expectedradiocall,
+            radioCall,
+            "Remember to include the target callsign at the start of your initial message."
+        );
     }
 
-    if (!radiocall.contains(currentstate.callsign.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your own callsign in your initial message.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.search(parsingData.callsign.toLowerCase())) {
+        return new Mistake (
+            expectedradiocall,
+            radioCall,
+            "Remember to include your own callsign in your initial message."
+        );
     }
 
-    let messagewords: string[] = radiocall.split(' ');
-    let callsignexpected: string = currentstate.callsign.toLowerCase();
-    let callsignwords: string[] = callsignexpected.split(' ');
-    let targetcallsignexpected: string =
-        currentstate.currenttarget.callsign.toLowerCase();
-    let targetcallsignwords: string[] = targetcallsignexpected
-        .splitwhitespace()
-        .collect<string[]>();
+    const messagewords: string[] = radioCall.split(' ');
+    const callsignexpected: string = parsingData.callsign.toLowerCase();
+    const callsignwords: string[] = callsignexpected.split(' ');
+    const targetcallsignexpected: string =
+        parsingData.currentTarget.callsign.toLowerCase();
+    const targetcallsignwords: string[] = targetcallsignexpected
+        .split(' ');
 
-    if (messagewords.len() > callsignwords.len() + targetcallsignwords.len() {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Keep your calls brief.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (messagewords.length > callsignwords.length + targetcallsignwords.length) {
+        return new Mistake (
+            expectedradiocall,
+            radioCall,
+            "Keep your calls brief."
+        );
     }
 
-    let atcresponse: string = format!(
-        "{0}, {1}.",
-        currentstate.callsign, currentstate.currenttarget.callsign,
-    );
+    const atcResponse: string = `${parsingData.callsign}, ${parsingData.currentTarget.callsign}.`;
 
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusAirborne {
             // These need to be updated with the information for the next waypoint
-            flightrules: flightrules.toowned(),
-            altitude: altitude.toowned(),
-            heading: heading.toowned(),
-            speed: speed.toowned(),
-            currentpoint: currentpoint.toowned(),
+            flightrules: flightrules,
+            altitude: altitude,
+            heading: heading,
+            speed: speed,
+            currentpoint: currentpoint,
             airborneevent: WaypointStagePreNewAirspaceFlightDetailsGiven,
         },
         pose: Pose {
@@ -482,20 +317,15 @@ Should consist of ATC callsign and aircraft callsign */
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
-        callsignmodified: currentstate.targetallocatedcallsign.toowned(), // Replaced by ATSU when needed
+        prefix: currentstate.prefix, // Set by r: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
+        callsignmodified: currentstate.targetallocatedcallsign, // Replaced by ATSU when needed
         emergency: EmergencyNone,
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
 
 /* Parse response to ATC unit acknowledging initial contact
@@ -504,83 +334,60 @@ rules, departure and destination aerodromes, position,
 flight level/altitude including passing/cleared level if (not
 in level flight, and additional details such as next waypoint(s)
 accompanied with the planned times to reach them */
- parsenewairspacegiveflightinformationtoatc(
-    scenarioSeed: number,
-    weatherseed: number,
-    radiocall: string,
-    flightrules: FlightRules,
+export function parseNewAirspaceGiveFlightInformationToATC(
+    seed: Seed,
+    radioCall: string,
+    flightRules: FlightRules,
     altitude: number,
     heading: number,
     speed: number,
-    currentpoint: RoutePoint,
-    currentstate: CallParsingData,
+    currentPoint: RoutePoint,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let startandendaerodrome: (Aerodrome, Aerodrome) =
-        match getstartandendaerodromes(*scenarioSeed) {
-            Some(aerodromes) => aerodromes,
-            None => {
-                return Err(Errormsg("Aerodromes not generated"));
-            }
-        };
+    const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
+    const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
 
-    let nearestwaypoint: str = "Test Waypoint";
-    let distancefromnearestwaypoint: f64 = 0.0;
-    let directiontonearestwaypoint: str = "Direction";
+    const nearestwaypoint: string = "Test Waypoint";
+    const distancefromnearestwaypoint: number = 0.0;
+    const directiontonearestwaypoint: string = "Direction";
 
-    let nextwaypoint: str = "Next Waypoint";
+    const nextwaypoint: string = "Next Waypoint";
 
-    let expectedradiocall: string = format!(
-        "{0} {1}, {2} {3} from {4} to {5}, {6} miles {7} of {8}, {9}, {10}",
-        currentstate.prefix.toLowerCase(),
-        currentstate.callsign.toLowerCase(),
-        currentstate.aircrafttype.toLowerCase(),
-        flightrules.tostring(),
-        startandendaerodrome.0.name.toLowerCase(),
-        startandendaerodrome.1.name.toLowerCase(),
-        distancefromnearestwaypoint,
-        directiontonearestwaypoint,
-        nearestwaypoint,
-        altitude,
-        nextwaypoint,
-    );
+    const expectedRadioCall: string = `${parsingData.prefix.toLowerCase()} ${parsingData.callsign.toLowerCase()}, ${parsingData.aircraftType.toLowerCase()} ${flightRules.tostring()} from ${startAerodrome.name.toLowerCase()} to ${endAerodrome.name.toLowerCase()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${altitude}, ${nextwaypoint}`;
 
-    if (!radiocall.contains(
-        currentstate
-            .currenttarget
+    if (!radioCall.search(
+        parsingData
+            .currentTarget
             .callsign
             .toLowerCase()
-            .asstr(),
-    ) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!(
-                "Remember to include the target callsign at the start of your initial message.",
-            ),
-            callfound: radiocall.tostring(),
-        }));
+    )) {
+        return new Mistake (
+            expectedRadioCall,
+            radioCall,
+            "Remember to include the target callsign at the start of your initial message.",
+        );
     }
 
-    if (!radiocall.contains(currentstate.callsign.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your own callsign in your initial message.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.search(parsingData.callsign.toLowerCase())) {
+        return new Mistake (
+            expectedRadioCall,
+            radioCall,
+            "Remember to include your own callsign in your initial message.");
     }
 
-    let atcresponse: string = stringnew();
+    const atcresponse: string = '';
 
     // -----------------------------------------------------------------------------------------
     // Current target and current point need to be updated here with next waypoint
     // -----------------------------------------------------------------------------------------
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusAirborne {
             // These need to be updated with the information for the next waypoint
-            flightrules: flightrules.toowned(),
-            altitude: altitude.toowned(),
-            heading: heading.toowned(),
-            speed: speed.toowned(),
-            currentpoint: currentpoint.toowned(),
+            flightrules: flightrules,
+            altitude: altitude,
+            heading: heading,
+            speed: speed,
+            currentpoint: currentpoint,
             airborneevent: WaypointStagePreNewAirspaceFlightDetailsGiven,
         },
         pose: Pose {
@@ -594,84 +401,64 @@ accompanied with the planned times to reach them */
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
-        callsignmodified: currentstate.targetallocatedcallsign.toowned(), // Replaced by ATSU when needed
+        prefix: currentstate.prefix, // Set by r: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
+        callsignmodified: currentstate.targetallocatedcallsign, // Replaced by ATSU when needed
         emergency: EmergencyNone,
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
 
 /* Parse response to ATC unit requesting squark.
 Should consist of aircraft callsign and squark code */
- parsenewairspacesquark(
-    scenarioSeed: number,
-    weatherseed: number,
-    radiocall: string,
-    sqwark: u16,
-    flightrules: FlightRules,
+export function parseMewAirspaceSquark(
+    seed: Seed,
+    radioCall: string,
+    sqwarkFrequency: number,
+    flightRules: FlightRules,
     altitude: number,
     heading: number,
     speed: number,
-    currentpoint: RoutePoint,
-    currentstate: CallParsingData,
+    currentPoint: RoutePoint,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let expectedradiocall: string = format!(
-        "Squawk {0}, {1} {2}",
-        sqwark,
-        currentstate.prefix.toLowerCase(),
-        currentstate.targetallocatedcallsign.toLowerCase(),
-    );
+    const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${parsingData.prefix.toLowerCase()} ${parsingData.targetAllocatedCallsign.toLowerCase()}`;
 
-    if (!radiocall.contains(sqwark.tostring().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!(
-                "Remember to include the sqwark code at the start of your initial message.",
-            ),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.search(sqwarkFrequency.toString())) {
+        return new Mistake (
+            expectedRadioCall,
+            radioCall,
+            "Remember to include the sqwark code at the start of your initial message."
+        );
     }
 
-    if (!radiocall.contains(currentstate.callsign.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your own callsign in your initial message.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.search(parsingData.callsign.toLowerCase())) {
+        return new Mistake (
+            expectedRadioCall,
+            radioCall,
+            "Remember to include your own callsign in your initial message.",
+        );
     }
 
-    let nearestwaypoint: str = "Test Waypoint";
-    let distancefromnearestwaypoint: f64 = 0.0;
-    let directiontonearestwaypoint: str = "Direction";
-    let nextwaypoint: str = "Next Waypoint";
+    const nearestWaypoint: string = "Test Waypoint";
+    const distanceFromNearestWaypoint: number = 0.0;
+    const directionToNearestWaypoint: string = "Direction";
+    const nextWayPoint: string = "Next Waypoint";
 
-    let atcresponse: string = format!(
-        "{0} {1}, identified {2} miles {3} of {4}. Next report at {5}",
-        currentstate.prefix,
-        currentstate.targetallocatedcallsign,
-        nearestwaypoint,
-        distancefromnearestwaypoint,
-        directiontonearestwaypoint,
-        nextwaypoint,
-    );
+    const atcresponse: string = 
+        `${parsingData.prefix} ${parsingData.targetAllocatedCallsign}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
 
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusAirborne {
             // These need to be updated with the information for the next waypoint
-            flightrules: flightrules.toowned(),
-            altitude: altitude.toowned(),
-            heading: heading.toowned(),
-            speed: speed.toowned(),
-            currentpoint: currentpoint.toowned(),
+            flightrules: flightrules,
+            altitude: altitude,
+            heading: heading,
+            speed: speed,
+            currentpoint: currentpoint,
             airborneevent: WaypointStagePreWilco,
         },
         pose: Pose {
@@ -685,8 +472,8 @@ Should consist of aircraft callsign and squark code */
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
+        prefix: currentstate.prefix, // Set by r: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
         callsignmodified: shortencallsign(
             scenarioSeed,
             currentstate.aircrafttype,
@@ -696,62 +483,47 @@ Should consist of aircraft callsign and squark code */
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
 
 /* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
- parsewilco(
-    scenarioSeed: number,
-    weatherseed: number,
-    radiocall: string,
-    flightrules: FlightRules,
+export function parsewilco(
+    seed: Seed,
+    radioCall: string,
+    flightRules: FlightRules,
     altitude: number,
     heading: number,
     speed: number,
-    currentpoint: RoutePoint,
-    currentstate: CallParsingData,
+    currentPoint: RoutePoint,
+    parsingData: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
-    let expectedradiocall: string = format!(
-        "Wilco, {0} {1}",
-        currentstate.prefix.toLowerCase(),
-        currentstate.targetallocatedcallsign.toLowerCase(),
-    );
+    const expectedRadioCall: string = `Wilco, ${parsingData.prefix.toLowerCase()} ${parsingData.targetAllocatedCallsign.toLowerCase()}`;
 
-    if (!radiocall.contains("wilco".tostring().asstr())
-        || !radiocall.contains("will comply".tostring().asstr())
+    if (!radioCall.search("wilco")
+        || !radioCall.search("will comply"))
     {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include wilco at the start of your initial message.",),
-            callfound: radiocall.tostring(),
-        }));
+        return new Mistake (
+            expectedRadioCall, radioCall, "Remember to include wilco at the start of your initial message.");
     }
 
-    if (!radiocall.contains(currentstate.callsign.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your own callsign in your initial message.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.search(parsingData.callsign.toLowerCase())) {
+        return new Mistake (
+            expectedRadioCall, radioCall, "Remember to include your own callsign in your initial message."
+        );
     }
 
-    let atcresponse: string = stringnew();
+    const atcResponse: string = '';
 
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusAirborne {
             // These need to be updated with the information for the next waypoint
-            flightrules: flightrules.toowned(),
-            altitude: altitude.toowned(),
-            heading: heading.toowned(),
-            speed: speed.toowned(),
-            currentpoint: currentpoint.toowned(),
+            flightrules: flightrules,
+            altitude: altitude,
+            heading: heading,
+            speed: speed,
+            currentpoint: currentpoint,
             airborneevent: WaypointStagePreWilco,
         },
         pose: Pose {
@@ -765,8 +537,8 @@ Should consist of Wilco followed by aircraft callsign */
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
+        prefix: currentstate.prefix, // Set by r: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
         callsignmodified: shortencallsign(
             scenarioSeed,
             currentstate.aircrafttype,
@@ -776,13 +548,8 @@ Should consist of Wilco followed by aircraft callsign */
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
 
 /* Parse VFR position report.
@@ -791,63 +558,51 @@ and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
 /* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
- parsevfrpositionreport(
-    scenarioSeed: number,
-    weatherseed: number,
-    radiocall: string,
-    flightrules: FlightRules,
+export function parsevfrpositionreport(
+    seed: Seed,
+    radioCall: string,
+    flightRules: FlightRules,
     altitude: number,
     heading: number,
     speed: number,
-    currentpoint: RoutePoint,
-    currentstate: CallParsingData,
+    currentPoint: RoutePoint,
+    currentState: CallParsingData,
 ) : SimulatorUpdateData | Mistake {
     // May need more details to be accurate to specific situation
-    let expectedradiocall: string = format!(
+    const expectedRadioCall: string = format!(
         "{0} {1}, overhead {2}, {3} feet",
-        currentstate.prefix.toLowerCase(),
-        currentstate.targetallocatedcallsign.toLowerCase(),
-        currentpoint.name.toLowerCase(),
+        currentState.prefix.toLowerCase(),
+        currentState.targetallocatedcallsign.toLowerCase(),
+        currentPoint.name.toLowerCase(),
         altitude,
     );
 
-    if (!radiocall.contains(currentstate.callsign.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!(
-                "Remember to include your own callsign at the start of your radio call.",
-            ),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.contains(currentState.callsign.toLowerCase())) {
+        return Mistake (
+            expectedRadioCall, radioCall, "Remember to include your own callsign at the start of your radio call.");
     }
 
-    if (!radiocall.contains(currentpoint.name.toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your current location in your radio call.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.contains(currentPoint.name.toLowerCase())) {
+        return new Mistake (
+            expectedRadioCall, radioCall, "Remember to include your current location in your radio call.");
     }
 
-    if (!radiocall.contains(altitude.tostring().toLowerCase().asstr()) {
-        return Ok(ServerResponseMistake(Mistake {
-            callexpected: expectedradiocall,
-            details: format!("Remember to include your altitude in your radio call.",),
-            callfound: radiocall.tostring(),
-        }));
+    if (!radioCall.contains(altitude.tostring().toLowerCase())) {
+        return new Mistake (
+            expectedRadioCall, radioCall, "Remember to include your altitude in your radio call.");
     }
 
-    let atcresponse: string = stringnew();
+    const atcResponse: string = '';
 
     // Logic required to figure out next state
-    let nextstate: SentState = SentState {
+    const nextstate: SentState = SentState {
         status: StatusAirborne {
             // These need to be updated with the information for the next waypoint
-            flightrules: flightrules.toowned(),
-            altitude: altitude.toowned(),
-            heading: heading.toowned(),
-            speed: speed.toowned(),
-            currentpoint: currentpoint.toowned(),
+            flightrules: flightrules,
+            altitude: altitude,
+            heading: heading,
+            speed: speed,
+            currentPoint: currentPoint,
             airborneevent: WaypointStagePreWilco,
         },
         pose: Pose {
@@ -861,8 +616,8 @@ Should consist of Wilco followed by aircraft callsign */
             frequency: currentstate.currenttarget.frequency,
             callsign: currentstate.currenttarget.callsign.clone(),
         },
-        prefix: currentstate.prefix.toowned(), // Set by r: none, student, helicopter, police, etc...
-        callsign: currentstate.callsign.toowned(),
+        prefix: currentstate.prefix, // Set by user: none, student, helicopter, police, etc...
+        callsign: currentstate.callsign,
         callsignmodified: shortencallsign(
             scenarioSeed,
             currentstate.aircrafttype,
@@ -872,11 +627,7 @@ Should consist of Wilco followed by aircraft callsign */
         squark: false,
         currentradiofrequency: currentstate.currentradiofrequency,
         currenttransponderfrequency: currentstate.currenttransponderfrequency,
-        aircrafttype: currentstate.aircrafttype.toowned(),
+        aircrafttype: currentstate.aircrafttype,
     };
-
-    Ok(ServerResponseStateMessage(SentStateMessage {
-        state: nextstate,
-        message: atcresponse,
-    }))
 }
+

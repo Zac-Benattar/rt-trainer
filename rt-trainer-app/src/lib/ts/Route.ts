@@ -6,7 +6,8 @@ import {
 	type RoutePointState,
 	type METORData,
 	type METORDataSample,
-	FrequencyType
+	FrequencyType,
+	type Seed
 } from './States';
 
 import smallAerodromes from '../../data/small_aerodromes.json';
@@ -123,25 +124,25 @@ export default class Route {
 	protected points: RoutePoint[] = [];
 
 	/* Get a start aerodrome. */
-	public static getStartAerodrome(seed: number): Aerodrome {
-		if (seed % 2 === 0) {
-			return getLargeAerodromesFromJSON()[seed % largeAerodromes.length];
+	public static getStartAerodrome(seed: Seed): Aerodrome {
+		if (seed.scenarioSeed % 2 === 0) {
+			return getLargeAerodromesFromJSON()[seed.scenarioSeed % largeAerodromes.length];
 		}
-		return getSmallAerodromesFromJSON()[seed % smallAerodromes.length];
+		return getSmallAerodromesFromJSON()[seed.scenarioSeed % smallAerodromes.length];
 	}
 
 	/* Get an end aerodrome that is within the maximum distance from the start aerodrome. */
-	public static getEndAerodrome(seed: number): Aerodrome {
+	public static getEndAerodrome(seed: Seed): Aerodrome {
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
 		const possibleEndAerodromes: Aerodrome[] = [];
 
-		if (seed % 2 === 0) {
+		if (seed.scenarioSeed % 2 === 0) {
 			possibleEndAerodromes.push(...getSmallAerodromesFromJSON());
 		} else {
 			possibleEndAerodromes.push(...getLargeAerodromesFromJSON());
 		}
 
-		let endAerodrome: Aerodrome = possibleEndAerodromes[seed % largeAerodromes.length];
+		let endAerodrome: Aerodrome = possibleEndAerodromes[seed.scenarioSeed % largeAerodromes.length];
 		let endAerodromeFound: boolean = false;
 
 		// If the end aerodrome is too far from the start aerodrome, find a new one
@@ -153,7 +154,7 @@ export default class Route {
 				break;
 			}
 
-			endAerodrome = possibleEndAerodromes[(seed + i) % largeAerodromes.length];
+			endAerodrome = possibleEndAerodromes[(seed.scenarioSeed + i) % largeAerodromes.length];
 		}
 
 		if (!endAerodromeFound) {
@@ -168,48 +169,47 @@ export default class Route {
 	}
 
 	public static getMETORSample(
-		seed: number,
-		seedString: string,
-		metor_data: METORData
+		seed: Seed,
+		metorData: METORData
 	): METORDataSample {
 		// let season: Season = Season.Spring;
 		let meanTemperature: number = 0.0;
 
-		switch (seed % 4) {
+		switch (seed.weatherSeed % 4) {
 			case 0:
 				// season = Season.Spring;
-				meanTemperature = metor_data.meanTemperature * 1.3;
+				meanTemperature = metorData.meanTemperature * 1.3;
 				break;
 			case 1:
 				// season = Season.Summer;
-				meanTemperature = metor_data.meanTemperature * 1.7;
+				meanTemperature = metorData.meanTemperature * 1.7;
 				break;
 			case 2:
 				// season = Season.Autumn;
-				meanTemperature = metor_data.meanTemperature * 1.1;
+				meanTemperature = metorData.meanTemperature * 1.1;
 				break;
 			case 3:
 				// season = Season.Winter;
-				meanTemperature = metor_data.meanTemperature * 0.4;
+				meanTemperature = metorData.meanTemperature * 0.4;
 				break;
 		}
 
 		// Simulate temperature, wind direction, wind speed and pressure with a normal distribution
 		const wind_direction =
-			seededNormalDistribution(seedString, metor_data.avgWindDirection, 10.0) % 360.0;
+			seededNormalDistribution(seed.weatherSeed.toString(), metorData.avgWindDirection, 10.0) % 360.0;
 
-		const temperature = seededNormalDistribution(seedString, meanTemperature, metor_data.stdTemperature);
+		const temperature = seededNormalDistribution(seed.weatherSeed.toString(), meanTemperature, metorData.stdTemperature);
 
 		const wind_speed = seededNormalDistribution(
-			seedString,
-			metor_data.meanWindSpeed,
-			metor_data.stdWindSpeed
+			seed.weatherSeed.toString(),
+			metorData.meanWindSpeed,
+			metorData.stdWindSpeed
 		);
 
 		const pressure = seededNormalDistribution(
-			seedString,
-			metor_data.meanPressure,
-			metor_data.stdTemperature
+			seed.weatherSeed.toString(),
+			metorData.meanPressure,
+			metorData.stdTemperature
 		);
 
 		return {

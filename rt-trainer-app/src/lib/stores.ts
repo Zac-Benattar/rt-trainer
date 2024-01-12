@@ -7,7 +7,7 @@ import type {
 	Pose,
 	Waypoint,
 	SimulatorSettings,
-	ScenarioSeed
+	Seed
 } from './ts/States';
 
 const initialSettings: SimulatorSettings = {
@@ -16,7 +16,7 @@ const initialSettings: SimulatorSettings = {
 	readRecievedCalls: false
 };
 
-const initialScenarioSeed: ScenarioSeed = {
+const initialScenarioSeed: Seed = {
 	seedString: '0',
 	scenarioSeed: 0,
 	weatherSeed: 0
@@ -65,7 +65,7 @@ export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDet
 
 export const SettingsStore = writable<SimulatorSettings>(initialSettings);
 
-export const SeedStore = writable<ScenarioSeed>(initialScenarioSeed);
+export const SeedStore = writable<Seed>(initialScenarioSeed);
 
 export const CurrentTargetStore = writable<COMFrequency>(initialTarget);
 
