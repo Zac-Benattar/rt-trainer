@@ -1,7 +1,8 @@
 import {
 	HoldingPointStage,
 	ParkedStage,
-	RoutePointStageType as RoutePointStateType
+	RoutePointStageType as RoutePointStateType,
+	TaxiingStage
 } from './FlightStages';
 
 export type COMFrequency = {
@@ -107,6 +108,19 @@ export class ParkedState extends RoutePointState {
 	stage: ParkedStage;
 	constructor(stage: ParkedStage, aerodrome: Aerodrome) {
 		super(RoutePointStateType.Parked, {
+			location: aerodrome.location,
+			heading: 0,
+			altitude: aerodrome.altitude,
+			airSpeed: 0
+		});
+		this.stage = stage;
+	}
+}
+
+export class TaxiingState extends RoutePointState {
+	stage: TaxiingStage;
+	constructor(stage: TaxiingStage, aerodrome: Aerodrome) {
+		super(RoutePointStateType.Taxiing, {
 			location: aerodrome.location,
 			heading: 0,
 			altitude: aerodrome.altitude,

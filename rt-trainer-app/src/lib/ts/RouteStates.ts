@@ -1,4 +1,4 @@
-import { ParkedState, type Aerodrome, type SimulatorUpdateData } from "./States";
+import { ParkedState, TaxiingState, type Aerodrome, type SimulatorUpdateData } from "./States";
 import Route from "./Route";
 import { ParkedStage, TaxiingStage } from "./FlightStages";
 
