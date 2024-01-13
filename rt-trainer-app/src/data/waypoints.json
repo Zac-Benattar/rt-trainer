@@ -1,18 +1,107 @@
-{
-    "waypoints": [
-        {
-            "name": "WAYPT1",
-            "location": {
-                "lat": 51.1234,
-                "long": -0.5678
-            },
-            "com_frequencies": [
-                {
-                    "frequency_type": "Tower",
-                    "frequency": 118.3,
-                    "callsign": "BIRMINGHAM TOWER"
-                }
-            ]
-        }
-    ]
-}
+[
+    {
+        "name": "WAYPT1",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.1234,
+            "long": -0.5678
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT2",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.4321,
+            "long": -0.9876
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT3",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.8765,
+            "long": -0.1234
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT4",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.6789,
+            "long": -0.4321
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT5",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.2345,
+            "long": -0.8765
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT6",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.9876,
+            "long": -0.6789
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    },
+    {
+        "name": "WAYPT7",
+        "waypointType": "VOR",
+        "location": {
+            "lat": 51.7654,
+            "long": -0.9876
+        },
+        "radioFrequencies": [
+            {
+                "frequencyType": "Tower",
+                "frequency": 118.3,
+                "callsign": "BIRMINGHAM TOWER"
+            }
+        ]
+    }
+]

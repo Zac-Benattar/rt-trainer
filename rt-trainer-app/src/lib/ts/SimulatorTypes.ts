@@ -83,17 +83,12 @@ export enum WaypointType {
 	NewAirspace // Entering new airspace - changing frequency
 }
 
-/* A waypoint is a point in space that can be navigated to. Associated with points on the route.
-	May or may not be visible. Has both a location for the waypoint itself and an aircraftPose,
-	which represents the pose of the aircraft at this point. Used for cusomising the pose 
-	at specific points, for example if ATC request a notification when a waypoint is in sight.
-	In this case the aircraftPose can be set to a slight offset from the waypoint's location. */
+/* Point in space. */
 export type Waypoint = {
 	waypointType: WaypointType;
 	location: Location;
-	aircraftPose: Pose;
-	visible: boolean;
 	name: string;
+	radioFrequencies: RadioFrequency[];
 };
 
 export type TransponderDialMode = 'OFF' | 'SBY' | 'GND' | 'STBY' | 'ON' | 'ALT' | 'TEST';
