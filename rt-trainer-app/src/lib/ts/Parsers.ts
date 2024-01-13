@@ -1,7 +1,8 @@
-import { type Aerodrome, type CallParsingData, type SimulatorUpdateData, Mistake, type METORDataSample, type Seed, type Runway, FlightRules } from "./States";
+import { type CallParsingData, type SimulatorUpdateData, Mistake, type Seed } from "./ServerClientTypes";
 import Route, { type RoutePoint } from "./Route";
 import { getGetDepartInfoReadbackSimulatorUpdateData, getGetTaxiClearenceReadbackSimulatorUpdateDate, getRadioCheckSimulatorUpdateData, getTaxiRequestSimulatorUpdateData } from "./RouteStates";
 import { getAbbreviatedCallsign } from "./utils";
+import type { Aerodrome, FlightRules, METORDataSample, Runway } from "./SimulatorTypes";
 
 export function parseRadioCheck(
     seed: Seed,
@@ -72,7 +73,7 @@ export function parseRadioCheck(
 
     const atcResponse: string = `${parsingData.callsign}, ${parsingData.currentTarget.callsign}, reading you 5`;
 
-    return getRadioCheckSimulatorUpdateData(seed.scenarioSeed);
+    return getRadioCheckSimulatorUpdateData(seed);
 }
 
 export function parseDepartureInformationRequest(
@@ -114,7 +115,7 @@ export function parseDepartureInformationRequest(
         )}, runway ${runway.name}, wind ${metorSample.windDirection} degrees ${metorSample.windSpeed} knots, QNH ${metorSample.pressure}, temperature ${metorSample.temperature} dewpoint ${metorSample.dewpoint}`;
 
 
-    return getGetDepartInfoReadbackSimulatorUpdateData(seed.scenarioSeed);
+    return getGetDepartInfoReadbackSimulatorUpdateData(seed);
 }
 
 export function parseDepartureInformationReadback(
@@ -150,7 +151,7 @@ export function parseDepartureInformationReadback(
     // ATC does not respond to this message
     const atcresponse: string = '';
 
-    return getTaxiRequestSimulatorUpdateData(seed.scenarioSeed);
+    return getTaxiRequestSimulatorUpdateData(seed);
 }
 
 export function parseTaxiRequest(
@@ -182,7 +183,7 @@ export function parseTaxiRequest(
 
     const atcresponse: string = `${parsingData.targetAllocatedCallsign}, taxi to holding point ${runway.holdingPoints[0].name}, runway ${runway.name}, QNH ${metorSample.pressure}`;
 
-    return getGetTaxiClearenceReadbackSimulatorUpdateDate(seed.scenarioSeed);
+    return getGetTaxiClearenceReadbackSimulatorUpdateDate(seed);
 }
 
 export function parseTaxiReadback(

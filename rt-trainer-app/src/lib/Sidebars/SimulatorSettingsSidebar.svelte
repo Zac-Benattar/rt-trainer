@@ -8,7 +8,7 @@
 		setDetailsStorePrefix,
 		AircraftDetailsStore
 	} from '$lib/stores';
-	import type { AircraftDetails } from '$lib/ts/States';
+	import type { AircraftDetails } from '$lib/ts/ServerClientTypes';
 
 	let mounted: boolean = false;
 	let prefixInputElement: HTMLInputElement;

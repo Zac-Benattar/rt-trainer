@@ -1,18 +1,11 @@
-import {
-	type COMFrequency,
-	type Pose,
-	type SimulatorUpdateData,
-	type Aerodrome,
-	type RoutePointState,
-	type METORData,
-	type METORDataSample,
-	FrequencyType,
-	type Seed
-} from './States';
+
 
 import smallAerodromes from '../../data/small_aerodromes.json';
 import largeAerodromes from '../../data/large_aerodromes.json';
 import { haversineDistance, seededNormalDistribution } from './utils';
+import { FrequencyType, type Aerodrome, type RadioFrequency, type METORDataSample, type METORData } from './SimulatorTypes';
+import type { Seed } from './ServerClientTypes';
+import type { RoutePoint } from './RouteStates';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 
@@ -27,7 +20,7 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
 	smallAerodromes.forEach((aerodrome) => {
-		const comFrequencies: COMFrequency[] = [];
+		const radioFrequencies: RadioFrequency[] = [];
 		aerodrome.comFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
 			switch (comFrequency.frequencyType) {
@@ -45,7 +38,7 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 					break;
 			}
 
-			comFrequencies.push({
+			radioFrequencies.push({
 				frequencyType: frequencyType,
 				frequency: comFrequency.frequency,
 				callsign: comFrequency.callsign
@@ -55,7 +48,7 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 		aerodromes.push({
 			name: aerodrome.name,
 			icao: aerodrome.icao,
-			comFrequencies: comFrequencies,
+			comFrequencies: radioFrequencies,
 			runways: aerodrome.runways,
 			location: aerodrome.location,
 			altitude: aerodrome.altitude,
@@ -71,7 +64,7 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
 	largeAerodromes.forEach((aerodrome) => {
-		const comFrequencies: COMFrequency[] = [];
+		const radioFrequencies: RadioFrequency[] = [];
 		aerodrome.comFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
 			switch (comFrequency.frequencyType) {
@@ -89,7 +82,7 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 					break;
 			}
 
-			comFrequencies.push({
+			radioFrequencies.push({
 				frequencyType: frequencyType,
 				frequency: comFrequency.frequency,
 				callsign: comFrequency.callsign
@@ -99,7 +92,7 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 		aerodromes.push({
 			name: aerodrome.name,
 			icao: aerodrome.icao,
-			comFrequencies: comFrequencies,
+			comFrequencies: radioFrequencies,
 			runways: aerodrome.runways,
 			location: aerodrome.location,
 			altitude: aerodrome.altitude,
@@ -110,14 +103,6 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 
 	return aerodromes;
 }
-
-/* A point on the route used in generation. Not neccisarily visible to the user */
-export type RoutePoint = {
-	pose: Pose;
-	name: string;
-	comFrequencies: COMFrequency[];
-	states: SimulatorUpdateData[];
-};
 
 /* Route generated for a scenario. */
 export default class Route {
@@ -223,33 +208,21 @@ export default class Route {
 
 	/* Generate the route based off of the seed. */
 	public generateRoute(seed: number): RoutePoint[] {
-		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
-		const startAerodromeStates: RoutePointState[] = getStartAerodromeStates(seed);
-		const startAerodromeRoutePoint: RoutePoint = {
-			pose: startAerodromeStates[0].pose,
-			name: startAerodrome.name,
-			comFrequencies: startAerodrome.comFrequencies,
-			states: startAerodromeStates
-		};
+		const startAerodromeRoutePoints: RoutePoint[] = getStartAerodromeStates(seed);
 
-		this.points.push(startAerodromeRoutePoint);
+		for (let i = 0; i < startAerodromeRoutePoints.length; i++)
+			this.points.push(startAerodromeRoutePoints[i]);
 
 		this.points.push(...getEnrouteWaypoints(seed));
 
-		const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
-		const endAerodromeStates: RoutePointState[] = getEndAerodromeStates(seed);
-		const endAerodromeRoutePoint: RoutePoint = {
-			pose: endAerodromeStates[0].pose,
-			name: endAerodrome.name,
-			comFrequencies: endAerodrome.comFrequencies,
-			states: endAerodromeStates
-		};
+		const endAerodromeStates: RoutePoint[] = getEndAerodromeStates(seed);
 
-		this.points.push(endAerodromeRoutePoint);
+		for (let i = 0; i < endAerodromeStates.length; i++)
+			this.points.push(endAerodromeStates[i]);
 
 		console.log('Route points:');
 		for (let i = 0; i < this.points.length; i++) {
-			console.log(this.points[i].name);
+			console.log(this.points[i]);
 		}
 
 		return this.points;

@@ -7,9 +7,15 @@
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
 	import { PoseStore, RouteStore } from '$lib/stores';
-	import type { Pose, Waypoint } from '$lib/ts/States';
+	import type { Pose, Waypoint } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+
+	type MapWaypoint = {
+		lat: number;
+		long: number;
+		name: string;
+	};
 
 	export let enabled: boolean = true;
 	let leaflet: any;
@@ -17,7 +23,7 @@
 	let targetPose: Pose;
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
-	let waypoints: Waypoint[] = [];
+	let waypoints: MapWaypoint[] = [];
 	let markers: any[] = [];
 	let zoomLevel: number = 13;
 	let map: any;
@@ -34,7 +40,11 @@
 	});
 
 	RouteStore.subscribe((value) => {
-		waypoints = value;
+		for (let i = 0; i < value.length; i++) {
+			if (value[i].visible) {
+				waypoints.push({ lat: value[i].aircraftPose.location.lat, long: value[i].aircraftPose.location.long, name: value[i].name });
+			}
+		}
 
 		if (mounted) {
 			updateMap();
@@ -78,7 +88,7 @@
 
 		// Adds all waypoints to the map
 		waypoints.forEach((waypoint) => {
-			addMarker(waypoint.location.lat, waypoint.location.long, waypoint.name);
+			addMarker(waypoint.lat, waypoint.long, waypoint.name);
 		});
 
 		connectMarkers();
@@ -103,7 +113,7 @@
 
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
-				addMarker(waypoint.location.lat, waypoint.location.long, waypoint.name);
+				addMarker(waypoint.lat, waypoint.long, waypoint.name);
 			});
 
 			connectMarkers();
@@ -118,8 +128,7 @@
 			flightInformationOverlay.remove();
 
 			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
-		}
-		else {
+		} else {
 			console.log('Map not mounted');
 		}
 	}

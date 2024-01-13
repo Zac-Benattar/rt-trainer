@@ -24,7 +24,11 @@
                 "name": "15",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.452997,
+                            "long": -1.740041
+                        }
                     }
                 ]
             },
@@ -32,7 +36,11 @@
                 "name": "33",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.452997,
+                            "long": -1.740041
+                        }
                     }
                 ]
             }

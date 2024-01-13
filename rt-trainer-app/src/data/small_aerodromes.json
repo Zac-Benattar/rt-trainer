@@ -14,7 +14,11 @@
                 "name": "18",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.1922,
+                            "long": -1.6144
+                        }
                     }
                 ]
             },
@@ -22,7 +26,11 @@
                 "name": "36",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.1922,
+                            "long": -1.6144
+                        }
                     }
                 ]
             },
@@ -30,7 +38,11 @@
                 "name": "05",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.1922,
+                            "long": -1.6144
+                        }
                     }
                 ]
             },
@@ -38,7 +50,11 @@
                 "name": "23",
                 "holdingPoints": [
                     {
-                        "name": "A1"
+                        "name": "A1",
+                        "location": {
+                            "lat": 52.1922,
+                            "long": -1.6144
+                        }
                     }
                 ]
             }

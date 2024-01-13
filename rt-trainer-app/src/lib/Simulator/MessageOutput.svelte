@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { COMFrequency } from '$lib/ts/States';
+	import type { COMFrequency } from '$lib/ts/ServerClientTypes';
 	import { CurrentTargetStore, ATCMessageStore } from '$lib/stores';
 
 	let currentTarget: COMFrequency;

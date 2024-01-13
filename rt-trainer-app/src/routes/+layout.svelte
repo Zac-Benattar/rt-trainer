@@ -8,7 +8,7 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/Sidebars/NavigationSidebar.svelte';
-	import type { AircraftDetails } from '$lib/ts/States';
+	import type { AircraftDetails } from '$lib/ts/ServerClientTypes';
 	import { Modal } from '@skeletonlabs/skeleton';
 	import SimulatorSettingsSidebar from '$lib/Sidebars/SimulatorSettingsSidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });

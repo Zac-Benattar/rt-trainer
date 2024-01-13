@@ -1,5 +1,5 @@
 import * as RandomSeed from 'random-seed';
-import type { Location } from './States';
+import type { Location } from './SimulatorTypes';
 
 // Function to generate a seeded normal distribution
 export function seededNormalDistribution(

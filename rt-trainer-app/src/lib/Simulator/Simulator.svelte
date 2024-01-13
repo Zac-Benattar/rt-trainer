@@ -17,7 +17,7 @@
 		TransponderState,
 		Waypoint,
 		SimulatorUpdateData
-	} from '$lib/ts/States';
+	} from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
@@ -298,7 +298,7 @@
 		try {
 			const stateMessage: SentStateMessageSeeds = {
 				state: {
-					stage: {
+					routePoint: {
 						Parked: {
 							stage: 'PreRadioCheck'
 						}

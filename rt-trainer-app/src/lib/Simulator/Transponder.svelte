@@ -3,7 +3,7 @@
 	import FrequencyDial from './FrequencyDial.svelte';
 	import Dial from './ModeDial.svelte';
 	import TransponderDisplay from './TransponderDisplay.svelte';
-	import type { TransponderState } from '$lib/ts/States';
+	import type { TransponderState } from '$lib/ts/ServerClientTypes';
 	import { TransponderStateStore } from '$lib/stores';
 
 	const transponderDialModes: ArrayMaxLength7MinLength2 = [

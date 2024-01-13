@@ -4,7 +4,7 @@
 	import RadioDisplay from './RadioDisplay.svelte';
 	import TransmitButton from './TransmitButton.svelte';
 	import { RadioStateStore } from '$lib/stores';
-	import type { RadioState } from '$lib/ts/States';
+	import type { RadioState } from '$lib/ts/ServerClientTypes';
 
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [

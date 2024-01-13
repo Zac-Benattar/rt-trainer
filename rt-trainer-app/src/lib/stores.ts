@@ -1,14 +1,15 @@
 import { writable } from 'svelte/store';
-import type {
-	RadioState,
-	COMFrequency,
-	AircraftDetails,
-	TransponderState,
-	Pose,
-	Waypoint,
-	SimulatorSettings,
-	Seed
-} from './ts/States';
+import {
+	type RadioState,
+	type COMFrequency,
+	type AircraftDetails,
+	type TransponderState,
+	type Pose,
+	type Waypoint,
+	type SimulatorSettings,
+	type Seed,
+	FrequencyType
+} from './ts/ServerClientTypes';
 
 const initialSettings: SimulatorSettings = {
 	unexpectedEvents: false,
@@ -46,7 +47,7 @@ const initialTransponderState: TransponderState = {
 const initialTarget: COMFrequency = {
 	frequency: 0,
 	callsign: 'NONE',
-	frequencyType: 'AFIS'
+	frequencyType: FrequencyType.AFIS
 };
 
 const initialPose: Pose = {
@@ -58,8 +59,6 @@ const initialPose: Pose = {
 	altitude: 0,
 	airSpeed: 0
 };
-
-const initialWaypoints: Waypoint[] = [];
 
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
@@ -81,7 +80,7 @@ export const KneeboardStore = writable<string>('');
 
 export const PoseStore = writable<Pose>(initialPose);
 
-export const RouteStore = writable<Waypoint[]>(initialWaypoints);
+export const RouteStore = writable<Waypoint[]>([]);
 
 export function setDetailsStorePrefix(prefix: string) {
 	AircraftDetailsStore.update((settings) => {
