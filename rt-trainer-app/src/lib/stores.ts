@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
-import type { Seed, SimulatorSettings } from './ts/ServerClientTypes';
+import type { SimulatorSettings } from './ts/ServerClientTypes';
 import { FrequencyType, type AircraftDetails, type RadioFrequency, type RadioState, type TransponderState, type Pose, type Waypoint } from './ts/SimulatorTypes';
-
+import type Seed from './ts/Seed';
 
 const initialSettings: SimulatorSettings = {
 	unexpectedEvents: false,

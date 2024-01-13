@@ -36,6 +36,7 @@
 	} from '$lib/stores';
 	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
+	import type { RoutePoint } from '$lib/ts/RouteStates';
 
 	// Simulator state and settings
 	let scenarioSeed: number = 0;
@@ -48,6 +49,7 @@
 	let atcMessage: string;
 	let userMessage: string;
 	let kneeboardText: string = 'Make notes here.';
+	let route: RoutePoint[] | undefined = [];
 
 	// Page settings
 	let seedString: string = '0';
@@ -137,7 +139,6 @@
 	async function handleSubmit() {
 		// Check state matches expected state
 		if (!requiredState) {
-
 			// Attempt to get state from server
 			initiateScenario();
 
@@ -261,6 +262,26 @@
 		}
 	}
 
+	async function getRoute(): Promise<Waypoint[] | undefined> {
+		try {
+			console.log(scenarioSeed);
+			const response = await axios.get(`/scenario/seed=${scenarioSeed}`, {
+				headers: {
+					'Content-Type': 'application/json',
+					'Access-Control-Allow-Origin': '*'
+				}
+			});
+
+			return response.data;
+		} catch (error) {
+			if (error.message === 'Network Error') {
+				serverNotResponding = true;
+			} else {
+				console.error('Error: ', error);
+			}
+		}
+	}
+
 	async function getInitialState(): Promise<SimulatorUpdateData | undefined> {
 		try {
 			const response = await axios.post(
@@ -338,7 +359,8 @@
 	}
 
 	onMount(async () => {
-		if (!initiateScenario()) serverNotResponding = true;
+		route = await getRoute();
+		// if (!initiateScenario()) serverNotResponding = true;
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;

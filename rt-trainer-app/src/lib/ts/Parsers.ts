@@ -1,4 +1,5 @@
-import { type CallParsingData, Mistake, type Seed } from './ServerClientTypes';
+import { type CallParsingData, Mistake } from './ServerClientTypes';
+import type Seed from './Seed';
 import Route from './Route';
 import { getAbbreviatedCallsign } from './utils';
 import type { Aerodrome, METORDataSample, Runway } from './SimulatorTypes';

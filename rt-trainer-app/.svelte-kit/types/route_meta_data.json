@@ -2,5 +2,7 @@
 	"/": [],
 	"/about": [],
 	"/profile": [],
-	"/scenario/[scenarioId]": []
+	"/scenario/[seed]": [
+		"src/routes/scenario/[seed]/+server.ts"
+	]
 }

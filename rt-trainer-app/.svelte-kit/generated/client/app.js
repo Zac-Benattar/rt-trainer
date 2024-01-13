@@ -15,7 +15,7 @@ export const dictionary = {
 		"/": [2],
 		"/about": [3],
 		"/profile": [4],
-		"/scenario/[scenarioId]": [5]
+		"/scenario/[seed]": [5]
 	};
 
 export const hooks = {

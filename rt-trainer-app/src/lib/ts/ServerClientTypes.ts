@@ -1,4 +1,5 @@
 import type { RoutePoint } from './RouteStates';
+import type Seed from './Seed';
 import type { EmergencyType, RadioFrequency } from './SimulatorTypes';
 import type { Location } from './SimulatorTypes';
 
@@ -21,13 +22,6 @@ export class Mistake {
 		this.details = details;
 	}
 }
-
-/* The seed used to generate the scenario and weather. Split into scenario and weather seed for easy access. */
-export type Seed = {
-	seedString: string;
-	scenarioSeed: number;
-	weatherSeed: number;
-};
 
 /* The state data which must be sent to the server for use in parsing. */
 export type CallParsingData = {

@@ -251,7 +251,7 @@ export default class Route {
 		for (let i = 0; i < possibleWaypoints.length * possibleWaypoints.length; i++) {
 			let totalDistance = 0.0;
 			// Add waypoints until the route is too long or contains too many points
-			for (let i = 0; i < MAX_AIRBORNE_ROUTE_POINTS; i++) {
+			for (let i = 1; i < MAX_AIRBORNE_ROUTE_POINTS; i++) {
 				const waypoint = possibleWaypoints[seed.scenarioSeed % possibleWaypoints.length];
 				const distance = haversineDistance(points[points.length - 1]?.location, waypoint.location);
 
