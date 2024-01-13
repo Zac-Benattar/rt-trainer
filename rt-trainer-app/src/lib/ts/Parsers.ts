@@ -1,7 +1,7 @@
 import { type CallParsingData, Mistake, type Seed } from './ServerClientTypes';
 import Route from './Route';
 import { getAbbreviatedCallsign } from './utils';
-import type { Aerodrome, FlightRules, METORDataSample, Runway } from './SimulatorTypes';
+import type { Aerodrome, METORDataSample, Runway } from './SimulatorTypes';
 import type { AirbornePoint, RoutePoint } from './RouteStates';
 
 export function parseRadioCheck(
@@ -221,13 +221,8 @@ export function parseTaxiReadback(
 /* Parse initial contact with ATC unit.
 Should consist of ATC callsign and aircraft callsign */
 export function parseNewAirspaceInitialContact(
-	scenarioSeed: number,
-	weatherSeed: number,
+    seed: Seed,
 	radioCall: string,
-	flightRules: FlightRules,
-	altitude: number,
-	heading: number,
-	speed: number,
 	currentPoint: RoutePoint,
 	parsingData: CallParsingData
 ): Mistake | string {
@@ -272,10 +267,6 @@ accompanied with the planned times to reach them */
 export function parseNewAirspaceGiveFlightInformationToATC(
 	seed: Seed,
 	radioCall: string,
-	flightRules: FlightRules,
-	altitude: number,
-	heading: number,
-	speed: number,
 	currentPoint: AirbornePoint,
 	parsingData: CallParsingData
 ): Mistake | string {
@@ -288,7 +279,7 @@ export function parseNewAirspaceGiveFlightInformationToATC(
 
 	const nextwaypoint: string = 'Next Waypoint';
 
-	const expectedRadioCall: string = `${parsingData.prefix.toLowerCase()} ${parsingData.callsign.toLowerCase()}, ${parsingData.aircraftType.toLowerCase()} ${flightRules.toString()} from ${startAerodrome.name.toLowerCase()} to ${endAerodrome.name.toLowerCase()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${altitude}, ${nextwaypoint}`;
+	const expectedRadioCall: string = `${parsingData.prefix.toLowerCase()} ${parsingData.callsign.toLowerCase()}, ${parsingData.aircraftType.toLowerCase()} ${currentPoint.flightRules.toString()} from ${startAerodrome.name.toLowerCase()} to ${endAerodrome.name.toLowerCase()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${currentPoint.pose.altitude}, ${nextwaypoint}`;
 
 	if (!radioCall.search(parsingData.currentTarget.callsign.toLowerCase())) {
 		return new Mistake(
@@ -316,10 +307,6 @@ export function parseMewAirspaceSquark(
 	seed: Seed,
 	radioCall: string,
 	sqwarkFrequency: number,
-	flightRules: FlightRules,
-	altitude: number,
-	heading: number,
-	speed: number,
 	currentPoint: RoutePoint,
 	parsingData: CallParsingData
 ): Mistake | string {
@@ -352,14 +339,10 @@ export function parseMewAirspaceSquark(
 
 /* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
-export function parsewilco(
+export function parseWILCO(
 	seed: Seed,
 	radioCall: string,
-	flightRules: FlightRules,
-	altitude: number,
-	heading: number,
-	speed: number,
-	currentPoint: RoutePoint,
+	currentPoint: AirbornePoint,
 	parsingData: CallParsingData
 ): Mistake | string {
 	const expectedRadioCall: string = `Wilco, ${parsingData.prefix.toLowerCase()} ${parsingData.targetAllocatedCallsign.toLowerCase()}`;
@@ -390,19 +373,15 @@ and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
 /* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
-export function parsevfrpositionreport(
+export function parseVFRPositionReport(
 	seed: Seed,
 	radioCall: string,
-	flightRules: FlightRules,
-	altitude: number,
-	heading: number,
-	speed: number,
 	currentPoint: AirbornePoint,
 	currentState: CallParsingData
 ): Mistake | string {
 	// May need more details to be accurate to specific situation
 	const expectedRadioCall: string = `
-        "${currentState.prefix.toLowerCase()} ${currentState.targetAllocatedCallsign.toLowerCase()}, overhead ${currentPoint.waypoint.name.toLowerCase()}, ${altitude} feet`;
+        "${currentState.prefix.toLowerCase()} ${currentState.targetAllocatedCallsign.toLowerCase()}, overhead ${currentPoint.waypoint.name.toLowerCase()}, ${currentPoint.pose.altitude} feet`;
 
 	if (!radioCall.search(currentState.callsign.toLowerCase())) {
 		return new Mistake(
@@ -420,7 +399,7 @@ export function parsevfrpositionreport(
 		);
 	}
 
-	if (!radioCall.search(altitude.toString().toLowerCase())) {
+	if (!radioCall.search(currentPoint.pose.altitude.toString().toLowerCase())) {
 		return new Mistake(
 			expectedRadioCall,
 			radioCall,

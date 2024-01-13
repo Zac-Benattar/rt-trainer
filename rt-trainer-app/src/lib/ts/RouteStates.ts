@@ -1,6 +1,6 @@
 import type { Seed, SimulatorUpdateData } from './ServerClientTypes';
 import type { HoldingPointStage, ParkedStage, TaxiingStage } from './FlightStages';
-import { FlightRules, type Aerodrome, EmergencyType, type Pose } from './SimulatorTypes';
+import { FlightRules, type Aerodrome, EmergencyType, type Pose, type Waypoint } from './SimulatorTypes';
 
 /* Type of routepoint. Each type has a different set of stages that can be performed. */
 export enum RoutePointType {
@@ -58,16 +58,19 @@ export class HoldingPointPoint extends RoutePoint {
 export class AirbornePoint extends RoutePoint {
 	flightRules: FlightRules = FlightRules.IFR;
 	emergency: EmergencyType = EmergencyType.None;
+    waypoint: Waypoint;
 
 	constructor(
 		flightRules: FlightRules,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-		emergency: EmergencyType
+		emergency: EmergencyType,
+        waypoint: Waypoint
 	) {
 		super(RoutePointType.Airborne, pose, updateData);
 		this.flightRules = flightRules;
 		this.emergency = emergency;
+        this.waypoint = waypoint;
 	}
 }
 

@@ -108,3 +108,91 @@ export function getAbbreviatedCallsign(
 
 	return abbreviatedCallsign;
 }
+
+export function replacePhoneticAlphabetDecimalWithNumber(str: string): string {
+	return str.replace(/(\d{3}) decimal (\d{3})/g, '$1.$2');
+}
+
+export function replacePhoneticAlphabetWithChars(str: string) : string {
+    const phoneticAlphabetMapping = {
+        alpha: 'A',
+        bravo: 'B',
+        charlie: 'C',
+        delta: 'D',
+        echo: 'E',
+		foxtrot: 'F',
+		golf: 'G',
+		hotel: 'H',
+		india: 'I',
+		juliet: 'J',
+    };
+
+    // Create a regular expression pattern to match any of the phonetic alphabet words
+    const pattern = new RegExp(Object.keys(phoneticAlphabetMapping).join('|'), 'gi');
+
+    // Replace occurrences of phonetic alphabet words with their corresponding characters
+    return str.replace(pattern, match => phoneticAlphabetMapping[match.toLowerCase()]).trim();
+}
+
+export function replaceWithPhoneticAlphabet(text:string) {
+	const phoneticAlphabet = {
+		A: 'Alpha',
+		B: 'Bravo',
+		C: 'Charlie',
+		D: 'Delta',
+		E: 'Echo',
+		F: 'Foxtrot',
+		G: 'Golf',
+		H: 'Hotel',
+		I: 'India',
+		J: 'Juliet',
+		K: 'Kilo',
+		L: 'Lima',
+		M: 'Mike',
+		N: 'November',
+		O: 'Oscar',
+		P: 'Papa',
+		Q: 'Quebec',
+		R: 'Romeo',
+		S: 'Sierra',
+		T: 'Tango',
+		U: 'Uniform',
+		V: 'Victor',
+		W: 'Whiskey',
+		X: 'X-ray',
+		Y: 'Yankee',
+		Z: 'Zulu'
+	};
+
+	const phoneticNumbers = {
+		'0': 'Zero',
+		'1': 'One',
+		'2': 'Two',
+		'3': 'Three',
+		'4': 'Four',
+		'5': 'Five',
+		'6': 'Six',
+		'7': 'Seven',
+		'8': 'Eight',
+		'9': 'Niner'
+	};
+
+	const upperText = text.toUpperCase();
+
+	let result = '';
+	for (let i = 0; i < upperText.length; i++) {
+		const char = upperText[i];
+
+		if (/[A-Z]/.test(char)) {
+			const natoWord = phoneticAlphabet[char];
+			result += natoWord + ' ';
+		} else if (/[0-9]/.test(char)) {
+			const natoNumber = phoneticNumbers[char];
+			result += natoNumber + ' ';
+		} else {
+			result += char + ' ';
+		}
+	}
+
+	return result.trim();
+}

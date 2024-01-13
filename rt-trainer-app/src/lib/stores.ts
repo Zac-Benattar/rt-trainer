@@ -1,15 +1,7 @@
 import { writable } from 'svelte/store';
-import {
-	type RadioState,
-	type COMFrequency,
-	type AircraftDetails,
-	type TransponderState,
-	type Pose,
-	type Waypoint,
-	type SimulatorSettings,
-	type Seed,
-	FrequencyType
-} from './ts/ServerClientTypes';
+import type { Seed, SimulatorSettings } from './ts/ServerClientTypes';
+import { FrequencyType, type AircraftDetails, type RadioFrequency, type RadioState, type TransponderState, type Pose, type Waypoint } from './ts/SimulatorTypes';
+
 
 const initialSettings: SimulatorSettings = {
 	unexpectedEvents: false,
@@ -38,13 +30,13 @@ const initialRadioState: RadioState = {
 };
 
 const initialTransponderState: TransponderState = {
-	dial_mode: 'OFF',
+	dialMode: 'OFF',
 	frequency: 0,
 	ident_enabled: false,
-	vfr_has_executed: false
+	vfrHasExecuted: false
 };
 
-const initialTarget: COMFrequency = {
+const initialTarget: RadioFrequency = {
 	frequency: 0,
 	callsign: 'NONE',
 	frequencyType: FrequencyType.AFIS
@@ -66,7 +58,7 @@ export const SettingsStore = writable<SimulatorSettings>(initialSettings);
 
 export const SeedStore = writable<Seed>(initialScenarioSeed);
 
-export const CurrentTargetStore = writable<COMFrequency>(initialTarget);
+export const CurrentTargetStore = writable<RadioFrequency>(initialTarget);
 
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 

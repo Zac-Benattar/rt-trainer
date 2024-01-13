@@ -288,12 +288,13 @@ export default class Route {
 		points.shift();
 
 		// Add events at each point
+		let emergencyGenerated: boolean = false;
 	}
 
 	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {}
 
 	/* Get end aerodrome for a given seed.
-		Depending on whether the seed is odd or even a large or small aerodrome is picked.
+		Depending on whether the seed is odd or even a the large or small aerodrome list is loaded.
 		Then an potential airodrome is picked based on the seed modulo number of possible 
 		end aerodromes. If this is not within the maximum distance from the start aerodrome, 
 		the next aerodrome is checked, and so on until all are checked. 
