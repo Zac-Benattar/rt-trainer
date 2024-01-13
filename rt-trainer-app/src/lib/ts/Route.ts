@@ -192,6 +192,10 @@ export default class Route {
 		return stages;
 	}
 
+	public static getAirborneRoutePoints(seed: Seed): RoutePoint[] {}
+
+	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {}
+
 	/* Get an end aerodrome that is within the maximum distance from the start aerodrome. */
 	public static getEndAerodrome(seed: Seed): Aerodrome {
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
