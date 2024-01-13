@@ -64,7 +64,7 @@ export type METORDataSample = {
 export type Aerodrome = {
 	name: string;
 	icao: string;
-	comFrequencies: RadioFrequency[];
+	radioFrequencies: RadioFrequency[];
 	runways: Runway[];
 	location: Location;
 	altitude: number;

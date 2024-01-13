@@ -2,7 +2,7 @@
     {
         "name": "Birmingham Airport",
         "icao": "EGBB",
-        "comFrequencies": [
+        "radioFrequencies": [
             {
                 "frequencyType": "ATIS",
                 "frequency": 136.030,

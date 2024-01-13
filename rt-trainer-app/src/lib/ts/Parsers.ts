@@ -1,8 +1,8 @@
 import { type CallParsingData, type SimulatorUpdateData, Mistake, type Seed } from "./ServerClientTypes";
 import Route, { type RoutePoint } from "./Route";
-import { getGetDepartInfoReadbackSimulatorUpdateData, getGetTaxiClearenceReadbackSimulatorUpdateDate, getRadioCheckSimulatorUpdateData, getTaxiRequestSimulatorUpdateData } from "./RouteStates";
+import { getGetDepartInfoReadbackSimulatorUpdateData, getGetTaxiClearenceReadbackSimulatorUpdateData, getRadioCheckSimulatorUpdateData, getTaxiRequestSimulatorUpdateData } from "./RouteStates";
 import { getAbbreviatedCallsign } from "./utils";
-import type { Aerodrome, FlightRules, METORDataSample, Runway } from "./SimulatorTypes";
+import type { Aerodrome, FlightRules, METORDataSample, Runway, Waypoint } from "./SimulatorTypes";
 
 export function parseRadioCheck(
     seed: Seed,
@@ -183,7 +183,7 @@ export function parseTaxiRequest(
 
     const atcresponse: string = `${parsingData.targetAllocatedCallsign}, taxi to holding point ${runway.holdingPoints[0].name}, runway ${runway.name}, QNH ${metorSample.pressure}`;
 
-    return getGetTaxiClearenceReadbackSimulatorUpdateDate(seed);
+    return getGetTaxiClearenceReadbackSimulatorUpdateData(seed);
 }
 
 export function parseTaxiReadback(

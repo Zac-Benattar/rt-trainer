@@ -2,7 +2,7 @@
     {
         "name": "Wellesbourne Mountford",
         "icao": "EGBW",
-        "comFrequencies": [
+        "radioFrequencies": [
             {
                 "frequencyType": "AFIS",
                 "frequency": 180.030,
