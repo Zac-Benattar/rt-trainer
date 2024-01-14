@@ -7,15 +7,9 @@
 	import Kneeboard from './Kneeboard.svelte';
 	import axios from 'axios';
 	import type {
-		COMFrequency,
 		Mistake,
-		AircraftDetails,
 		CallParsingData,
-		SentStateMessageSeeds,
-		RecievedStateMessage,
-		RadioState,
-		TransponderState,
-		Waypoint,
+		UserRadioCall,
 		SimulatorUpdateData
 	} from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
@@ -32,27 +26,35 @@
 		RouteStore,
 		AircraftDetailsStore,
 		SeedStore,
-		KneeboardStore
+		KneeboardStore,
+
+		CurrentRoutePointStore
+
 	} from '$lib/stores';
 	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
+	import type {
+		TransponderState,
+		AircraftDetails,
+		RadioState,
+		RadioFrequency
+	} from '$lib/ts/SimulatorTypes';
+	import type Seed from '$lib/ts/Seed';
 
 	// Simulator state and settings
-	let scenarioSeed: number = 0;
-	let weatherSeed: number = 0;
-	let requiredState: SimulatorUpdateData | undefined; // Required state for user to match
+	let seed: Seed;
 	let simulatorSettings: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
-	let currentTarget: COMFrequency;
+	let currentTarget: RadioFrequency;
 	let atcMessage: string;
 	let userMessage: string;
 	let kneeboardText: string = 'Make notes here.';
 	let route: RoutePoint[] | undefined = [];
+	let currentPointIndex: number = 0;
 
 	// Page settings
-	let seedString: string = '0';
 	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let unexpectedEvents: boolean = true; // Unexpected events are enabled by default
@@ -76,14 +78,8 @@
 		speakATCMessage();
 	}
 
-	$: if (requiredState) {
-		currentTarget = requiredState.currentTarget;
-	}
-
 	SeedStore.subscribe((value) => {
-		seedString = value.seedString;
-		scenarioSeed = value.scenarioSeed;
-		weatherSeed = value.weatherSeed;
+		seed = value;
 	});
 
 	SettingsStore.subscribe((value) => {
@@ -160,7 +156,7 @@
 				body: 'Radio dial is off'
 			});
 			return;
-		} else if (transponderState.dial_mode == 'OFF') {
+		} else if (transponderState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -209,46 +205,37 @@
 			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
-			requiredState = newStateMessage.state;
-			ATCMessageStore.set(newStateMessage.message);
-			CurrentTargetStore.set(newStateMessage.state.currentTarget);
-			PoseStore.set(newStateMessage.state.pose);
+			ATCMessageStore.set(newStateMessage.radioCall);
+			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
+			PoseStore.set(route[currentPointIndex].pose);
 		}
 	}
 
 	async function initiateScenario() {
 		// Get the state from the server
-		let initialState = await getInitialState();
-		let scenarioRoute = await getScenarioRoute();
+		route = await getRoute();
+
 		// Update the components with the new state
-		if (initialState === undefined) {
+		if (route === undefined) {
 			// Handle error
 			serverNotResponding = true;
 
 			return 0;
 		} else {
-			console.log('Initial State:', initialState);
-			requiredState = initialState;
-			CurrentTargetStore.set(initialState.currentTarget);
-			PoseStore.set(initialState.pose);
-		}
-
-		if (scenarioRoute === undefined) {
-			// Handle error
-			serverNotResponding = true;
-			return 0;
-		} else {
-			console.log('Scenario Route:', scenarioRoute);
-			RouteStore.set(scenarioRoute);
+			console.log('Initial Stage:', route[0]);
+			CurrentTargetStore.set(route[0].updateData.currentTarget);
+			PoseStore.set(route[0].pose);
+			RouteStore.set(route);
+			CurrentRoutePointStore.set(route[0]);
 		}
 	}
 
-	async function getScenarioRoute(): Promise<Waypoint[] | undefined> {
+	async function getRoute(): Promise<RoutePoint[] | undefined> {
 		try {
-			const response = await axios.get('http://localhost:3000/route/' + scenarioSeed, {
+			const response = await axios.get(`/scenario/seed=${seed.scenarioSeed}`, {
 				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*'
+					'Content-Type': 'application/json'
+					// 'Access-Control-Allow-Origin': '*'
 				}
 			});
 
@@ -262,70 +249,18 @@
 		}
 	}
 
-	async function getRoute(): Promise<Waypoint[] | undefined> {
-		try {
-			console.log(scenarioSeed);
-			const response = await axios.get(`/scenario/seed=${scenarioSeed}`, {
-				headers: {
-					'Content-Type': 'application/json',
-					'Access-Control-Allow-Origin': '*'
-				}
-			});
-
-			return response.data;
-		} catch (error) {
-			if (error.message === 'Network Error') {
-				serverNotResponding = true;
-			} else {
-				console.error('Error: ', error);
-			}
-		}
-	}
-
-	async function getInitialState(): Promise<SimulatorUpdateData | undefined> {
-		try {
-			const response = await axios.post(
-				'http://localhost:3000/initialstate',
-				{
-					scenario_seed: scenarioSeed,
-					weather_seed: weatherSeed,
-					prefix: simulatorSettings.prefix,
-					user_callsign: simulatorSettings.callsign,
-					aircraft_type: simulatorSettings.aircraftType
-				},
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						'Access-Control-Allow-Origin': '*'
-					}
-				}
-			);
-
-			return response.data;
-		} catch (error) {
-			if (error.message === 'Network Error') {
-				serverNotResponding = true;
-			} else {
-				console.error('Error: ', error);
-			}
-		}
-	}
-
-	async function getNextState(): Promise<RecievedStateMessage | Mistake | undefined> {
-		if (!requiredState) {
-			console.log('Error: No state');
+	async function getNextState(): Promise<SimulatorUpdateData | Mistake | undefined> {
+		if (!route) {
+			console.log('Error: No route');
 			return;
 		}
 		try {
-			const stateMessage: SentStateMessageSeeds = {
-				state: {
-					routePoint: {
-						Parked: {
-							stage: 'PreRadioCheck'
-						}
-					},
+			const userRadioCall: UserRadioCall = {
+				parsingData: {
+					routePoint: route[currentPointIndex],
 					prefix: simulatorSettings.prefix,
 					callsign: simulatorSettings.callsign,
+					callsignModified: route[currentPointIndex].updateData.callsignModified,
 					squark: false,
 					currentTarget: {
 						frequencyType: currentTarget.frequencyType,
@@ -336,17 +271,16 @@
 					currentTransponderFrequency: transponderState.frequency,
 					aircraftType: simulatorSettings.aircraftType
 				},
-				message: userMessage,
-				scenarioSeed: scenarioSeed,
-				weatherSeed: weatherSeed
+				radioCall: userMessage,
+				seed: seed
 			};
 
-			console.log('Sending state: ', stateMessage);
+			console.log('Sending call: ', userRadioCall);
 
-			const response = await axios.post('http://localhost:3000/nextstate', stateMessage);
+			const response = await axios.post('http://localhost:3000/nextstate', userRadioCall);
 
-			if (response.data.StateMessage != undefined) {
-				return response.data.StateMessage as RecievedStateMessage;
+			if (response.data.SimulatorUpdateData != undefined) {
+				return response.data.SimulatorUpdateData as SimulatorUpdateData;
 			} else if (response.data.Mistake != undefined) {
 				return response.data.Mistake as Mistake;
 			} else {
@@ -359,8 +293,7 @@
 	}
 
 	onMount(async () => {
-		route = await getRoute();
-		// if (!initiateScenario()) serverNotResponding = true;
+		if (!initiateScenario()) serverNotResponding = true;
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;

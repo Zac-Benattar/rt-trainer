@@ -6,7 +6,7 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { PoseStore, RouteStore } from '$lib/stores';
+	import { CurrentRoutePointStore, PoseStore, RouteStore } from '$lib/stores';
 	import type { Pose, Waypoint } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
@@ -40,11 +40,19 @@
 	});
 
 	RouteStore.subscribe((value) => {
-		for (let i = 0; i < value.length; i++) {
-			if (value[i].visible) {
-				waypoints.push({ lat: value[i].aircraftPose.location.lat, long: value[i].aircraftPose.location.long, name: value[i].name });
-			}
+		// for (let i = 0; i < value.length; i++) {
+		// 	if (value[i].visible) {
+		// 		waypoints.push({ lat: value[i].aircraftPose.location.lat, long: value[i].aircraftPose.location.long, name: value[i].name });
+		// 	}
+		// }
+
+		if (mounted) {
+			updateMap();
 		}
+	});
+
+	CurrentRoutePointStore.subscribe((value) => {
+		targetPose = value.pose;
 
 		if (mounted) {
 			updateMap();

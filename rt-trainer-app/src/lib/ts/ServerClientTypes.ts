@@ -26,10 +26,9 @@ export class Mistake {
 /* The state data which must be sent to the server for use in parsing. */
 export type CallParsingData = {
 	routePoint: RoutePoint;
-	fix: string;
-	callsign: string;
 	prefix: string;
-	targetAllocatedCallsign: string;
+	callsign: string;
+	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: RadioFrequency;
 	currentRadioFrequency: number;
@@ -39,6 +38,7 @@ export type CallParsingData = {
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */
 export type SimulatorUpdateData = {
+	radioCall: string;
 	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: RadioFrequency;
@@ -48,14 +48,8 @@ export type SimulatorUpdateData = {
 };
 
 /* The simulator data which must be sent to the server to generate the next state. */
-export type SentStateMessageSeeds = {
-	state: CallParsingData;
-	message: string;
+export type UserRadioCall = {
+	parsingData: CallParsingData;
+	radioCall: string;
 	seed: Seed;
-};
-
-/* The simulator data recieved from the server after generating the next state. Used to update the simulator frontend. */
-export type RecievedStateMessage = {
-	state: SimulatorUpdateData;
-	message: string;
 };

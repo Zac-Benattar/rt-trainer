@@ -12,7 +12,7 @@ import {
 	type Pose,
 	type Waypoint
 } from './SimulatorTypes';
-import type { Seed } from './ServerClientTypes';
+import type Seed from './Seed';
 import {
 	ParkedPoint,
 	getRadioCheckSimulatorUpdateData,
@@ -167,6 +167,11 @@ function getWaypointsFromJSON(): Waypoint[] {
 /* Route generated for a scenario. */
 export default class Route {
 	protected points: RoutePoint[] = [];
+	protected currentPointIndex: number = 0;
+
+	public getCurrentPoint(): RoutePoint {
+		return this.points[this.currentPointIndex];
+	}
 
 	/* Get a start aerodrome. */
 	public static getStartAerodrome(seed: Seed): Aerodrome {
@@ -289,9 +294,17 @@ export default class Route {
 
 		// Add events at each point
 		let emergencyGenerated: boolean = false;
+		const routePoints: RoutePoint[] = [];
+
+		return routePoints;
 	}
 
-	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {}
+	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {
+
+		const stages: RoutePoint[] = [];
+
+		return stages;
+	}
 
 	/* Get end aerodrome for a given seed.
 		Depending on whether the seed is odd or even a the large or small aerodrome list is loaded.
