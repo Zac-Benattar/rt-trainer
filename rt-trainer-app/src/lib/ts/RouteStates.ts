@@ -1,6 +1,13 @@
-import type { Seed, SimulatorUpdateData } from './ServerClientTypes';
+import type { SimulatorUpdateData } from './ServerClientTypes';
+import type Seed from './Seed';
 import type { HoldingPointStage, ParkedStage, TaxiingStage } from './FlightStages';
-import { FlightRules, type Aerodrome, EmergencyType, type Pose, type Waypoint } from './SimulatorTypes';
+import {
+	FlightRules,
+	type Aerodrome,
+	EmergencyType,
+	type Pose,
+	type Waypoint
+} from './SimulatorTypes';
 
 /* Type of routepoint. Each type has a different set of stages that can be performed. */
 export enum RoutePointType {
@@ -20,26 +27,43 @@ export class RoutePoint {
 	pointType: RoutePointType;
 	pose: Pose;
 	updateData: SimulatorUpdateData;
+	waypoint: Waypoint | null = null;
 
-	constructor(pointType: RoutePointType, pose: Pose, updateData: SimulatorUpdateData) {
+	constructor(
+		pointType: RoutePointType,
+		pose: Pose,
+		updateData: SimulatorUpdateData,
+		waypoint?: Waypoint
+	) {
 		this.pointType = pointType;
 		this.pose = pose;
 		this.updateData = updateData;
+		this.waypoint = waypoint || null;
 	}
 }
 
 export class ParkedPoint extends RoutePoint {
 	stage: ParkedStage;
-	constructor(stage: ParkedStage, pose: Pose, updateData: SimulatorUpdateData) {
-		super(RoutePointType.Parked, pose, updateData);
+	constructor(
+		stage: ParkedStage,
+		pose: Pose,
+		updateData: SimulatorUpdateData,
+		waypoint?: Waypoint
+	) {
+		super(RoutePointType.Parked, pose, updateData, waypoint);
 		this.stage = stage;
 	}
 }
 
 export class TaxiingPoint extends RoutePoint {
 	stage: TaxiingStage;
-	constructor(stage: TaxiingStage, pose: Pose, updateData: SimulatorUpdateData) {
-		super(RoutePointType.Taxiing, pose, updateData);
+	constructor(
+		stage: TaxiingStage,
+		pose: Pose,
+		updateData: SimulatorUpdateData,
+		waypoint?: Waypoint
+	) {
+		super(RoutePointType.Taxiing, pose, updateData, waypoint);
 		this.stage = stage;
 	}
 }
@@ -48,8 +72,13 @@ export class TaxiingPoint extends RoutePoint {
 export class HoldingPointPoint extends RoutePoint {
 	stage: HoldingPointStage;
 
-	constructor(stage: HoldingPointStage, pose: Pose, updateData: SimulatorUpdateData) {
-		super(RoutePointType.HoldingPoint, pose, updateData);
+	constructor(
+		stage: HoldingPointStage,
+		pose: Pose,
+		updateData: SimulatorUpdateData,
+		waypoint?: Waypoint
+	) {
+		super(RoutePointType.HoldingPoint, pose, updateData, waypoint);
 		this.stage = stage;
 	}
 }
@@ -58,19 +87,18 @@ export class HoldingPointPoint extends RoutePoint {
 export class AirbornePoint extends RoutePoint {
 	flightRules: FlightRules = FlightRules.IFR;
 	emergency: EmergencyType = EmergencyType.None;
-    waypoint: Waypoint;
 
 	constructor(
 		flightRules: FlightRules,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
 		emergency: EmergencyType,
-        waypoint: Waypoint
+		waypoint: Waypoint
 	) {
-		super(RoutePointType.Airborne, pose, updateData);
+		super(RoutePointType.Airborne, pose, updateData, waypoint);
 		this.flightRules = flightRules;
 		this.emergency = emergency;
-        this.waypoint = waypoint;
+		this.waypoint = waypoint;
 	}
 }
 

@@ -198,38 +198,50 @@ export default class Route {
 			airSpeed: 0.0
 		};
 
+		const parkedWaypoint: Waypoint = {
+			waypointType: WaypointType.Aerodrome,
+			location: startAerodrome.location,
+			name: startAerodrome.name,
+			radioFrequencies: startAerodrome.radioFrequencies
+		};
+
 		const radioCheck = new ParkedPoint(
 			ParkedStage.RadioCheck,
 			parkedPose,
-			getRadioCheckSimulatorUpdateData(seed, startAerodrome)
+			getRadioCheckSimulatorUpdateData(seed, startAerodrome),
+			parkedWaypoint
 		);
 		stages.push(radioCheck);
 
 		const requestDepartInfo = new ParkedPoint(
 			ParkedStage.DepartInfo,
 			parkedPose,
-			getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome)
+			getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
+			parkedWaypoint
 		);
 		stages.push(requestDepartInfo);
 
 		const readbackDepartInfo = new ParkedPoint(
 			ParkedStage.ReadbackDepartInfo,
 			parkedPose,
-			getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome)
+			getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
+			parkedWaypoint
 		);
 		stages.push(readbackDepartInfo);
 
 		const taxiRequest = new ParkedPoint(
 			ParkedStage.TaxiRequest,
 			parkedPose,
-			getTaxiRequestSimulatorUpdateData(seed, startAerodrome)
+			getTaxiRequestSimulatorUpdateData(seed, startAerodrome),
+			parkedWaypoint
 		);
 		stages.push(taxiRequest);
 
 		const taxiClearanceReadback = new ParkedPoint(
 			ParkedStage.TaxiClearanceReadback,
 			parkedPose,
-			getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome)
+			getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome),
+			parkedWaypoint
 		);
 		stages.push(taxiClearanceReadback);
 

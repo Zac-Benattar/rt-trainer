@@ -1,6 +1,6 @@
 import { writable } from 'svelte/store';
 import type { SimulatorSettings } from './ts/ServerClientTypes';
-import { FrequencyType, type AircraftDetails, type RadioFrequency, type RadioState, type TransponderState, type Pose } from './ts/SimulatorTypes';
+import { FrequencyType, type AircraftDetails, type RadioFrequency, type RadioState, type TransponderState } from './ts/SimulatorTypes';
 import type Seed from './ts/Seed';
 import type { RoutePoint } from './ts/RouteStates';
 
@@ -43,16 +43,6 @@ const initialTarget: RadioFrequency = {
 	frequencyType: FrequencyType.AFIS
 };
 
-const initialPose: Pose = {
-	location: {
-		lat: 0,
-		long: 0
-	},
-	heading: 0,
-	altitude: 0,
-	airSpeed: 0
-};
-
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
 export const SettingsStore = writable<SimulatorSettings>(initialSettings);
@@ -70,8 +60,6 @@ export const UserMessageStore = writable<string>('');
 export const ATCMessageStore = writable<string>('');
 
 export const KneeboardStore = writable<string>('');
-
-export const PoseStore = writable<Pose>(initialPose);
 
 export const RouteStore = writable<RoutePoint[]>([]);
 

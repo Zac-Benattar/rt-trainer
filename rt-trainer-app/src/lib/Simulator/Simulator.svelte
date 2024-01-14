@@ -22,7 +22,6 @@
 		UserMessageStore,
 		ATCMessageStore,
 		CurrentTargetStore,
-		PoseStore,
 		RouteStore,
 		AircraftDetailsStore,
 		SeedStore,
@@ -207,7 +206,6 @@
 			// Update the components with the new state
 			ATCMessageStore.set(newStateMessage.radioCall);
 			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
-			PoseStore.set(route[currentPointIndex].pose);
 		}
 	}
 
@@ -224,7 +222,6 @@
 		} else {
 			console.log('Initial Stage:', route[0]);
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
-			PoseStore.set(route[0].pose);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
 		}

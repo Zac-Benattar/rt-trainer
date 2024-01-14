@@ -6,10 +6,10 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { CurrentRoutePointStore, PoseStore, RouteStore } from '$lib/stores';
-	import type { Pose, Waypoint } from '$lib/ts/ServerClientTypes';
+	import { CurrentRoutePointStore, RouteStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import type { Pose } from '$lib/ts/SimulatorTypes';
 
 	type MapWaypoint = {
 		lat: number;
@@ -31,31 +31,37 @@
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 
-	PoseStore.subscribe((value) => {
-		targetPose = value;
+	RouteStore.subscribe((routePoints) => {
+		// Get all waypoints from the route
+		waypoints = [];
+		for (let i = 0; i < routePoints.length; i++) {
+			if (routePoints[i].waypoint && !waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)) {
+				waypoints.push({ lat: routePoints[i].waypoint.location.lat, long: routePoints[i].waypoint.location.long, name: routePoints[i].waypoint.name });
+			}
+		}
 
 		if (mounted) {
-			updateMap();
+			loadMapScenario();
 		}
 	});
 
-	RouteStore.subscribe((value) => {
-		// for (let i = 0; i < value.length; i++) {
-		// 	if (value[i].visible) {
-		// 		waypoints.push({ lat: value[i].aircraftPose.location.lat, long: value[i].aircraftPose.location.long, name: value[i].name });
-		// 	}
-		// }
+	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
+		if (currentRoutePoint != null) {
+			targetPose = currentRoutePoint.pose;
 
-		if (mounted) {
-			updateMap();
-		}
-	});
-
-	CurrentRoutePointStore.subscribe((value) => {
-		targetPose = value.pose;
-
-		if (mounted) {
-			updateMap();
+			if (mounted) {
+				updateMap();
+			}
+		} else {
+			targetPose = {
+				location: {
+					lat: 0,
+					long: 0
+				},
+				heading: 0,
+				altitude: 0,
+				airSpeed: 0
+			};
 		}
 	});
 
@@ -170,7 +176,6 @@
 			leaflet = await import('leaflet');
 			rotated_marker = await import('leaflet-rotatedmarker');
 
-			await loadMapScenario();
 			mounted = true;
 		}
 	});
