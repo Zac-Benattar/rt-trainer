@@ -1,9 +1,50 @@
 import { Mistake } from './ServerClientTypes';
 import type { METORDataSample } from './SimulatorTypes';
-import type { AirbornePoint, RoutePoint } from './RouteStates';
+import { RoutePointType, type AirbornePoint, type RoutePoint, ParkedPoint } from './RouteStates';
 import type CallParsingContext from './CallParsingContext';
+import { ParkedStage } from './FlightStages';
 
 export default class Parser {
+	public static parseCall(parseContext: CallParsingContext): Mistake | string {
+		switch (parseContext.getRoutePoint().pointType) {
+			case RoutePointType.Parked: {
+				const parkedPoint: ParkedPoint = parseContext.getRoutePoint() as ParkedPoint;
+				switch (parkedPoint.stage) {
+					case ParkedStage.RadioCheck:
+						return this.parseRadioCheck(parseContext);
+					case ParkedStage.DepartureInformationRequest:
+						return this.parseDepartureInformationRequest(parseContext);
+					case ParkedStage.ReadbackDepartureInformation:
+						return this.parseDepartureInformationReadback(parseContext);
+					case ParkedStage.TaxiRequest:
+						return this.parseTaxiRequest(parseContext);
+					case ParkedStage.TaxiClearanceReadback:
+						return this.parseTaxiReadback(parseContext);
+					default:
+						throw new Error('Unknown parked stage');
+				}
+			}
+			case RoutePointType.Taxiing:
+				return this.parseTaxiing(parseContext);
+			case RoutePointType.HoldingPoint:
+				return this.parseHoldingPoint(parseContext);
+			case RoutePointType.TakeOff:
+				return this.parseTakeOff(parseContext);
+			case RoutePointType.Airborne:
+				return this.parseAirborne(parseContext);
+			case RoutePointType.InboundForJoin:
+				return this.parseApproach(parseContext);
+			case RoutePointType.JoinCircuit:
+				return this.parseLanding(parseContext);
+			case RoutePointType.CircuitAndLanding:
+				return this.parseLandedTaxiing(parseContext);
+			case RoutePointType.LandingToParked:
+				return this.parseLandedParked(parseContext);
+			default:
+				throw new Error('Unknown route point type');
+		}
+	}
+
 	public static parseRadioCheck(parseContext: CallParsingContext): Mistake | string {
 		const expectedRadioCall: string = `${
 			parseContext.getCurrentTarget().callsign
@@ -299,7 +340,7 @@ accompanied with the planned times to reach them */
 
 	/* Parse response to ATC unit requesting squark.
 Should consist of aircraft callsign and squark code */
-	public static parseMewAirspaceSquark(
+	public static parseNewAirspaceSquark(
 		sqwarkFrequency: number,
 		parseContext: CallParsingContext
 	): Mistake | string {

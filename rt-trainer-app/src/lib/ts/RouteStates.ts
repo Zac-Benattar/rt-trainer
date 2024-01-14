@@ -11,15 +11,15 @@ import {
 
 /* Type of routepoint. Each type has a different set of stages that can be performed. */
 export enum RoutePointType {
-	Parked,
-	Taxiing,
-	HoldingPoint,
-	TakeOff,
-	Airborne,
-	Approach,
-	Landing,
-	LandedTaxiing,
-	LandedParked
+	Parked = 'Parked',
+	Taxiing = 'Taxiing',
+	HoldingPoint = 'HoldingPoint',
+	TakeOff = 'TakeOff',
+	Airborne = 'Airborne',
+	InboundForJoin = 'InboundForJoin',
+	JoinCircuit = 'JoinCircuit',
+	CircuitAndLanding = 'CircuitAndLanding',
+	LandingToParked = 'LandingToParked',
 }
 
 /* A point on the route used in generation. Not necissarily visible to the user */

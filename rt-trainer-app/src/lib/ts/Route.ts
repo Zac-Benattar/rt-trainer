@@ -214,7 +214,7 @@ export default class Route {
 		stages.push(radioCheck);
 
 		const requestDepartInfo = new ParkedPoint(
-			ParkedStage.DepartInfo,
+			ParkedStage.DepartureInformationRequest,
 			parkedPose,
 			getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
 			parkedWaypoint
@@ -222,7 +222,7 @@ export default class Route {
 		stages.push(requestDepartInfo);
 
 		const readbackDepartInfo = new ParkedPoint(
-			ParkedStage.ReadbackDepartInfo,
+			ParkedStage.ReadbackDepartureInformation,
 			parkedPose,
 			getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
 			parkedWaypoint
@@ -425,10 +425,10 @@ export default class Route {
 
 		this.points.push(...Route.getEndAerodromeRoutePoints(seed));
 
-		console.log('Route points:');
-		for (let i = 0; i < this.points.length; i++) {
-			console.log(this.points[i]);
-		}
+		// console.log('Route points:');
+		// for (let i = 0; i < this.points.length; i++) {
+		// 	console.log(this.points[i]);
+		// }
 
 		return this.points;
 	}

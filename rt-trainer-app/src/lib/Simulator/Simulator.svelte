@@ -8,9 +8,6 @@
 	import axios from 'axios';
 	import type {
 		Mistake,
-		CallParsingContext,
-		UserRadioCall,
-		SimulatorUpdateData
 	} from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
@@ -26,9 +23,7 @@
 		AircraftDetailsStore,
 		SeedStore,
 		KneeboardStore,
-
 		CurrentRoutePointStore
-
 	} from '$lib/stores';
 	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
@@ -133,12 +128,12 @@
 
 	async function handleSubmit() {
 		// Check state matches expected state
-		if (!requiredState) {
+		if (!route) {
 			// Attempt to get state from server
 			initiateScenario();
 
-			if (!requiredState) {
-				console.log('Error: No state');
+			if (!route) {
+				console.log('Error: No route');
 				modalStore.trigger({
 					type: 'alert',
 					title: 'Connection to server failed',
@@ -163,7 +158,8 @@
 			});
 			return;
 		} else if (
-			radioState.activeFrequency.toFixed(3) != requiredState.currentTarget.frequency.toFixed(3)
+			radioState.activeFrequency.toFixed(3) !=
+			route[currentPointIndex].updateData.currentTarget.frequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -171,7 +167,9 @@
 				body: 'Radio frequency incorrect'
 			});
 			return;
-		} else if (transponderState.frequency != requiredState.currentTransponderFrequency) {
+		} else if (
+			transponderState.frequency != route[currentPointIndex].updateData.currentTransponderFrequency
+		) {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
@@ -181,9 +179,9 @@
 		}
 
 		// Send message to server
-		let newStateMessage = await getNextState();
-		console.log('Received state: ', newStateMessage);
-		if (newStateMessage === undefined) {
+		let feedback = await checkRadioCall();
+		console.log('Received state: ', feedback);
+		if (feedback === undefined) {
 			// Handle error
 			serverNotResponding = true;
 			modalStore.trigger({
@@ -191,7 +189,7 @@
 				title: 'Connection to server failed',
 				body: 'This may be due to the server being offline. Come back later and try again.'
 			});
-		} else if (isMistake(newStateMessage)) {
+		} else if (isMistake(feedback)) {
 			// Handle mistake
 
 			// Pop up modal with mistake details
@@ -199,12 +197,12 @@
 				type: 'alert',
 				// Data
 				title: 'Mistake',
-				body: newStateMessage.details
+				body: feedback.details
 			};
 			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
-			ATCMessageStore.set(newStateMessage.radioCall);
+			ATCMessageStore.set(feedback);
 			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 		}
 	}
@@ -246,41 +244,43 @@
 		}
 	}
 
-	async function getNextState(): Promise<SimulatorUpdateData | Mistake | undefined> {
+	async function checkRadioCall(): Promise<string | Mistake | undefined> {
 		if (!route) {
 			console.log('Error: No route');
 			return;
 		}
 		try {
-			const userRadioCall: UserRadioCall = {
-				parsingData: {
-					routePoint: route[currentPointIndex],
-					prefix: simulatorSettings.prefix,
-					userCallsign: simulatorSettings.callsign,
-					userCallsignModified: route[currentPointIndex].updateData.callsignModified,
-					squark: false,
-					currentTarget: {
-						frequencyType: currentTarget.frequencyType,
-						frequency: currentTarget.frequency,
-						callsign: currentTarget.callsign
-					},
-					currentRadioFrequency: radioState.activeFrequency,
-					currentTransponderFrequency: transponderState.frequency,
-					aircraftType: simulatorSettings.aircraftType
-				},
+			const currentTarget = route[currentPointIndex].updateData.currentTarget;
+			const callParsingContext = {
 				radioCall: userMessage,
-				seed: seed
+				seed: seed,
+				routePoint: route[currentPointIndex],
+				prefix: simulatorSettings.prefix,
+				userCallsign: simulatorSettings.callsign,
+				userCallsignModified: route[currentPointIndex].updateData.callsignModified,
+				squark: false,
+				currentTarget: currentTarget,
+				currentRadioFrequency: radioState.activeFrequency,
+				currentTransponderFrequency: transponderState.frequency,
+				aircraftType: simulatorSettings.aircraftType
 			};
 
-			console.log('Sending call: ', userRadioCall);
+			console.log('Sending call: ', callParsingContext);
 
-			const response = await axios.post('http://localhost:3000/nextstate', userRadioCall);
+			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
+				data: callParsingContext
+			});
 
-			if (response.data.SimulatorUpdateData != undefined) {
-				return response.data.SimulatorUpdateData as SimulatorUpdateData;
-			} else if (response.data.Mistake != undefined) {
-				return response.data.Mistake as Mistake;
+			console.log(response.data);
+
+			if (response.data.callExpected != undefined) {
+				// Response is a mistake
+				return response.data as Mistake;
+			} else if (response.data.atcCall != undefined) {
+				// Response atc call
+				return response.data as string;
 			} else {
+				// Server failure
 				serverNotResponding = true;
 				return;
 			}

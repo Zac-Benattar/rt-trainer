@@ -1,22 +1,9 @@
-/* Type of routepoint. Each type has a different set of stages that can be performed. */
-export enum RoutePointStageType {
-	Parked = 'Parked',
-	Taxiing = 'Taxiing',
-	HoldingPoint = 'HoldingPoint',
-	TakeOff = 'TakeOff',
-	Airborne = 'Airborne',
-	Descent = 'Descent',
-	Approach = 'Approach',
-	Landing = 'Landing',
-	Landed = 'Landed',
-}
-
 /* Stages of a route point. Each stage has a different set of actions that can be performed.
 	some of the airborne waypoint stages are optional depending on the generation. */
 export enum ParkedStage {
 	RadioCheck = 'RadioCheck',
-	DepartInfo = 'DepartInfo',
-	ReadbackDepartInfo = 'ReadbackDepartInfo',
+	DepartureInformationRequest = 'DepartureInformationRequest',
+	ReadbackDepartureInformation = 'ReadbackDepartureInformation',
 	TaxiRequest = 'TaxiRequest',
 	TaxiClearanceReadback = 'TaxiClearanceReadback',
 }
