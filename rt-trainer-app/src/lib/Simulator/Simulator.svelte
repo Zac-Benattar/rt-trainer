@@ -8,7 +8,7 @@
 	import axios from 'axios';
 	import type {
 		Mistake,
-		CallParsingData,
+		CallParsingContext,
 		UserRadioCall,
 		SimulatorUpdateData
 	} from '$lib/ts/ServerClientTypes';
@@ -256,8 +256,8 @@
 				parsingData: {
 					routePoint: route[currentPointIndex],
 					prefix: simulatorSettings.prefix,
-					callsign: simulatorSettings.callsign,
-					callsignModified: route[currentPointIndex].updateData.callsignModified,
+					userCallsign: simulatorSettings.callsign,
+					userCallsignModified: route[currentPointIndex].updateData.callsignModified,
 					squark: false,
 					currentTarget: {
 						frequencyType: currentTarget.frequencyType,

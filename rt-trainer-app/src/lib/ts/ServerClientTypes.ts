@@ -1,4 +1,3 @@
-import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
 import type { EmergencyType, RadioFrequency } from './SimulatorTypes';
 import type { Location } from './SimulatorTypes';
@@ -23,17 +22,11 @@ export class Mistake {
 	}
 }
 
-/* The state data which must be sent to the server for use in parsing. */
-export type CallParsingData = {
-	routePoint: RoutePoint;
-	prefix: string;
-	callsign: string;
-	callsignModified: boolean;
-	squark: boolean;
-	currentTarget: RadioFrequency;
-	currentRadioFrequency: number;
-	currentTransponderFrequency: number;
-	aircraftType: string;
+/* Context which must be sent to the server for use in parsing. */
+export type CallParsingContext = {
+	radioCall: string;
+	seed: Seed;
+
 };
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */
@@ -45,11 +38,4 @@ export type SimulatorUpdateData = {
 	currentTransponderFrequency: number;
 	location: Location;
 	emergency: EmergencyType;
-};
-
-/* The simulator data which must be sent to the server to generate the next state. */
-export type UserRadioCall = {
-	parsingData: CallParsingData;
-	radioCall: string;
-	seed: Seed;
 };

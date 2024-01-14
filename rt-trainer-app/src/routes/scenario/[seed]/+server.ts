@@ -9,3 +9,9 @@ export function GET({ params }) {
 
 	return json(route.getPoints());
 }
+
+export function POST({ params, request }) {
+
+
+	return json(route.getPoints());
+}

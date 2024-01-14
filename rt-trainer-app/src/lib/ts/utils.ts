@@ -72,11 +72,6 @@ export function getAbbreviatedCallsign(
 	if (callsign.length == 6) {
 		let standardRegStyle: boolean = true;
 
-		for (let i = 0; i < callsign.length; i++) {
-			if (!(callsign.charAt(i) == callsign.charAt(i).toUpperCase()) && i != 1) {
-				standardRegStyle = false;
-			}
-		}
 		if (standardRegStyle) {
 			if (callsign.charAt(1) != '-') {
 				standardRegStyle = false;
