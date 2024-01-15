@@ -178,7 +178,7 @@ export default class Parser {
 
 		if (
 			parseContext.callContainsConsecutiveWords(
-				parseContext.getStartAerodrome().startPoint.split(' ')
+				parseContext.getStartAerodrome().startPointName.split(' ')
 			)
 		) {
 			return new Mistake(

@@ -46,11 +46,18 @@
             }
         ],
         "location": {
-            "lat": 52.452997,
-            "long": -1.740041
+            "lat": 52.453997,
+            "long": -1.744041
         },
         "altitude": 327,
-        "startPoint": "North Side Hangers",
+        "startPoints": [{
+            "name": "South Side Hangers",
+            "location": {
+                "lat": 52.45024,
+                "long": -1.74737
+            },
+            "heading": 70.0
+        }],
         "metorData": {
             "avgWindDirection": 260.0,
             "meanWindSpeed": 5.0,

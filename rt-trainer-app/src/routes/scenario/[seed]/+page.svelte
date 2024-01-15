@@ -5,12 +5,12 @@
 	import Seed from '$lib/ts/Seed';
 
 	// Get the seed from the URL
-	var seedString = $page.params.seed;
+	let seedString = $page.params.seed;
 	if (seedString == null) {
 		seedString = '';
 	}
 	let seed: Seed = new Seed(seedString);
-
+	
 	// Set the seed store
 	SeedStore.set(seed);
 

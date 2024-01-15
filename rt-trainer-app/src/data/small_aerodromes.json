@@ -64,7 +64,18 @@
             "long": -1.6144
         },
         "altitude": 163,
-        "startPoint": "South Side Hangers",
+        "startPointLocation": {
+            "lat": 52.1922,
+            "long": -1.6144
+        },
+        "startPoints": [{
+            "name": "South Side Hangers",
+            "location": {
+                "lat": 52.1955,
+                "long": -1.6176
+            },
+            "heading": 80.0
+        }],
         "metorData": {
             "avgWindDirection": 240.0,
             "meanWindSpeed": 11.0,

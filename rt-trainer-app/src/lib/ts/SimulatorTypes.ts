@@ -60,6 +60,14 @@ export type METORDataSample = {
 	dewpoint: number;
 };
 
+/* Represents a starting point for an aerodrome. 
+Used to specify the location and heading of the aircraft at the start of a scenario. */
+export type AerodromeStartPoint = {
+	name: string;
+	location: Location;
+	heading: number;
+};
+
 /* Aerodrome data. */
 export type Aerodrome = {
 	name: string;
@@ -68,7 +76,7 @@ export type Aerodrome = {
 	runways: Runway[];
 	location: Location;
 	altitude: number;
-	startPoint: string;
+	startPoints: AerodromeStartPoint[];
 	metorData: METORData;
 };
 

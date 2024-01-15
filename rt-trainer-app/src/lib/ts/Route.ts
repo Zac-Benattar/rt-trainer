@@ -72,7 +72,7 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 			runways: aerodrome.runways,
 			location: aerodrome.location,
 			altitude: aerodrome.altitude,
-			startPoint: aerodrome.startPoint,
+			startPoints: aerodrome.startPoints,
 			metorData: aerodrome.metorData
 		});
 	});
@@ -116,7 +116,7 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 			runways: aerodrome.runways,
 			location: aerodrome.location,
 			altitude: aerodrome.altitude,
-			startPoint: aerodrome.startPoint,
+			startPoints: aerodrome.startPoints,
 			metorData: aerodrome.metorData
 		});
 	});
@@ -190,10 +190,11 @@ export default class Route {
 	public static getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 		const stages: RoutePoint[] = [];
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
+		const startPointIndex = seed.scenarioSeed % startAerodrome.startPoints.length;
 
 		const parkedPose: Pose = {
-			location: startAerodrome.location,
-			heading: 0.0,
+			location: startAerodrome.startPoints[startPointIndex].location,
+			heading: startAerodrome.startPoints[startPointIndex].heading,
 			altitude: startAerodrome.altitude,
 			airSpeed: 0.0
 		};
@@ -312,7 +313,6 @@ export default class Route {
 	}
 
 	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {
-
 		const stages: RoutePoint[] = [];
 
 		return stages;
