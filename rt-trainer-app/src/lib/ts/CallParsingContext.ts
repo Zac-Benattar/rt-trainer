@@ -1,8 +1,8 @@
 import Route from './Route';
 import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
-import type { Aerodrome, METORDataSample, RadioFrequency, Runway } from './SimulatorTypes';
-import { getAbbreviatedCallsign } from './utils';
+import type { Aerodrome, AerodromeStartPoint, METORDataSample, RadioFrequency, Runway } from './SimulatorTypes';
+import { getAbbreviatedCallsign, processString, removePunctuation } from './utils';
 
 export default class CallParsingContext {
 	private radioCall: string;
@@ -44,7 +44,7 @@ export default class CallParsingContext {
 	}
 
 	public getRadioCall(): string {
-		return this.radioCall.trim().toLowerCase();
+		return processString(this.radioCall.trim().toLowerCase());
 	}
 
 	public getSeed(): Seed {
@@ -56,11 +56,11 @@ export default class CallParsingContext {
 	}
 
 	public getPrefix(): string {
-		return this.prefix;
+		return this.prefix.toLowerCase();
 	}
 
 	public getUserCallsign(): string {
-		return this.prefix + ' ' + this.userCallsign;
+		return this.getPrefix() + ' ' + this.userCallsign.toLowerCase();
 	}
 
 	public getUserCallsignModified(): boolean {
@@ -84,7 +84,7 @@ export default class CallParsingContext {
 	}
 
 	public getAircraftType(): string {
-		return this.aircraftType;
+		return this.aircraftType.toLowerCase();
 	}
 
 	public getUnmodifiedRadioCall(): string {
@@ -115,7 +115,7 @@ export default class CallParsingContext {
 		return +this.getRadioCallWord(this.getRadioFrequencyIndex());
 	}
 
-	public radioFrequencyStatedEqualsCurrent(): boolean {
+	public radioFrequencyStatedEqualsCurrent(): boolean {		
 		return this.getRadioFrequencyStated() == this.currentRadioFrequency;
 	}
 
@@ -125,48 +125,48 @@ export default class CallParsingContext {
 
 	public getUserCallsignStartIndexInRadioCall(): number {
 		return this.getRadioCallWords().findIndex(
-			(x) => x == this.getUserCallsign().toLowerCase().split(' ')[0]
+			(x) => x == this.getUserCallsign().split(' ')[0]
 		);
 	}
 
 	public callContainsWord(word: string): boolean {
-		return this.getRadioCallWords().find((x) => x == word) != undefined;
+		return this.getRadioCallWords().find((x) => x == word.toLowerCase()) != undefined;
 	}
 
 	public callContainsWords(words: string[]): boolean {
 		for (let i = 0; i < words.length; i++) {
-			if (this.getRadioCallWords().find((x) => x == words[i]) == undefined) return false;
+			if (this.getRadioCallWords().find((x) => x == words[i].toLowerCase()) == undefined) return false;
 		}
 		return true;
 	}
 
 	public callStartsWithWord(word: string): boolean {
-		return this.getRadioCallWords()[0] == word;
+		return this.getRadioCallWords()[0] == word.toLowerCase();
 	}
 
 	public callStartsWithConsecutiveWords(words: string[]): boolean {
 		for (let i = 0; i < words.length; i++) {
-			if (this.getRadioCallWord(i) != words[i]) return false;
+			if (this.getRadioCallWord(i) != words[i].toLowerCase()) return false;
 		}
 		return true;
 	}
 
 	public callEndsWithWord(word: string): boolean {
-		return this.getRadioCallWords()[this.getRadioCallWordCount() - 1] == word;
+		return this.getRadioCallWords()[this.getRadioCallWordCount() - 1] == word.toLowerCase();
 	}
 
 	public callEndsWithConsecutiveWords(words: string[]): boolean {
 		for (let i = 0; i < words.length; i++) {
-			if (this.getRadioCallWord(this.getRadioCallWordCount() - i - 1) != words[i]) return false;
+			if (this.getRadioCallWord(this.getRadioCallWordCount() - i - 1) != words[i].toLowerCase()) return false;
 		}
 		return true;
 	}
 
 	public callContainsConsecutiveWords(words: string[]): boolean {
-		const startIndex = this.getRadioCallWords().findIndex((x) => x == words[0]);
+		const startIndex = this.getRadioCallWords().findIndex((x) => x == words[0].toLowerCase());
 		if (startIndex == -1) return false;
-		for (let i = 1; i < words.length; i++) {
-			if (this.getRadioCallWord(startIndex + i) != words[i]) return false;
+		for (let i = 0; i < words.length; i++) {
+			if (this.getRadioCallWord(startIndex + i) != words[i].toLowerCase()) return false;
 		}
 		return true;
 	}
@@ -210,17 +210,17 @@ export default class CallParsingContext {
 	public getTargetAllocatedCallsign(): string {
 		if (this.userCallsignModified) {
 			return (
-				this.prefix +
-				getAbbreviatedCallsign(this.seed.scenarioSeed, this.aircraftType, this.userCallsign)
+				this.getPrefix() + " " +
+				getAbbreviatedCallsign(this.seed.scenarioSeed, this.getAircraftType(), this.getUserCallsign())
 			);
 		}
-		return this.prefix + this.userCallsign;
+		return this.getUserCallsign();
 	}
 
 	/* Returns the callsign of the user as they would state it in a radio call.
 	Given that abbreviated callsigns are optional once established both 
 	full and abbreviated versions returned if abbreviation established. */
-	public getValidUserCallsigns(): string[] {
+	private getValidUserCallsigns(): string[] {
 		const callsigns = [this.getUserCallsign(), this.getTargetAllocatedCallsign()];
 		if (callsigns[0] != callsigns[1]) return callsigns;
 		return [callsigns[0]];
@@ -232,6 +232,12 @@ export default class CallParsingContext {
 
 	public getEndAerodrome(): Aerodrome {
 		return Route.getEndAerodrome(this.seed);
+	}
+
+	public getStartAerodromeStartingPoint(): AerodromeStartPoint {
+		return this.getStartAerodrome().startPoints[
+			this.seed.scenarioSeed % this.getStartAerodrome().startPoints.length
+		];
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {

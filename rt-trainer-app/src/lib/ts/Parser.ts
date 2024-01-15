@@ -52,7 +52,7 @@ export default class Parser {
 
 		// If radio frequency not found return an error
 		if (!parseContext.radioFrequencyIsStated()) {
-			return new Mistake(expectedRadioCall, parseContext.getRadioCall(), 'Frequency missing');
+			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Frequency missing');
 		}
 
 		// Convert frequency string to float and check it is a valid frequency and equal to the correct frequency
@@ -61,27 +61,27 @@ export default class Parser {
 			return new Mistake(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
-				'Frequency not recognised'
+				'Remember to include the frequency in your message'
 			);
 		} else if (radioFreqStated != parseContext.getCurrentRadioFrequency()) {
-			return new Mistake(expectedRadioCall, parseContext.getRadioCall(), 'Frequency incorrect');
+			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Check your stated frequency is correct');
 		}
 
 		// Ensure aircraft callsign is present
 		if (!parseContext.callContainsUserCallsign())
-			return new Mistake(expectedRadioCall, parseContext.getRadioCall(), 'Callsign not recognised');
+			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Remember to include your callsign in your call');
 
 		// Check the message contains "radio check"
 		if (!parseContext.callContainsConsecutiveWords(['radio', 'check'])) {
 			return new Mistake(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
-				"Expected 'radio check' in message"
+				"Remember to ask for the 'radio check' in your call"
 			);
 		}
 
 		// Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
-		if (parseContext.radioFrequencyStatedEqualsCurrent()) {
+		if (!parseContext.radioFrequencyStatedEqualsCurrent()) {
 			return new Mistake(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
@@ -178,7 +178,7 @@ export default class Parser {
 
 		if (
 			parseContext.callContainsConsecutiveWords(
-				parseContext.getStartAerodrome().startPointName.split(' ')
+				parseContext.getStartAerodromeStartingPoint().name.split(' ')
 			)
 		) {
 			return new Mistake(

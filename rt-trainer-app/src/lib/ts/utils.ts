@@ -49,7 +49,7 @@ export function processString(str: string): string {
 
 /* Removes all punctuation from a string. */
 export function removePunctuation(str: string): string {
-	return str.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '');
+	return str.replace(/(?<=\d),(?=\d)|[^\d\w\s.-]/g, ' ')
 }
 
 /* Shortens all spaces to a single space. */
