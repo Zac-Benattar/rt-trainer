@@ -1,19 +1,11 @@
-import { Mistake } from './ServerClientTypes';
+import { ServerResponse, type Mistake } from './ServerClientTypes';
 import type { METORDataSample } from './SimulatorTypes';
 import { RoutePointType, type AirbornePoint, type RoutePoint, ParkedPoint } from './RouteStates';
 import type CallParsingContext from './CallParsingContext';
 import { ParkedStage } from './FlightStages';
 
 export default class Parser {
-	public static parseCall(parseContext: CallParsingContext): Mistake | string {
-		if (parseContext.getIsRadioCallEmpty()) {
-			return new Mistake(
-				'',
-				parseContext.getUnmodifiedRadioCall(),
-				'You must say something on the radio'
-			);
-		}
-
+	public static parseCall(parseContext: CallParsingContext): ServerResponse {
 		switch (parseContext.getRoutePoint().pointType) {
 			case RoutePointType.Parked: {
 				const parkedPoint: ParkedPoint = parseContext.getRoutePoint() as ParkedPoint;
@@ -53,230 +45,145 @@ export default class Parser {
 		}
 	}
 
-	public static parseRadioCheck(parseContext: CallParsingContext): Mistake | string {
+	private static checkForMistakes(assertionFunctions: (() => Mistake | undefined)[]): Mistake[] {
+		const mistakes: Mistake[] = [];
+		assertionFunctions.forEach((func) => {
+			const mistake: Mistake | undefined = func();
+			if (mistake != undefined) mistakes.push(mistake);
+		});
+		return mistakes;
+	}
+
+	// Example: Wellesbourne information, student g-ofly, radio check 180.030
+	public static parseRadioCheck(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadioCall: string = `${
 			parseContext.getCurrentTarget().callsign
 		}, ${parseContext.getUserCallsign()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
 
-		// If radio frequency not found return an error
-		if (!parseContext.radioFrequencyIsStated()) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Frequency missing'
-			);
-		}
-
-		// Convert frequency string to float and check it is a valid frequency and equal to the correct frequency
-		const radioFreqStated: number = parseContext.getRadioFrequencyStated();
-		if (isNaN(radioFreqStated)) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include the frequency in your message'
-			);
-		} else if (radioFreqStated != parseContext.getCurrentRadioFrequency()) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Check your stated frequency is correct'
-			);
-		}
-
-		// Ensure aircraft callsign is present
-		if (!parseContext.callContainsUserCallsign())
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your callsign in your call'
-			);
-
-		// Check the message contains "radio check"
-		if (!parseContext.callContainsConsecutiveWords(['radio', 'check'])) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				"Remember to ask for the 'radio check' in your call"
-			);
-		}
-
-		// Trailing 0s lost when frequency string parsed to float, hence comparison of floats rather than strings
-		if (!parseContext.radioFrequencyStatedEqualsCurrent()) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				`Frequency incorrect: ${radioFreqStated} \n Expected: ${parseContext.getCurrentRadioFrequency()}`
-			);
-		}
+		const mistakes: Mistake[] = Parser.checkForMistakes([
+			parseContext.assertCallContainsCurrentRadioFrequency,
+			parseContext.assertCallStartsWithTargetCallsign,
+			parseContext.assertCallContainsUserCallsign,
+			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['radio', 'check'])
+		]);
 
 		// Return ATC response
-		return `${parseContext.getUserCallsign().toUpperCase()}, ${
+		const atcResponse = `${parseContext.getUserCallsign().toUpperCase()}, ${
 			parseContext.getCurrentTarget().callsign
 		}, reading you 5`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
 
-	public static parseDepartureInformationRequest(
-		parseContext: CallParsingContext
-	): Mistake | string {
+	// Example: G-OFly, request taxi
+	public static parseDepartureInformationRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadiocall = `${parseContext
 			.getUserCallsign()
 			.toLowerCase()} request departure information`;
 
-		if (!parseContext.callContainsUserCallsign()) {
-			return new Mistake(
-				expectedRadiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your whole callsign in your message'
-			);
-		}
-
-		if (!parseContext.callContainsConsecutiveWords(['request', 'departure', 'information'])) {
-			return new Mistake(
-				expectedRadiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the departure information request in your message.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithUserCallsign,
+			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, [
+				'request',
+				'departure',
+				'information'
+			])
+		]);
 
 		// Return ATC response
 		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
-		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
+		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
 		}, wind ${metorSample.windDirection} degrees ${metorSample.windSpeed} knots, QNH ${
 			metorSample.pressure
 		}, temperature ${metorSample.temperature} dewpoint ${metorSample.dewpoint}`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedRadiocall);
 	}
 
+	// Example: G-OFly, taxi holding point alpha runway 36 G-OFly
 	public static parseDepartureInformationReadback(
 		parseContext: CallParsingContext
-	): Mistake | string {
+	): ServerResponse {
 		const runwayName: string = parseContext.getStartAerodromeTakeoffRunway().name;
-		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
+		// const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
 
-		const expectedradiocall: string = `${parseContext.getUserCallsign()} runway ${runwayName} qnh ${
-			metorSample.pressure
-		} ${parseContext.getUserCallsign()}`;
+		const expectedRadioCall: string = `${parseContext.getUserCallsign()} runway ${runwayName} ${parseContext.getUserCallsign()}`;
 
-		if (!parseContext.callContainsConsecutiveWords(['qnh', metorSample.pressure.toString()])) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the air pressure in your readback.'
-			);
-		}
+		// const expectedradiocall: string = `${parseContext.getUserCallsign()} runway ${runwayName} qnh ${
+		// 	metorSample.pressure
+		// } ${parseContext.getUserCallsign()}`;
 
-		if (!parseContext.callContainsConsecutiveWords(['runway', runwayName])) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the runway in your readback.'
-			);
-		}
+		// if (!parseContext.callContainsConsecutiveWords(['qnh', metorSample.pressure.toString()])) {
+		// 	return new Mistake(
+		// 		expectedradiocall,
+		// 		parseContext.getUnmodifiedRadioCall(),
+		// 		'Make sure to include the air pressure in your readback.'
+		// 	);
+		// }
+
+		const mistakes: Mistake[] = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithUserCallsign,
+			parseContext.assertCallContainsTakeOffRunwayName
+		]);
 
 		// ATC does not respond to this message
-		return '';
+		return new ServerResponse(mistakes, '', expectedRadioCall);
 	}
 
-	public static parseTaxiRequest(parseContext: CallParsingContext): Mistake | string {
+	public static parseTaxiRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} at ${parseContext.getStartAerodrome()} request taxi VFR to ${parseContext.getEndAerodrome()}`;
 
-		if (!parseContext.callStartsWithUserCallsign()) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your callsign at the start of your message.'
-			);
-		}
-
-		if (!parseContext.callContainsWords(parseContext.getAircraftType().split(' '))) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include the aircraft type in your message.'
-			);
-		}
-
-		if (
-			parseContext.callContainsConsecutiveWords(
-				parseContext.getStartAerodromeStartingPoint().name.split(' ')
-			)
-		) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the start point in your request.'
-			);
-		}
-
-		if (parseContext.callContainsConsecutiveWords(parseContext.getEndAerodrome().name.split(' '))) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the destination in your request.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithTargetCallsign,
+			parseContext.assertCallContainsAircraftType,
+			parseContext.assertCallContainsScenarioStartPoint,
+			parseContext.assertCallContainsStartAerodromeName,
+			parseContext.assertCallContainsEndAerodromeName,
+			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['request', 'taxi'])
+		]);
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, taxi to holding point ${
+		const atcResponse = `${parseContext
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, taxi to holding point ${
 			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
 		}, runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
 			parseContext.getStartAerodromeMETORSample().pressure
 		}`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
 
-	public static parseTaxiReadback(parseContext: CallParsingContext): Mistake | string {
+	public static parseTaxiReadback(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
 			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
 		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${
 			parseContext.getStartAerodromeMETORSample().pressure
 		} ${parseContext.getTargetAllocatedCallsign()}`;
 
-		if (
-			!(
-				parseContext.callContainsConsecutiveWords(['taxi', 'holding', 'point']) ||
-				parseContext.callContainsConsecutiveWords(['taxi', 'to', 'holding', 'point'])
-			)
-		) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the action you are approved for (taxi to holding point) in your readback.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithTargetCallsign,
+			parseContext.assertCallContainsWord.bind(parseContext, 'taxi'),
+			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['holding', 'point']),
+			parseContext.assertCallContainsTakeOffRunwayName,
+			parseContext.assertCallEndsWithUserCallsign
+		]);
 
 		if (
 			!parseContext.callContainsConsecutiveWords(
 				parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name.split(' ')
 			)
 		) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedradiocall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Make sure to include the holding point in your readback.'
 			);
 		}
 
-		if (
-			!parseContext.callContainsConsecutiveWords(
-				parseContext.getStartAerodromeTakeoffRunway().name.split(' ')
-			)
-		) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the runway in your readback.'
-			);
-		}
-
-		if (parseContext.callEndsWithUserCallsign())
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your callsign at the end of your readback.'
-			);
-
 		// ATC does not respond to this message
-		return '';
+		return new ServerResponse(mistakes, '', expectedradiocall);
 	}
 
 	/* Parse initial contact with ATC unit.
@@ -284,42 +191,22 @@ Should consist of ATC callsign and aircraft callsign */
 	public static parseNewAirspaceInitialContact(
 		currentPoint: RoutePoint,
 		parseContext: CallParsingContext
-	): Mistake | string {
+	): ServerResponse {
 		const expectedradiocall: string = `${parseContext
 			.getCurrentTarget()
 			.callsign.toLowerCase()}, ${parseContext.getUserCallsign()}`;
 
-		if (!parseContext.callContainsTargetCallsign()) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include the target callsign at the start of your initial message.'
-			);
-		}
-
-		if (!parseContext.callContainsUserCallsign()) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your own callsign in your initial message.'
-			);
-		}
-
-		if (
-			parseContext.getRadioCallWordCount() >
-			parseContext.getUserCallsignWords().length + parseContext.getTargetCallsignWords().length
-		) {
-			return new Mistake(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Keep your calls brief.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithTargetCallsign,
+			parseContext.assertCallContainsUserCallsign
+		]);
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, ${
+		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, ${
 			parseContext.getCurrentTarget().callsign
 		}.`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
 
 	/* Parse response to ATC unit acknowledging initial contact
@@ -331,7 +218,7 @@ accompanied with the planned times to reach them */
 	public static parseNewAirspaceGiveFlightInformationToATC(
 		currentPoint: AirbornePoint,
 		parseContext: CallParsingContext
-	): Mistake | string {
+	): ServerResponse {
 		const nearestwaypoint: string = 'Test Waypoint';
 		const distancefromnearestwaypoint: number = 0.0;
 		const directiontonearestwaypoint: string = 'Direction';
@@ -346,14 +233,6 @@ accompanied with the planned times to reach them */
 			currentPoint.pose.altitude
 		}, ${nextwaypoint}`;
 
-		if (!parseContext.callStartsWithUserCallsign()) {
-			return new Mistake(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your own callsign at the start of your call.'
-			);
-		}
-
 		// TODO
 		return '';
 	}
@@ -363,11 +242,11 @@ Should consist of aircraft callsign and squark code */
 	public static parseNewAirspaceSquark(
 		sqwarkFrequency: number,
 		parseContext: CallParsingContext
-	): Mistake | string {
+	): ServerResponse {
 		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${parseContext.getTargetAllocatedCallsign()}`;
 
 		if (!parseContext.callStartsWithUserCallsign()) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include your own callsign at the start of your message.'
@@ -375,7 +254,7 @@ Should consist of aircraft callsign and squark code */
 		}
 
 		if (!parseContext.callContainsWord(sqwarkFrequency.toString())) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include the sqwark code at the start of your initial message.'
@@ -388,7 +267,9 @@ Should consist of aircraft callsign and squark code */
 		const nextWayPoint: string = 'Next Waypoint';
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
+		let atcResponse = `${parseContext
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
 	}
 
 	/* Parse Wilco in response to an instruction from ATC unit.
@@ -396,14 +277,14 @@ Should consist of Wilco followed by aircraft callsign */
 	public static parseWILCO(
 		currentPoint: AirbornePoint,
 		parseContext: CallParsingContext
-	): Mistake | string {
+	): ServerResponse {
 		const expectedRadioCall: string = `Wilco, ${parseContext.getTargetAllocatedCallsign()}`;
 
 		if (
 			!parseContext.callStartsWithWord('wilco') ||
 			!parseContext.callStartsWithConsecutiveWords(['will', 'comply'])
 		) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include WILCO (will comply) at the start of your initial message.'
@@ -411,7 +292,7 @@ Should consist of Wilco followed by aircraft callsign */
 		}
 
 		if (!parseContext.callContainsUserCallsign()) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include your own callsign in your message.'
@@ -419,7 +300,7 @@ Should consist of Wilco followed by aircraft callsign */
 		}
 
 		// ATC does not respond to this message
-		return '';
+		
 	}
 
 	/* Parse VFR position report.
@@ -428,7 +309,7 @@ and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
 	/* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
-	public static parseVFRPositionReport(parseContext: CallParsingContext): Mistake | string {
+	public static parseVFRPositionReport(parseContext: CallParsingContext): ServerResponse {
 		if (parseContext.getRoutePoint().waypoint == null) {
 			throw new Error('Waypoint not found');
 		}
@@ -440,7 +321,7 @@ Should consist of Wilco followed by aircraft callsign */
 		}, ${parseContext.getRoutePoint().pose.altitude} feet`;
 
 		if (!parseContext.callContainsUserCallsign()) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include your own callsign at the start of your radio call.'
@@ -452,7 +333,7 @@ Should consist of Wilco followed by aircraft callsign */
 				parseContext.getRoutePoint().waypoint.name.split(' ')
 			)
 		) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include your current location in your radio call.'
@@ -460,7 +341,7 @@ Should consist of Wilco followed by aircraft callsign */
 		}
 
 		if (!parseContext.callContainsWord(parseContext.getRoutePoint().pose.altitude.toString())) {
-			return new Mistake(
+			return new ServerResponse(
 				expectedRadioCall,
 				parseContext.getUnmodifiedRadioCall(),
 				'Remember to include your altitude in your radio call.'
@@ -468,6 +349,6 @@ Should consist of Wilco followed by aircraft callsign */
 		}
 
 		// TODO
-		return '';
+		
 	}
 }
