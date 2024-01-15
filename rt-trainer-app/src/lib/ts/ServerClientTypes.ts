@@ -9,16 +9,22 @@ export type SimulatorSettings = {
 	readRecievedCalls: boolean;
 };
 
-/* The details of a radio call mistake made by the user. */
-export class Mistake {
-	callExpected: string;
-	callFound: string;
+/* Mistake made in the user's call. Description and whether or not ATC can deal with it. */
+export type Mistake = {
 	details: string;
+	severe: boolean;
+};
 
-	constructor(callExpected: string, callFound: string, details: string) {
-		this.callExpected = callExpected;
-		this.callFound = callFound;
-		this.details = details;
+/* List of mistakes made by the user and the response from the radio target */
+export class ServerResponse {
+	mistakes: Mistake[];
+	responseCall: string;
+	expectedUserCall: string;
+
+	constructor(mistakes: Mistake[], responseCall: string, expectedUserCall: string) {
+		this.mistakes = mistakes;
+		this.responseCall = responseCall;
+		this.expectedUserCall = expectedUserCall;
 	}
 }
 

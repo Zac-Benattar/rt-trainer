@@ -6,7 +6,7 @@
 	import MessageOutput from './MessageOutput.svelte';
 	import Kneeboard from './Kneeboard.svelte';
 	import axios from 'axios';
-	import type { Mistake } from '$lib/ts/ServerClientTypes';
+	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
@@ -120,11 +120,12 @@
 		}
 	}
 
-	function isMistake(message: any): message is Mistake {
-		return typeof (message as Mistake).details === 'string';
-	}
-
 	async function handleSubmit() {
+		// Check the call is not empty
+		if (userMessage == '' || userMessage == 'Enter your radio message here.') {
+			return;
+		}
+
 		// Check state matches expected state
 		if (!route) {
 			// Attempt to get state from server
@@ -186,7 +187,7 @@
 				title: 'No response from server',
 				body: 'This may be due to the server being offline or an unrecoverable parsing error encountered by the server. Come back later and try again.'
 			});
-		} else if (isMistake(feedback)) {
+		} else if (feedback.mistakes.length > 0) {
 			// Handle mistake
 
 			// Pop up modal with mistake details
@@ -194,12 +195,12 @@
 				type: 'alert',
 				// Data
 				title: 'Mistake',
-				body: feedback.details
+				body: feedback.mistakes[0].details
 			};
 			modalStore.trigger(modal);
 		} else {
 			// Update the components with the new state
-			ATCMessageStore.set(feedback);
+			ATCMessageStore.set(feedback.responseCall);
 			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 		}
 	}
@@ -235,7 +236,7 @@
 		}
 	}
 
-	async function checkRadioCallByServer(): Promise<string | Mistake | undefined> {
+	async function checkRadioCallByServer(): Promise<ServerResponse | undefined> {
 		if (!route) {
 			console.log('Error: No route');
 			return;
