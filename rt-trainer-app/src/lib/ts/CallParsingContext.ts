@@ -235,8 +235,15 @@ export default class CallParsingContext {
 
 	public assertCallContainsUserCallsign(): Mistake | undefined {
 		if (!this.callContainsUserCallsign()) {
+			if (this.prefix != '') {
+				return {
+					details: 'Make sure your call contains your callsign.',
+					severe: true
+				};
+			}
+
 			return {
-				details: 'Make sure your call contains your callsign.',
+				details: 'Make sure your call contains your callsign, including prefix.',
 				severe: true
 			};
 		}
@@ -245,8 +252,6 @@ export default class CallParsingContext {
 
 	private callStartsWithUserCallsign(): boolean {
 		const validUserCallsigns = this.getValidUserCallsigns();
-		const startIndex = this.getUserCallsignStartIndexInRadioCall();
-		if (startIndex == -1) return false;
 		for (let i = 0; i < validUserCallsigns.length; i++) {
 			if (this.callStartsWithConsecutiveWords(validUserCallsigns[i].split(' '))) return true;
 		}
@@ -424,8 +429,8 @@ export default class CallParsingContext {
 		return;
 	}
 
-	public assertCallContainsCurrentLocation(currentLocation: string): Mistake | undefined {
-		if (!this.callContainsConsecutiveWords(currentLocation.split(' '))) {
+	public assertCallContainsCurrentLocation(): Mistake | undefined {
+		if (!this.callContainsConsecutiveWords(this.getRoutePoint().waypoint.name.split(' '))) {
 			return {
 				details: 'Make sure your call contains the current location.',
 				severe: true
@@ -434,8 +439,11 @@ export default class CallParsingContext {
 		return;
 	}
 
-	public assertCallContainsAltitude(): Mistake | undefined { 
-		if (!this.callContainsWord('altitude') && !this.callContainsWord(this.routePoint.pose.altitude.toString())) {
+	public assertCallContainsAltitude(): Mistake | undefined {
+		if (
+			!this.callContainsWord('altitude') &&
+			!this.callContainsWord(this.routePoint.pose.altitude.toString())
+		) {
 			return {
 				details: 'Make sure your call contains your altitude.',
 				severe: true

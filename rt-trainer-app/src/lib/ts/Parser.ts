@@ -45,10 +45,9 @@ export default class Parser {
 		}
 	}
 
-	private static checkForMistakes(assertionFunctions: (() => Mistake | undefined)[]): Mistake[] {
+	private static checkForMistakes(potentialMistakes: (Mistake | undefined)[]): Mistake[] {
 		const mistakes: Mistake[] = [];
-		assertionFunctions.forEach((func) => {
-			const mistake: Mistake | undefined = func();
+		potentialMistakes.forEach((mistake) => {
 			if (mistake != undefined) mistakes.push(mistake);
 		});
 		return mistakes;
@@ -61,10 +60,10 @@ export default class Parser {
 		}, ${parseContext.getUserCallsign()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
-			parseContext.assertCallContainsCurrentRadioFrequency,
-			parseContext.assertCallStartsWithTargetCallsign,
-			parseContext.assertCallContainsUserCallsign,
-			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['radio', 'check'])
+			parseContext.assertCallContainsCurrentRadioFrequency(),
+			parseContext.assertCallStartsWithTargetCallsign(),
+			parseContext.assertCallContainsUserCallsign(),
+			parseContext.assertCallContainsConsecutiveWords(['radio', 'check'])
 		]);
 
 		// Return ATC response
@@ -75,15 +74,15 @@ export default class Parser {
 		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
 
-	// Example: G-OFly, request taxi
+	// Example: student G-OFLY, request departure information
 	public static parseDepartureInformationRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadiocall = `${parseContext
 			.getUserCallsign()
 			.toLowerCase()} request departure information`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithUserCallsign,
-			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, [
+			parseContext.assertCallStartsWithUserCallsign(),
+			parseContext.assertCallContainsConsecutiveWords([
 				'request',
 				'departure',
 				'information'
@@ -94,9 +93,9 @@ export default class Parser {
 		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
 		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
-		}, wind ${metorSample.windDirection} degrees ${metorSample.windSpeed} knots, QNH ${
-			metorSample.pressure
-		}, temperature ${metorSample.temperature} dewpoint ${metorSample.dewpoint}`;
+		}, wind ${metorSample.windDirection.toFixed(0)} degrees ${metorSample.windSpeed.toFixed(0)} knots, QNH ${
+			metorSample.pressure.toFixed(0)
+		}, temperature ${metorSample.temperature.toFixed(0)} dewpoint ${metorSample.dewpoint.toFixed(0)}`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedRadiocall);
 	}
@@ -123,8 +122,8 @@ export default class Parser {
 		// }
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithUserCallsign,
-			parseContext.assertCallContainsTakeOffRunwayName
+			parseContext.assertCallStartsWithUserCallsign(),
+			parseContext.assertCallContainsTakeOffRunwayName()
 		]);
 
 		// ATC does not respond to this message
@@ -135,12 +134,12 @@ export default class Parser {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} at ${parseContext.getStartAerodrome()} request taxi VFR to ${parseContext.getEndAerodrome()}`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithTargetCallsign,
-			parseContext.assertCallContainsAircraftType,
-			parseContext.assertCallContainsScenarioStartPoint,
-			parseContext.assertCallContainsStartAerodromeName,
-			parseContext.assertCallContainsEndAerodromeName,
-			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['request', 'taxi'])
+			parseContext.assertCallStartsWithTargetCallsign(),
+			parseContext.assertCallContainsAircraftType(),
+			parseContext.assertCallContainsScenarioStartPoint(),
+			parseContext.assertCallContainsStartAerodromeName(),
+			parseContext.assertCallContainsEndAerodromeName(),
+			parseContext.assertCallContainsConsecutiveWords(['request', 'taxi'])
 		]);
 
 		// Return ATC response
@@ -163,12 +162,12 @@ export default class Parser {
 		} ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithTargetCallsign,
-			parseContext.assertCallContainsWord.bind(parseContext, 'taxi'),
-			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['holding', 'point']),
-			parseContext.assertCallContainsTakeOffRunwayName,
-			parseContext.assertCallEndsWithUserCallsign,
-			parseContext.assertCallContainsTakeOffRunwayHoldingPoint
+			parseContext.assertCallStartsWithTargetCallsign(),
+			parseContext.assertCallContainsWord( 'taxi'),
+			parseContext.assertCallContainsConsecutiveWords( ['holding', 'point']),
+			parseContext.assertCallContainsTakeOffRunwayName(),
+			parseContext.assertCallEndsWithUserCallsign(),
+			parseContext.assertCallContainsTakeOffRunwayHoldingPoint()
 		]);
 
 		// ATC does not respond to this message
@@ -186,8 +185,8 @@ Should consist of ATC callsign and aircraft callsign */
 			.callsign.toLowerCase()}, ${parseContext.getUserCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithTargetCallsign,
-			parseContext.assertCallContainsUserCallsign
+			parseContext.assertCallStartsWithTargetCallsign(),
+			parseContext.assertCallContainsUserCallsign()
 		]);
 
 		// Return ATC response
@@ -235,8 +234,8 @@ Should consist of aircraft callsign and squark code */
 		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallContainsSqwarkCode,
-			parseContext.assertCallContainsUserCallsign
+			parseContext.assertCallContainsSqwarkCode(),
+			parseContext.assertCallContainsUserCallsign()
 		]);
 
 		const nearestWaypoint: string = 'Test Waypoint';
@@ -261,8 +260,8 @@ Should consist of Wilco followed by aircraft callsign */
 		const expectedRadioCall: string = `Wilco, ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithWilco,
-			parseContext.assertCallContainsUserCallsign
+			parseContext.assertCallStartsWithWilco(),
+			parseContext.assertCallContainsUserCallsign()
 		]);
 
 		// ATC does not respond to this message
@@ -285,10 +284,9 @@ if (not in level flight. */
 		}, ${parseContext.getRoutePoint().pose.altitude} feet`;
 
 		const mistakes = Parser.checkForMistakes([
-			parseContext.assertCallStartsWithUserCallsign,
-			parseContext.assertCallContainsCurrentLocation.bind(parseContext, parseContext.getRoutePoint().waypoint.name),
-			parseContext.assertCallContainsWord.bind(parseContext, 'overhead'),
-			parseContext.assertCallContainsAltitude
+			parseContext.assertCallStartsWithUserCallsign(),
+			parseContext.assertCallContainsCurrentLocation(),
+			parseContext.assertCallContainsAltitude()
 		]); 
 
 		// TODO

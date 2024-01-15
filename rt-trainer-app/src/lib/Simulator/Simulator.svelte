@@ -178,8 +178,8 @@
 		}
 
 		// Send message to server
-		let feedback = await checkRadioCallByServer();
-		if (feedback === undefined) {
+		let serverResponse = await checkRadioCallByServer();
+		if (serverResponse === undefined) {
 			// Handle error
 			serverNotResponding = true;
 			modalStore.trigger({
@@ -187,7 +187,13 @@
 				title: 'No response from server',
 				body: 'This may be due to the server being offline or an unrecoverable parsing error encountered by the server. Come back later and try again.'
 			});
-		} else if (feedback.mistakes.length > 0) {
+
+			return;
+		}
+
+		serverNotResponding = false;
+
+		if (serverResponse.mistakes.length > 0) {
 			// Handle mistake
 
 			// Pop up modal with mistake details
@@ -195,12 +201,13 @@
 				type: 'alert',
 				// Data
 				title: 'Mistake',
-				body: feedback.mistakes[0].details
+				body: serverResponse.mistakes[0].details
 			};
 			modalStore.trigger(modal);
 		} else {
-			// Update the components with the new state
-			ATCMessageStore.set(feedback.responseCall);
+			// Update the simulator with the next route point
+			currentPointIndex++;
+			ATCMessageStore.set(serverResponse.responseCall);
 			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 		}
 	}
@@ -209,13 +216,13 @@
 		// Get the state from the server
 		route = await getRouteFromServer();
 
-		// Update the components with the new state
 		if (route === undefined) {
 			// Handle error
 			serverNotResponding = true;
 
 			return 0;
 		} else {
+			// Update stores with the route
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
