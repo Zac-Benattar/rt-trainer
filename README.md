@@ -10,11 +10,11 @@ This repository is inspired by a starter pack repository of resources for CS310 
 - Generic advice for writing the reports.
 ## Installing and Running the System
 - Clone the repo into a local folder.
-- Install Node.js (https://nodejs.org/en) and npm (should be installed with nodejs), you may need to restart your terminal to use npm.
+- Install Node.js (https://nodejs.org/) and npm (should be installed with nodejs), you may need to restart your terminal to use npm.
 - From the `rt-trainer-app` directory run the following commands in a terminal to start the front-end:
 	- Install the required dependencies: `npm install`
-	- Run the front-end webserver on `localhost:5173/`: `npx vite` 
-### LaTeX documents
+	- Run the front-end webserver: `npx vite` 
+## LaTeX documents
 The TeX documents in this repository have all been written using Overleaf's online editor (https://www.overleaf.com/) for simplicity, and GitHub Sync (https://www.overleaf.com/learn/how-to/GitHub_Synchronization) has been used to keep the repository up to date. This can interfere with the GitHub actions compliation, as Overleaf is more compliant with errors and warnings. Hence it may be easier to view the TeX documents in Overleaf than try compile locally.
 ### Continuous Integration
 This repository is configured with [GitHub Actions](https://docs.github.com/en/actions) workflows which will builds reports every time changes are pushed. For example, if you change `specification/specification.tex` locally, commit your changes, and push them to GitHub, then the workflow defined in `.github/workflows/specification.yml` will run and build your specification for you. If the build is successful, the resulting PDF will be uploaded as a build artefact and can be downloaded from the summary page of the corresponding job.
