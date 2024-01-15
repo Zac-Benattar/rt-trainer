@@ -10,14 +10,18 @@
 	let readRecievedCalls: boolean = false;
 	const modalStore = getModalStore();
 
+	SettingsStore.subscribe((settings) => {
+		unexpectedEvents = settings.unexpectedEvents;
+		speechInput = settings.speechInput;
+		readRecievedCalls = settings.readRecievedCalls;
+	});
+
 	function updateSettings() {
 		SettingsStore.set({
 			unexpectedEvents: unexpectedEvents,
 			speechInput: speechInput,
 			readRecievedCalls: readRecievedCalls
 		});
-
-		console.log('Updated settings');
 	}
 </script>
 
