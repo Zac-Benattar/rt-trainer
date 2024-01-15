@@ -110,7 +110,7 @@ export default class Parser {
 		}
 
 		// Return ATC response
-		return `${parseContext.getUserCallsign()}, ${
+		return `${parseContext.getUserCallsign().toUpperCase()}, ${
 			parseContext.getCurrentTarget().callsign
 		}, reading you 5`;
 	}
@@ -140,7 +140,7 @@ export default class Parser {
 
 		// Return ATC response
 		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
-		return `${parseContext.getTargetAllocatedCallsign()}, runway ${
+		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
 		}, wind ${metorSample.windDirection} degrees ${metorSample.windSpeed} knots, QNH ${
 			metorSample.pressure
@@ -217,7 +217,7 @@ export default class Parser {
 		}
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign()}, taxi to holding point ${
+		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, taxi to holding point ${
 			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
 		}, runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
 			parseContext.getStartAerodromeMETORSample().pressure
@@ -317,7 +317,7 @@ Should consist of ATC callsign and aircraft callsign */
 		}
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign()}, ${
+		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, ${
 			parseContext.getCurrentTarget().callsign
 		}.`;
 	}
@@ -388,7 +388,7 @@ Should consist of aircraft callsign and squark code */
 		const nextWayPoint: string = 'Next Waypoint';
 
 		// Return ATC response
-		return `${parseContext.getTargetAllocatedCallsign()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
+		return `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
 	}
 
 	/* Parse Wilco in response to an instruction from ATC unit.

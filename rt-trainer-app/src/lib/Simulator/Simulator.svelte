@@ -6,9 +6,7 @@
 	import MessageOutput from './MessageOutput.svelte';
 	import Kneeboard from './Kneeboard.svelte';
 	import axios from 'axios';
-	import type {
-		Mistake,
-	} from '$lib/ts/ServerClientTypes';
+	import type { Mistake } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings } from '@skeletonlabs/skeleton';
@@ -179,15 +177,14 @@
 		}
 
 		// Send message to server
-		let feedback = await checkRadioCall();
-		console.log('Received state: ', feedback);
+		let feedback = await checkRadioCallByServer();
 		if (feedback === undefined) {
 			// Handle error
 			serverNotResponding = true;
 			modalStore.trigger({
 				type: 'alert',
-				title: 'Connection to server failed',
-				body: 'This may be due to the server being offline. Come back later and try again.'
+				title: 'No response from server',
+				body: 'This may be due to the server being offline or an unrecoverable parsing error encountered by the server. Come back later and try again.'
 			});
 		} else if (isMistake(feedback)) {
 			// Handle mistake
@@ -209,7 +206,7 @@
 
 	async function initiateScenario() {
 		// Get the state from the server
-		route = await getRoute();
+		route = await getRouteFromServer();
 
 		// Update the components with the new state
 		if (route === undefined) {
@@ -218,24 +215,18 @@
 
 			return 0;
 		} else {
-			console.log('Initial Stage:', route[0]);
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
 		}
 	}
 
-	async function getRoute(): Promise<RoutePoint[] | undefined> {
+	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
-			const response = await axios.get(`/scenario/seed=${seed.scenarioSeed}`, {
-				headers: {
-					'Content-Type': 'application/json'
-					// 'Access-Control-Allow-Origin': '*'
-				}
-			});
+			const response = await axios.get(`/scenario/seed=${seed.scenarioSeed}`);
 
 			return response.data;
-		} catch (error) {
+		} catch (error: any) {
 			if (error.message === 'Network Error') {
 				serverNotResponding = true;
 			} else {
@@ -244,7 +235,7 @@
 		}
 	}
 
-	async function checkRadioCall(): Promise<string | Mistake | undefined> {
+	async function checkRadioCallByServer(): Promise<string | Mistake | undefined> {
 		if (!route) {
 			console.log('Error: No route');
 			return;
@@ -265,25 +256,11 @@
 				aircraftType: simulatorSettings.aircraftType
 			};
 
-			console.log('Sending call: ', callParsingContext);
-
 			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
 				data: callParsingContext
 			});
 
-			console.log(response.data);
-
-			if (response.data.callExpected != undefined) {
-				// Response is a mistake
-				return response.data as Mistake;
-			} else if (response.data.atcCall != undefined) {
-				// Response atc call
-				return response.data as string;
-			} else {
-				// Server failure
-				serverNotResponding = true;
-				return;
-			}
+			return response.data;
 		} catch (error) {
 			console.error('Error: ', error);
 		}
