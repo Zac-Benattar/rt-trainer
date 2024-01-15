@@ -167,20 +167,9 @@ export default class Parser {
 			parseContext.assertCallContainsWord.bind(parseContext, 'taxi'),
 			parseContext.assertCallContainsConsecutiveWords.bind(parseContext, ['holding', 'point']),
 			parseContext.assertCallContainsTakeOffRunwayName,
-			parseContext.assertCallEndsWithUserCallsign
+			parseContext.assertCallEndsWithUserCallsign,
+			parseContext.assertCallContainsTakeOffRunwayHoldingPoint
 		]);
-
-		if (
-			!parseContext.callContainsConsecutiveWords(
-				parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name.split(' ')
-			)
-		) {
-			return new ServerResponse(
-				expectedradiocall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Make sure to include the holding point in your readback.'
-			);
-		}
 
 		// ATC does not respond to this message
 		return new ServerResponse(mistakes, '', expectedradiocall);
@@ -245,21 +234,10 @@ Should consist of aircraft callsign and squark code */
 	): ServerResponse {
 		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${parseContext.getTargetAllocatedCallsign()}`;
 
-		if (!parseContext.callStartsWithUserCallsign()) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your own callsign at the start of your message.'
-			);
-		}
-
-		if (!parseContext.callContainsWord(sqwarkFrequency.toString())) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include the sqwark code at the start of your initial message.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallContainsSqwarkCode,
+			parseContext.assertCallContainsUserCallsign
+		]);
 
 		const nearestWaypoint: string = 'Test Waypoint';
 		const distanceFromNearestWaypoint: number = 0.0;
@@ -267,9 +245,11 @@ Should consist of aircraft callsign and squark code */
 		const nextWayPoint: string = 'Next Waypoint';
 
 		// Return ATC response
-		let atcResponse = `${parseContext
+		const atcResponse = `${parseContext
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
 
 	/* Parse Wilco in response to an instruction from ATC unit.
@@ -280,35 +260,19 @@ Should consist of Wilco followed by aircraft callsign */
 	): ServerResponse {
 		const expectedRadioCall: string = `Wilco, ${parseContext.getTargetAllocatedCallsign()}`;
 
-		if (
-			!parseContext.callStartsWithWord('wilco') ||
-			!parseContext.callStartsWithConsecutiveWords(['will', 'comply'])
-		) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include WILCO (will comply) at the start of your initial message.'
-			);
-		}
-
-		if (!parseContext.callContainsUserCallsign()) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your own callsign in your message.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithWilco,
+			parseContext.assertCallContainsUserCallsign
+		]);
 
 		// ATC does not respond to this message
-		
+		return new ServerResponse(mistakes, '', expectedRadioCall);
 	}
 
 	/* Parse VFR position report.
 Should contain the aircraft callsign, location relative to a waypoint,
 and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
-	/* Parse Wilco in response to an instruction from ATC unit.
-Should consist of Wilco followed by aircraft callsign */
 	public static parseVFRPositionReport(parseContext: CallParsingContext): ServerResponse {
 		if (parseContext.getRoutePoint().waypoint == null) {
 			throw new Error('Waypoint not found');
@@ -320,35 +284,13 @@ Should consist of Wilco followed by aircraft callsign */
 			parseContext.getRoutePoint().waypoint.name
 		}, ${parseContext.getRoutePoint().pose.altitude} feet`;
 
-		if (!parseContext.callContainsUserCallsign()) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your own callsign at the start of your radio call.'
-			);
-		}
-
-		if (
-			!parseContext.callContainsConsecutiveWords(
-				parseContext.getRoutePoint().waypoint.name.split(' ')
-			)
-		) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your current location in your radio call.'
-			);
-		}
-
-		if (!parseContext.callContainsWord(parseContext.getRoutePoint().pose.altitude.toString())) {
-			return new ServerResponse(
-				expectedRadioCall,
-				parseContext.getUnmodifiedRadioCall(),
-				'Remember to include your altitude in your radio call.'
-			);
-		}
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithUserCallsign,
+			parseContext.assertCallContainsCurrentLocation.bind(parseContext, parseContext.getRoutePoint().waypoint.name),
+			parseContext.assertCallContainsWord.bind(parseContext, 'overhead'),
+			parseContext.assertCallContainsAltitude
+		]); 
 
 		// TODO
-		
 	}
 }

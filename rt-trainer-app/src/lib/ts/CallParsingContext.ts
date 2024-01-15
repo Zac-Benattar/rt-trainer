@@ -403,4 +403,54 @@ export default class CallParsingContext {
 		}
 		return;
 	}
+
+	public assertCallContainsSqwarkCode(): Mistake | undefined {
+		if (!this.callContainsConsecutiveWords(['squawk', this.currentTransponderFrequency + ''])) {
+			return {
+				details: 'Make sure your call contains the squawk code.',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	public assertCallStartsWithWilco(): Mistake | undefined {
+		if (!this.callStartsWithWord('wilco')) {
+			return {
+				details: 'Make sure your call starts with WILCO (will comply).',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsCurrentLocation(currentLocation: string): Mistake | undefined {
+		if (!this.callContainsConsecutiveWords(currentLocation.split(' '))) {
+			return {
+				details: 'Make sure your call contains the current location.',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsAltitude(): Mistake | undefined { 
+		if (!this.callContainsWord('altitude') && !this.callContainsWord(this.routePoint.pose.altitude.toString())) {
+			return {
+				details: 'Make sure your call contains your altitude.',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsTakeOffRunwayHoldingPoint(): Mistake | undefined {
+		if (!this.getStartAerodromeTakeoffRunway().holdingPoints[0].name.split(' ')) {
+			return {
+				details: 'Make sure your call contains the current holding point.',
+				severe: true
+			};
+		}
+		return;
+	}
 }
