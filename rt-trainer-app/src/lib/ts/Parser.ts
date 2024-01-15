@@ -6,6 +6,14 @@ import { ParkedStage } from './FlightStages';
 
 export default class Parser {
 	public static parseCall(parseContext: CallParsingContext): Mistake | string {
+		if (parseContext.getIsRadioCallEmpty()) {
+			return new Mistake(
+				'',
+				parseContext.getUnmodifiedRadioCall(),
+				'You must say something on the radio'
+			);
+		}
+
 		switch (parseContext.getRoutePoint().pointType) {
 			case RoutePointType.Parked: {
 				const parkedPoint: ParkedPoint = parseContext.getRoutePoint() as ParkedPoint;
@@ -52,7 +60,11 @@ export default class Parser {
 
 		// If radio frequency not found return an error
 		if (!parseContext.radioFrequencyIsStated()) {
-			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Frequency missing');
+			return new Mistake(
+				expectedRadioCall,
+				parseContext.getUnmodifiedRadioCall(),
+				'Frequency missing'
+			);
 		}
 
 		// Convert frequency string to float and check it is a valid frequency and equal to the correct frequency
@@ -64,12 +76,20 @@ export default class Parser {
 				'Remember to include the frequency in your message'
 			);
 		} else if (radioFreqStated != parseContext.getCurrentRadioFrequency()) {
-			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Check your stated frequency is correct');
+			return new Mistake(
+				expectedRadioCall,
+				parseContext.getUnmodifiedRadioCall(),
+				'Check your stated frequency is correct'
+			);
 		}
 
 		// Ensure aircraft callsign is present
 		if (!parseContext.callContainsUserCallsign())
-			return new Mistake(expectedRadioCall, parseContext.getUnmodifiedRadioCall(), 'Remember to include your callsign in your call');
+			return new Mistake(
+				expectedRadioCall,
+				parseContext.getUnmodifiedRadioCall(),
+				'Remember to include your callsign in your call'
+			);
 
 		// Check the message contains "radio check"
 		if (!parseContext.callContainsConsecutiveWords(['radio', 'check'])) {

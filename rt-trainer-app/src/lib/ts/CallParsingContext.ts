@@ -91,6 +91,10 @@ export default class CallParsingContext {
 		return this.radioCall;
 	}
 
+	public getIsRadioCallEmpty() {
+		return this.getRadioCall() == '' || this.getRadioCall().length == 0;
+	}
+
 	public getRadioCallWords(): string[] {
 		return this.getRadioCall().split(' ');
 	}
