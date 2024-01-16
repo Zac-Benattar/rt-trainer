@@ -4,7 +4,7 @@
 	import RadioDisplay from './RadioDisplay.svelte';
 	import TransmitButton from './TransmitButton.svelte';
 	import { RadioStateStore } from '$lib/stores';
-	import type { RadioState } from '$lib/ts/ServerClientTypes';
+	import type { RadioState } from '$lib/ts/SimulatorTypes';
 
 	var RadioDialModes: ArrayMaxLength7MinLength2 = ['OFF', 'SBY'];
 	type ArrayMaxLength7MinLength2 = readonly [
@@ -113,15 +113,11 @@
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall() {
-		radioState.standbyFrequency = parseFloat(
-			(radioState.standbyFrequency + 0.005).toPrecision(6)
-		);
+		radioState.standbyFrequency = parseFloat((radioState.standbyFrequency + 0.005).toPrecision(6));
 	}
 
 	function onRadioFrequencyReduceSmall() {
-		radioState.standbyFrequency = parseFloat(
-			(radioState.standbyFrequency - 0.005).toPrecision(6)
-		);
+		radioState.standbyFrequency = parseFloat((radioState.standbyFrequency - 0.005).toPrecision(6));
 	}
 </script>
 
@@ -160,10 +156,10 @@
 	<div class="right-container absolute inset-y-0 right-0">
 		<DoubleFrequencyDial
 			DialEnabled={frequencyDialEnabled}
-			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceLarge}
-			on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseLarge}
-			on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceSmall}
-			on:dialOuterClockwiseTurn={onRadioFrequencyIncreaseSmall}
+			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceSmall}
+			on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseSmall}
+			on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceLarge}
+			on:dialOuterClockwiseTurn={onRadioFrequencyIncreaseLarge}
 		/>
 	</div>
 </div>

@@ -1,15 +1,19 @@
 <script lang="ts">
 	import '../app.postcss';
-	import { AppShell } from '@skeletonlabs/skeleton';
-	import { autoModeWatcher } from '@skeletonlabs/skeleton';
 	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
-	import { initializeStores, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
+	import {
+		AppShell,
+		autoModeWatcher,
+		initializeStores,
+		Drawer,
+		getDrawerStore,
+		storePopup,
+		Modal,
+		Toast
+	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-	import { storePopup } from '@skeletonlabs/skeleton';
 	import Navigation from '$lib/Sidebars/NavigationSidebar.svelte';
-	import type { AircraftDetails } from '$lib/ts/ServerClientTypes';
-	import { Modal } from '@skeletonlabs/skeleton';
 	import SimulatorSettingsSidebar from '$lib/Sidebars/SimulatorSettingsSidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
@@ -67,6 +71,8 @@
 </Drawer>
 
 <Modal />
+
+<Toast />
 
 <!-- App Shell -->
 <AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>

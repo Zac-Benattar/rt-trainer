@@ -40,6 +40,7 @@
 				unexpectedEvents = !unexpectedEvents;
 				updateSettings();
 			}}
+			disabled
 			>Unexpected events
 		</SlideToggle>
 	</Tooltip>

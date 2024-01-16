@@ -8,8 +8,8 @@
 	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
-	import { getModalStore } from '@skeletonlabs/skeleton';
-	import type { ModalSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
+	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
 	import {
 		SettingsStore,
 		RadioStateStore,
@@ -57,6 +57,7 @@
 	let serverNotResponding: boolean = false;
 
 	const modalStore = getModalStore();
+	const toastStore = getToastStore();
 
 	$: if (serverNotResponding) {
 		modalStore.trigger({
@@ -205,6 +206,11 @@
 			};
 			modalStore.trigger(modal);
 		} else {
+			const t: ToastSettings = {
+				message: 'Correct!'
+			};
+			toastStore.trigger(t);
+
 			// Update the simulator with the next route point
 			currentPointIndex++;
 			ATCMessageStore.set(serverResponse.responseCall);
