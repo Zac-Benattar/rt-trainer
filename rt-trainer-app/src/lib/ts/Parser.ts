@@ -74,7 +74,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
 
-	// Example: student G-OFLY, request departure information
+	// Example: Student G-OFLY, request departure information
 	public static parseDepartureInformationRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadiocall = `${parseContext
 			.getUserCallsign()
@@ -98,7 +98,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, atcResponse, expectedRadiocall);
 	}
 
-	// Example: G-OFly, taxi holding point alpha runway 36 G-OFly
+	// Example: Runway 24, QNH 1013, student G-OFLY
 	public static parseDepartureInformationReadback(
 		parseContext: CallParsingContext
 	): ServerResponse {
@@ -118,6 +118,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedRadioCall);
 	}
 
+	// Example: student G-OFLY, by the south side hangers, request taxi for vfr flight to birmingham
 	public static parseTaxiRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} at ${parseContext.getStartAerodrome()} request taxi VFR to ${parseContext.getEndAerodrome()}`;
 

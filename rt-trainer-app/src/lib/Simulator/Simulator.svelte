@@ -48,6 +48,7 @@
 	let readRecievedCalls: boolean = false;
 
 	// Server state
+	let awaitingRadioCallCheck: boolean = false;
 	let serverNotResponding: boolean = false;
 
 	const modalStore = getModalStore();
@@ -116,6 +117,9 @@
 	}
 
 	async function handleSubmit() {
+		// Prevent race conditions from multiple calls
+		if (awaitingRadioCallCheck) return;
+
 		// Check the call is not empty
 		if (userMessage == '' || userMessage == 'Enter your radio message here.') {
 			return;
@@ -173,7 +177,9 @@
 		}
 
 		// Send message to server
+		awaitingRadioCallCheck = true;
 		let serverResponse = await checkRadioCallByServer();
+		awaitingRadioCallCheck = false;
 		if (serverResponse === undefined) {
 			// Handle error
 			serverNotResponding = true;
