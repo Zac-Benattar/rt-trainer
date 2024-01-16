@@ -49,7 +49,7 @@ export function processString(str: string): string {
 
 /* Removes all punctuation from a string. */
 export function removePunctuation(str: string): string {
-	return str.replace(/(?<=\d),(?=\d)|[^\d\w\s.-]/g, ' ')
+	return str.replace(/(?<=\d),(?=\d)|[^\d\w\s.-]/g, ' ');
 }
 
 /* Shortens all spaces to a single space. */
@@ -108,28 +108,28 @@ export function replacePhoneticAlphabetDecimalWithNumber(str: string): string {
 	return str.replace(/(\d{3}) decimal (\d{3})/g, '$1.$2');
 }
 
-export function replacePhoneticAlphabetWithChars(str: string) : string {
-    const phoneticAlphabetMapping = {
-        alpha: 'A',
-        bravo: 'B',
-        charlie: 'C',
-        delta: 'D',
-        echo: 'E',
+export function replacePhoneticAlphabetWithChars(str: string): string {
+	const phoneticAlphabetMapping = {
+		alpha: 'A',
+		bravo: 'B',
+		charlie: 'C',
+		delta: 'D',
+		echo: 'E',
 		foxtrot: 'F',
 		golf: 'G',
 		hotel: 'H',
 		india: 'I',
-		juliet: 'J',
-    };
+		juliet: 'J'
+	};
 
-    // Create a regular expression pattern to match any of the phonetic alphabet words
-    const pattern = new RegExp(Object.keys(phoneticAlphabetMapping).join('|'), 'gi');
+	// Create a regular expression pattern to match any of the phonetic alphabet words
+	const pattern = new RegExp(Object.keys(phoneticAlphabetMapping).join('|'), 'gi');
 
-    // Replace occurrences of phonetic alphabet words with their corresponding characters
-    return str.replace(pattern, match => phoneticAlphabetMapping[match.toLowerCase()]).trim();
+	// Replace occurrences of phonetic alphabet words with their corresponding characters
+	return str.replace(pattern, (match) => phoneticAlphabetMapping[match.toLowerCase()]).trim();
 }
 
-export function replaceWithPhoneticAlphabet(text:string) {
+export function replaceWithPhoneticAlphabet(text: string) {
 	const phoneticAlphabet = {
 		A: 'Alpha',
 		B: 'Bravo',

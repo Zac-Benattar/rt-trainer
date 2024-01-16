@@ -8,7 +8,7 @@
 		setDetailsStorePrefix,
 		AircraftDetailsStore
 	} from '$lib/stores';
-	import type { AircraftDetails } from '$lib/ts/ServerClientTypes';
+	import type { AircraftDetails } from '$lib/ts/SimulatorTypes';
 
 	let mounted: boolean = false;
 	let prefixInputElement: HTMLInputElement;
@@ -42,7 +42,9 @@
 				prefixInputElement.value == 'STUDENT' ||
 				prefixInputElement.value == 'HELICOPTER' ||
 				prefixInputElement.value == 'POLICE' ||
-				prefixInputElement.value == 'SUPER')
+				prefixInputElement.value == 'SUPER' ||
+				prefixInputElement.value == 'FASTJET' ||
+				prefixInputElement.value == 'FASTPROP')
 		) {
 			setDetailsStorePrefix(prefixInputElement.value);
 		}

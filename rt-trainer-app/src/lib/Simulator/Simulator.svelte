@@ -26,12 +26,7 @@
 	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
-	import type {
-		TransponderState,
-		AircraftDetails,
-		RadioState,
-		RadioFrequency
-	} from '$lib/ts/SimulatorTypes';
+	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 
 	// Simulator state and settings
@@ -39,7 +34,6 @@
 	let simulatorSettings: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
-	let currentTarget: RadioFrequency;
 	let atcMessage: string;
 	let userMessage: string;
 	let kneeboardText: string = 'Make notes here.';

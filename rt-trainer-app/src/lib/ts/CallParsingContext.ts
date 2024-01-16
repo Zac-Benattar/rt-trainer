@@ -419,10 +419,23 @@ export default class CallParsingContext {
 		return;
 	}
 
-	public assertCallStartsWithWilco(): Mistake | undefined {
+	public assertWILCOCallCorrect(): Mistake | undefined {
 		if (!this.callStartsWithWord('wilco')) {
 			return {
 				details: 'Make sure your call starts with WILCO (will comply).',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	public assertRogerCallCorrect(): Mistake | undefined {
+		if (
+			!this.callContainsConsecutiveWords(['roger', this.getTargetAllocatedCallsign()]) ||
+			!(this.callStartsWithUserCallsign() && this.getRadioCallWordCount() == 1)
+		) {
+			return {
+				details: 'Make sure your call starts with ROGER (message received).',
 				severe: true
 			};
 		}
@@ -458,6 +471,26 @@ export default class CallParsingContext {
 				details: 'Make sure your call contains the current holding point.',
 				severe: true
 			};
+		}
+		return;
+	}
+
+	public assertCallContainsPressure(): Mistake | undefined {
+		const pressureSample = this.getStartAerodromeMETORSample().pressure;
+		if (pressureSample > 1000) {
+			if (!this.callContainsConsecutiveWords(['qnh', pressureSample.toString()])) {
+				return {
+					details: 'Make sure your call contains the air pressure.',
+					severe: false
+				};
+			}
+		} else {
+			if (!this.callContainsConsecutiveWords(['qnh', pressureSample.toString(), 'millibars'])) {
+				return {
+					details: 'Make sure your call contains the air pressure.',
+					severe: false
+				};
+			}
 		}
 		return;
 	}
