@@ -132,17 +132,20 @@ export default class Parser {
 		]);
 
 		// Return ATC response
-		const atcResponse = `${parseContext
+		const pressure = parseContext.getStartAerodromeMETORSample().pressure;
+		let atcResponse = `${parseContext
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
 			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
-		}, runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
+		} via taxiway charlie. Hold short of runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
 			parseContext.getStartAerodromeMETORSample().pressure
 		}`;
+		if (pressure < 1000) atcResponse += ' millibars';
 
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
 
+	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, student G-OFLY
 	public static parseTaxiReadback(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
 			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
@@ -163,7 +166,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedradiocall);
 	}
 
-	/* Parse initial contact with ATC unit.
+	/* Parse initial contact with new ATC unit.
 Should consist of ATC callsign and aircraft callsign */
 	public static parseNewAirspaceInitialContact(
 		currentPoint: RoutePoint,
