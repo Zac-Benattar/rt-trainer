@@ -39,10 +39,6 @@
 				waypoints.push({ lat: routePoints[i].waypoint.location.lat, long: routePoints[i].waypoint.location.long, name: routePoints[i].waypoint.name });
 			}
 		}
-
-		if (mounted) {
-			loadMapScenario();
-		}
 	});
 
 	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
@@ -51,6 +47,8 @@
 
 			if (mounted) {
 				updateMap();
+			} else {
+
 			}
 		} else {
 			targetPose = {
@@ -66,6 +64,10 @@
 	});
 
 	async function loadMapScenario() {
+		if (map) {
+			map.remove();
+		}
+
 		FlightInformationTextBox = L.Control.extend({
 			onAdd: function () {
 				var text = L.DomUtil.create('div');
@@ -176,6 +178,7 @@
 			leaflet = await import('leaflet');
 			rotated_marker = await import('leaflet-rotatedmarker');
 
+			loadMapScenario();
 			mounted = true;
 		}
 	});
