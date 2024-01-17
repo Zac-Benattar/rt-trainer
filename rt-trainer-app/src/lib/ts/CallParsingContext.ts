@@ -7,7 +7,9 @@ import type {
 	AerodromeStartPoint,
 	METORDataSample,
 	RadioFrequency,
-	Runway
+	Runway,
+	RunwayHoldingPoint,
+	Taxiway
 } from './SimulatorTypes';
 import { getAbbreviatedCallsign, processString } from './utils';
 
@@ -466,7 +468,7 @@ export default class CallParsingContext {
 	}
 
 	public assertCallContainsTakeOffRunwayHoldingPoint(): Mistake | undefined {
-		if (!this.getStartAerodromeTakeoffRunway().holdingPoints[0].name.split(' ')) {
+		if (!this.getTakeoffRunwayTaxiway().holdingPoints[0].name.split(' ')) {
 			return {
 				details: 'Make sure your call contains the current holding point.',
 				severe: true
@@ -493,5 +495,15 @@ export default class CallParsingContext {
 			}
 		}
 		return;
+	}
+
+	public getTakeoffRunwayTaxiway(): Taxiway {
+		return this.getStartAerodromeTakeoffRunway().taxiways[
+			this.seed.scenarioSeed % this.getStartAerodromeTakeoffRunway().taxiways.length
+		];
+	}
+
+	public getTakeoffRunwayHoldingPoint(): RunwayHoldingPoint {
+		return this.getTakeoffRunwayTaxiway().holdingPoints[this.seed.scenarioSeed %  this.getTakeoffRunwayTaxiway().holdingPoints.length];
 	}
 }
