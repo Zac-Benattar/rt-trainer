@@ -1,6 +1,7 @@
 # CS310 - Third Year Computer Science Project
 This project comprises a web based training platform for future pilots to learn radio telephony (RT) skills required to pass the CAA RT exam in order to obtain a Flight Radiotelephony Operator's License (FRTOL). More information about the licence and exam can be found on the CAA's website:
 https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/
+The current production version can be used at https://www.rt-trainer.com
 ## Abstract
 The UK Civil Aviation Authority's Radio Telephony exam involves a student performing a series of radio calls to simulate a full takeoff to landing flight, during which various events which they must respond correctly to may occur. Practice commonly involves learning a large technical document, then organising mock tests with an examiner. Online solo practice systems lack the ability to speak the radio calls into the user's device microphone, leaving space for a new system to include this feature.
 ## The repository
