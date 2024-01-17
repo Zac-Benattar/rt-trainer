@@ -6,7 +6,7 @@
             {
                 "frequencyType": "ATIS",
                 "frequency": 136.030,
-                "callsign": "Birmingham Info"
+                "callsign": "Birmingham Information"
             },
             {
                 "frequencyType": "Tower",
@@ -22,25 +22,35 @@
         "runways": [
             {
                 "name": "15",
-                "holdingPoints": [
+                "taxiways": [
                     {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.452997,
-                            "long": -1.740041
-                        }
+                        "name": "Alpha",
+                        "holdingPoints": [
+                            {
+                                "name": "A1",
+                                "location": {
+                                    "lat": 52.453997,
+                                    "long": -1.744041
+                                }
+                            }
+                        ]
                     }
                 ]
             },
             {
                 "name": "33",
-                "holdingPoints": [
+                "taxiways": [
                     {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.452997,
-                            "long": -1.740041
-                        }
+                        "name": "Bravo",
+                        "holdingPoints": [
+                            {
+                                "name": "B1",
+                                "location": {
+                                    "lat": 52.453997,
+                                    "long": -1.744041
+                                }
+                            }
+                        ]
                     }
                 ]
             }

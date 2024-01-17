@@ -4,7 +4,7 @@
         "icao": "EGBW",
         "radioFrequencies": [
             {
-                "frequencyType": "AFIS",
+                "frequencyType": "FIS",
                 "frequency": 180.030,
                 "callsign": "Wellesbourne Information"
             }
@@ -12,49 +12,35 @@
         "runways": [
             {
                 "name": "18",
-                "holdingPoints": [
+                "taxiways": [
                     {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.1922,
-                            "long": -1.6144
-                        }
+                        "name": "Alpha",
+                        "holdingPoints": [
+                            {
+                                "name": "A1",
+                                "location": {
+                                    "lat": 52.1922,
+                                    "long": -1.6144
+                                }
+                            }
+                        ]
                     }
                 ]
             },
             {
                 "name": "36",
-                "holdingPoints": [
+                "taxiways": [
                     {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.1922,
-                            "long": -1.6144
-                        }
-                    }
-                ]
-            },
-            {
-                "name": "05",
-                "holdingPoints": [
-                    {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.1922,
-                            "long": -1.6144
-                        }
-                    }
-                ]
-            },
-            {
-                "name": "23",
-                "holdingPoints": [
-                    {
-                        "name": "A1",
-                        "location": {
-                            "lat": 52.1922,
-                            "long": -1.6144
-                        }
+                        "name": "Bravo",
+                        "holdingPoints": [
+                            {
+                                "name": "B1",
+                                "location": {
+                                    "lat": 52.1922,
+                                    "long": -1.6144
+                                }
+                            }
+                        ]
                     }
                 ]
             }
@@ -68,14 +54,16 @@
             "lat": 52.1922,
             "long": -1.6144
         },
-        "startPoints": [{
-            "name": "South Side Hangers",
-            "location": {
-                "lat": 52.1955,
-                "long": -1.6176
-            },
-            "heading": 80.0
-        }],
+        "startPoints": [
+            {
+                "name": "South Side Hangers",
+                "location": {
+                    "lat": 52.1955,
+                    "long": -1.6176
+                },
+                "heading": 80.0
+            }
+        ],
         "metorData": {
             "avgWindDirection": 240.0,
             "meanWindSpeed": 11.0,

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.postcss';
-	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
+	import TopAppBar from '$lib/Components/TopAppBar.svelte';
 	import {
 		AppShell,
 		autoModeWatcher,
@@ -13,8 +13,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-	import Navigation from '$lib/Sidebars/NavigationSidebar.svelte';
-	import SimulatorSettingsSidebar from '$lib/Sidebars/SimulatorSettingsSidebar.svelte';
+	import Navigation from '$lib/Components/Sidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -29,7 +28,6 @@
 	let classesSidebar: string;
 	let classesAppBar: string;
 	let burgerButton: string;
-	let topBarEnabled: boolean;
 
 	// Reactive Classes
 	$: if ($page.url.pathname === '/') {
@@ -37,20 +35,16 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
-		topBarEnabled = true;
-	} else if ($page.url.pathname.includes('/scenario')) {
-		// Should also check if user is logged in
-		// If in a scenario hide sidebar and top app bar to fit everything in
-		classesAppBar = 'w-0';
+	} else if ($page.url.pathname.search('/scenario') != -1) {
+		// If on scenario page hide sidebar and ways to access it as user is not logged in
+		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
-		burgerButton = '';
-		topBarEnabled = false;
+		burgerButton = 'lg';
 	} else {
 		// Otherwise user is logged in and sidebar can be shown
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'lg:hidden';
-		topBarEnabled = true;
+		burgerButton = 'lg';
 	}
 </script>
 
@@ -59,15 +53,12 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
-<!-- Settings Drawer -->
+<!-- Navigatiton Drawer -->
 <Drawer width="w-64">
-	<h2 class="p-4">Simulator Settings</h2>
+	<h2 class="p-4">Navigation</h2>
 	<hr />
-	{#if classesSidebar == 'w-0'}
-		<SimulatorSettingsSidebar />
-	{:else}
-		<Navigation />
-	{/if}
+
+	<Navigation />
 </Drawer>
 
 <Modal />
@@ -75,16 +66,14 @@
 <Toast />
 
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>
+<AppShell slotSidebarLeft="bg-surface-500/5 appbar {classesSidebar}" slotHeader={classesAppBar}>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<TopAppBar {burgerButton} enabled={topBarEnabled} on:burgerButtonClicked={drawerOpen} />
+		<TopAppBar {burgerButton} enabled={true} on:burgerButtonClicked={drawerOpen} />
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		{#if classesSidebar == 'w-0'}
-			<SimulatorSettingsSidebar />
-		{:else}
+		{#if !($page.url.pathname.search('/scenario') != -1 || $page.url.pathname === '/')}
 			<Navigation />
 		{/if}
 	</svelte:fragment>

@@ -11,7 +11,6 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
 	import {
-		SettingsStore,
 		RadioStateStore,
 		TransponderStateStore,
 		UserMessageStore,
@@ -19,11 +18,11 @@
 		CurrentTargetStore,
 		RouteStore,
 		AircraftDetailsStore,
-		SeedStore,
+		GenerationParametersStore,
 		KneeboardStore,
-		CurrentRoutePointStore
+		CurrentRoutePointStore,
+		SpeechOutputStore
 	} from '$lib/stores';
-	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -31,7 +30,9 @@
 
 	// Simulator state and settings
 	let seed: Seed;
-	let simulatorSettings: AircraftDetails; // Current settings of the simulator
+	let airborneWaypoints: number = 2;
+	let hasEmergency: boolean;
+	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
 	let atcMessage: string;
@@ -43,8 +44,6 @@
 	// Page settings
 	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
-	let unexpectedEvents: boolean = true; // Unexpected events are enabled by default
-	let speechInput: boolean = false; // Users must opt in to speech input
 	let readRecievedCalls: boolean = false;
 
 	// Server state
@@ -66,18 +65,18 @@
 		speakATCMessage();
 	}
 
-	SeedStore.subscribe((value) => {
-		seed = value;
+	SpeechOutputStore.subscribe((value) => {
+		readRecievedCalls = value;
 	});
 
-	SettingsStore.subscribe((value) => {
-		unexpectedEvents = value.unexpectedEvents;
-		speechInput = value.speechInput;
-		readRecievedCalls = value.readRecievedCalls;
+	GenerationParametersStore.subscribe((value) => {
+		seed = value.seed;
+		airborneWaypoints = value.airborneWaypoints;
+		hasEmergency = value.hasEmergency;
 	});
 
 	AircraftDetailsStore.subscribe((value) => {
-		simulatorSettings = value;
+		aircraftDetails = value;
 	});
 
 	RadioStateStore.subscribe((value) => {
@@ -237,7 +236,9 @@
 
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
-			const response = await axios.get(`/scenario/seed=${seed.scenarioSeed}`);
+			const response = await axios.get(
+				`/scenario/seed=${seed.scenarioSeed}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+			);
 
 			return response.data;
 		} catch (error: any) {
@@ -260,14 +261,14 @@
 				radioCall: userMessage,
 				seed: seed,
 				routePoint: route[currentPointIndex],
-				prefix: simulatorSettings.prefix,
-				userCallsign: simulatorSettings.callsign,
+				prefix: aircraftDetails.prefix,
+				userCallsign: aircraftDetails.callsign,
 				userCallsignModified: route[currentPointIndex].updateData.callsignModified,
 				squark: false,
 				currentTarget: currentTarget,
 				currentRadioFrequency: radioState.activeFrequency,
 				currentTransponderFrequency: transponderState.frequency,
-				aircraftType: simulatorSettings.aircraftType
+				aircraftType: aircraftDetails.aircraftType
 			};
 
 			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
@@ -292,12 +293,11 @@
 </script>
 
 <div class="relative flex">
-	<div class="flex flex-col items-center gap-10" style="width:1000px">
-		<SimulatorSettings {speechRecognitionSupported} />
-
+	<div class="simcomponents-container flex flex-col items-center gap-5" style="width:1000px">
+		<div class="h-1" />
 		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
 			<div class="rt-message-input-container">
-				<MessageInput on:submit={handleSubmit} />
+				<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
 			</div>
 
 			<div class="rt-message-output-container">
@@ -305,7 +305,7 @@
 			</div>
 		</div>
 
-		<div class="radio-transponder-container flex flex-col items center gap-10">
+		<div class="radio-transponder-container flex flex-col items center gap-5">
 			<div>
 				<Radio />
 			</div>
@@ -325,7 +325,7 @@
 			<ScenarioLink />
 		</div>
 
-		<div class="h-5" />
+		<div class="h-1" />
 	</div>
 </div>
 

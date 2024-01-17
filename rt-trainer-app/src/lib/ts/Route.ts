@@ -44,18 +44,25 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 		aerodrome.radioFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
 			switch (comFrequency.frequencyType) {
-				case 'AFIS':
-					frequencyType = FrequencyType.AFIS;
+				case 'ATIS':
+					frequencyType = FrequencyType.ATIS;
+					break;
+				case 'FIS':
+					frequencyType = FrequencyType.FIS;
 					break;
 				case 'GND':
+				case 'Ground':
 					frequencyType = FrequencyType.GND;
 					break;
 				case 'TWR':
+				case 'Tower':
 					frequencyType = FrequencyType.TWR;
 					break;
 				default:
-					frequencyType = FrequencyType.TWR;
-					break;
+					throw new Error(
+						'Invalid frequency type loaded from Small Aerodromes JSON: ' +
+							comFrequency.frequencyType
+					);
 			}
 
 			radioFrequencies.push({
@@ -88,18 +95,25 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 		aerodrome.radioFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
 			switch (comFrequency.frequencyType) {
-				case 'AFIS':
-					frequencyType = FrequencyType.AFIS;
+				case 'ATIS':
+					frequencyType = FrequencyType.ATIS;
+					break;
+				case 'FIS':
+					frequencyType = FrequencyType.FIS;
 					break;
 				case 'GND':
+				case 'Ground':
 					frequencyType = FrequencyType.GND;
 					break;
 				case 'TWR':
+				case 'Tower':
 					frequencyType = FrequencyType.TWR;
 					break;
 				default:
-					frequencyType = FrequencyType.TWR;
-					break;
+					throw new Error(
+						'Invalid frequency type loaded from Large Aerodromes JSON: ' +
+							comFrequency.frequencyType
+					);
 			}
 
 			radioFrequencies.push({
@@ -132,18 +146,25 @@ function getWaypointsFromJSON(): Waypoint[] {
 		for (let i = 0; i < waypoint.radioFrequencies.length; i++) {
 			let frequencyType: FrequencyType;
 			switch (waypoint.radioFrequencies[i].frequencyType) {
-				case 'AFIS':
-					frequencyType = FrequencyType.AFIS;
+				case 'ATIS':
+					frequencyType = FrequencyType.ATIS;
+					break;
+				case 'FIS':
+					frequencyType = FrequencyType.FIS;
 					break;
 				case 'GND':
+				case 'Ground':
 					frequencyType = FrequencyType.GND;
 					break;
 				case 'TWR':
+				case 'Tower':
 					frequencyType = FrequencyType.TWR;
 					break;
 				default:
-					frequencyType = FrequencyType.TWR;
-					break;
+					throw new Error(
+						'Invalid frequency type loaded from Waypoints JSON: ' +
+							waypoint.radioFrequencies[i].frequencyType
+					);
 			}
 
 			radioFrequencies.push({
