@@ -3,10 +3,22 @@
 	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { AircraftDetailsStore } from '$lib/stores';
 
-	export let seed = Math.floor(Math.random() * 1000000);
-	let airborneWaypoints = 2;
-	const maxAirborneWaypoints = 5;
-	let invalidInput = false;
+	export let seed: string = generateRandomString(8);
+	let airborneWaypoints: number = 2;
+	const maxAirborneWaypoints: number = 5;
+	let invalidInput: boolean = false;
+
+	function generateRandomString(length: number) {
+		const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+		let randomString = '';
+
+		for (let i = 0; i < length; i++) {
+			const randomIndex = Math.floor(Math.random() * charset.length);
+			randomString += charset.charAt(randomIndex);
+		}
+
+		return randomString;
+	}
 
 	const handleClick = () => {
 		const enableEmergenciesElement = document.getElementById(
@@ -40,11 +52,8 @@
 		let callsign = '';
 		const callsignInputElement = document.getElementById('callsign-input') as HTMLInputElement;
 		if (callsignInputElement != null) {
-			if (callsignInputElement.value == null) {
+			if (callsignInputElement.value == '') {
 				callsign = 'G-OFLY';
-			} else if (callsignInputElement.value == '') {
-				callsignInputElement.classList.add('input-error');
-				invalidInput = true;
 			}
 		}
 
@@ -53,12 +62,16 @@
 			'aircraft-type-input'
 		) as HTMLInputElement;
 		if (aircraftTypeInputElement != null) {
-			if (aircraftTypeInputElement.value == null) {
+			if (aircraftTypeInputElement.value == '') {
 				aircraftType = 'Cessna 172';
-			} else if (aircraftTypeInputElement.value == '') {
-				aircraftTypeInputElement.classList.add('input-error');
-				invalidInput = true;
 			}
+		}
+
+		const scenarioCodeInputElement = document.getElementById(
+			'scenario-code-input'
+		) as HTMLInputElement;
+		if (scenarioCodeInputElement != null) {
+			if (scenarioCodeInputElement.value != '') seed = scenarioCodeInputElement.value;
 		}
 
 		// If any data is invalid, return
@@ -125,6 +138,7 @@
 				<input
 					class="input"
 					title="Callsign"
+					id="callsign-input"
 					type="text"
 					placeholder="G-OFLY"
 					minlength="6"
@@ -139,10 +153,26 @@
 				<input
 					class="input"
 					title="Aircraft Type"
+					id="aircraft-type-input"
 					type="text"
 					placeholder="Cessna 172"
 					minlength="6"
 					maxlength="30"
+					pattern="[\x00-\x7F]+"
+				/>
+			</label>
+		</div>
+		<div>
+			<label class="label">
+				<span>Scenario Code</span>
+				<input
+					class="input"
+					title="Scenario Code"
+					id="scenario-code-input"
+					type="text"
+					placeholder={seed}
+					minlength="6"
+					maxlength="20"
 					pattern="[\x00-\x7F]+"
 				/>
 			</label>
