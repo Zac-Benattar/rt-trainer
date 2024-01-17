@@ -1,5 +1,6 @@
 export enum FrequencyType {
-	AFIS = 'AFIS',
+	ATIS = 'ATIS',
+	FIS = 'FIS',
 	TWR = 'TWR',
 	GND = 'GND'
 }
@@ -33,9 +34,14 @@ export type RunwayHoldingPoint = {
 	location: Location;
 };
 
-export type Runway = {
+export type Taxiway = {
 	name: string;
 	holdingPoints: RunwayHoldingPoint[];
+};
+
+export type Runway = {
+	name: string;
+	taxiways: Taxiway[];
 };
 
 /* METORlogical data. */

@@ -24,7 +24,7 @@
 	<p class="output-box">{atcMessage}</p>
 	<p class="output-data-box">
 		Current Target: {currentTarget.callsign}<br />
-		{currentTarget.frequency} MHz
+		{currentTarget.frequency}MHz
 		{currentTarget.frequencyType}
 	</p>
 	<div class="play-atc-call-container">

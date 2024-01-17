@@ -109,7 +109,7 @@
 				</Tooltip>
 			{:else}
 				<Tooltip
-					tip="Speech recognition is not supported in this browser.<br>Please use a different browser if you would like to use this feature."
+					tip="Speech recognition is not supported in this browser.<br>Please use a different browser if you would like to use this feature.<br>Google Chrome, Microsoft Edge and Safari are recommended."
 					bottom
 				>
 					<SlideToggle
