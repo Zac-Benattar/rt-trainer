@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Simulator from '$lib/Simulator/Simulator.svelte';
+	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
 	import { GenerationParametersStore } from '$lib/stores';
 	import Seed from '$lib/ts/Seed';

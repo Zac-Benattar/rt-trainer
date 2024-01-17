@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.postcss';
-	import TopAppBar from '$lib/LinkButtons/TopAppBar.svelte';
+	import TopAppBar from '$lib/Components/TopAppBar.svelte';
 	import {
 		AppShell,
 		autoModeWatcher,
@@ -13,7 +13,7 @@
 	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-	import Navigation from '$lib/Simulator/Sidebar.svelte';
+	import Navigation from '$lib/Components/Sidebar.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
