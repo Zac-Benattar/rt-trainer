@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { UserMessageStore } from '$lib/stores';
+	import { SpeechInputStore, UserMessageStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import Tooltip from 'sv-tooltip';
+
+	export let speechRecognitionSupported: boolean = false;
+	let speechInput: boolean = false;
 
 	let mounted: boolean = false;
 
@@ -62,6 +67,8 @@
 		dispatch('submit');
 	};
 
+	$: SpeechInputStore.set(speechInput);
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -82,6 +89,42 @@
 	</p>
 
 	<div class="flex flex-row grid-rows-1 items-end content-center items-center">
+		<div class="speech-input-container">
+			{#if speechRecognitionSupported}
+				<Tooltip
+					tip="Speech recognition is experimental, you may need to correct the recorded text."
+					bottom
+				>
+					<SlideToggle
+						id="enable-voice-input"
+						name="slider-label"
+						checked={speechInput}
+						active="bg-primary-500"
+						size="sm"
+						on:click={() => {
+							speechInput = !speechInput;
+						}}
+						>Voice input
+					</SlideToggle>
+				</Tooltip>
+			{:else}
+				<Tooltip
+					tip="Speech recognition is not supported in this browser.<br>Please use a different browser if you would like to use this feature."
+					bottom
+				>
+					<SlideToggle
+						id="enable-voice-input"
+						name="slider-label"
+						checked={speechInput}
+						active="bg-primary-500"
+						size="sm"
+						disabled
+						>Voice input
+					</SlideToggle>
+				</Tooltip>
+			{/if}
+		</div>
+
 		<button class="submit-button btn variant-filled" on:click={submit}>Submit</button>
 		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 		<!-- svelte-ignore a11y-missing-attribute -->
@@ -118,6 +161,11 @@
 
 	.input-box:focus {
 		outline: none;
+	}
+
+	.speech-input-container {
+		padding-right: 10px;
+		margin-bottom: -10px;
 	}
 
 	.delete-button {

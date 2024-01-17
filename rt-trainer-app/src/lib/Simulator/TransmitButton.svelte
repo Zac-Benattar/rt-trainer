@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { UserMessageStore } from '$lib/stores';
+	import { SpeechInputStore, UserMessageStore } from '$lib/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { SettingsStore } from '$lib/stores';
 
 	export let enabled: boolean = false;
 	export let speechEnabled: boolean = true; // User's choice
@@ -15,8 +14,8 @@
 	let SpeechRecognitionEvent: any;
 	let recognition: any;
 
-	SettingsStore.subscribe((value) => {
-		speechEnabled = value.speechInput;
+	SpeechInputStore.subscribe((value) => {
+		speechEnabled = value;
 	});
 
 	$: if (speechEnabled && mounted) {

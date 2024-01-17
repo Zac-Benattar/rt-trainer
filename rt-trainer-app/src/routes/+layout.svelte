@@ -53,7 +53,7 @@
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
 >
 
-<!-- Settings Drawer -->
+<!-- Navigatiton Drawer -->
 <Drawer width="w-64">
 	<h2 class="p-4">Navigation</h2>
 	<hr />
@@ -94,9 +94,5 @@
 		font-style: normal;
 		font-weight: 100;
 		src: url('/fonts/DSEG7ClassicMini-Regular.woff2') format('woff2');
-	}
-
-	.appbar {
-		height: 70;
 	}
 </style>

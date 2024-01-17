@@ -1,9 +1,3 @@
-/* The settings for the simulation. */
-export type SimulatorSettings = {
-	speechInput: boolean;
-	readRecievedCalls: boolean;
-};
-
 export enum FrequencyType {
 	AFIS = 'AFIS',
 	TWR = 'TWR',
@@ -124,7 +118,7 @@ export type RadioState = {
 export type TransponderState = {
 	dialMode: TransponderDialMode;
 	frequency: number;
-	ident_enabled: boolean;
+	identEnabled: boolean;
 	vfrHasExecuted: boolean;
 };
 

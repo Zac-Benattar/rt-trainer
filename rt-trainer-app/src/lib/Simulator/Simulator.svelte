@@ -11,7 +11,6 @@
 	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
 	import {
-		SettingsStore,
 		RadioStateStore,
 		TransponderStateStore,
 		UserMessageStore,
@@ -21,9 +20,9 @@
 		AircraftDetailsStore,
 		GenerationParametersStore,
 		KneeboardStore,
-		CurrentRoutePointStore
+		CurrentRoutePointStore,
+		SpeechOutputStore
 	} from '$lib/stores';
-	import SimulatorSettings from './SimulatorSettings.svelte';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -68,15 +67,14 @@
 		speakATCMessage();
 	}
 
+	SpeechOutputStore.subscribe((value) => {
+		readRecievedCalls = value;
+	});
+
 	GenerationParametersStore.subscribe((value) => {
 		seed = value.seed;
 		airborneWaypoints = value.airborneWaypoints;
 		hasEmergency = value.hasEmergency;
-	});
-
-	SettingsStore.subscribe((value) => {
-		speechInput = value.speechInput;
-		readRecievedCalls = value.readRecievedCalls;
 	});
 
 	AircraftDetailsStore.subscribe((value) => {
@@ -297,12 +295,11 @@
 </script>
 
 <div class="relative flex">
-	<div class="flex flex-col items-center gap-10" style="width:1000px">
-		<SimulatorSettings {speechRecognitionSupported} />
-
+	<div class="simcomponents-container flex flex-col items-center gap-5" style="width:1000px">
+		<div class="h-1" />
 		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
 			<div class="rt-message-input-container">
-				<MessageInput on:submit={handleSubmit} />
+				<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
 			</div>
 
 			<div class="rt-message-output-container">
@@ -310,7 +307,7 @@
 			</div>
 		</div>
 
-		<div class="radio-transponder-container flex flex-col items center gap-10">
+		<div class="radio-transponder-container flex flex-col items center gap-5">
 			<div>
 				<Radio />
 			</div>
@@ -330,7 +327,7 @@
 			<ScenarioLink />
 		</div>
 
-		<div class="h-5" />
+		<div class="h-1" />
 	</div>
 </div>
 

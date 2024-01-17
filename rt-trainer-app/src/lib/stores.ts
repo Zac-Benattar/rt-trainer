@@ -6,7 +6,6 @@ import {
 	type RadioFrequency,
 	type RadioState,
 	type TransponderState,
-	type SimulatorSettings
 } from './ts/SimulatorTypes';
 import type { RoutePoint } from './ts/RouteStates';
 
@@ -18,11 +17,6 @@ const initialGenerationParameters: GenerationParameters = {
 	},
 	airborneWaypoints: 2,
 	hasEmergency: false
-};
-
-const initialSettings: SimulatorSettings = {
-	speechInput: false,
-	readRecievedCalls: false
 };
 
 const initialAircraftDetails: AircraftDetails = {
@@ -54,11 +48,13 @@ const initialTarget: RadioFrequency = {
 
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
-export const SettingsStore = writable<SimulatorSettings>(initialSettings);
-
 export const GenerationParametersStore = writable<GenerationParameters>(initialGenerationParameters);
 
 export const CurrentTargetStore = writable<RadioFrequency>(initialTarget);
+
+export const SpeechInputStore = writable<boolean>(false);
+
+export const SpeechOutputStore = writable<boolean>(false);
 
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 
