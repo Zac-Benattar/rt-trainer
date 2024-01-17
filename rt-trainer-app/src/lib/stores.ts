@@ -1,19 +1,28 @@
 import { writable } from 'svelte/store';
-import type { SimulatorSettings } from './ts/ServerClientTypes';
-import { FrequencyType, type AircraftDetails, type RadioFrequency, type RadioState, type TransponderState } from './ts/SimulatorTypes';
-import type Seed from './ts/Seed';
+import type { GenerationParameters } from './ts/ServerClientTypes';
+import {
+	FrequencyType,
+	type AircraftDetails,
+	type RadioFrequency,
+	type RadioState,
+	type TransponderState,
+	type SimulatorSettings
+} from './ts/SimulatorTypes';
 import type { RoutePoint } from './ts/RouteStates';
 
-const initialSettings: SimulatorSettings = {
-	unexpectedEvents: false,
-	speechInput: false,
-	readRecievedCalls: false
+const initialGenerationParameters: GenerationParameters = {
+	seed: {
+		seedString: '0',
+		scenarioSeed: 0,
+		weatherSeed: 0
+	},
+	airborneWaypoints: 2,
+	hasEmergency: false
 };
 
-const initialScenarioSeed: Seed = {
-	seedString: '0',
-	scenarioSeed: 0,
-	weatherSeed: 0
+const initialSettings: SimulatorSettings = {
+	speechInput: false,
+	readRecievedCalls: false
 };
 
 const initialAircraftDetails: AircraftDetails = {
@@ -47,7 +56,7 @@ export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDet
 
 export const SettingsStore = writable<SimulatorSettings>(initialSettings);
 
-export const SeedStore = writable<Seed>(initialScenarioSeed);
+export const GenerationParametersStore = writable<GenerationParameters>(initialGenerationParameters);
 
 export const CurrentTargetStore = writable<RadioFrequency>(initialTarget);
 

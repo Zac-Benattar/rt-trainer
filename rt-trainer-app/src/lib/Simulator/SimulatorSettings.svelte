@@ -5,20 +5,17 @@
 	import Tooltip from 'sv-tooltip';
 
 	export let speechRecognitionSupported: boolean = false;
-	let unexpectedEvents: boolean = false;
 	let speechInput: boolean = false;
 	let readRecievedCalls: boolean = false;
 	const modalStore = getModalStore();
 
 	SettingsStore.subscribe((settings) => {
-		unexpectedEvents = settings.unexpectedEvents;
 		speechInput = settings.speechInput;
 		readRecievedCalls = settings.readRecievedCalls;
 	});
 
 	function updateSettings() {
 		SettingsStore.set({
-			unexpectedEvents: unexpectedEvents,
 			speechInput: speechInput,
 			readRecievedCalls: readRecievedCalls
 		});
@@ -26,24 +23,6 @@
 </script>
 
 <div class="settings-container relative flex flex-row items-center gap-5">
-	<Tooltip
-		tip="Unexpected events are random events that occur during the simulation such as engine failure."
-		bottom
-	>
-		<SlideToggle
-			id="enable-random-events"
-			name="slider-label"
-			checked={unexpectedEvents}
-			active="bg-primary-500"
-			size="sm"
-			on:click={() => {
-				unexpectedEvents = !unexpectedEvents;
-				updateSettings();
-			}}
-			disabled
-			>Unexpected events
-		</SlideToggle>
-	</Tooltip>
 	{#if speechRecognitionSupported}
 		<Tooltip
 			tip="Speech recognition is experimental, you may need to correct the recorded text."
@@ -64,7 +43,7 @@
 		</Tooltip>
 	{:else}
 		<Tooltip
-			tip="Speech recognition is not supported in this browser. Please use a different browser if you would like to use this feature."
+			tip="Speech recognition is not supported in this browser.<br>Please use a different browser if you would like to use this feature."
 			bottom
 		>
 			<SlideToggle
@@ -85,7 +64,10 @@
 			</SlideToggle>
 		</Tooltip>
 	{/if}
-	<Tooltip tip="Audio messages can be played when you recieve a call from ATC or another aircraft." bottom>
+	<Tooltip
+		tip="Audio messages can be played when you recieve a call from ATC or another aircraft."
+		bottom
+	>
 		<SlideToggle
 			id="enabled-audio-messages"
 			name="slider-label"

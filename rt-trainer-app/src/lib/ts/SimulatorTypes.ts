@@ -1,3 +1,9 @@
+/* The settings for the simulation. */
+export type SimulatorSettings = {
+	speechInput: boolean;
+	readRecievedCalls: boolean;
+};
+
 export enum FrequencyType {
 	AFIS = 'AFIS',
 	TWR = 'TWR',

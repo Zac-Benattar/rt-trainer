@@ -19,7 +19,7 @@
 		CurrentTargetStore,
 		RouteStore,
 		AircraftDetailsStore,
-		SeedStore,
+		GenerationParametersStore,
 		KneeboardStore,
 		CurrentRoutePointStore
 	} from '$lib/stores';
@@ -31,7 +31,9 @@
 
 	// Simulator state and settings
 	let seed: Seed;
-	let simulatorSettings: AircraftDetails; // Current settings of the simulator
+	let airborneWaypoints: number = 2;
+	let hasEmergency: boolean;
+	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
 	let atcMessage: string;
@@ -66,18 +68,19 @@
 		speakATCMessage();
 	}
 
-	SeedStore.subscribe((value) => {
-		seed = value;
+	GenerationParametersStore.subscribe((value) => {
+		seed = value.seed;
+		airborneWaypoints = value.airborneWaypoints;
+		hasEmergency = value.hasEmergency;
 	});
 
 	SettingsStore.subscribe((value) => {
-		unexpectedEvents = value.unexpectedEvents;
 		speechInput = value.speechInput;
 		readRecievedCalls = value.readRecievedCalls;
 	});
 
 	AircraftDetailsStore.subscribe((value) => {
-		simulatorSettings = value;
+		aircraftDetails = value;
 	});
 
 	RadioStateStore.subscribe((value) => {
@@ -237,7 +240,9 @@
 
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
-			const response = await axios.get(`/scenario/seed=${seed.scenarioSeed}`);
+			const response = await axios.get(
+				`/scenario/seed=${seed.scenarioSeed}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+			);
 
 			return response.data;
 		} catch (error: any) {
@@ -260,14 +265,14 @@
 				radioCall: userMessage,
 				seed: seed,
 				routePoint: route[currentPointIndex],
-				prefix: simulatorSettings.prefix,
-				userCallsign: simulatorSettings.callsign,
+				prefix: aircraftDetails.prefix,
+				userCallsign: aircraftDetails.callsign,
 				userCallsignModified: route[currentPointIndex].updateData.callsignModified,
 				squark: false,
 				currentTarget: currentTarget,
 				currentRadioFrequency: radioState.activeFrequency,
 				currentTransponderFrequency: transponderState.frequency,
-				aircraftType: simulatorSettings.aircraftType
+				aircraftType: aircraftDetails.aircraftType
 			};
 
 			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {

@@ -2,11 +2,10 @@ import type Seed from './Seed';
 import type { EmergencyType, RadioFrequency } from './SimulatorTypes';
 import type { Location } from './SimulatorTypes';
 
-/* The settings for the simulation. */
-export type SimulatorSettings = {
-	unexpectedEvents: boolean;
-	speechInput: boolean;
-	readRecievedCalls: boolean;
+export type GenerationParameters = {
+	seed: Seed;
+	airborneWaypoints: number;
+	hasEmergency: boolean;
 };
 
 /* Mistake made in the user's call. Description and whether or not ATC can deal with it. */

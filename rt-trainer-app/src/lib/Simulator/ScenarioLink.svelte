@@ -1,21 +1,29 @@
 <script lang="ts">
 	import { clipboard } from '@skeletonlabs/skeleton';
-	import { SettingsStore, SeedStore } from '$lib/stores';
+	import { GenerationParametersStore } from '$lib/stores';
 
 	let seedString: string = '0';
-	let scenarioLink: string = 'www.rt-trainer.com/scenario/0';
+	let hasEmergency: boolean = false;
+	let airborneWaypoints: number = 2;
 
-	SeedStore.subscribe((value) => {
-		seedString = value.seedString;
+	GenerationParametersStore.subscribe((value) => {
+		seedString = value.seed.seedString;
+		airborneWaypoints = value.airborneWaypoints;
+		hasEmergency = value.hasEmergency;
 	});
 
-	SettingsStore.subscribe((value) => {
-		if (value.unexpectedEvents) {
-			scenarioLink = 'www.rt-trainer.com/scenario/' + seedString + '?unexpectedEvents=true';
-		} else {
-			scenarioLink = 'www.rt-trainer.com/scenario/' + seedString;
-		}
-	});
+	let scenarioLink = 'www.rt-trainer.com/scenario/' + seedString;
+	let questionMarkAppended = false;
+
+	if (hasEmergency) {
+		scenarioLink += '?emergencies=true';
+		questionMarkAppended = true;
+	}
+	if (airborneWaypoints != 2) {
+		if (questionMarkAppended) scenarioLink += '&';
+		else scenarioLink += '?';
+		scenarioLink += 'airborneWaypoints=' + airborneWaypoints;
+	}
 </script>
 
 <div class="copy-link-div relative w-full text-token card variant-soft p-4 flex items-center gap-4">

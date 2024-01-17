@@ -66,7 +66,7 @@
 <Toast />
 
 <!-- App Shell -->
-<AppShell slotSidebarLeft="bg-surface-500/5 {classesSidebar}" slotHeader={classesAppBar}>
+<AppShell slotSidebarLeft="bg-surface-500/5 appbar {classesSidebar}" slotHeader={classesAppBar}>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
 		<TopAppBar {burgerButton} enabled={true} on:burgerButtonClicked={drawerOpen} />
@@ -94,5 +94,9 @@
 		font-style: normal;
 		font-weight: 100;
 		src: url('/fonts/DSEG7ClassicMini-Regular.woff2') format('woff2');
+	}
+
+	.appbar {
+		height: 70;
 	}
 </style>

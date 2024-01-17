@@ -2,23 +2,12 @@
 	import { goto } from '$app/navigation';
 	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { AircraftDetailsStore } from '$lib/stores';
+	import { generateRandomURLValidString } from '$lib/ts/utils';
 
-	export let seed: string = generateRandomString(8);
+	export let seed: string = generateRandomURLValidString(8);
 	let airborneWaypoints: number = 2;
 	const maxAirborneWaypoints: number = 5;
 	let invalidInput: boolean = false;
-
-	function generateRandomString(length: number) {
-		const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-		let randomString = '';
-
-		for (let i = 0; i < length; i++) {
-			const randomIndex = Math.floor(Math.random() * charset.length);
-			randomString += charset.charAt(randomIndex);
-		}
-
-		return randomString;
-	}
 
 	const handleClick = () => {
 		const enableEmergenciesElement = document.getElementById(
@@ -86,8 +75,15 @@
 
 		// Redirect to the scenario page
 		let url = '/scenario/' + seed;
-		if (enableEmergencies) url += '?emergencies=True';
-		if (airborneWaypoints != 2) url += '?airborneWaypoints=' + airborneWaypoints;
+		let questionMarkAppended = false;
+		if (enableEmergencies) {
+			url += '?emergencies=True';
+			questionMarkAppended = true;
+		}
+		if (airborneWaypoints != 2) {
+			if (questionMarkAppended) url += '&airborneWaypoints=' + airborneWaypoints;
+			else url += '?airborneWaypoints=' + airborneWaypoints;
+		}
 		goto(url);
 	};
 </script>
@@ -101,7 +97,7 @@
 				name="slider-medium"
 				checked
 				active="bg-primary-500"
-				size="md">Emergencies</SlideToggle
+				size="md">Include Emergency Event</SlideToggle
 			>
 		</div>
 
