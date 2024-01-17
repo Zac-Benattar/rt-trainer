@@ -15,15 +15,15 @@
 	SeedStore.set(seed);
 
 	// Check whether unexpected events are enabled from the URL
-	let unexpectedEvents: boolean = false;
-	var unexpectedEventsString = $page.url.searchParams.get('unexpectedEvents');
-	if (unexpectedEventsString != null) {
-		unexpectedEvents = unexpectedEventsString === 'True';
+	let enableEmergencies: boolean = false;
+	var emergenciesString = $page.url.searchParams.get('emergencies');
+	if (emergenciesString != null) {
+		enableEmergencies = emergenciesString === 'True';
 	}
 
 	// Set the initial simulator settings
 	SettingsStore.set({
-		unexpectedEvents: unexpectedEvents,
+		unexpectedEvents: enableEmergencies,
 		speechInput: false,
 		readRecievedCalls: false
 	});
