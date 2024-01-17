@@ -20,14 +20,31 @@
 	$: SpeechOutputStore.set(readRecievedCalls);
 </script>
 
-<div class="kneeboard flex flex-col grid-cols-1">
-	<p class="output-box">{atcMessage}</p>
-	<p class="output-data-box">
-		Current Target: {currentTarget.callsign}<br />
-		{currentTarget.frequency}MHz
-		{currentTarget.frequencyType}
-	</p>
-	<div class="play-atc-call-container">
+<div class="message-output-container flex flex-col grid-cols-1 bg-surface-500">
+	<div class="flex flex-col gap-y-2 grow">
+		<textarea
+			class="textarea bg-surface-500 text-secondary-50 call-output"
+			id="call-output"
+			name="call-output"
+			disabled
+			rows="3"
+			cols="50"
+			maxlength="100"
+			placeholder="Radio messages will appear here.">{atcMessage}</textarea
+		>
+		<textarea
+			class="textarea bg-secondary-500-50 text-secondary-50 call-target-output"
+			id="call-target-output"
+			name="call-target-output"
+			disabled
+			rows="1"
+			cols="50"
+			maxlength="25"
+			placeholder="Radio messages will appear here."
+			>{currentTarget.callsign} {currentTarget.frequency}MHz</textarea
+		>
+	</div>
+	<div class="flex flex-row content-evenly justify-end gap-x-3 px-5 bg-surface-500 text-secondary-50">
 		<Tooltip
 			tip="Audio messages can be played when you recieve a call from ATC or another aircraft."
 			bottom
@@ -47,28 +64,30 @@
 </div>
 
 <style lang="postcss">
-	.kneeboard {
+	.message-output-container {
 		box-sizing: border-box;
-		padding: 10px;
+		padding: 8px;
 		min-width: 490px;
 		max-width: 490px;
 		height: 200px;
-		background-color: #fff;
-		padding: 20px;
-		outline: solid 1px #ccc;
 		border-radius: 5px;
 		color: black;
 	}
 
-	.play-atc-call-container {
-		margin-top: 10px;
-		margin-bottom: -10px;
+	.textarea {
+		width: 100%;
+		resize: none;
+		overflow: hidden;
+		height: auto;
+		outline: none;
+		border: none;
 	}
 
-	.output-box {
-		width: 100%;
-		height: 120px;
-		resize: none;
-		overflow: auto;
+	.call-output {
+		
+	}
+
+	.call-target-output {
+		height: 40px;
 	}
 </style>

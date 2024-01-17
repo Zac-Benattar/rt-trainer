@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
-	import { AircraftDetailsStore } from '$lib/stores';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 
 	export let seed: string = generateRandomURLValidString(8);
@@ -66,23 +65,32 @@
 		// If any data is invalid, return
 		if (invalidInput) return;
 
-		// Set the aircraft details store
-		AircraftDetailsStore.set({
-			prefix: prefix,
-			callsign: callsign,
-			aircraftType: aircraftType
-		});
-
 		// Redirect to the scenario page
 		let url = '/scenario/' + seed;
 		let questionMarkAppended = false;
+		if (prefix != '') {
+			url += '?prefix=' + prefix;
+			questionMarkAppended = true;
+		}
+		if (callsign != '') {
+			if (questionMarkAppended) url += '&callsign=' + callsign;
+			else url += '?callsign=' + callsign;
+			questionMarkAppended = true;
+		}
+		if (aircraftType != '') {
+			if (questionMarkAppended) url += '&aircraftType=' + aircraftType;
+			else url += '?aircraftType=' + aircraftType;
+			questionMarkAppended = true;
+		}
 		if (enableEmergencies) {
-			url += '?emergencies=True';
+			if (questionMarkAppended) url += '&emergencies=True';
+			else url += '?emergencies=True';
 			questionMarkAppended = true;
 		}
 		if (airborneWaypoints != 2) {
 			if (questionMarkAppended) url += '&airborneWaypoints=' + airborneWaypoints;
 			else url += '?airborneWaypoints=' + airborneWaypoints;
+			questionMarkAppended = true;
 		}
 		goto(url);
 	};
@@ -121,7 +129,7 @@
 				<span>Prefix</span>
 				<select class="select" id="prefix-select">
 					<option value="">None</option>
-					<option value="STUDENT">Student</option>
+					<option value="STUDENT" selected>Student</option>
 					<option value="HELICOPTER">Helicopter</option>
 					<option value="POLICE">Police</option>
 				</select>

@@ -27,7 +27,7 @@
 						</svg>
 					</span>
 				</button>
-				<strong class="text-xl uppercase">RT Trainer</strong>
+				<strong class="text-xl uppercase">RT Trainer - Demo</strong>
 			</div>
 		</svelte:fragment>
 

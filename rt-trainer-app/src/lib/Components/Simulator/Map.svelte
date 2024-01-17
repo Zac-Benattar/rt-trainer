@@ -35,8 +35,15 @@
 		// Get all waypoints from the route
 		waypoints = [];
 		for (let i = 0; i < routePoints.length; i++) {
-			if (routePoints[i].waypoint && !waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)) {
-				waypoints.push({ lat: routePoints[i].waypoint.location.lat, long: routePoints[i].waypoint.location.long, name: routePoints[i].waypoint.name });
+			if (
+				routePoints[i].waypoint &&
+				!waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)
+			) {
+				waypoints.push({
+					lat: routePoints[i].waypoint.location.lat,
+					long: routePoints[i].waypoint.location.long,
+					name: routePoints[i].waypoint.name
+				});
 			}
 		}
 	});
@@ -48,7 +55,6 @@
 			if (mounted) {
 				updateMap();
 			} else {
-
 			}
 		} else {
 			targetPose = {
@@ -116,7 +122,7 @@
 			rotationOrigin: 'center'
 		}).addTo(map);
 
-		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
+		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright'}).addTo(map);
 	}
 
 	async function updateMap() {
@@ -195,9 +201,13 @@
 	{/if}
 </svelte:head>
 
-<div class="map-container">
+<div class="map-container bg-surface-500">
 	{#if enabled}
-		<div id="myMap" style="position: relative; width: 100%; height: 100%;" />
+		<div
+			id="myMap"
+			class="card"
+			style="position: relative; width: 100%; height: 100%;  z-index: 2;"
+		/>
 	{/if}
 	{#if !enabled}
 		<p>Map is disabled</p>
@@ -211,10 +221,9 @@
 		height: 100%;
 		min-width: 490px;
 		min-height: 390px;
-		background-color: #fff;
-		padding: 20px;
-		outline: solid 1px #ccc;
+
+		padding: 8px;
+
 		border-radius: 5px;
-		color: black;
 	}
 </style>

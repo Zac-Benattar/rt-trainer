@@ -44,8 +44,6 @@
 	// Page settings
 	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
-	let unexpectedEvents: boolean = true; // Unexpected events are enabled by default
-	let speechInput: boolean = false; // Users must opt in to speech input
 	let readRecievedCalls: boolean = false;
 
 	// Server state
