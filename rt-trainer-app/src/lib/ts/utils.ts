@@ -79,20 +79,11 @@ export function getAbbreviatedCallsign(
 		}
 
 		if (standardRegStyle) {
-			if (scenarioSeed % 3 == 0) {
-				// G-OFLY -> Cessna 172 LY
-				abbreviatedCallsign += removeDigits(aircraftType);
-				abbreviatedCallsign += ' ';
-				abbreviatedCallsign += callsign.charAt(4);
-				abbreviatedCallsign += callsign.charAt(5);
-			} else {
-				// G-OFLY -> GO-LY
-				abbreviatedCallsign += callsign.charAt(0);
-				abbreviatedCallsign += callsign.charAt(1);
-				abbreviatedCallsign += '-';
-				abbreviatedCallsign += callsign.charAt(4);
-				abbreviatedCallsign += callsign.charAt(5);
-			}
+			// G-OFLY -> G-LY
+			abbreviatedCallsign += callsign.charAt(0);
+			abbreviatedCallsign += '-';
+			abbreviatedCallsign += callsign.charAt(4);
+			abbreviatedCallsign += callsign.charAt(5);
 		} else {
 			abbreviatedCallsign += callsign;
 		}

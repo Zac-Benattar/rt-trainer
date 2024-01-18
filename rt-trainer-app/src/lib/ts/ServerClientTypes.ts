@@ -36,7 +36,6 @@ export type CallParsingContext = {
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */
 export type SimulatorUpdateData = {
-	radioCall: string;
 	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: RadioFrequency;

@@ -33,7 +33,6 @@ export class RoutePoint {
 		pointType: RoutePointType,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-
 		waypoint?: Waypoint
 	) {
 		this.pointType = pointType;
@@ -49,7 +48,6 @@ export class ParkedPoint extends RoutePoint {
 		stage: ParkedStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-
 		waypoint?: Waypoint
 	) {
 		super(RoutePointType.Parked, pose, updateData, waypoint);
@@ -63,7 +61,6 @@ export class TaxiingPoint extends RoutePoint {
 		stage: TaxiingStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-
 		waypoint?: Waypoint
 	) {
 		super(RoutePointType.Taxiing, pose, updateData, waypoint);
@@ -126,7 +123,7 @@ export function getRequestingDepartInfoSimulatorUpdateData(
 	startAerodrome: Aerodrome
 ): SimulatorUpdateData {
 	return {
-		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
+		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.radioFrequencies[0], // TODO: Change to correct frequency - add method in aerodrome to get the specific frequencies
 		currentTransponderFrequency: 7000,
@@ -141,7 +138,7 @@ export function getGetDepartInfoReadbackSimulatorUpdateData(
 	startAerodrome: Aerodrome
 ): SimulatorUpdateData {
 	return {
-		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
+		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.radioFrequencies[0], // TODO: Change to correct frequency - add method in aerodrome to get the specific frequencies
 		currentTransponderFrequency: 7000,
@@ -156,7 +153,7 @@ export function getTaxiRequestSimulatorUpdateData(
 	startAerodrome: Aerodrome
 ): SimulatorUpdateData {
 	return {
-		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
+		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.radioFrequencies[0], // TODO: Change to correct frequency - add method in aerodrome to get the specific frequencies
 		currentTransponderFrequency: 7000,
@@ -171,7 +168,7 @@ export function getGetTaxiClearenceReadbackSimulatorUpdateData(
 	startAerodrome: Aerodrome
 ): SimulatorUpdateData {
 	return {
-		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
+		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.radioFrequencies[0], // TODO: Change to correct frequency - add method in aerodrome to get the specific frequencies
 		currentTransponderFrequency: 7000,
