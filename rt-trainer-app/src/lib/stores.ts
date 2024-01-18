@@ -71,3 +71,19 @@ export const KneeboardStore = writable<string>('');
 export const RouteStore = writable<RoutePoint[]>([]);
 
 export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
+
+export function ClearSimulationStores(): void {
+	AircraftDetailsStore.set(initialAircraftDetails);
+	GenerationParametersStore.set(initialGenerationParameters);
+	CurrentTargetStore.set(initialTarget);
+	SpeechInputStore.set(false);
+	SpeechOutputStore.set(false);
+	RadioStateStore.set(initialRadioState);
+	TransponderStateStore.set(initialTransponderState);
+	UserMessageStore.set('');
+	ExpectedUserMessageStore.set('');
+	ATCMessageStore.set('');
+	KneeboardStore.set('');
+	RouteStore.set([]);
+	CurrentRoutePointStore.set(null);
+}

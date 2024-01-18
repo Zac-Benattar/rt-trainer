@@ -315,7 +315,7 @@ export default class CallParsingContext {
 				getAbbreviatedCallsign(
 					this.seed.scenarioSeed,
 					this.getAircraftType(),
-					this.getUserCallsign()
+					this.userCallsign
 				)
 			);
 		}

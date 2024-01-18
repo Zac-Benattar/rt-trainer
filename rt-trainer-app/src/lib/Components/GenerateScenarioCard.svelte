@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
+	import { ClearSimulationStores } from '$lib/stores';
 
 	export let seed: string = generateRandomURLValidString(8);
 	let airborneWaypoints: number = 2;
@@ -9,6 +10,10 @@
 	let invalidInput: boolean = false;
 
 	const handleClick = () => {
+		// Reset stores
+		ClearSimulationStores()
+
+		// Get the values from the form
 		const enableEmergenciesElement = document.getElementById(
 			'emergency-events'
 		) as HTMLInputElement;

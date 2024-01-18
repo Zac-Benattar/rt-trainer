@@ -166,6 +166,8 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedradiocall);
 	}
 
+	
+
 	/* Parse initial contact with new ATC unit.
 Should consist of ATC callsign and aircraft callsign */
 	public static parseNewAirspaceInitialContact(
