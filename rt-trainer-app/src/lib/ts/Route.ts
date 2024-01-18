@@ -266,7 +266,7 @@ export default class Route {
 			parkedWaypoint
 		);
 		stages.push(taxiClearanceReadback);
-
+			
 		return stages;
 	}
 

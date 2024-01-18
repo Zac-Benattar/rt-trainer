@@ -199,7 +199,6 @@
 		let severeMistakes: boolean = false;
 		let callsignMentioned: boolean = true; // If user's callsign in their call or not
 		let minorMistakes: string[] = [];
-		console.log(serverResponse.mistakes);
 		for (let i = 0; i < serverResponse.mistakes.length; i++) {
 			// If the user's callsign is mentioned in the mistakes, then they have not said their callsign, so set the flag
 			if (serverResponse.mistakes[i].details.search('your callsign') != -1) {
