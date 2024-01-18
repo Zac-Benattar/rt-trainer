@@ -42,7 +42,10 @@
 		if (callsignInputElement != null) {
 			if (callsignInputElement.value == '') {
 				callsign = 'G-OFLY';
+			} else {
+				callsign = callsignInputElement.value;
 			}
+
 		}
 
 		let aircraftType = '';
@@ -52,6 +55,9 @@
 		if (aircraftTypeInputElement != null) {
 			if (aircraftTypeInputElement.value == '') {
 				aircraftType = 'Cessna 172';
+			}
+			else {
+				aircraftType = aircraftTypeInputElement.value;
 			}
 		}
 

@@ -19,7 +19,7 @@ export enum RoutePointType {
 	InboundForJoin = 'InboundForJoin',
 	JoinCircuit = 'JoinCircuit',
 	CircuitAndLanding = 'CircuitAndLanding',
-	LandingToParked = 'LandingToParked',
+	LandingToParked = 'LandingToParked'
 }
 
 /* A point on the route used in generation. Not necissarily visible to the user */
@@ -33,6 +33,7 @@ export class RoutePoint {
 		pointType: RoutePointType,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+
 		waypoint?: Waypoint
 	) {
 		this.pointType = pointType;
@@ -48,6 +49,7 @@ export class ParkedPoint extends RoutePoint {
 		stage: ParkedStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+
 		waypoint?: Waypoint
 	) {
 		super(RoutePointType.Parked, pose, updateData, waypoint);
@@ -61,6 +63,7 @@ export class TaxiingPoint extends RoutePoint {
 		stage: TaxiingStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+
 		waypoint?: Waypoint
 	) {
 		super(RoutePointType.Taxiing, pose, updateData, waypoint);

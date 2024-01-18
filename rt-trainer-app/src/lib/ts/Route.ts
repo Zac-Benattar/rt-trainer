@@ -231,7 +231,7 @@ export default class Route {
 			ParkedStage.RadioCheck,
 			parkedPose,
 			getRadioCheckSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
+			parkedWaypoint,
 		);
 		stages.push(radioCheck);
 
@@ -266,7 +266,7 @@ export default class Route {
 			parkedWaypoint
 		);
 		stages.push(taxiClearanceReadback);
-
+			
 		return stages;
 	}
 
