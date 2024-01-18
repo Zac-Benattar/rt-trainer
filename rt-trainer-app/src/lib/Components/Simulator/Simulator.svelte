@@ -21,7 +21,10 @@
 		GenerationParametersStore,
 		KneeboardStore,
 		CurrentRoutePointStore,
-		SpeechOutputStore
+		SpeechOutputStore,
+
+		ExpectedUserMessageStore
+
 	} from '$lib/stores';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
@@ -40,6 +43,7 @@
 	let kneeboardText: string = 'Make notes here.';
 	let route: RoutePoint[] | undefined = [];
 	let currentPointIndex: number = 0;
+	let failedAttempts: number = 0;
 
 	// Page settings
 	let mapEnabled = true;
@@ -193,28 +197,68 @@
 
 		serverNotResponding = false;
 
-		if (serverResponse.mistakes.length > 0) {
-			// Handle mistake
+		// Get whether there are severe mistakes, and record all minor ones
+		let severeMistakes: boolean = false;
+		let minorMistakes: string[] = [];
+		for (let i = 0; i < serverResponse.mistakes.length; i++) {
+			if (serverResponse.mistakes[i].severe) {
+				severeMistakes = true;
+				break;
+			} else {
+				minorMistakes.push(serverResponse.mistakes[i].details);
+			}
+		}
 
-			// Pop up modal with mistake details
-			const modal: ModalSettings = {
-				type: 'alert',
-				// Data
-				title: 'Mistake',
-				body: serverResponse.mistakes[0].details
+		// Handle mistakes
+		if (severeMistakes) {
+			failedAttempts++;
+
+			if (failedAttempts >= 3) {
+				// Show a modal asking the user if they want to be given the correct call or keep trying
+				const m: ModalSettings = {
+					type: 'confirm',
+					title: 'Mistake',
+					body: 'Do you want to be given the correct call?',
+					response: (r: boolean) => {
+						if (r) {
+							// Put the correct call in the input box
+							ExpectedUserMessageStore.set(serverResponse.expectedUserCall);
+						} else {
+							failedAttempts = -999;
+						}
+					}
+				};
+				modalStore.trigger(m);
+
+				return;
+			}
+
+			// Make ATC respond with say again and do not advance the simulator
+			if (route[currentPointIndex].contactEstablished) {
+				ATCMessageStore.set(aircraftDetails.prefix + ' ' + aircraftDetails.callsign + ' Say Again');
+			} else {
+				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
+			}
+
+			return;
+		} else if (minorMistakes.length > 0) {
+			// Show a toast with the minor mistakes and advance scenario
+			const t: ToastSettings = {
+				message: 'Correct with minor mistakes: ' + minorMistakes.join(', ') + '.'
 			};
-			modalStore.trigger(modal);
+			toastStore.trigger(t);
 		} else {
 			const t: ToastSettings = {
 				message: 'Correct!'
 			};
 			toastStore.trigger(t);
-
-			// Update the simulator with the next route point
-			currentPointIndex++;
-			ATCMessageStore.set(serverResponse.responseCall);
-			CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 		}
+
+		// Update the simulator with the next route point
+		failedAttempts = 0;
+		currentPointIndex++;
+		ATCMessageStore.set(serverResponse.responseCall);
+		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}
 
 	async function initiateScenario() {

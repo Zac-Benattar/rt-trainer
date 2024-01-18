@@ -36,14 +36,14 @@ const initialRadioState: RadioState = {
 const initialTransponderState: TransponderState = {
 	dialMode: 'OFF',
 	frequency: 0,
-	ident_enabled: false,
+	identEnabled: false,
 	vfrHasExecuted: false
 };
 
 const initialTarget: RadioFrequency = {
 	frequency: 0,
 	callsign: 'NONE',
-	frequencyType: FrequencyType.AFIS
+	frequencyType: FrequencyType.FIS
 };
 
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
@@ -61,6 +61,8 @@ export const RadioStateStore = writable<RadioState>(initialRadioState);
 export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
 
 export const UserMessageStore = writable<string>('');
+
+export const ExpectedUserMessageStore = writable<string>('');
 
 export const ATCMessageStore = writable<string>('');
 

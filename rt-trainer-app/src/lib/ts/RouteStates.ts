@@ -27,17 +27,20 @@ export class RoutePoint {
 	pointType: RoutePointType;
 	pose: Pose;
 	updateData: SimulatorUpdateData;
+	contactEstablished: boolean = false; // Stores whether or not the user has contacted the radio target at this point
 	waypoint: Waypoint | null = null;
 
 	constructor(
 		pointType: RoutePointType,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+		contactEstablished: boolean,
 		waypoint?: Waypoint
 	) {
 		this.pointType = pointType;
 		this.pose = pose;
 		this.updateData = updateData;
+		this.contactEstablished = contactEstablished;
 		this.waypoint = waypoint || null;
 	}
 }
@@ -48,9 +51,10 @@ export class ParkedPoint extends RoutePoint {
 		stage: ParkedStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+		contactEstablished: boolean,
 		waypoint?: Waypoint
 	) {
-		super(RoutePointType.Parked, pose, updateData, waypoint);
+		super(RoutePointType.Parked, pose, updateData, contactEstablished, waypoint);
 		this.stage = stage;
 	}
 }
@@ -61,9 +65,10 @@ export class TaxiingPoint extends RoutePoint {
 		stage: TaxiingStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+		contactEstablished: boolean,
 		waypoint?: Waypoint
 	) {
-		super(RoutePointType.Taxiing, pose, updateData, waypoint);
+		super(RoutePointType.Taxiing, pose, updateData, contactEstablished, waypoint);
 		this.stage = stage;
 	}
 }
@@ -76,9 +81,10 @@ export class HoldingPointPoint extends RoutePoint {
 		stage: HoldingPointStage,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+		contactEstablished: boolean,
 		waypoint?: Waypoint
 	) {
-		super(RoutePointType.HoldingPoint, pose, updateData, waypoint);
+		super(RoutePointType.HoldingPoint, pose, updateData, contactEstablished, waypoint);
 		this.stage = stage;
 	}
 }
@@ -92,10 +98,11 @@ export class AirbornePoint extends RoutePoint {
 		flightRules: FlightRules,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
+		contactEstablished: boolean,
 		emergency: EmergencyType,
 		waypoint: Waypoint
 	) {
-		super(RoutePointType.Airborne, pose, updateData, waypoint);
+		super(RoutePointType.Airborne, pose, updateData, contactEstablished, waypoint);
 		this.flightRules = flightRules;
 		this.emergency = emergency;
 		this.waypoint = waypoint;

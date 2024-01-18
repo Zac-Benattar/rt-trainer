@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { SpeechInputStore, UserMessageStore } from '$lib/stores';
+	import { ExpectedUserMessageStore, SpeechInputStore, UserMessageStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
@@ -36,6 +36,17 @@
 		UserMessageStore.set(message);
 		dispatch('submit');
 	};
+
+	ExpectedUserMessageStore.subscribe((value) => {
+		if (value !== '') {
+			resetBox();
+			const inputBox = document.getElementById('call-input') as HTMLTextAreaElement;
+			inputBox.value = value;
+			message = value;
+			UserMessageStore.set(message);
+			ExpectedUserMessageStore.set('');
+		}
+	});
 
 	$: SpeechInputStore.set(speechInput);
 
@@ -108,7 +119,7 @@
 		padding: 8px;
 		min-width: 490px;
 		max-width: 490px;
-		height: 200px;		
+		height: 200px;
 		border-radius: 5px;
 	}
 

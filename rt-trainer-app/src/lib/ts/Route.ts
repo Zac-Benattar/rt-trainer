@@ -231,7 +231,8 @@ export default class Route {
 			ParkedStage.RadioCheck,
 			parkedPose,
 			getRadioCheckSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
+			false,
+			parkedWaypoint,
 		);
 		stages.push(radioCheck);
 
@@ -239,6 +240,7 @@ export default class Route {
 			ParkedStage.DepartureInformationRequest,
 			parkedPose,
 			getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
+			true,
 			parkedWaypoint
 		);
 		stages.push(requestDepartInfo);
@@ -247,6 +249,7 @@ export default class Route {
 			ParkedStage.ReadbackDepartureInformation,
 			parkedPose,
 			getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
+			true,
 			parkedWaypoint
 		);
 		stages.push(readbackDepartInfo);
@@ -255,6 +258,7 @@ export default class Route {
 			ParkedStage.TaxiRequest,
 			parkedPose,
 			getTaxiRequestSimulatorUpdateData(seed, startAerodrome),
+			true,
 			parkedWaypoint
 		);
 		stages.push(taxiRequest);
@@ -263,6 +267,7 @@ export default class Route {
 			ParkedStage.TaxiClearanceReadback,
 			parkedPose,
 			getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome),
+			true,
 			parkedWaypoint
 		);
 		stages.push(taxiClearanceReadback);
