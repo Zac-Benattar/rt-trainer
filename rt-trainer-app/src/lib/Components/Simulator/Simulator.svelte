@@ -322,7 +322,7 @@
 				<Kneeboard />
 			</div>
 
-			<ScenarioLink />
+			<!-- <ScenarioLink /> -->
 		</div>
 
 		<div class="h-1" />
