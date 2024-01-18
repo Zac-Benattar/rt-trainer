@@ -79,6 +79,8 @@
 
 	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 	AircraftDetailsStore.set({ callsign, prefix, aircraftType });
+
+	console.log(seed, airborneWaypoints, hasEmergency, callsign, prefix, aircraftType);
 </script>
 
 <div class="relative flex" style="justify-content: center;">
