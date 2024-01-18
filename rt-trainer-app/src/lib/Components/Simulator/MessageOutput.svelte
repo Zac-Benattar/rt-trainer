@@ -83,10 +83,6 @@
 		border: none;
 	}
 
-	.call-output {
-		
-	}
-
 	.call-target-output {
 		height: 40px;
 	}

@@ -22,9 +22,7 @@
 		KneeboardStore,
 		CurrentRoutePointStore,
 		SpeechOutputStore,
-
 		ExpectedUserMessageStore
-
 	} from '$lib/stores';
 	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
@@ -199,11 +197,19 @@
 
 		// Get whether there are severe mistakes, and record all minor ones
 		let severeMistakes: boolean = false;
+		let callsignMentioned: boolean = true; // If user's callsign in their call or not
 		let minorMistakes: string[] = [];
+		console.log(serverResponse.mistakes);
 		for (let i = 0; i < serverResponse.mistakes.length; i++) {
+			// If the user's callsign is mentioned in the mistakes, then they have not said their callsign, so set the flag
+			if (serverResponse.mistakes[i].details.search('your callsign') != -1) {
+				callsignMentioned = false;
+			}
+
+			// If the mistake is severe, then set the flag
 			if (serverResponse.mistakes[i].severe) {
 				severeMistakes = true;
-				break;
+				continue;
 			} else {
 				minorMistakes.push(serverResponse.mistakes[i].details);
 			}
@@ -234,7 +240,7 @@
 			}
 
 			// Make ATC respond with say again and do not advance the simulator
-			if (route[currentPointIndex].contactEstablished) {
+			if (callsignMentioned) {
 				ATCMessageStore.set(aircraftDetails.prefix + ' ' + aircraftDetails.callsign + ' Say Again');
 			} else {
 				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
