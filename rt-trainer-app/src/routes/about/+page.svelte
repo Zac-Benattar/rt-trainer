@@ -1,12 +1,12 @@
 <script lang="ts">
 </script>
 
-<div>
-	<div>
-		<h1>About</h1>
+<div class="p-5 w-10/12">
+	<div class="p-1">
+		<h1 class="text-xl">About</h1>
 	</div>
-	<div>
-		<p>
+	<div class="p-3">
+		<p class="p-2">
 			<b>RT Trainer</b> - A web based training platform for future pilots to learn
 			<a
 				href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
@@ -22,38 +22,36 @@
 				>CAA's website</a
 			>.
 		</p>
-		<p>
+		<p class="p-2">
 			This website was created as part of Zac Benattar's third year computer science project. The <a
 				href="https://github.com/Zac-Benattar/csproj">GitHub repository</a
 			>
-			contains the accompanying code and documents for the project. The frontend was built using
-			<a href="https://kit.svelte.dev/">SvelteKit</a>, and the backend is a Rust websever using the
-			<a href="https://github.com/tokio-rs/axum">Axum crate</a>. This project was developed with
-			assistence from the
-			<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>
+			contains the accompanying code and documents for the project. The fronted was built using
+			<a href="https://svelte.dev/">Svelte</a>, and the backend is a Vite websever built using
+			<a href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
+			<a href="https://vercel.com/">Vercel</a>. This project was developed with assistence from the
+			<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>. I
+			am not currently looking for feedback from all users, as the app is still in too early a state
+			for wider testing. Eventually I will include a way of contacting me on this page when I need
+			feedback.
 		</p>
 	</div>
 
-	<div>
-		<h2>Attributions</h2>
+	<div class="p-1">
+		<h2 class="text-xl">Attributions</h2>
 	</div>
-	<div>
-		<p>
-			<b>Map</b> - The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
+	<div class="p-3">
+		<h3>Map</h3>
+		<p class="p-2">
+			The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
 			<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
 			<a href="https://www.mapbox.com/">Mapbox</a> tiles.
 		</p>
-		<p>
-			<b>Icons</b>
+		<h3>Images</h3>
+		<p class="p-2">
 			<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
 				>Plane icon created by Freepik - Flaticon</a
 			>
-		</p>
-		<p>
-			<b>Images</b>
-		</p>
-		<p>
-			<b>Audio</b>
 		</p>
 	</div>
 </div>
