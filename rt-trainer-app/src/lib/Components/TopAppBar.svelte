@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AppBar } from '@skeletonlabs/skeleton';
+	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 
@@ -32,16 +32,8 @@
 		</svelte:fragment>
 
 		<svelte:fragment slot="trail">
-			<a
-				class="btn btn-sm variant-ghost-surface"
-				href="https://github.com/Zac-Benattar/csproj/"
-				target="_blank"
-				rel="external"
-			>
-				GitHub
-			</a>
-
-			<a class="btn btn-sm variant-ghost-surface" href="/profile"
+			<LightSwitch />
+			<a class="btn-icon variant-ghost-surface" href="/profile"
 				><Avatar
 					src="https://i.pravatar.cc/"
 					fallback="/images/headshot.png"

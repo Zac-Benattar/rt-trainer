@@ -136,7 +136,7 @@ export default class Parser {
 		let atcResponse = `${parseContext
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
-			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
+			parseContext.getTakeoffRunwayHoldingPoint().name
 		} via taxiway charlie. Hold short of runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
 			parseContext.getStartAerodromeMETORSample().pressure
 		}`;
@@ -148,7 +148,7 @@ export default class Parser {
 	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, student G-OFLY
 	public static parseTaxiReadback(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
-			parseContext.getStartAerodromeTakeoffRunway().holdingPoints[0].name
+			parseContext.getTakeoffRunwayHoldingPoint().name
 		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${
 			parseContext.getStartAerodromeMETORSample().pressure
 		} ${parseContext.getTargetAllocatedCallsign()}`;
