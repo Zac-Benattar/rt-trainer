@@ -62,6 +62,10 @@ export function removeDigits(str: string): string {
 	return str.replace(/[0-9]/g, '');
 }
 
+export function isCallsignStandardRegistration(callsign: string): boolean {
+	return callsign.length == 6 && callsign.charAt(1) == '-';
+}
+
 /* Returns a abbreviated callsign. */
 export function getAbbreviatedCallsign(
 	scenarioSeed: number,
@@ -70,15 +74,7 @@ export function getAbbreviatedCallsign(
 ): string {
 	let abbreviatedCallsign: string = '';
 	if (callsign.length == 6) {
-		let standardRegStyle: boolean = true;
-
-		if (standardRegStyle) {
-			if (callsign.charAt(1) != '-') {
-				standardRegStyle = false;
-			}
-		}
-
-		if (standardRegStyle) {
+		if (isCallsignStandardRegistration(callsign)) {
 			// G-OFLY -> G-LY
 			abbreviatedCallsign += callsign.charAt(0);
 			abbreviatedCallsign += '-';
@@ -110,7 +106,23 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 		golf: 'G',
 		hotel: 'H',
 		india: 'I',
-		juliet: 'J'
+		juliet: 'J',
+		kilo: 'K',
+		lima: 'L',
+		mike: 'M',
+		november: 'N',
+		oscar: 'O',
+		papa: 'P',
+		quebec: 'Q',
+		romeo: 'R',
+		sierra: 'S',
+		tango: 'T',
+		uniform: 'U',
+		victor: 'V',
+		whiskey: 'W',
+		xray: 'X',
+		yankee: 'Y',
+		zulu: 'Z'
 	};
 
 	// Create a regular expression pattern to match any of the phonetic alphabet words
@@ -175,6 +187,11 @@ export function replaceWithPhoneticAlphabet(text: string) {
 		} else if (/[0-9]/.test(char)) {
 			const natoNumber = phoneticNumbers[char];
 			result += natoNumber + ' ';
+		} else if (char === '-') {
+			// Ignore hyphens
+			continue;
+		} else if (char === '.') {
+			result += 'Decimal ';
 		} else {
 			result += char + ' ';
 		}

@@ -28,6 +28,7 @@
 	import type { RoutePoint } from '$lib/ts/RouteStates';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
+	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -240,7 +241,18 @@
 
 			// Make ATC respond with say again and do not advance the simulator
 			if (callsignMentioned) {
-				ATCMessageStore.set(aircraftDetails.prefix + ' ' + aircraftDetails.callsign + ' Say Again');
+				if (isCallsignStandardRegistration(aircraftDetails.callsign)) {
+					ATCMessageStore.set(
+						aircraftDetails.prefix +
+							' ' +
+							replaceWithPhoneticAlphabet(aircraftDetails.callsign) +
+							' Say Again'
+					);
+				} else {
+					ATCMessageStore.set(
+						aircraftDetails.prefix + ' ' + aircraftDetails.callsign + ' Say Again'
+					);
+				}
 			} else {
 				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
 			}
