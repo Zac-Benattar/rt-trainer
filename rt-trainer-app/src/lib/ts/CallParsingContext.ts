@@ -4,7 +4,7 @@ import type Seed from './Seed';
 import type { Mistake } from './ServerClientTypes';
 import { getAbbreviatedCallsign, isCallsignStandardRegistration, processString, replaceWithPhoneticAlphabet } from './utils';
 import type { RadioFrequency } from './SimulatorTypes';
-import type { Aerodrome, AerodromeStartPoint, METORDataSample, Runway, RunwayHoldingPoint, Taxiway } from './Aerodrome';
+import { ControlledAerodrome, type Aerodrome, type AerodromeStartPoint, type METORDataSample, type Runway, type RunwayHoldingPoint, type Taxiway } from './Aerodrome';
 
 export default class CallParsingContext {
 	private radioCall: string;
@@ -95,6 +95,10 @@ export default class CallParsingContext {
 
 	public getAircraftType(): string {
 		return this.aircraftType.toLowerCase();
+	}
+
+	public isTakeoffAerodromeControlled(): boolean {
+		return this.getStartAerodrome() instanceof ControlledAerodrome;
 	}
 
 	public getUnmodifiedRadioCall(): string {

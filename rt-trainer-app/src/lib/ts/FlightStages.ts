@@ -6,6 +6,8 @@ export enum ParkedStage {
 	ReadbackDepartureInformation = 'ReadbackDepartureInformation',
 	TaxiRequest = 'TaxiRequest',
 	TaxiClearanceReadback = 'TaxiClearanceReadback',
+	RequestTaxiInformation = 'RequestTaxiInformation', // Uncontrolled aerodrome
+	AnnounceTaxiing = 'AnnounceTaxiing', // Uncontrolled aerodrome
 }
 
 export enum TaxiingStage {

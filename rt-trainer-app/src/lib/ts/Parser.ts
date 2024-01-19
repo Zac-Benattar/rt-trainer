@@ -9,19 +9,32 @@ export default class Parser {
 		switch (parseContext.getRoutePoint().pointType) {
 			case RoutePointType.Parked: {
 				const parkedPoint: ParkedPoint = parseContext.getRoutePoint() as ParkedPoint;
-				switch (parkedPoint.stage) {
-					case ParkedStage.RadioCheck:
-						return this.parseRadioCheck(parseContext);
-					case ParkedStage.DepartureInformationRequest:
-						return this.parseDepartureInformationRequest(parseContext);
-					case ParkedStage.ReadbackDepartureInformation:
-						return this.parseDepartureInformationReadback(parseContext);
-					case ParkedStage.TaxiRequest:
-						return this.parseTaxiRequest(parseContext);
-					case ParkedStage.TaxiClearanceReadback:
-						return this.parseTaxiReadback(parseContext);
-					default:
-						throw new Error('Unknown parked stage');
+				if (parseContext.isTakeoffAerodromeControlled()) {
+					switch (parkedPoint.stage) {
+						case ParkedStage.RadioCheck:
+							return this.parseRadioCheck(parseContext);
+						case ParkedStage.DepartureInformationRequest:
+							return this.parseDepartureInformationRequest(parseContext);
+						case ParkedStage.ReadbackDepartureInformation:
+							return this.parseDepartureInformationReadback(parseContext);
+						case ParkedStage.TaxiRequest:
+							return this.parseTaxiRequest(parseContext);
+						case ParkedStage.TaxiClearanceReadback:
+							return this.parseTaxiReadback(parseContext);
+						default:
+							throw new Error('Unknown parked stage');
+					}
+				} else {
+					switch (parkedPoint.stage) {
+						case ParkedStage.RadioCheck:
+							return this.parseRadioCheck(parseContext);
+						case ParkedStage.RequestTaxiInformation:
+							return this.parseTaxiInformationRequest(parseContext);
+						case ParkedStage.AnnounceTaxiing:
+							return this.parseAnnounceTaxiing(parseContext);
+						default:
+							throw new Error('Unknown parked stage');
+					}
 				}
 			}
 			case RoutePointType.Taxiing:
@@ -137,9 +150,9 @@ export default class Parser {
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
 			parseContext.getTakeoffRunwayHoldingPoint().name
-		} via taxiway charlie. Hold short of runway ${parseContext.getStartAerodromeTakeoffRunway().name}, QNH ${
-			parseContext.getStartAerodromeMETORSample().pressure
-		}`;
+		} via taxiway charlie. Hold short of runway ${
+			parseContext.getStartAerodromeTakeoffRunway().name
+		}, QNH ${parseContext.getStartAerodromeMETORSample().pressure}`;
 		if (pressure < 1000) atcResponse += ' millibars';
 
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);

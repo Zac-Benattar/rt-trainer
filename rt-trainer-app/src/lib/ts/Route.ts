@@ -20,7 +20,7 @@ import {
 	getGetTaxiClearenceReadbackSimulatorUpdateData
 } from './RouteStates';
 import { ParkedStage } from './FlightStages';
-import { Aerodrome } from './Aerodrome';
+import { Aerodrome, ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 const MAX_ROUTE_DISTANCE = 300000; // 300km
@@ -34,7 +34,7 @@ const MAX_AIRBORNE_ROUTE_POINTS = 5;
 // 	Winter
 // }
 
-function getUncontrolledAerodromesFromJSON(): Aerodrome[] {
+function getUncontrolledAerodromesFromJSON(): UncontrolledAerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
 	uncontrolledAerodromes.forEach((aerodrome) => {
@@ -85,7 +85,7 @@ function getUncontrolledAerodromesFromJSON(): Aerodrome[] {
 	return aerodromes;
 }
 
-function getControlledAerodromesFromJSON(): Aerodrome[] {
+function getControlledAerodromesFromJSON(): ControlledAerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
 	controlledAerodromes.forEach((aerodrome) => {
