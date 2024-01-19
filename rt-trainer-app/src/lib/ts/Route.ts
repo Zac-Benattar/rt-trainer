@@ -1,16 +1,13 @@
-import smallAerodromes from '../../data/small_aerodromes.json';
-import largeAerodromes from '../../data/large_aerodromes.json';
+import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
+import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import waypoints from '../../data/waypoints.json';
 import { haversineDistance, seededNormalDistribution } from './utils';
 import {
 	FrequencyType,
-	type Aerodrome,
-	type RadioFrequency,
-	type METORDataSample,
-	type METORData,
 	WaypointType,
 	type Pose,
-	type Waypoint
+	type Waypoint,
+	type RadioFrequency
 } from './SimulatorTypes';
 import type Seed from './Seed';
 import {
@@ -23,6 +20,7 @@ import {
 	getGetTaxiClearenceReadbackSimulatorUpdateData
 } from './RouteStates';
 import { ParkedStage } from './FlightStages';
+import { Aerodrome } from './Aerodrome';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 const MAX_ROUTE_DISTANCE = 300000; // 300km
@@ -36,10 +34,10 @@ const MAX_AIRBORNE_ROUTE_POINTS = 5;
 // 	Winter
 // }
 
-function getSmallAerodromesFromJSON(): Aerodrome[] {
+function getUncontrolledAerodromesFromJSON(): Aerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
-	smallAerodromes.forEach((aerodrome) => {
+	uncontrolledAerodromes.forEach((aerodrome) => {
 		const radioFrequencies: RadioFrequency[] = [];
 		aerodrome.radioFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
@@ -87,10 +85,10 @@ function getSmallAerodromesFromJSON(): Aerodrome[] {
 	return aerodromes;
 }
 
-function getLargeAerodromesFromJSON(): Aerodrome[] {
+function getControlledAerodromesFromJSON(): Aerodrome[] {
 	const aerodromes: Aerodrome[] = [];
 
-	largeAerodromes.forEach((aerodrome) => {
+	controlledAerodromes.forEach((aerodrome) => {
 		const radioFrequencies: RadioFrequency[] = [];
 		aerodrome.radioFrequencies.forEach((comFrequency) => {
 			let frequencyType: FrequencyType;
@@ -123,16 +121,18 @@ function getLargeAerodromesFromJSON(): Aerodrome[] {
 			});
 		});
 
-		aerodromes.push({
-			name: aerodrome.name,
-			icao: aerodrome.icao,
-			radioFrequencies: radioFrequencies,
-			runways: aerodrome.runways,
-			location: aerodrome.location,
-			altitude: aerodrome.altitude,
-			startPoints: aerodrome.startPoints,
-			metorData: aerodrome.metorData
-		});
+		aerodromes.push(
+			new Aerodrome(
+				aerodrome.name,
+				aerodrome.icao,
+				radioFrequencies,
+				aerodrome.runways,
+				aerodrome.location,
+				aerodrome.altitude,
+				aerodrome.startPoints,
+				aerodrome.metorData
+			)
+		);
 	});
 
 	return aerodromes;
@@ -197,9 +197,9 @@ export default class Route {
 	/* Get a start aerodrome. */
 	public static getStartAerodrome(seed: Seed): Aerodrome {
 		if (seed.scenarioSeed % 2 === 0) {
-			return getLargeAerodromesFromJSON()[seed.scenarioSeed % largeAerodromes.length];
+			return getControlledAerodromesFromJSON()[seed.scenarioSeed % controlledAerodromes.length];
 		}
-		return getSmallAerodromesFromJSON()[seed.scenarioSeed % smallAerodromes.length];
+		return getUncontrolledAerodromesFromJSON()[seed.scenarioSeed % uncontrolledAerodromes.length];
 	}
 
 	/* Get the start aerodrome states. This includes all stages of:     
@@ -231,7 +231,7 @@ export default class Route {
 			ParkedStage.RadioCheck,
 			parkedPose,
 			getRadioCheckSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint,
+			parkedWaypoint
 		);
 		stages.push(radioCheck);
 
@@ -266,29 +266,30 @@ export default class Route {
 			parkedWaypoint
 		);
 		stages.push(taxiClearanceReadback);
-			
+
 		return stages;
 	}
 
-	public static getAirborneRoutePoints(seed: Seed): RoutePoint[] {
+	public static getAirborneRoutePoints(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
 		let points: Waypoint[] = [];
 		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
 		const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
+
 		// Read in all waypoints from waypoints.json
-
 		const possibleWaypoints = getWaypointsFromJSON();
-
-		// Push the start aerodrome to points in order to calculate the distance from it
-		points.push({
-			waypointType: WaypointType.Aerodrome,
-			location: startAerodrome.location,
-			name: 'startAerodrome',
-			radioFrequencies: startAerodrome.radioFrequencies
-		});
 
 		// Try many combinations of waypoints until a valid route is found
 		for (let i = 0; i < possibleWaypoints.length * possibleWaypoints.length; i++) {
+			// Push the start aerodrome to points in order to calculate the distance from it
+			points = [];
+			points.push({
+				waypointType: WaypointType.Aerodrome,
+				location: startAerodrome.location,
+				name: 'startAerodrome',
+				radioFrequencies: startAerodrome.radioFrequencies
+			});
 			let totalDistance = 0.0;
+
 			// Add waypoints until the route is too long or contains too many points
 			for (let i = 1; i < MAX_AIRBORNE_ROUTE_POINTS; i++) {
 				const waypoint = possibleWaypoints[seed.scenarioSeed % possibleWaypoints.length];
@@ -313,14 +314,7 @@ export default class Route {
 				break;
 			}
 
-			// No suitable route found - reset points and try again
-			points = [];
-			points.push({
-				waypointType: WaypointType.Aerodrome,
-				location: startAerodrome.location,
-				name: 'startAerodrome',
-				radioFrequencies: startAerodrome.radioFrequencies
-			});
+			// No suitable route found - try again
 		}
 
 		// Remove the start aerodrome
@@ -351,9 +345,9 @@ export default class Route {
 		const possibleEndAerodromes: Aerodrome[] = [];
 
 		if (seed.scenarioSeed % 2 === 0) {
-			possibleEndAerodromes.push(...getSmallAerodromesFromJSON());
+			possibleEndAerodromes.push(...getUncontrolledAerodromesFromJSON());
 		} else {
-			possibleEndAerodromes.push(...getLargeAerodromesFromJSON());
+			possibleEndAerodromes.push(...getControlledAerodromesFromJSON());
 		}
 
 		let endAerodrome: Aerodrome =
@@ -439,10 +433,10 @@ export default class Route {
 	}
 
 	/* Generate the route based off of the seed. */
-	public generateRoute(seed: Seed): RoutePoint[] {
+	public generateRoute(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
 		this.points.push(...Route.getStartAerodromeRoutePoints(seed));
 
-		this.points.push(...Route.getAirborneRoutePoints(seed));
+		this.points.push(...Route.getAirborneRoutePoints(seed), airborneWaypoints, emergency);
 
 		this.points.push(...Route.getEndAerodromeRoutePoints(seed));
 

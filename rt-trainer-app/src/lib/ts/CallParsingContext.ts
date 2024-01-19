@@ -1,18 +1,10 @@
-import { get } from 'http';
 import Route from './Route';
 import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
 import type { Mistake } from './ServerClientTypes';
-import type {
-	Aerodrome,
-	AerodromeStartPoint,
-	METORDataSample,
-	RadioFrequency,
-	Runway,
-	RunwayHoldingPoint,
-	Taxiway
-} from './SimulatorTypes';
 import { getAbbreviatedCallsign, isCallsignStandardRegistration, processString, replaceWithPhoneticAlphabet } from './utils';
+import type { RadioFrequency } from './SimulatorTypes';
+import type { Aerodrome, AerodromeStartPoint, METORDataSample, Runway, RunwayHoldingPoint, Taxiway } from './Aerodrome';
 
 export default class CallParsingContext {
 	private radioCall: string;
