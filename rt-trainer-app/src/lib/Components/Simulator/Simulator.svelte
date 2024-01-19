@@ -22,9 +22,11 @@
 		KneeboardStore,
 		CurrentRoutePointStore,
 		SpeechOutputStore,
-		ExpectedUserMessageStore
+		ExpectedUserMessageStore,
+
+		CurrentTargetFrequencyStore
+
 	} from '$lib/stores';
-	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
@@ -39,7 +41,7 @@
 	let transponderState: TransponderState; // Current transponder settings
 	let atcMessage: string;
 	let userMessage: string;
-	let kneeboardText: string = 'Make notes here.';
+	let kneeboardText: string;
 	let route: RoutePoint[] | undefined = [];
 	let currentPointIndex: number = 0;
 	let failedAttempts: number = 0;
@@ -59,8 +61,8 @@
 	$: if (serverNotResponding) {
 		modalStore.trigger({
 			type: 'alert',
-			title: 'Connection to server failed',
-			body: 'This may be due to the server being offline. Come back later and try again.'
+			title: 'Server did not respond',
+			body: 'This may be due to a bad request or the server being offline. Come back later and try again.'
 		});
 	}
 
@@ -159,7 +161,7 @@
 			return;
 		} else if (
 			radioState.activeFrequency.toFixed(3) !=
-			route[currentPointIndex].updateData.currentTarget.frequency.toFixed(3)
+			route[currentPointIndex].updateData.currentTargetFrequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -185,11 +187,6 @@
 		if (serverResponse === undefined) {
 			// Handle error
 			serverNotResponding = true;
-			modalStore.trigger({
-				type: 'alert',
-				title: 'No response from server',
-				body: 'This may be due to the server being offline or an unrecoverable parsing error encountered by the server. Come back later and try again.'
-			});
 
 			return;
 		}
@@ -230,7 +227,7 @@
 							// Put the correct call in the input box
 							ExpectedUserMessageStore.set(serverResponse.expectedUserCall);
 						} else {
-							failedAttempts = -999;
+							failedAttempts = -7;
 						}
 					}
 				};
@@ -290,6 +287,7 @@
 		} else {
 			// Update stores with the route
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
+			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
 		}

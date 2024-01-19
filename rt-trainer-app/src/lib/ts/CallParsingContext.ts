@@ -3,8 +3,7 @@ import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
 import type { Mistake } from './ServerClientTypes';
 import { getAbbreviatedCallsign, isCallsignStandardRegistration, processString, replaceWithPhoneticAlphabet } from './utils';
-import type { RadioFrequency } from './SimulatorTypes';
-import { ControlledAerodrome, type Aerodrome, type AerodromeStartPoint, type METORDataSample, type Runway, type RunwayHoldingPoint, type Taxiway } from './Aerodrome';
+import { ControlledAerodrome, type AerodromeStartPoint, type METORDataSample, type Runway, type RunwayHoldingPoint, type Taxiway, UncontrolledAerodrome } from './Aerodrome';
 
 export default class CallParsingContext {
 	private radioCall: string;
@@ -14,7 +13,8 @@ export default class CallParsingContext {
 	private userCallsign: string;
 	private userCallsignModified: boolean;
 	private squark: boolean;
-	private currentTarget: RadioFrequency;
+	private currentTarget: string;
+	private currentTargetFrequency: number;
 	private currentRadioFrequency: number;
 	private currentTransponderFrequency: number;
 	private aircraftType: string;
@@ -27,7 +27,8 @@ export default class CallParsingContext {
 		userCallsign: string,
 		userCallsignModified: boolean,
 		squark: boolean,
-		currentTarget: RadioFrequency,
+		currentTarget: string,
+		currentTargetFrequency: number,
 		currentRadioFrequency: number,
 		currentTransponderFrequency: number,
 		aircraftType: string
@@ -40,6 +41,7 @@ export default class CallParsingContext {
 		this.userCallsignModified = userCallsignModified;
 		this.squark = squark;
 		this.currentTarget = currentTarget;
+		this.currentTargetFrequency = currentTargetFrequency;
 		this.currentRadioFrequency = currentRadioFrequency;
 		this.currentTransponderFrequency = currentTransponderFrequency;
 		this.aircraftType = aircraftType;
@@ -81,8 +83,12 @@ export default class CallParsingContext {
 		return this.squark;
 	}
 
-	public getCurrentTarget(): RadioFrequency {
+	public getCurrentTarget(): string {
 		return this.currentTarget;
+	}
+
+	public getCurrentTargetFrequency(): number {
+		return this.currentTargetFrequency;
 	}
 
 	public getCurrentRadioFrequency(): number {
@@ -294,7 +300,7 @@ export default class CallParsingContext {
 	}
 
 	public getTargetCallsignWords(): string[] {
-		return this.currentTarget.callsign.split(' ');
+		return this.currentTarget.split(' ');
 	}
 
 	public callContainsTargetCallsign(): boolean {
@@ -334,31 +340,33 @@ export default class CallParsingContext {
 		return [callsigns[0]];
 	}
 
-	public getStartAerodrome(): Aerodrome {
+	public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
 		return Route.getStartAerodrome(this.seed);
 	}
 
-	public getEndAerodrome(): Aerodrome {
+	public getEndAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
 		return Route.getEndAerodrome(this.seed);
 	}
 
 	public getStartAerodromeStartingPoint(): AerodromeStartPoint {
-		return this.getStartAerodrome().startPoints[
-			this.seed.scenarioSeed % this.getStartAerodrome().startPoints.length
+		const startPoints = this.getStartAerodrome().getStartPoints();
+		return startPoints[
+			this.seed.scenarioSeed % startPoints.length
 		];
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {
-		return Route.getMETORSample(this.seed, this.getStartAerodrome().metorData);
+		return this.getStartAerodrome().getMETORSample(this.seed);
 	}
 
 	public getEndAerodromeMETORSample(): METORDataSample {
-		return Route.getMETORSample(this.seed, this.getEndAerodrome().metorData);
+		return this.getEndAerodrome().getMETORSample(this.seed);
 	}
 
 	public getStartAerodromeTakeoffRunway(): Runway {
-		return this.getStartAerodrome().runways[
-			this.seed.scenarioSeed % this.getStartAerodrome().runways.length
+		const runways = this.getStartAerodrome().getRunways();
+		return runways[
+			this.seed.scenarioSeed % runways.length
 		];
 	}
 
@@ -395,7 +403,7 @@ export default class CallParsingContext {
 	}
 
 	public assertCallContainsStartAerodromeName(): Mistake | undefined {
-		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().name])) {
+		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().getShortName()])) {
 			return {
 				details: 'Make sure your call contains the name of the starting aerodrome.',
 				severe: true
@@ -405,7 +413,7 @@ export default class CallParsingContext {
 	}
 
 	public assertCallContainsEndAerodromeName(): Mistake | undefined {
-		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().name])) {
+		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().getShortName()])) {
 			return {
 				details: 'Make sure your call contains the name of the ending aerodrome.',
 				severe: true

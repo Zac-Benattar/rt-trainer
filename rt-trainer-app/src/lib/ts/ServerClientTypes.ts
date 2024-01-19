@@ -1,5 +1,5 @@
 import type Seed from './Seed';
-import type { EmergencyType, RadioFrequency } from './SimulatorTypes';
+import type { EmergencyType } from './SimulatorTypes';
 import type { Location } from './SimulatorTypes';
 
 export type GenerationParameters = {
@@ -38,7 +38,8 @@ export type CallParsingContext = {
 export type SimulatorUpdateData = {
 	callsignModified: boolean;
 	squark: boolean;
-	currentTarget: RadioFrequency;
+	currentTarget: string;
+	currentTargetFrequency: number;
 	currentTransponderFrequency: number;
 	location: Location;
 	emergency: EmergencyType;

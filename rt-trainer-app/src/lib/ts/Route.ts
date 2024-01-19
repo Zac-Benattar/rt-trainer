@@ -1,14 +1,6 @@
-import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
-import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import waypoints from '../../data/waypoints.json';
-import { haversineDistance, seededNormalDistribution } from './utils';
-import {
-	FrequencyType,
-	WaypointType,
-	type Pose,
-	type Waypoint,
-	type RadioFrequency
-} from './SimulatorTypes';
+import { haversineDistance } from './utils';
+import { WaypointType, type Pose, type Waypoint } from './SimulatorTypes';
 import type Seed from './Seed';
 import {
 	ParkedPoint,
@@ -20,11 +12,10 @@ import {
 	getGetTaxiClearenceReadbackSimulatorUpdateData
 } from './RouteStates';
 import { ParkedStage } from './FlightStages';
-import { Aerodrome, ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
+import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 const MAX_ROUTE_DISTANCE = 300000; // 300km
-const MIN_AIRBORNE_ROUTE_POINTS = 2;
 const MAX_AIRBORNE_ROUTE_POINTS = 5;
 
 // enum Season {
@@ -34,151 +25,14 @@ const MAX_AIRBORNE_ROUTE_POINTS = 5;
 // 	Winter
 // }
 
-function getUncontrolledAerodromesFromJSON(): UncontrolledAerodrome[] {
-	const aerodromes: Aerodrome[] = [];
-
-	uncontrolledAerodromes.forEach((aerodrome) => {
-		const radioFrequencies: RadioFrequency[] = [];
-		aerodrome.radioFrequencies.forEach((comFrequency) => {
-			let frequencyType: FrequencyType;
-			switch (comFrequency.frequencyType) {
-				case 'ATIS':
-					frequencyType = FrequencyType.ATIS;
-					break;
-				case 'FIS':
-					frequencyType = FrequencyType.FIS;
-					break;
-				case 'GND':
-				case 'Ground':
-					frequencyType = FrequencyType.GND;
-					break;
-				case 'TWR':
-				case 'Tower':
-					frequencyType = FrequencyType.TWR;
-					break;
-				default:
-					throw new Error(
-						'Invalid frequency type loaded from Small Aerodromes JSON: ' +
-							comFrequency.frequencyType
-					);
-			}
-
-			radioFrequencies.push({
-				frequencyType: frequencyType,
-				frequency: comFrequency.frequency,
-				callsign: comFrequency.callsign
-			});
-		});
-
-		aerodromes.push({
-			name: aerodrome.name,
-			icao: aerodrome.icao,
-			radioFrequencies: radioFrequencies,
-			runways: aerodrome.runways,
-			location: aerodrome.location,
-			altitude: aerodrome.altitude,
-			startPoints: aerodrome.startPoints,
-			metorData: aerodrome.metorData
-		});
-	});
-
-	return aerodromes;
-}
-
-function getControlledAerodromesFromJSON(): ControlledAerodrome[] {
-	const aerodromes: Aerodrome[] = [];
-
-	controlledAerodromes.forEach((aerodrome) => {
-		const radioFrequencies: RadioFrequency[] = [];
-		aerodrome.radioFrequencies.forEach((comFrequency) => {
-			let frequencyType: FrequencyType;
-			switch (comFrequency.frequencyType) {
-				case 'ATIS':
-					frequencyType = FrequencyType.ATIS;
-					break;
-				case 'FIS':
-					frequencyType = FrequencyType.FIS;
-					break;
-				case 'GND':
-				case 'Ground':
-					frequencyType = FrequencyType.GND;
-					break;
-				case 'TWR':
-				case 'Tower':
-					frequencyType = FrequencyType.TWR;
-					break;
-				default:
-					throw new Error(
-						'Invalid frequency type loaded from Large Aerodromes JSON: ' +
-							comFrequency.frequencyType
-					);
-			}
-
-			radioFrequencies.push({
-				frequencyType: frequencyType,
-				frequency: comFrequency.frequency,
-				callsign: comFrequency.callsign
-			});
-		});
-
-		aerodromes.push(
-			new Aerodrome(
-				aerodrome.name,
-				aerodrome.icao,
-				radioFrequencies,
-				aerodrome.runways,
-				aerodrome.location,
-				aerodrome.altitude,
-				aerodrome.startPoints,
-				aerodrome.metorData
-			)
-		);
-	});
-
-	return aerodromes;
-}
-
 function getWaypointsFromJSON(): Waypoint[] {
 	const airborneWaypoints: Waypoint[] = [];
 
 	waypoints.forEach((waypoint) => {
-		const radioFrequencies: RadioFrequency[] = [];
-		for (let i = 0; i < waypoint.radioFrequencies.length; i++) {
-			let frequencyType: FrequencyType;
-			switch (waypoint.radioFrequencies[i].frequencyType) {
-				case 'ATIS':
-					frequencyType = FrequencyType.ATIS;
-					break;
-				case 'FIS':
-					frequencyType = FrequencyType.FIS;
-					break;
-				case 'GND':
-				case 'Ground':
-					frequencyType = FrequencyType.GND;
-					break;
-				case 'TWR':
-				case 'Tower':
-					frequencyType = FrequencyType.TWR;
-					break;
-				default:
-					throw new Error(
-						'Invalid frequency type loaded from Waypoints JSON: ' +
-							waypoint.radioFrequencies[i].frequencyType
-					);
-			}
-
-			radioFrequencies.push({
-				frequencyType: frequencyType,
-				frequency: waypoint.radioFrequencies[i].frequency,
-				callsign: waypoint.radioFrequencies[i].callsign
-			});
-		}
-
 		airborneWaypoints.push({
 			waypointType: WaypointType.VOR,
 			name: waypoint.name,
-			location: waypoint.location,
-			radioFrequencies: radioFrequencies
+			location: waypoint.location
 		});
 	});
 
@@ -195,11 +49,13 @@ export default class Route {
 	}
 
 	/* Get a start aerodrome. */
-	public static getStartAerodrome(seed: Seed): Aerodrome {
+	public static getStartAerodrome(seed: Seed): ControlledAerodrome | UncontrolledAerodrome {
 		if (seed.scenarioSeed % 2 === 0) {
-			return getControlledAerodromesFromJSON()[seed.scenarioSeed % controlledAerodromes.length];
+			const controlledAerodromes = ControlledAerodrome.getAerodromesFromJSON();
+			return controlledAerodromes[seed.scenarioSeed % controlledAerodromes.length];
 		}
-		return getUncontrolledAerodromesFromJSON()[seed.scenarioSeed % uncontrolledAerodromes.length];
+		const uncontrolledAerodromes = UncontrolledAerodrome.getAerodromesFromJSON();
+		return uncontrolledAerodromes[seed.scenarioSeed % uncontrolledAerodromes.length];
 	}
 
 	/* Get the start aerodrome states. This includes all stages of:     
@@ -210,70 +66,81 @@ export default class Route {
 	 */
 	public static getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 		const stages: RoutePoint[] = [];
-		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
-		const startPointIndex = seed.scenarioSeed % startAerodrome.startPoints.length;
+		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
+			Route.getStartAerodrome(seed);
+		const controlledAerodrome: boolean = startAerodrome instanceof ControlledAerodrome;
+		const startPoints = startAerodrome.getStartPoints();
+		const startPointIndex = seed.scenarioSeed % startPoints.length;
 
-		const parkedPose: Pose = {
-			location: startAerodrome.startPoints[startPointIndex].location,
-			heading: startAerodrome.startPoints[startPointIndex].heading,
-			altitude: startAerodrome.altitude,
-			airSpeed: 0.0
-		};
+		if (controlledAerodrome) {
+			const parkedPose: Pose = {
+				location: startPoints[startPointIndex].location,
+				heading: startPoints[startPointIndex].heading,
+				altitude: startAerodrome.getAltitude(),
+				airSpeed: 0.0
+			};
 
-		const parkedWaypoint: Waypoint = {
-			waypointType: WaypointType.Aerodrome,
-			location: startAerodrome.location,
-			name: startAerodrome.name,
-			radioFrequencies: startAerodrome.radioFrequencies
-		};
+			const parkedWaypoint: Waypoint = {
+				waypointType: WaypointType.Aerodrome,
+				location: startAerodrome.getLocation(),
+				name: startAerodrome.getShortName()
+			};
 
-		const radioCheck = new ParkedPoint(
-			ParkedStage.RadioCheck,
-			parkedPose,
-			getRadioCheckSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
-		);
-		stages.push(radioCheck);
+			const radioCheck = new ParkedPoint(
+				ParkedStage.RadioCheck,
+				parkedPose,
+				getRadioCheckSimulatorUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(radioCheck);
 
-		const requestDepartInfo = new ParkedPoint(
-			ParkedStage.DepartureInformationRequest,
-			parkedPose,
-			getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
-		);
-		stages.push(requestDepartInfo);
+			const requestDepartInfo = new ParkedPoint(
+				ParkedStage.DepartureInformationRequest,
+				parkedPose,
+				getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(requestDepartInfo);
 
-		const readbackDepartInfo = new ParkedPoint(
-			ParkedStage.ReadbackDepartureInformation,
-			parkedPose,
-			getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
-		);
-		stages.push(readbackDepartInfo);
+			const readbackDepartInfo = new ParkedPoint(
+				ParkedStage.ReadbackDepartureInformation,
+				parkedPose,
+				getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(readbackDepartInfo);
 
-		const taxiRequest = new ParkedPoint(
-			ParkedStage.TaxiRequest,
-			parkedPose,
-			getTaxiRequestSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
-		);
-		stages.push(taxiRequest);
+			const taxiRequest = new ParkedPoint(
+				ParkedStage.TaxiRequest,
+				parkedPose,
+				getTaxiRequestSimulatorUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(taxiRequest);
 
-		const taxiClearanceReadback = new ParkedPoint(
-			ParkedStage.TaxiClearanceReadback,
-			parkedPose,
-			getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome),
-			parkedWaypoint
-		);
-		stages.push(taxiClearanceReadback);
+			const taxiClearanceReadback = new ParkedPoint(
+				ParkedStage.TaxiClearanceReadback,
+				parkedPose,
+				getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(taxiClearanceReadback);
+		} else {
+			
+		}
 
 		return stages;
 	}
 
-	public static getAirborneRoutePoints(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
+	public static getAirborneRoutePoints(
+		seed: Seed,
+		airborneWaypoints: number,
+		emergency: boolean
+	): RoutePoint[] {
 		let points: Waypoint[] = [];
-		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
-		const endAerodrome: Aerodrome = Route.getEndAerodrome(seed);
+		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
+			Route.getStartAerodrome(seed);
+		const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
 
 		// Read in all waypoints from waypoints.json
 		const possibleWaypoints = getWaypointsFromJSON();
@@ -284,9 +151,8 @@ export default class Route {
 			points = [];
 			points.push({
 				waypointType: WaypointType.Aerodrome,
-				location: startAerodrome.location,
-				name: 'startAerodrome',
-				radioFrequencies: startAerodrome.radioFrequencies
+				location: startAerodrome.getLocation(),
+				name: 'startAerodrome'
 			});
 			let totalDistance = 0.0;
 
@@ -298,7 +164,7 @@ export default class Route {
 				// If route is too long or contains too many points, stop adding points
 				if (
 					totalDistance + distance >
-						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.location, endAerodrome.location) ||
+						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.location, endAerodrome.getLocation()) ||
 					points.length - 1 >= MAX_AIRBORNE_ROUTE_POINTS
 				) {
 					break;
@@ -310,7 +176,7 @@ export default class Route {
 			}
 
 			// Suitable route found
-			if (points.length >= MIN_AIRBORNE_ROUTE_POINTS) {
+			if (points.length >= airborneWaypoints) {
 				break;
 			}
 
@@ -340,23 +206,24 @@ export default class Route {
 		the next aerodrome is checked, and so on until all are checked. 
 		Error thrown if none found as the whole route generation is based on start and 
 		end aerodromes so this is not recoverable. */
-	public static getEndAerodrome(seed: Seed): Aerodrome {
-		const startAerodrome: Aerodrome = Route.getStartAerodrome(seed);
-		const possibleEndAerodromes: Aerodrome[] = [];
+	public static getEndAerodrome(seed: Seed): ControlledAerodrome | UncontrolledAerodrome {
+		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
+			Route.getStartAerodrome(seed);
+		const possibleEndAerodromes: (ControlledAerodrome | UncontrolledAerodrome)[] = [];
 
 		if (seed.scenarioSeed % 2 === 0) {
-			possibleEndAerodromes.push(...getUncontrolledAerodromesFromJSON());
+			possibleEndAerodromes.push(...UncontrolledAerodrome.getAerodromesFromJSON());
 		} else {
-			possibleEndAerodromes.push(...getControlledAerodromesFromJSON());
+			possibleEndAerodromes.push(...ControlledAerodrome.getAerodromesFromJSON());
 		}
 
-		let endAerodrome: Aerodrome =
+		let endAerodrome: ControlledAerodrome | UncontrolledAerodrome =
 			possibleEndAerodromes[seed.scenarioSeed % possibleEndAerodromes.length];
 		let endAerodromeFound: boolean = false;
 
 		// If the end aerodrome is too far from the start aerodrome, find a new one
 		for (let i = 0; i < possibleEndAerodromes.length; i++) {
-			const distance = haversineDistance(startAerodrome.location, endAerodrome.location);
+			const distance = haversineDistance(startAerodrome.getLocation(), endAerodrome.getLocation());
 
 			if (distance <= MAX_AERODROME_DISTANCE) {
 				endAerodromeFound = true;
@@ -377,66 +244,11 @@ export default class Route {
 		return endAerodrome;
 	}
 
-	public static getMETORSample(seed: Seed, metorData: METORData): METORDataSample {
-		// let season: Season = Season.Spring;
-		let meanTemperature: number = 0.0;
-
-		switch (seed.weatherSeed % 4) {
-			case 0:
-				// season = Season.Spring;
-				meanTemperature = metorData.meanTemperature * 1.3;
-				break;
-			case 1:
-				// season = Season.Summer;
-				meanTemperature = metorData.meanTemperature * 1.7;
-				break;
-			case 2:
-				// season = Season.Autumn;
-				meanTemperature = metorData.meanTemperature * 1.1;
-				break;
-			case 3:
-				// season = Season.Winter;
-				meanTemperature = metorData.meanTemperature * 0.4;
-				break;
-		}
-
-		// Simulate temperature, wind direction, wind speed and pressure with a normal distribution
-		const wind_direction =
-			seededNormalDistribution(seed.weatherSeed.toString(), metorData.avgWindDirection, 10.0) %
-			360.0;
-
-		const temperature = seededNormalDistribution(
-			seed.weatherSeed.toString(),
-			meanTemperature,
-			metorData.stdTemperature
-		);
-
-		const wind_speed = seededNormalDistribution(
-			seed.weatherSeed.toString(),
-			metorData.meanWindSpeed,
-			metorData.stdWindSpeed
-		);
-
-		const pressure = seededNormalDistribution(
-			seed.weatherSeed.toString(),
-			metorData.meanPressure,
-			metorData.stdTemperature
-		);
-
-		return {
-			windDirection: wind_direction,
-			windSpeed: wind_speed,
-			pressure: pressure,
-			temperature: temperature,
-			dewpoint: temperature * 0.95 - 1.2 // Basic dewpoint aproximation - not based on any actual formula
-		};
-	}
-
 	/* Generate the route based off of the seed. */
 	public generateRoute(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
 		this.points.push(...Route.getStartAerodromeRoutePoints(seed));
 
-		this.points.push(...Route.getAirborneRoutePoints(seed), airborneWaypoints, emergency);
+		this.points.push(...Route.getAirborneRoutePoints(seed, airborneWaypoints, emergency));
 
 		this.points.push(...Route.getEndAerodromeRoutePoints(seed));
 

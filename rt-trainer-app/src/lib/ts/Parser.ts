@@ -1,8 +1,8 @@
 import { ServerResponse, type Mistake } from './ServerClientTypes';
-import type { METORDataSample } from './SimulatorTypes';
 import { RoutePointType, type AirbornePoint, type RoutePoint, ParkedPoint } from './RouteStates';
 import type CallParsingContext from './CallParsingContext';
 import { ParkedStage } from './FlightStages';
+import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
 	public static parseCall(parseContext: CallParsingContext): ServerResponse {
@@ -69,7 +69,7 @@ export default class Parser {
 	// Example: Wellesbourne Information, Student Golf Oscar Foxtrot Lima Yankee, radio check 180.030
 	public static parseRadioCheck(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadioCall: string = `${
-			parseContext.getCurrentTarget().callsign
+			parseContext.getCurrentTarget()
 		}, ${parseContext.getUserCallsign()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
@@ -81,7 +81,7 @@ export default class Parser {
 
 		// Return ATC response
 		const atcResponse = `${parseContext.getUserCallsignPhonetics().toUpperCase()}, ${
-			parseContext.getCurrentTarget().callsign
+			parseContext.getCurrentTarget()
 		}, reading you 5`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
@@ -186,8 +186,7 @@ export default class Parser {
 		parseContext: CallParsingContext
 	): ServerResponse {
 		const expectedradiocall: string = `${parseContext
-			.getCurrentTarget()
-			.callsign.toLowerCase()}, ${parseContext.getUserCallsign()}`;
+			.getCurrentTarget().toLowerCase()}, ${parseContext.getUserCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithTargetCallsign(),
@@ -196,7 +195,7 @@ export default class Parser {
 
 		// Return ATC response
 		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, ${
-			parseContext.getCurrentTarget().callsign
+			parseContext.getCurrentTarget()
 		}.`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
@@ -219,9 +218,9 @@ accompanied with the planned times to reach them */
 		const nextwaypoint: string = 'Next Waypoint';
 
 		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()}, ${parseContext.getAircraftType()} ${currentPoint.flightRules.toString()} from ${
-			parseContext.getStartAerodrome().name
+			parseContext.getStartAerodrome().getShortName()
 		} to ${
-			parseContext.getEndAerodrome().name
+			parseContext.getEndAerodrome().getShortName()
 		}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${
 			currentPoint.pose.altitude
 		}, ${nextwaypoint}`;
