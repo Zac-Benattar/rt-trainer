@@ -103,8 +103,7 @@ export class AirbornePoint extends RoutePoint {
 	}
 }
 
-// Stage 1
-export function getRadioCheckSimulatorUpdateData(
+export function getParkedInitialControlledUpdateData(
 	seed: Seed,
 	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
 ): SimulatorUpdateData {
@@ -119,8 +118,7 @@ export function getRadioCheckSimulatorUpdateData(
 	};
 }
 
-// Stage 2
-export function getRequestingDepartInfoSimulatorUpdateData(
+export function getParkedMadeContactControlledUpdateData(
 	seed: Seed,
 	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
 ): SimulatorUpdateData {
@@ -135,50 +133,33 @@ export function getRequestingDepartInfoSimulatorUpdateData(
 	};
 }
 
-// Stage 3
-export function getGetDepartInfoReadbackSimulatorUpdateData(
+export function getParkedInitialUncontrolledUpdateData(
 	seed: Seed,
 	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + " Ground", 
+		currentTarget: startAerodrome.getShortName() + " Information", 
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
 		location: startAerodrome.getLocation(),
 		emergency: EmergencyType.None
-	};
+	}
 }
 
-// Stage 4
-export function getTaxiRequestSimulatorUpdateData(
+export function getParkedMadeContactUncontrolledUpdateData(
 	seed: Seed,
 	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + " Ground", 
+		currentTarget: startAerodrome.getShortName() + " Information", 
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
 		location: startAerodrome.getLocation(),
 		emergency: EmergencyType.None
-	};
+	}
 }
 
-// Stage 5
-export function getGetTaxiClearenceReadbackSimulatorUpdateData(
-	seed: Seed,
-	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
-): SimulatorUpdateData {
-	return {
-		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
-		squark: false,
-		currentTarget: startAerodrome.getShortName() + " Ground", 
-		currentTargetFrequency: startAerodrome.getGroundFrequency(),
-		currentTransponderFrequency: 7000,
-		location: startAerodrome.getLocation(),
-		emergency: EmergencyType.None
-	};
-}

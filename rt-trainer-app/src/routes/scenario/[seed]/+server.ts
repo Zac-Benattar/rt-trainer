@@ -49,6 +49,7 @@ export async function POST({ request }) {
 		data.userCallsignModified,
 		data.squark,
 		data.currentTarget,
+		data.currentTargetFrequency,
 		data.currentRadioFrequency,
 		data.currentTransponderFrequency,
 		data.aircraftType

@@ -2,8 +2,21 @@ import Route from './Route';
 import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
 import type { Mistake } from './ServerClientTypes';
-import { getAbbreviatedCallsign, isCallsignStandardRegistration, processString, replaceWithPhoneticAlphabet } from './utils';
-import { ControlledAerodrome, type AerodromeStartPoint, type METORDataSample, type Runway, type RunwayHoldingPoint, type Taxiway, UncontrolledAerodrome } from './Aerodrome';
+import {
+	getAbbreviatedCallsign,
+	isCallsignStandardRegistration,
+	processString,
+	replaceWithPhoneticAlphabet
+} from './utils';
+import {
+	ControlledAerodrome,
+	type AerodromeStartPoint,
+	type METORDataSample,
+	type Runway,
+	type RunwayHoldingPoint,
+	type Taxiway,
+	UncontrolledAerodrome
+} from './Aerodrome';
 
 export default class CallParsingContext {
 	private radioCall: string;
@@ -104,6 +117,7 @@ export default class CallParsingContext {
 	}
 
 	public isTakeoffAerodromeControlled(): boolean {
+		console.log(this.getStartAerodrome());
 		return this.getStartAerodrome() instanceof ControlledAerodrome;
 	}
 
@@ -350,24 +364,20 @@ export default class CallParsingContext {
 
 	public getStartAerodromeStartingPoint(): AerodromeStartPoint {
 		const startPoints = this.getStartAerodrome().getStartPoints();
-		return startPoints[
-			this.seed.scenarioSeed % startPoints.length
-		];
+		return startPoints[this.seed.scenarioSeed % startPoints.length];
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {
-		return this.getStartAerodrome().getMETORSample(this.seed);
+		return this.getStartAerodrome().getMETORData().getSample(this.seed);
 	}
 
 	public getEndAerodromeMETORSample(): METORDataSample {
-		return this.getEndAerodrome().getMETORSample(this.seed);
+		return this.getEndAerodrome().getMETORData().getSample(this.seed);
 	}
 
 	public getStartAerodromeTakeoffRunway(): Runway {
 		const runways = this.getStartAerodrome().getRunways();
-		return runways[
-			this.seed.scenarioSeed % runways.length
-		];
+		return runways[this.seed.scenarioSeed % runways.length];
 	}
 
 	public assertCallContainsTakeOffRunwayName(): Mistake | undefined {
@@ -488,22 +498,91 @@ export default class CallParsingContext {
 		return;
 	}
 
-	public assertCallContainsPressure(): Mistake | undefined {
-		const pressureSample = this.getStartAerodromeMETORSample().pressure;
-		if (pressureSample > 1000) {
-			if (!this.callContainsConsecutiveWords(['qnh', pressureSample.toString()])) {
-				return {
-					details: 'Make sure your call contains the air pressure.',
-					severe: false
-				};
-			}
-		} else {
-			if (!this.callContainsConsecutiveWords(['qnh', pressureSample.toString(), 'millibars'])) {
-				return {
-					details: 'Make sure your call contains the air pressure.',
-					severe: false
-				};
-			}
+	public assertCallContainsStartAerodromePressure(): Mistake | undefined {
+		const pressureSample = this.getStartAerodromeMETORSample().getPressureString().split(' ');
+		if (!this.callContainsWord(pressureSample[0])) {
+			return {
+				details: 'Make sure your call contains the air pressure.',
+				severe: true
+			};
+		} else if (pressureSample.length > 1 && !this.callContainsWord(pressureSample[1])) {
+			return {
+				details:
+					'Make sure to append millibars to your pressure readback when pressure is below 1000 millibars.',
+				severe: false
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsStartAerodromeTemperature(): Mistake | undefined {
+		const temperatureSample = this.getStartAerodromeMETORSample().getTemperatureString().split(' ');
+		if (!this.callContainsWord(temperatureSample[0])) {
+			return {
+				details: 'Make sure your call contains the temperature.',
+				severe: true
+			};
+		} else if (!this.callContainsWord(temperatureSample[1])) {
+			return {
+				details: 'Make sure your call contains the temperature units.',
+				severe: false
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsStartAerodromeDewpoint(): Mistake | undefined {
+		const dewpointSample = this.getStartAerodromeMETORSample().getDewpointString().split(' ');
+		if (!this.callContainsWord(dewpointSample[0])) {
+			return {
+				details: 'Make sure your call contains the dewpoint.',
+				severe: true
+			};
+		} else if (!this.callContainsWord(dewpointSample[1])) {
+			return {
+				details: 'Make sure your call contains the dewpoint units.',
+				severe: false
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsStartAerodromeWindSpeed(): Mistake | undefined {
+		const windSpeedSample = this.getStartAerodromeMETORSample().getWindSpeedString().split(' ');
+		if (!this.callContainsWord(windSpeedSample[0])) {
+			return {
+				details: 'Make sure your call contains the wind speed.',
+				severe: true
+			};
+		} else if (!this.callContainsWord(windSpeedSample[1])) {
+			return {
+				details: 'Make sure your call contains the wind speed units.',
+				severe: false
+			};
+		}
+		return;
+	}
+
+	public assertCallContainsStartAerodromeWindDirection(): Mistake | undefined {
+		const windDirectionSample = this.getStartAerodromeMETORSample()
+			.getWindDirectionString()
+			.split(' ');
+		if (!this.callContainsConsecutiveWords(windDirectionSample)) {
+			return {
+				details: 'Make sure your call contains the wind direction.',
+				severe: true
+			};
+		}
+		return;
+	}
+
+	// Currently only checks for VFR
+	public assertCallContainsFlightRules(): Mistake | undefined {
+		if (!this.callContainsWord('VFR')) {
+			return {
+				details: 'Make sure your call contains your flight rules (VFR).',
+				severe: true
+			};
 		}
 		return;
 	}

@@ -22,7 +22,7 @@ export default class Parser {
 						case ParkedStage.TaxiClearanceReadback:
 							return this.parseTaxiReadback(parseContext);
 						default:
-							throw new Error('Unknown parked stage');
+							throw new Error('Unknown parked stage: ' + parkedPoint.stage.toString());
 					}
 				} else {
 					switch (parkedPoint.stage) {
@@ -33,7 +33,7 @@ export default class Parser {
 						case ParkedStage.AnnounceTaxiing:
 							return this.parseAnnounceTaxiing(parseContext);
 						default:
-							throw new Error('Unknown parked stage');
+							throw new Error('Unknown parked stage: ' + parkedPoint.stage.toString());
 					}
 				}
 			}
@@ -68,9 +68,7 @@ export default class Parser {
 
 	// Example: Wellesbourne Information, Student Golf Oscar Foxtrot Lima Yankee, radio check 180.030
 	public static parseRadioCheck(parseContext: CallParsingContext): ServerResponse {
-		const expectedRadioCall: string = `${
-			parseContext.getCurrentTarget()
-		}, ${parseContext.getUserCallsign()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
+		const expectedRadioCall: string = `${parseContext.getCurrentTarget()}, ${parseContext.getUserCallsignPhonetics()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
 			parseContext.assertCallContainsCurrentRadioFrequency(),
@@ -80,9 +78,9 @@ export default class Parser {
 		]);
 
 		// Return ATC response
-		const atcResponse = `${parseContext.getUserCallsignPhonetics().toUpperCase()}, ${
-			parseContext.getCurrentTarget()
-		}, reading you 5`;
+		const atcResponse = `${parseContext
+			.getUserCallsignPhonetics()
+			.toUpperCase()}, ${parseContext.getCurrentTarget()}, reading you 5`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
@@ -90,7 +88,7 @@ export default class Parser {
 	// Example: Student Golf Oscar Foxtrot Lima Yankee, request departure information
 	public static parseDepartureInformationRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadiocall = `${parseContext
-			.getUserCallsign()
+			.getTargetAllocatedCallsign()
 			.toLowerCase()} request departure information`;
 
 		const mistakes = Parser.checkForMistakes([
@@ -102,11 +100,7 @@ export default class Parser {
 		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
 		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
-		}, wind ${metorSample.windDirection.toFixed(0)} degrees ${metorSample.windSpeed.toFixed(
-			0
-		)} knots, QNH ${metorSample.pressure.toFixed(0)}, temperature ${metorSample.temperature.toFixed(
-			0
-		)} dewpoint ${metorSample.dewpoint.toFixed(0)}`;
+		}, surface wind ${metorSample.getWindDirectionString()} ${metorSample.getWindSpeedString()}, QNH ${metorSample.getPressureString()}, temperature ${metorSample.getTemperatureString()} dewpoint ${metorSample.getDewpointString()}`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedRadiocall);
 	}
@@ -116,14 +110,12 @@ export default class Parser {
 		parseContext: CallParsingContext
 	): ServerResponse {
 		const runwayName: string = parseContext.getStartAerodromeTakeoffRunway().name;
-		const pressure: number = parseContext.getStartAerodromeMETORSample().pressure;
-		let expectedRadioCall: string = `${parseContext.getUserCallsign()} runway ${runwayName} qnh ${pressure} ${parseContext.getUserCallsign()}`;
-		if (pressure < 1000) expectedRadioCall += ' millibars';
+		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()} runway ${runwayName} qnh ${parseContext.getStartAerodromeMETORSample().getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithUserCallsign(),
 			parseContext.assertCallContainsTakeOffRunwayName(),
-			parseContext.assertCallContainsPressure(),
+			parseContext.assertCallContainsStartAerodromePressure(),
 			parseContext.assertCallEndsWithUserCallsign()
 		]);
 
@@ -133,7 +125,7 @@ export default class Parser {
 
 	// Example: Student Golf Lima Yankee, by the south side hangers, request taxi for vfr flight to birmingham
 	public static parseTaxiRequest(parseContext: CallParsingContext): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} at ${parseContext.getStartAerodrome()} request taxi VFR to ${parseContext.getEndAerodrome()}`;
+		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} by the ${parseContext.getStartAerodromeStartingPoint().name} request taxi VFR to ${parseContext.getEndAerodrome().getShortName()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithTargetCallsign(),
@@ -145,15 +137,13 @@ export default class Parser {
 		]);
 
 		// Return ATC response
-		const pressure = parseContext.getStartAerodromeMETORSample().pressure;
-		let atcResponse = `${parseContext
+		const atcResponse = `${parseContext
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
 			parseContext.getTakeoffRunwayHoldingPoint().name
 		} via taxiway charlie. Hold short of runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
-		}, QNH ${parseContext.getStartAerodromeMETORSample().pressure}`;
-		if (pressure < 1000) atcResponse += ' millibars';
+		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
@@ -163,7 +153,7 @@ export default class Parser {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
 			parseContext.getTakeoffRunwayHoldingPoint().name
 		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${
-			parseContext.getStartAerodromeMETORSample().pressure
+			parseContext.getStartAerodromeMETORSample().getPressureString()
 		} ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
@@ -179,6 +169,45 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedradiocall);
 	}
 
+	public static parseTaxiInformationRequest(parseContext: CallParsingContext): ServerResponse {
+		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, by the ${parseContext.getStartAerodromeStartingPoint().name}, request taxi information, VFR to ${parseContext
+			.getEndAerodrome()
+			.getShortName()}`;
+
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithUserCallsign(),
+			parseContext.assertCallContainsConsecutiveWords(['request', 'taxi', 'information']),
+			parseContext.assertCallContainsFlightRules(),
+			parseContext.assertCallContainsScenarioStartPoint(),
+			parseContext.assertCallContainsEndAerodromeName(),
+		]);
+
+		// Return ATC response
+		const atcResponse = `${parseContext
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, runway ${
+			parseContext.getStartAerodromeTakeoffRunway().name
+		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
+
+		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
+	}
+
+	public static parseAnnounceTaxiing(parseContext: CallParsingContext): ServerResponse {
+		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, taxiing to runway ${
+			parseContext.getStartAerodromeTakeoffRunway().name
+		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
+
+		const mistakes = Parser.checkForMistakes([
+			parseContext.assertCallStartsWithUserCallsign(),
+			parseContext.assertCallContainsWord('taxiing'),
+			parseContext.assertCallContainsTakeOffRunwayName(),
+			parseContext.assertCallContainsStartAerodromePressure(),
+		]);
+
+		// ATC does not respond to this message
+		return new ServerResponse(mistakes, '', expectedradiocall);
+	}
+
 	/* Parse initial contact with new ATC unit.
 	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
@@ -186,7 +215,8 @@ export default class Parser {
 		parseContext: CallParsingContext
 	): ServerResponse {
 		const expectedradiocall: string = `${parseContext
-			.getCurrentTarget().toLowerCase()}, ${parseContext.getUserCallsign()}`;
+			.getCurrentTarget()
+			.toLowerCase()}, ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithTargetCallsign(),
@@ -194,9 +224,9 @@ export default class Parser {
 		]);
 
 		// Return ATC response
-		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, ${
-			parseContext.getCurrentTarget()
-		}.`;
+		const atcResponse = `${parseContext
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, ${parseContext.getCurrentTarget()}.`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
@@ -217,11 +247,11 @@ accompanied with the planned times to reach them */
 
 		const nextwaypoint: string = 'Next Waypoint';
 
-		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()}, ${parseContext.getAircraftType()} ${currentPoint.flightRules.toString()} from ${
-			parseContext.getStartAerodrome().getShortName()
-		} to ${
-			parseContext.getEndAerodrome().getShortName()
-		}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${
+		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()}, ${parseContext.getAircraftType()} ${currentPoint.flightRules.toString()} from ${parseContext
+			.getStartAerodrome()
+			.getShortName()} to ${parseContext
+			.getEndAerodrome()
+			.getShortName()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${
 			currentPoint.pose.altitude
 		}, ${nextwaypoint}`;
 

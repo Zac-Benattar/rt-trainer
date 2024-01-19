@@ -4,12 +4,11 @@ import { WaypointType, type Pose, type Waypoint } from './SimulatorTypes';
 import type Seed from './Seed';
 import {
 	ParkedPoint,
-	getRadioCheckSimulatorUpdateData,
+	getParkedInitialControlledUpdateData,
 	type RoutePoint,
-	getRequestingDepartInfoSimulatorUpdateData,
-	getGetDepartInfoReadbackSimulatorUpdateData,
-	getTaxiRequestSimulatorUpdateData,
-	getGetTaxiClearenceReadbackSimulatorUpdateData
+	getParkedMadeContactControlledUpdateData,
+	getParkedInitialUncontrolledUpdateData,
+	getParkedMadeContactUncontrolledUpdateData
 } from './RouteStates';
 import { ParkedStage } from './FlightStages';
 import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
@@ -72,24 +71,24 @@ export default class Route {
 		const startPoints = startAerodrome.getStartPoints();
 		const startPointIndex = seed.scenarioSeed % startPoints.length;
 
+		const parkedPose: Pose = {
+			location: startPoints[startPointIndex].location,
+			heading: startPoints[startPointIndex].heading,
+			altitude: startAerodrome.getAltitude(),
+			airSpeed: 0.0
+		};
+
+		const parkedWaypoint: Waypoint = {
+			waypointType: WaypointType.Aerodrome,
+			location: startAerodrome.getLocation(),
+			name: startAerodrome.getShortName()
+		};
+
 		if (controlledAerodrome) {
-			const parkedPose: Pose = {
-				location: startPoints[startPointIndex].location,
-				heading: startPoints[startPointIndex].heading,
-				altitude: startAerodrome.getAltitude(),
-				airSpeed: 0.0
-			};
-
-			const parkedWaypoint: Waypoint = {
-				waypointType: WaypointType.Aerodrome,
-				location: startAerodrome.getLocation(),
-				name: startAerodrome.getShortName()
-			};
-
 			const radioCheck = new ParkedPoint(
 				ParkedStage.RadioCheck,
 				parkedPose,
-				getRadioCheckSimulatorUpdateData(seed, startAerodrome),
+				getParkedInitialControlledUpdateData(seed, startAerodrome),
 				parkedWaypoint
 			);
 			stages.push(radioCheck);
@@ -97,7 +96,7 @@ export default class Route {
 			const requestDepartInfo = new ParkedPoint(
 				ParkedStage.DepartureInformationRequest,
 				parkedPose,
-				getRequestingDepartInfoSimulatorUpdateData(seed, startAerodrome),
+				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
 				parkedWaypoint
 			);
 			stages.push(requestDepartInfo);
@@ -105,7 +104,7 @@ export default class Route {
 			const readbackDepartInfo = new ParkedPoint(
 				ParkedStage.ReadbackDepartureInformation,
 				parkedPose,
-				getGetDepartInfoReadbackSimulatorUpdateData(seed, startAerodrome),
+				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
 				parkedWaypoint
 			);
 			stages.push(readbackDepartInfo);
@@ -113,7 +112,7 @@ export default class Route {
 			const taxiRequest = new ParkedPoint(
 				ParkedStage.TaxiRequest,
 				parkedPose,
-				getTaxiRequestSimulatorUpdateData(seed, startAerodrome),
+				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
 				parkedWaypoint
 			);
 			stages.push(taxiRequest);
@@ -121,12 +120,34 @@ export default class Route {
 			const taxiClearanceReadback = new ParkedPoint(
 				ParkedStage.TaxiClearanceReadback,
 				parkedPose,
-				getGetTaxiClearenceReadbackSimulatorUpdateData(seed, startAerodrome),
+				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
 				parkedWaypoint
 			);
 			stages.push(taxiClearanceReadback);
 		} else {
-			
+			const radioCheck = new ParkedPoint(
+				ParkedStage.RadioCheck,
+				parkedPose,
+				getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(radioCheck);
+
+			const requestTaxiInformation = new ParkedPoint(
+				ParkedStage.RequestTaxiInformation,
+				parkedPose,
+				getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(requestTaxiInformation);
+
+			const readbackTaxiInformation = new ParkedPoint(
+				ParkedStage.AnnounceTaxiing,
+				parkedPose,
+				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
+				parkedWaypoint
+			);
+			stages.push(readbackTaxiInformation);
 		}
 
 		return stages;
