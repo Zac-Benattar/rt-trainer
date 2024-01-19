@@ -1,3 +1,4 @@
+import { get } from 'http';
 import Route from './Route';
 import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
@@ -11,7 +12,7 @@ import type {
 	RunwayHoldingPoint,
 	Taxiway
 } from './SimulatorTypes';
-import { getAbbreviatedCallsign, processString } from './utils';
+import { getAbbreviatedCallsign, isCallsignStandardRegistration, processString, replaceWithPhoneticAlphabet } from './utils';
 
 export default class CallParsingContext {
 	private radioCall: string;
@@ -70,6 +71,14 @@ export default class CallParsingContext {
 
 	public getUserCallsign(): string {
 		return this.getPrefix() + ' ' + this.userCallsign.toLowerCase();
+	}
+
+	public getUserCallsignPhonetics(): string {
+		if (isCallsignStandardRegistration(this.userCallsign)) {
+			return this.getPrefix() + ' ' + replaceWithPhoneticAlphabet(this.userCallsign.toLowerCase());
+		} else {
+			return this.getUserCallsign();
+		}
 	}
 
 	public getUserCallsignModified(): boolean {
@@ -312,21 +321,19 @@ export default class CallParsingContext {
 			return (
 				this.getPrefix() +
 				' ' +
-				getAbbreviatedCallsign(
-					this.seed.scenarioSeed,
-					this.getAircraftType(),
-					this.userCallsign
+				replaceWithPhoneticAlphabet(
+					getAbbreviatedCallsign(this.seed.scenarioSeed, this.getAircraftType(), this.userCallsign)
 				)
 			);
 		}
-		return this.getUserCallsign();
+		return this.getUserCallsignPhonetics();
 	}
 
 	/* Returns the callsign of the user as they would state it in a radio call.
 	Given that abbreviated callsigns are optional once established both 
 	full and abbreviated versions returned if abbreviation established. */
 	private getValidUserCallsigns(): string[] {
-		const callsigns = [this.getUserCallsign(), this.getTargetAllocatedCallsign()];
+		const callsigns = [this.getUserCallsignPhonetics(), this.getTargetAllocatedCallsign()];
 		if (callsigns[0] != callsigns[1]) return callsigns;
 		return [callsigns[0]];
 	}
@@ -504,6 +511,8 @@ export default class CallParsingContext {
 	}
 
 	public getTakeoffRunwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getTakeoffRunwayTaxiway().holdingPoints[this.seed.scenarioSeed %  this.getTakeoffRunwayTaxiway().holdingPoints.length];
+		return this.getTakeoffRunwayTaxiway().holdingPoints[
+			this.seed.scenarioSeed % this.getTakeoffRunwayTaxiway().holdingPoints.length
+		];
 	}
 }

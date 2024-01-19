@@ -53,7 +53,7 @@ export default class Parser {
 		return mistakes;
 	}
 
-	// Example: Wellesbourne information, student g-ofly, radio check 180.030
+	// Example: Wellesbourne Information, Student Golf Oscar Foxtrot Lima Yankee, radio check 180.030
 	public static parseRadioCheck(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadioCall: string = `${
 			parseContext.getCurrentTarget().callsign
@@ -67,14 +67,14 @@ export default class Parser {
 		]);
 
 		// Return ATC response
-		const atcResponse = `${parseContext.getUserCallsign().toUpperCase()}, ${
+		const atcResponse = `${parseContext.getUserCallsignPhonetics().toUpperCase()}, ${
 			parseContext.getCurrentTarget().callsign
 		}, reading you 5`;
 
 		return new ServerResponse(mistakes, atcResponse, expectedRadioCall);
 	}
 
-	// Example: Student G-OFLY, request departure information
+	// Example: Student Golf Oscar Foxtrot Lima Yankee, request departure information
 	public static parseDepartureInformationRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedRadiocall = `${parseContext
 			.getUserCallsign()
@@ -98,7 +98,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, atcResponse, expectedRadiocall);
 	}
 
-	// Example: Runway 24, QNH 1013, student G-OFLY
+	// Example: Runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseDepartureInformationReadback(
 		parseContext: CallParsingContext
 	): ServerResponse {
@@ -118,7 +118,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedRadioCall);
 	}
 
-	// Example: student G-OFLY, by the south side hangers, request taxi for vfr flight to birmingham
+	// Example: Student Golf Lima Yankee, by the south side hangers, request taxi for vfr flight to birmingham
 	public static parseTaxiRequest(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} at ${parseContext.getStartAerodrome()} request taxi VFR to ${parseContext.getEndAerodrome()}`;
 
@@ -145,7 +145,7 @@ export default class Parser {
 		return new ServerResponse(mistakes, atcResponse, expectedradiocall);
 	}
 
-	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, student G-OFLY
+	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, Student Golf Lima Yankee
 	public static parseTaxiReadback(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
 			parseContext.getTakeoffRunwayHoldingPoint().name
@@ -166,10 +166,8 @@ export default class Parser {
 		return new ServerResponse(mistakes, '', expectedradiocall);
 	}
 
-	
-
 	/* Parse initial contact with new ATC unit.
-Should consist of ATC callsign and aircraft callsign */
+	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
 		currentPoint: RoutePoint,
 		parseContext: CallParsingContext
