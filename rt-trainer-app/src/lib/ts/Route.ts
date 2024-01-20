@@ -67,7 +67,6 @@ export default class Route {
 		const stages: RoutePoint[] = [];
 		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
 			Route.getStartAerodrome(seed);
-		const controlledAerodrome: boolean = startAerodrome instanceof ControlledAerodrome;
 		const startPoints = startAerodrome.getStartPoints();
 		const startPointIndex = seed.scenarioSeed % startPoints.length;
 
@@ -84,7 +83,7 @@ export default class Route {
 			name: startAerodrome.getShortName()
 		};
 
-		if (controlledAerodrome) {
+		if (startAerodrome instanceof ControlledAerodrome) {
 			const radioCheck = new ParkedPoint(
 				ParkedStage.RadioCheck,
 				parkedPose,

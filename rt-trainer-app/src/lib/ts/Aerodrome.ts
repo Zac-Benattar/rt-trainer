@@ -239,6 +239,8 @@ abstract class Aerodrome {
 	public abstract getLandingFrequency(): number;
 
 	public abstract getAirspaceFrequency(): number;
+
+	public abstract isControlled(): boolean;
 }
 
 export class ControlledAerodrome extends Aerodrome {
@@ -287,6 +289,10 @@ export class ControlledAerodrome extends Aerodrome {
 
 	public getAirspaceFrequency(): number {
 		return this.radarFrequency;
+	}
+
+	public isControlled(): boolean {
+		return true;
 	}
 
 	public static getAerodromesFromJSON(): ControlledAerodrome[] {
@@ -359,6 +365,10 @@ export class UncontrolledAerodrome extends Aerodrome {
 
 	public getAirspaceFrequency(): number {
 		return this.informationFrequency;
+	}
+
+	public isControlled(): boolean {
+		return false;
 	}
 
 	public static getAerodromesFromJSON(): UncontrolledAerodrome[] {

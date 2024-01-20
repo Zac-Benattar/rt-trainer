@@ -296,7 +296,7 @@
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
 			const response = await axios.get(
-				`/scenario/seed=${seed.scenarioSeed}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+				`/scenario/seed=${seed.seedString}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
 			);
 
 			return response.data;

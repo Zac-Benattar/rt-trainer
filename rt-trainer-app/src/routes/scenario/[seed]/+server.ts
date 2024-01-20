@@ -6,7 +6,7 @@ import CallParsingContext from '$lib/ts/CallParsingContext';
 
 export async function GET({ params, url }) {
 	const route = new Route();
-	const seed = new Seed(params.seed);
+	const seed = new Seed(params.seed.replace('seed=', ''));
 
 	// Check if the url has the number of airborne waypoints specified
 	const airborneWaypointsString: string | null = url.searchParams.get('airborneWaypoints');
@@ -40,9 +40,11 @@ export async function GET({ params, url }) {
 export async function POST({ request }) {
 	const { data } = await request.json();
 
+	console.log(data.seed.scenarioSeed);
+
 	const callParsingContext = new CallParsingContext(
 		data.radioCall,
-		new Seed(data.seed),
+		data.seed,
 		data.routePoint,
 		data.prefix,
 		data.userCallsign,

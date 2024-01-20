@@ -8,13 +8,13 @@ import {
 	processString,
 	replaceWithPhoneticAlphabet
 } from './utils';
-import {
+import type {
 	ControlledAerodrome,
-	type AerodromeStartPoint,
-	type METORDataSample,
-	type Runway,
-	type RunwayHoldingPoint,
-	type Taxiway,
+	AerodromeStartPoint,
+	METORDataSample,
+	Runway,
+	RunwayHoldingPoint,
+	Taxiway,
 	UncontrolledAerodrome
 } from './Aerodrome';
 
@@ -58,6 +58,8 @@ export default class CallParsingContext {
 		this.currentRadioFrequency = currentRadioFrequency;
 		this.currentTransponderFrequency = currentTransponderFrequency;
 		this.aircraftType = aircraftType;
+
+		console.log('seed: ' + this.seed.seedString + ' ' + this.seed.scenarioSeed + ' ' + this.seed.weatherSeed);
 	}
 
 	public getRadioCall(): string {
@@ -117,8 +119,7 @@ export default class CallParsingContext {
 	}
 
 	public isTakeoffAerodromeControlled(): boolean {
-		console.log(this.getStartAerodrome());
-		return this.getStartAerodrome() instanceof ControlledAerodrome;
+		return this.getStartAerodrome().isControlled();
 	}
 
 	public getUnmodifiedRadioCall(): string {
@@ -355,6 +356,12 @@ export default class CallParsingContext {
 	}
 
 	public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
+		console.log(
+			'seed: ' +
+				this.seed.scenarioSeed +
+				' start aerodrome: ' +
+				Route.getStartAerodrome(this.seed).getShortName()
+		);
 		return Route.getStartAerodrome(this.seed);
 	}
 
