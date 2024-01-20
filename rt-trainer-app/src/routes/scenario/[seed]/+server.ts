@@ -40,8 +40,6 @@ export async function GET({ params, url }) {
 export async function POST({ request }) {
 	const { data } = await request.json();
 
-	console.log(data.seed.scenarioSeed);
-
 	const callParsingContext = new CallParsingContext(
 		data.radioCall,
 		data.seed,
