@@ -402,9 +402,15 @@ export default class CallParsingContext {
 	}
 
 	public assertCallContainsScenarioStartPoint(): Mistake | undefined {
-		if (!this.callContainsConsecutiveWords(this.getStartAerodromeStartingPoint().name.toLowerCase().split(' '))) {
+		if (
+			!this.callContainsConsecutiveWords(
+				this.getStartAerodromeStartingPoint().name.toLowerCase().split(' ')
+			)
+		) {
 			return {
-				details: 'Make sure your call contains your location: ' + this.getStartAerodromeStartingPoint().name,
+				details:
+					'Make sure your call contains your location: ' +
+					this.getStartAerodromeStartingPoint().name,
 				severe: true
 			};
 		}

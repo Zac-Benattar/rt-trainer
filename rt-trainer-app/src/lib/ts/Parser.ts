@@ -1,60 +1,28 @@
 import { ServerResponse, type Mistake } from './ServerClientTypes';
-import { RoutePointType, type AirbornePoint, type RoutePoint, ParkedPoint } from './RouteStates';
+import type { AirbornePoint, ParkedPoint, HoldingPointPoint } from './RouteStates';
 import type CallParsingContext from './CallParsingContext';
 import { ParkedStage } from './FlightStages';
 import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
 	public static parseCall(parseContext: CallParsingContext): ServerResponse {
-		switch (parseContext.getRoutePoint().pointType) {
-			case RoutePointType.Parked: {
-				const parkedPoint: ParkedPoint = parseContext.getRoutePoint() as ParkedPoint;
-				if (parseContext.isTakeoffAerodromeControlled()) {
-					switch (parkedPoint.stage) {
-						case ParkedStage.RadioCheck:
-							return this.parseRadioCheck(parseContext);
-						case ParkedStage.DepartureInformationRequest:
-							return this.parseDepartureInformationRequest(parseContext);
-						case ParkedStage.ReadbackDepartureInformation:
-							return this.parseDepartureInformationReadback(parseContext);
-						case ParkedStage.TaxiRequest:
-							return this.parseTaxiRequest(parseContext);
-						case ParkedStage.TaxiClearanceReadback:
-							return this.parseTaxiReadback(parseContext);
-						default:
-							throw new Error('Unknown parked stage: ' + parkedPoint.stage.toString());
-					}
-				} else {
-					switch (parkedPoint.stage) {
-						case ParkedStage.RadioCheck:
-							return this.parseRadioCheck(parseContext);
-						case ParkedStage.RequestTaxiInformation:
-							return this.parseTaxiInformationRequest(parseContext);
-						case ParkedStage.AnnounceTaxiing:
-							return this.parseAnnounceTaxiing(parseContext);
-						default:
-							throw new Error('Unknown parked stage: ' + parkedPoint.stage.toString());
-					}
-				}
-			}
-			case RoutePointType.Taxiing:
-				return this.parseTaxiing(parseContext);
-			case RoutePointType.HoldingPoint:
-				return this.parseHoldingPoint(parseContext);
-			case RoutePointType.TakeOff:
-				return this.parseTakeOff(parseContext);
-			case RoutePointType.Airborne:
-				return this.parseAirborne(parseContext);
-			case RoutePointType.InboundForJoin:
-				return this.parseApproach(parseContext);
-			case RoutePointType.JoinCircuit:
-				return this.parseLanding(parseContext);
-			case RoutePointType.CircuitAndLanding:
-				return this.parseLandedTaxiing(parseContext);
-			case RoutePointType.LandingToParked:
-				return this.parseLandedParked(parseContext);
+		switch (parseContext.getRoutePoint().stage) {
+			case ParkedStage.RadioCheck:
+				return this.parseRadioCheck(parseContext);
+			case ParkedStage.DepartureInformationRequest:
+				return this.parseDepartureInformationRequest(parseContext);
+			case ParkedStage.ReadbackDepartureInformation:
+				return this.parseDepartureInformationReadback(parseContext);
+			case ParkedStage.TaxiRequest:
+				return this.parseTaxiRequest(parseContext);
+			case ParkedStage.TaxiClearanceReadback:
+				return this.parseTaxiReadback(parseContext);
+			case ParkedStage.RequestTaxiInformation:
+				return this.parseTaxiInformationRequest(parseContext);
+			case ParkedStage.AnnounceTaxiing:
+				return this.parseAnnounceTaxiing(parseContext);
 			default:
-				throw new Error('Unknown route point type');
+				throw new Error('Unimplemented route point type');
 		}
 	}
 
@@ -110,7 +78,9 @@ export default class Parser {
 		parseContext: CallParsingContext
 	): ServerResponse {
 		const runwayName: string = parseContext.getStartAerodromeTakeoffRunway().name;
-		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()} runway ${runwayName} qnh ${parseContext.getStartAerodromeMETORSample().getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
+		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()} runway ${runwayName} qnh ${parseContext
+			.getStartAerodromeMETORSample()
+			.getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes: Mistake[] = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithUserCallsign(),
@@ -125,7 +95,9 @@ export default class Parser {
 
 	// Example: Student Golf Lima Yankee, by the south side hangers, request taxi for vfr flight to birmingham
 	public static parseTaxiRequest(parseContext: CallParsingContext): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} by the ${parseContext.getStartAerodromeStartingPoint().name} request taxi VFR to ${parseContext.getEndAerodrome().getShortName()}`;
+		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} by the ${
+			parseContext.getStartAerodromeStartingPoint().name
+		} request taxi VFR to ${parseContext.getEndAerodrome().getShortName()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithTargetCallsign(),
@@ -152,9 +124,9 @@ export default class Parser {
 	public static parseTaxiReadback(parseContext: CallParsingContext): ServerResponse {
 		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
 			parseContext.getTakeoffRunwayHoldingPoint().name
-		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${
-			parseContext.getStartAerodromeMETORSample().getPressureString()
-		} ${parseContext.getTargetAllocatedCallsign()}`;
+		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${parseContext
+			.getStartAerodromeMETORSample()
+			.getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithTargetCallsign(),
@@ -170,22 +142,20 @@ export default class Parser {
 	}
 
 	public static parseTaxiInformationRequest(parseContext: CallParsingContext): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, by the ${parseContext.getStartAerodromeStartingPoint().name}, request taxi information, VFR to ${parseContext
-			.getEndAerodrome()
-			.getShortName()}`;
+		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, by the ${
+			parseContext.getStartAerodromeStartingPoint().name
+		}, request taxi information, VFR to ${parseContext.getEndAerodrome().getShortName()}`;
 
 		const mistakes = Parser.checkForMistakes([
 			parseContext.assertCallStartsWithUserCallsign(),
 			parseContext.assertCallContainsConsecutiveWords(['request', 'taxi', 'information']),
 			parseContext.assertCallContainsFlightRules(),
 			parseContext.assertCallContainsScenarioStartPoint(),
-			parseContext.assertCallContainsEndAerodromeName(),
+			parseContext.assertCallContainsEndAerodromeName()
 		]);
 
 		// Return ATC response
-		const atcResponse = `${parseContext
-			.getTargetAllocatedCallsign()
-			.toUpperCase()}, runway ${
+		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
 			parseContext.getStartAerodromeTakeoffRunway().name
 		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
 
@@ -201,7 +171,7 @@ export default class Parser {
 			parseContext.assertCallStartsWithUserCallsign(),
 			parseContext.assertCallContainsWord('taxiing'),
 			parseContext.assertCallContainsTakeOffRunwayName(),
-			parseContext.assertCallContainsStartAerodromePressure(),
+			parseContext.assertCallContainsStartAerodromePressure()
 		]);
 
 		// ATC does not respond to this message
@@ -211,7 +181,7 @@ export default class Parser {
 	/* Parse initial contact with new ATC unit.
 	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
-		currentPoint: RoutePoint,
+		currentPoint: ParkedPoint | HoldingPointPoint | AirbornePoint,
 		parseContext: CallParsingContext
 	): ServerResponse {
 		const expectedradiocall: string = `${parseContext

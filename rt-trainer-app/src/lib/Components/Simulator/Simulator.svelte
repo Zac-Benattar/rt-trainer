@@ -23,14 +23,19 @@
 		CurrentRoutePointStore,
 		SpeechOutputStore,
 		ExpectedUserMessageStore,
-
-		CurrentTargetFrequencyStore
-
+		CurrentTargetFrequencyStore,
+		FeedbackStore
 	} from '$lib/stores';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
-	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
+	import {
+		type TransponderState,
+		type AircraftDetails,
+		type RadioState,
+		Feedback
+	} from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
+	import { goto } from '$app/navigation';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -193,6 +198,13 @@
 
 		serverNotResponding = false;
 
+		// Push mistakes to feedback store
+		const feedback = new Feedback(userMessage, route[currentPointIndex], serverResponse.mistakes);
+		FeedbackStore.update((value) => {
+			value.push(feedback);
+			return value;
+		});
+
 		// Get whether there are severe mistakes, and record all minor ones
 		let severeMistakes: boolean = false;
 		let callsignMentioned: boolean = true; // If user's callsign in their call or not
@@ -266,6 +278,23 @@
 				message: 'Correct!'
 			};
 			toastStore.trigger(t);
+		}
+
+		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
+		if (currentPointIndex == route.length - 1) {
+			const m: ModalSettings = {
+				type: 'confirm',
+				title: 'Scenario Complete',
+				body: 'Do you want view your feedback?',
+				response: (r: boolean) => {
+					if (r) {
+						goto('/scenario/' + seed.seedString + '/results/');
+					}
+				}
+			};
+			modalStore.trigger(m);
+
+			return;
 		}
 
 		// Update the simulator with the next route point

@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/routes/scenario/[seed]/results/+page.svelte";

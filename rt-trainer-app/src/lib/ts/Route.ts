@@ -5,10 +5,11 @@ import type Seed from './Seed';
 import {
 	ParkedPoint,
 	getParkedInitialControlledUpdateData,
-	type RoutePoint,
 	getParkedMadeContactControlledUpdateData,
 	getParkedInitialUncontrolledUpdateData,
-	getParkedMadeContactUncontrolledUpdateData
+	getParkedMadeContactUncontrolledUpdateData,
+	HoldingPointPoint,
+	AirbornePoint
 } from './RouteStates';
 import { ParkedStage } from './FlightStages';
 import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
@@ -40,10 +41,10 @@ function getWaypointsFromJSON(): Waypoint[] {
 
 /* Route generated for a scenario. */
 export default class Route {
-	protected points: RoutePoint[] = [];
+	protected points: (ParkedPoint | HoldingPointPoint | AirbornePoint)[] = [];
 	protected currentPointIndex: number = 0;
 
-	public getCurrentPoint(): RoutePoint {
+	public getCurrentPoint(): ParkedPoint | HoldingPointPoint | AirbornePoint {
 		return this.points[this.currentPointIndex];
 	}
 
@@ -63,8 +64,8 @@ export default class Route {
     HoldingPoint,
     TakeOff.
 	 */
-	public static getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
-		const stages: RoutePoint[] = [];
+	public static getStartAerodromeRoutePoints(seed: Seed): (ParkedPoint | HoldingPointPoint | AirbornePoint)[] {
+		const stages: (ParkedPoint | HoldingPointPoint | AirbornePoint)[] = [];
 		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
 			Route.getStartAerodrome(seed);
 		const startPoints = startAerodrome.getStartPoints();
@@ -156,7 +157,7 @@ export default class Route {
 		seed: Seed,
 		airborneWaypoints: number,
 		emergency: boolean
-	): RoutePoint[] {
+	): (ParkedPoint | HoldingPointPoint | AirbornePoint)[] {
 		let points: Waypoint[] = [];
 		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
 			Route.getStartAerodrome(seed);
@@ -208,13 +209,13 @@ export default class Route {
 
 		// Add events at each point
 		let emergencyGenerated: boolean = false;
-		const routePoints: RoutePoint[] = [];
+		const routePoints: (ParkedPoint | HoldingPointPoint | AirbornePoint)[] = [];
 
 		return routePoints;
 	}
 
-	public static getEndAerodromeRoutePoints(seed: Seed): RoutePoint[] {
-		const stages: RoutePoint[] = [];
+	public static getEndAerodromeRoutePoints(seed: Seed): (ParkedPoint | HoldingPointPoint | AirbornePoint)[] {
+		const stages: (ParkedPoint | HoldingPointPoint | AirbornePoint)[] = [];
 
 		return stages;
 	}
@@ -265,7 +266,7 @@ export default class Route {
 	}
 
 	/* Generate the route based off of the seed. */
-	public generateRoute(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
+	public generateRoute(seed: Seed, airborneWaypoints: number, emergency: boolean): (ParkedPoint | HoldingPointPoint | AirbornePoint)[] {
 		this.points.push(...Route.getStartAerodromeRoutePoints(seed));
 
 		this.points.push(...Route.getAirborneRoutePoints(seed, airborneWaypoints, emergency));
@@ -280,15 +281,15 @@ export default class Route {
 		return this.points;
 	}
 
-	public getPoints(): RoutePoint[] {
+	public getPoints(): (ParkedPoint | HoldingPointPoint | AirbornePoint)[] {
 		return this.points;
 	}
 
-	public getStartPoint(): RoutePoint {
+	public getStartPoint(): (ParkedPoint | HoldingPointPoint | AirbornePoint) {
 		return this.points[0];
 	}
 
-	public getEndPoint(): RoutePoint {
+	public getEndPoint(): (ParkedPoint | HoldingPointPoint | AirbornePoint) {
 		return this.points[this.points.length - 1];
 	}
 }

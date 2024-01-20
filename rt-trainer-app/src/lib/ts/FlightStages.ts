@@ -20,6 +20,8 @@ export enum HoldingPointStage {
 	ReadbackClearance = 'ReadbackClearance',
 }
 
+export type AirborneStage = InboundForJoinStage | JoinCircuitStage | CircuitAndLandingStage;
+
 export enum InboundForJoinStage {
 	Handshake = 'Handshake',
 	LandingRequest = 'LandingRequest',
@@ -57,3 +59,5 @@ export enum LandingToParkedStage {
     VacatedRunway = 'VacatedRunway',
     TaxiClearanceReadback = 'TaxiClearanceReadback',
 }
+
+export type RouteStage = ParkedStage | TaxiingStage | HoldingPointStage | AirborneStage | LandingToParkedStage;

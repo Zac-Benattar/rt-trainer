@@ -2,7 +2,7 @@ import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
 
 import type { RoutePoint } from './ts/RouteStates';
-import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
+import type { AircraftDetails, RadioState, TransponderState, Feedback } from './ts/SimulatorTypes';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -62,6 +62,8 @@ export const KneeboardStore = writable<string>('');
 export const RouteStore = writable<RoutePoint[]>([]);
 
 export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
+
+export const FeedbackStore = writable<Feedback[]>([]);
 
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
