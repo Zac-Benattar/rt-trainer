@@ -1,6 +1,6 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
-import type { AirborneStage, HoldingPointStage, ParkedStage, RouteStage, TaxiingStage } from './FlightStages';
+import type { AirborneStage, HoldingPointStage, ParkedStage, RouteStage, TaxiingStage } from './RouteStages';
 import {
 	FlightRules,
 	EmergencyType,

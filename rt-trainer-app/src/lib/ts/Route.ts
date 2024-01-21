@@ -11,7 +11,7 @@ import {
 	HoldingPointPoint,
 	AirbornePoint
 } from './RouteStates';
-import { ParkedStage } from './FlightStages';
+import { ParkedStage } from './RouteStages';
 import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km

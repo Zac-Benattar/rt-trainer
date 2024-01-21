@@ -2,7 +2,8 @@ import { json } from '@sveltejs/kit';
 import Route from '$lib/ts/Route';
 import Seed from '$lib/ts/Seed';
 import Parser from '$lib/ts/Parser';
-import CallParsingContext from '$lib/ts/CallParsingContext';
+import RadioCall from '$lib/ts/RadioCall';
+import type { ServerResponse } from '$lib/ts/ServerClientTypes.js';
 
 export async function GET({ params, url }) {
 	const route = new Route();
@@ -39,23 +40,24 @@ export async function GET({ params, url }) {
 
 export async function POST({ request }) {
 	const { data } = await request.json();
+	const radioCallData = JSON.parse(data);
 
-	const callParsingContext = new CallParsingContext(
-		data.radioCall,
-		data.seed,
-		data.routePoint,
-		data.prefix,
-		data.userCallsign,
-		data.userCallsignModified,
-		data.squark,
-		data.currentTarget,
-		data.currentTargetFrequency,
-		data.currentRadioFrequency,
-		data.currentTransponderFrequency,
-		data.aircraftType
+	const radioCall: RadioCall = new RadioCall(
+		radioCallData.message,
+		radioCallData.seed,
+		radioCallData.routePoint,
+		radioCallData.prefix,
+		radioCallData.userCallsign,
+		radioCallData.userCallsignModified,
+		radioCallData.squark,
+		radioCallData.currentTarget,
+		radioCallData.currentTargetFrequency,
+		radioCallData.currentRadioFrequency,
+		radioCallData.currentTransponderFrequency,
+		radioCallData.aircraftType
 	);
 
-	const result = Parser.parseCall(callParsingContext);
+	const result: ServerResponse = Parser.parseCall(radioCall);
 
 	return json(result);
 }

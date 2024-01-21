@@ -1,7 +1,6 @@
 import Route from './Route';
 import type { RoutePoint } from './RouteStates';
 import type Seed from './Seed';
-import type { Mistake } from './ServerClientTypes';
 import {
 	getAbbreviatedCallsign,
 	isCallsignStandardRegistration,
@@ -17,9 +16,10 @@ import type {
 	Taxiway,
 	UncontrolledAerodrome
 } from './Aerodrome';
+import { Feedback } from './Feedback';
 
-export default class CallParsingContext {
-	private radioCall: string;
+export default class RadioCall {
+	private message: string;
 	private seed: Seed;
 	private routePoint: RoutePoint;
 	private prefix: string;
@@ -31,9 +31,10 @@ export default class CallParsingContext {
 	private currentRadioFrequency: number;
 	private currentTransponderFrequency: number;
 	private aircraftType: string;
+	private feedback: Feedback;
 
 	constructor(
-		radioCall: string,
+		message: string,
 		seed: Seed,
 		routePoint: RoutePoint,
 		prefix: string,
@@ -46,7 +47,7 @@ export default class CallParsingContext {
 		currentTransponderFrequency: number,
 		aircraftType: string
 	) {
-		this.radioCall = radioCall;
+		this.message = message;
 		this.seed = seed;
 		this.routePoint = routePoint;
 		this.prefix = prefix;
@@ -58,10 +59,11 @@ export default class CallParsingContext {
 		this.currentRadioFrequency = currentRadioFrequency;
 		this.currentTransponderFrequency = currentTransponderFrequency;
 		this.aircraftType = aircraftType;
+		this.feedback = new Feedback();
 	}
 
 	public getRadioCall(): string {
-		return processString(this.radioCall.trim().toLowerCase());
+		return processString(this.message.trim().toLowerCase());
 	}
 
 	public getSeed(): Seed {
@@ -116,12 +118,38 @@ export default class CallParsingContext {
 		return this.aircraftType.toLowerCase();
 	}
 
+	public getFeedback(): Feedback {
+		return this.feedback;
+	}
+
+	public getJSONData(): string {
+		return JSON.stringify({
+			message: this.message,
+			seed: this.seed,
+			routePoint: this.routePoint,
+			prefix: this.prefix,
+			userCallsign: this.userCallsign,
+			userCallsignModified: this.userCallsignModified,
+			squark: this.squark,
+			currentTarget: this.currentTarget,
+			currentTargetFrequency: this.currentTargetFrequency,
+			currentRadioFrequency: this.currentRadioFrequency,
+			currentTransponderFrequency: this.currentTransponderFrequency,
+			aircraftType: this.aircraftType,
+			feedback: this.feedback
+		});
+	}
+
+	public setFeedback(feedback: Feedback): void {
+		this.feedback = feedback;
+	}
+
 	public isTakeoffAerodromeControlled(): boolean {
 		return this.getStartAerodrome().isControlled();
 	}
 
 	public getUnmodifiedRadioCall(): string {
-		return this.radioCall;
+		return this.message;
 	}
 
 	private getIsRadioCallEmpty() {
@@ -158,14 +186,13 @@ export default class CallParsingContext {
 		return this.getRadioFrequencyStated() == this.currentRadioFrequency;
 	}
 
-	public assertCallContainsCurrentRadioFrequency(): Mistake | undefined {
+	public assertCallContainsCurrentRadioFrequency(): boolean {
 		if (!this.radioFrequencyStatedEqualsCurrent()) {
-			return {
-				details: 'Make sure your call contains the current radio frequency.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the current radio frequency.');
+
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	private getUserCallsignWords(): string[] {
@@ -180,14 +207,22 @@ export default class CallParsingContext {
 		return this.getRadioCallWords().find((x) => x == word.toLowerCase()) != undefined;
 	}
 
-	public assertCallContainsWord(word: string): Mistake | undefined {
+	public assertCallContainsCriticalWord(word: string): boolean {
 		if (!this.callContainsWord(word)) {
-			return {
-				details: 'Make sure your call contains the word: ' + word,
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the word: ' + word);
+
+			return false;
 		}
-		return;
+		return true;
+	}
+
+	public assertCallContainsNonCriticalWord(word: string): boolean {
+		if (!this.callContainsWord(word)) {
+			this.feedback.pushMinorMistake('Your call didn\'t contain the word: ' + word);
+
+			return false;
+		}
+		return true;
 	}
 
 	private callContainsWords(words: string[]): boolean {
@@ -198,14 +233,20 @@ export default class CallParsingContext {
 		return true;
 	}
 
-	public assertCallContainsWords(words: string[]): Mistake | undefined {
+	public assertCallContainsCriticalWords(words: string[]): boolean {
 		if (!this.callContainsWords(words)) {
-			return {
-				details: 'Make sure your call contains the words: ' + words.join(' '),
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			return false;
 		}
-		return;
+		return true;
+	}
+
+	public assertCallContainsNonCriticalWords(words: string[]): boolean {
+		if (!this.callContainsWords(words)) {
+			this.feedback.pushMinorMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			return false;
+		}
+		return true;
 	}
 
 	private callStartsWithWord(word: string): boolean {
@@ -240,14 +281,20 @@ export default class CallParsingContext {
 		return true;
 	}
 
-	public assertCallContainsConsecutiveWords(words: string[]): Mistake | undefined {
+	public assertCallContainsConsecutiveCriticalWords(words: string[]): boolean {
 		if (!this.callContainsConsecutiveWords(words)) {
-			return {
-				details: 'Make sure your call contains the phrase: ' + words.join(' '),
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			return false;
 		}
-		return;
+		return true;
+	}
+
+	public assertCallContainsConsecutiveNonCriticalWords(words: string[]): boolean {
+		if (!this.callContainsConsecutiveWords(words)) {
+			this.feedback.pushMinorMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			return false;
+		}
+		return true;
 	}
 
 	private callContainsUserCallsign(): boolean {
@@ -259,21 +306,19 @@ export default class CallParsingContext {
 		);
 	}
 
-	public assertCallContainsUserCallsign(): Mistake | undefined {
+	public assertCallContainsUserCallsign(): boolean {
 		if (!this.callContainsUserCallsign()) {
 			if (this.prefix != '') {
-				return {
-					details: 'Make sure your call contains your callsign.',
-					severe: true
-				};
+				this.feedback.pushSevereMistake('Your call didn\'t contain your callsign.');
+				return false;
 			}
 
-			return {
-				details: 'Make sure your call contains your callsign, including prefix.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				'Your call didn\'t contain your callsign, including prefix.'
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	private callStartsWithUserCallsign(): boolean {
@@ -284,14 +329,12 @@ export default class CallParsingContext {
 		return false;
 	}
 
-	public assertCallStartsWithUserCallsign(): Mistake | undefined {
+	public assertCallStartsWithUserCallsign(): boolean {
 		if (!this.callStartsWithUserCallsign()) {
-			return {
-				details: 'Make sure your call starts with your callsign.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t start with your callsign.');
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	private callEndsWithUserCallsign(): boolean {
@@ -302,14 +345,12 @@ export default class CallParsingContext {
 		return false;
 	}
 
-	public assertCallEndsWithUserCallsign(): Mistake | undefined {
+	public assertCallEndsWithUserCallsign(): boolean {
 		if (!this.callEndsWithUserCallsign()) {
-			return {
-				details: 'Make sure your call ends with your callsign.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t end with your callsign.');
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	public getTargetCallsignWords(): string[] {
@@ -320,14 +361,14 @@ export default class CallParsingContext {
 		return this.callContainsConsecutiveWords(this.getTargetCallsignWords());
 	}
 
-	public assertCallStartsWithTargetCallsign(): Mistake | undefined {
+	public assertCallStartsWithTargetCallsign(): boolean {
 		if (!this.callStartsWithConsecutiveWords(this.getTargetCallsignWords())) {
-			return {
-				details: 'Make sure your call starts with the callsign of the target.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				'Your call didn\'t starts with the callsign of the target.'
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	/* Returns the callsign of the user as it is to be stated in radio calls from ATC. */
@@ -379,217 +420,213 @@ export default class CallParsingContext {
 		return runways[this.seed.scenarioSeed % runways.length];
 	}
 
-	public assertCallContainsTakeOffRunwayName(): Mistake | undefined {
-		if (
+	public assertCallContainsTakeOffRunwayName(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getStartAerodromeTakeoffRunway().name])) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the name of the runway you are taking off from."
+			);
+			return false;
+		} else if (
 			!this.callContainsConsecutiveWords(['runway', this.getStartAerodromeTakeoffRunway().name])
 		) {
-			return {
-				details: 'Make sure your call contains the name of the runway you are taking off from.',
-				severe: true
-			};
+			this.feedback.pushMinorMistake(
+				'Your call didn\'t contain the word "runway" with the runway name.'
+			);
+			return true;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsAircraftType(): Mistake | undefined {
+	public assertCallContainsAircraftType(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getAircraftType()])) {
-			return {
-				details: 'Make sure your call contains the type of aircraft you are flying.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the type of aircraft you are flying: " + this.getAircraftType()
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsScenarioStartPoint(): Mistake | undefined {
+	public assertCallContainsScenarioStartPoint(): boolean {
 		if (
 			!this.callContainsConsecutiveWords(
 				this.getStartAerodromeStartingPoint().name.toLowerCase().split(' ')
 			)
 		) {
-			return {
-				details:
-					'Make sure your call contains your location: ' +
-					this.getStartAerodromeStartingPoint().name,
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain your location: " + this.getStartAerodromeStartingPoint().name
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsStartAerodromeName(): Mistake | undefined {
+	public assertCallContainsStartAerodromeName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().getShortName()])) {
-			return {
-				details: 'Make sure your call contains the name of the starting aerodrome.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				'Your call didn\'t contain the name of the starting aerodrome.'
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsEndAerodromeName(): Mistake | undefined {
+	public assertCallContainsEndAerodromeName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().getShortName()])) {
-			return {
-				details: 'Make sure your call contains the name of the ending aerodrome.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake(
+				'Your call didn\'t contain the name of the ending aerodrome.'
+			);
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsSqwarkCode(): Mistake | undefined {
+	public assertCallContainsSqwarkCode(): boolean {
 		if (!this.callContainsConsecutiveWords(['squawk', this.currentTransponderFrequency + ''])) {
-			return {
-				details: 'Make sure your call contains the squawk code.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the squawk code.');
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertWILCOCallCorrect(): Mistake | undefined {
+	public assertWILCOCallCorrect(): boolean {
 		if (!this.callStartsWithWord('wilco')) {
-			return {
-				details: 'Make sure your call starts with WILCO (will comply).',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t start with WILCO (will comply).');
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertRogerCallCorrect(): Mistake | undefined {
+	public assertRogerCallCorrect(): boolean {
 		if (
 			!this.callContainsConsecutiveWords(['roger', this.getTargetAllocatedCallsign()]) ||
 			!(this.callStartsWithUserCallsign() && this.getRadioCallWordCount() == 1)
 		) {
-			return {
-				details: 'Make sure your call starts with ROGER (message received).',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t start with ROGER (message received).');
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsCurrentLocation(): Mistake | undefined {
+	public assertCallContainsCurrentLocation(): boolean {
 		if (!this.callContainsConsecutiveWords(this.getRoutePoint().waypoint.name.split(' '))) {
-			return {
-				details: 'Make sure your call contains the current location.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake("Your call didn't contain your location.");
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsAltitude(): Mistake | undefined {
+	public assertCallContainsAltitude(): boolean {
 		if (
 			!this.callContainsWord('altitude') &&
 			!this.callContainsWord(this.routePoint.pose.altitude.toString())
 		) {
-			return {
-				details: 'Make sure your call contains your altitude.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake("Your call didn't contain your altitude.");
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsTakeOffRunwayHoldingPoint(): Mistake | undefined {
+	public assertCallContainsTakeOffRunwayHoldingPoint(): boolean {
 		if (!this.getTakeoffRunwayTaxiway().holdingPoints[0].name.split(' ')) {
-			return {
-				details: 'Make sure your call contains the current holding point.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake("Your call didn't contain your holding point.");
+			return false;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsStartAerodromePressure(): Mistake | undefined {
+	public assertCallContainsStartAerodromePressure(): boolean {
 		const pressureSample = this.getStartAerodromeMETORSample().getPressureString().split(' ');
 		if (!this.callContainsWord(pressureSample[0])) {
-			return {
-				details: 'Make sure your call contains the air pressure.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake("Your call didn't contain the air pressure.");
+			return false;
 		} else if (pressureSample.length > 1 && !this.callContainsWord(pressureSample[1])) {
-			return {
-				details:
-					'Make sure to append millibars to your pressure readback when pressure is below 1000 millibars.',
-				severe: false
-			};
+			this.feedback.pushMinorMistake(
+				'Your air pressure call didn\'t include "millibars" when the pressure was below 1000 millibars. \n' +
+					'Numbers must have units when confusion is possible.'
+			);
+			return true;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsStartAerodromeTemperature(): Mistake | undefined {
-		const temperatureSample = this.getStartAerodromeMETORSample().getTemperatureString().split(' ');
-		if (!this.callContainsWord(temperatureSample[0])) {
-			return {
-				details: 'Make sure your call contains the temperature.',
-				severe: true
-			};
-		} else if (!this.callContainsWord(temperatureSample[1])) {
-			return {
-				details: 'Make sure your call contains the temperature units.',
-				severe: false
-			};
+	public assertCallContainsStartAerodromeTemperature(): boolean {
+		let temperatureSample = this.getStartAerodromeMETORSample().getTemperatureString();
+		let sign = '';
+		
+		if (temperatureSample[0] == '-' || temperatureSample[0] == '+') {
+			temperatureSample = temperatureSample.substring(1);
+			sign = temperatureSample[0];
 		}
-		return;
+
+		if (!this.callContainsWord(temperatureSample)) {
+			this.feedback.pushSevereMistake('Your call didn\'t contain the temperature.');
+			return false;
+		} else if (!this.callContainsWord(sign + temperatureSample)) {
+			this.feedback.pushMinorMistake(
+				'Your temperature readback didn\'t include the sign ' + sign + '. \n' +
+					'Temperatures must have a sign when confusion is possible.'
+			);
+
+			return true;
+		}
+		return true;
 	}
 
-	public assertCallContainsStartAerodromeDewpoint(): Mistake | undefined {
-		const dewpointSample = this.getStartAerodromeMETORSample().getDewpointString().split(' ');
-		if (!this.callContainsWord(dewpointSample[0])) {
-			return {
-				details: 'Make sure your call contains the dewpoint.',
-				severe: true
-			};
-		} else if (!this.callContainsWord(dewpointSample[1])) {
-			return {
-				details: 'Make sure your call contains the dewpoint units.',
-				severe: false
-			};
+	public assertCallContainsStartAerodromeDewpoint(): boolean {
+		let dewpointSample = this.getStartAerodromeMETORSample().getDewpointString();
+		let sign = '';
+		
+		if (dewpointSample[0] == '-' || dewpointSample[0] == '+') {
+			dewpointSample = dewpointSample.substring(1);
+			sign = dewpointSample[0];
 		}
-		return;
+
+		if (!this.callContainsWord(dewpointSample)) {
+			this.feedback.pushSevereMistake('Your call didn\'t contain the dewpoint.');
+			return false;
+		} else if (!this.callContainsWord(sign + dewpointSample)) {
+			this.feedback.pushMinorMistake(
+				'Your dewpoint readback didn\'t include the sign ' + sign + '. \n' +
+					'Dewpoints must have a sign when confusion is possible.'
+			);
+
+			return true;
+		}
+		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindSpeed(): Mistake | undefined {
+	public assertCallContainsStartAerodromeWindSpeed(): boolean {
+		// Wind speed followed by 'knots' 
 		const windSpeedSample = this.getStartAerodromeMETORSample().getWindSpeedString().split(' ');
 		if (!this.callContainsWord(windSpeedSample[0])) {
-			return {
-				details: 'Make sure your call contains the wind speed.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the wind speed.');
+			return false;
 		} else if (!this.callContainsWord(windSpeedSample[1])) {
-			return {
-				details: 'Make sure your call contains the wind speed units.',
-				severe: false
-			};
+			this.feedback.pushMinorMistake('Your call didn\'t contain the wind speed units.');
+			return true;
 		}
-		return;
+		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindDirection(): Mistake | undefined {
+	public assertCallContainsStartAerodromeWindDirection(): boolean {
 		const windDirectionSample = this.getStartAerodromeMETORSample()
 			.getWindDirectionString()
 			.split(' ');
 		if (!this.callContainsConsecutiveWords(windDirectionSample)) {
-			return {
-				details: 'Make sure your call contains the wind direction.',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain the wind direction.');
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	// Currently only checks for VFR
-	public assertCallContainsFlightRules(): Mistake | undefined {
+	public assertCallContainsFlightRules(): boolean {
 		if (!this.callContainsWord('VFR')) {
-			return {
-				details: 'Make sure your call contains your flight rules (VFR).',
-				severe: true
-			};
+			this.feedback.pushSevereMistake('Your call didn\'t contain your flight rules (VFR).');
+			return false;
 		}
-		return;
+		return true;
 	}
 
 	public getTakeoffRunwayTaxiway(): Taxiway {

@@ -1,67 +1,71 @@
 <script lang="ts">
-	import { FeedbackStore } from '$lib/stores';
+	import { RadioCallsStore } from '$lib/stores';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
-	import { ScenarioFeedback } from '$lib/ts/SimulatorTypes';
-	let feedback: ScenarioFeedback | null = null;
+	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import type RadioCall from '$lib/ts/RadioCall';
+	import { Feedback } from '$lib/ts/Feedback';
+	import Results from '$lib/ts/Results';
+	let results: Results;
 
-	FeedbackStore.subscribe((value) => {
-		feedback = new ScenarioFeedback(value);
+	RadioCallsStore.subscribe((value) => {
+		results = new Results(value);
 	});
 </script>
 
 <div class="card p-4 w-9/12">
-	{#if feedback === null}
-		<p>Something went wrong: Feedback is null</p>
+	{#if results.getRadioCalls().length === 0}
+		<p>Something went wrong: No feedback to show</p>
 	{:else}
-		<TreeView >
-			<TreeViewItem>
-				🟢 {feedback.getFlawlessCount()} Flawless Radio Calls
-				<svelte:fragment slot="children">
-					<TreeViewItem>
-						{#each feedback.getFlawless() as item}
+		<Accordion>
+			<AccordionItem open>
+				<svelte:fragment slot="lead">🛫</svelte:fragment>
+				<svelte:fragment slot="summary">Takeoff</svelte:fragment>
+				<svelte:fragment slot="content">
+					<TreeView hyphenOpacity={'opacity-0'}>
+						{#each results.getStartUpAndTaxiCalls() as item}
 							<TreeViewItem>
 								{item.getRoutePoint().stage}
 								<svelte:fragment slot="children">
-									<TreeViewItem>{item.getRadioCall()}</TreeViewItem>
+									<TreeViewItem>"{item.getRadioCall()}"</TreeViewItem>
 								</svelte:fragment></TreeViewItem
 							>
-						{/each}</TreeViewItem
-					>
-				</svelte:fragment>
-			</TreeViewItem>
-			<TreeViewItem>
-				🟠 {feedback.getMinorMistakesCount()} Minor Mistakes
-				<svelte:fragment slot="children">
-					<TreeViewItem>
-						{#each feedback.getMinorMistakes() as item}
+						{/each}
+					</TreeView></svelte:fragment
+				>
+			</AccordionItem>
+			<AccordionItem>
+				<svelte:fragment slot="lead">🧭</svelte:fragment>
+				<svelte:fragment slot="summary">Cross Country Flight</svelte:fragment>
+				<svelte:fragment slot="content"
+					><TreeView hyphenOpacity={'opacity-0'}>
+						{#each results.getAirborneCalls() as item}
 							<TreeViewItem>
 								{item.getRoutePoint().stage}
 								<svelte:fragment slot="children">
-									<TreeViewItem>{item.getRadioCall()}</TreeViewItem>
-									<TreeViewItem>{item.getDisplayString()}</TreeViewItem>
+									<TreeViewItem>"{item.getRadioCall()}"</TreeViewItem>
 								</svelte:fragment></TreeViewItem
 							>
-						{/each}</TreeViewItem
-					>
-				</svelte:fragment>
-			</TreeViewItem>
-			<TreeViewItem>
-				🔴 {feedback.getSevereMistakesCount()} Major Errors
-				<svelte:fragment slot="children">
-					<TreeViewItem>
-						{#each feedback.getSevereMistakes() as item}
+						{/each}
+					</TreeView></svelte:fragment
+				>
+			</AccordionItem>
+			<AccordionItem>
+				<svelte:fragment slot="lead">🛬</svelte:fragment>
+				<svelte:fragment slot="summary">Landing</svelte:fragment>
+				<svelte:fragment slot="content"
+					><TreeView hyphenOpacity={'opacity-0'}>
+						{#each results.getLandingCalls() as item}
 							<TreeViewItem>
 								{item.getRoutePoint().stage}
 								<svelte:fragment slot="children">
-									<TreeViewItem>{item.getRadioCall()}</TreeViewItem>
-									<TreeViewItem>{item.getDisplayString()}</TreeViewItem>
+									<TreeViewItem>"{item.getRadioCall()}"</TreeViewItem>
 								</svelte:fragment></TreeViewItem
 							>
-						{/each}</TreeViewItem
-					>
-				</svelte:fragment>
-			</TreeViewItem>
-		</TreeView>
+						{/each}
+					</TreeView></svelte:fragment
+				>
+			</AccordionItem>
+		</Accordion>
 	{/if}
 </div>
 
