@@ -117,6 +117,42 @@ export function replacePhoneticAlphabetDecimalWithNumber(str: string): string {
 	return str.replace(/(\d{3}) decimal (\d{3})/g, '$1.$2');
 }
 
+export function numberToPhoneticString(number: number, precision: number): string {
+	const phoneticNumbers = {
+		'0': 'Zero',
+		'1': 'One',
+		'2': 'Two',
+		'3': 'Three',
+		'4': 'Four',
+		'5': 'Five',
+		'6': 'Six',
+		'7': 'Seven',
+		'8': 'Eight',
+		'9': 'Nine'
+	};
+
+	const stringNumber = number.toFixed(precision);
+	let result: string = '';
+
+	for (let i = 0; i < stringNumber.length; i++) {
+		const char = stringNumber[i];
+
+		if (/[0-9]/.test(char)) {
+			result += phoneticNumbers[char] + ' ';
+		} else if (char === '-') {
+			result += 'Dash ';
+			continue;
+		} else if (char === '.') {
+			result += 'Decimal ';
+		} else {
+			result += char + ' ';
+		}
+	}
+
+	return result.trim();
+}
+
+
 export function replacePhoneticAlphabetWithChars(str: string): string {
 	const phoneticAlphabetMapping = {
 		alpha: 'A',
@@ -144,7 +180,17 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 		whiskey: 'W',
 		xray: 'X',
 		yankee: 'Y',
-		zulu: 'Z'
+		zulu: 'Z',
+		zero: '0',
+		one: '1',
+		two: '2',
+		three: '3',
+		four: '4',
+		five: '5',
+		six: '6',
+		seven: '7',
+		eight: '8',
+		niner: '9'
 	};
 
 	// Create a regular expression pattern to match any of the phonetic alphabet words

@@ -22,6 +22,18 @@ export class Feedback {
 		return this.minorMistakes;
 	}
 
+	public getSevereMistakesCount(): number {
+		return this.severeMistakes.length;
+	}
+
+	public getMinorMistakesCount(): number {
+		return this.minorMistakes.length;
+	}
+
+	public getTotalMistakes(): number {
+		return this.severeMistakes.length + this.minorMistakes.length;
+	}
+
     public callValid(): boolean {
         return this.severeMistakes.length == 0;
     }
