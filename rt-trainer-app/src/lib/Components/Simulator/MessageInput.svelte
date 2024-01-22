@@ -2,8 +2,10 @@
 	import { ExpectedUserMessageStore, SpeechInputStore, UserMessageStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
+	import { SlideToggle, getModalStore } from '@skeletonlabs/skeleton';
 	import Tooltip from 'sv-tooltip';
+
+	const modalStore = getModalStore();
 
 	export let speechRecognitionSupported: boolean = false;
 	let speechInput: boolean = false;
@@ -83,6 +85,11 @@
 						size="sm"
 						on:click={() => {
 							speechInput = !speechInput;
+							modalStore.trigger({
+								type: 'alert',
+								title: 'Speech input is enabled',
+								body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
+							});
 						}}
 						>Voice input
 					</SlideToggle>

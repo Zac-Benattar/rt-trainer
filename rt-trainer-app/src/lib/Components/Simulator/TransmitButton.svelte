@@ -35,11 +35,7 @@
 		recognition.lang = 'en';
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
-			console.log(
-				`Input: ${event.results[0][0].transcript} Confidence: ${event.results[0][0].confidence}`
-			);
 			if (event.results[0][0].confidence > 0.5) {
-				console.log('Speech Recognition Success');
 				userMessage = speechInput;
 				UserMessageStore.set(userMessage);
 			} else {
@@ -85,6 +81,32 @@
 		}
 	};
 
+	function onKeyDown(e: { keyCode: any; }) {
+		switch (e.keyCode) {
+			case 32:
+				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
+				if (transmitButton != null) {
+					transmitButton.classList.add('active');
+					transmitting = true;
+					recognition?.start();
+				}
+				break;
+		}
+	}
+
+	function onKeyUp(e: { keyCode: any; }) {
+		switch (e.keyCode) {
+			case 32:
+				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
+				if (transmitButton != null) {
+					transmitButton.classList.remove('active');
+					transmitting = false;
+					recognition?.stop();
+				}
+				break;
+		}
+	}
+
 	onMount(() => {
 		mounted = true;
 	});
@@ -102,6 +124,8 @@
 	tabindex="0"
 	role="button"
 />
+
+<svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp}/>
 
 <style lang="postcss">
 	.transmit-button {
