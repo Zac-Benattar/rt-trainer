@@ -1,17 +1,39 @@
-import * as RandomSeed from 'random-seed';
 import type { Location } from './SimulatorTypes';
+
+// Simple hash function: hash * 31 + char
+export function simpleHash(str: string): number {
+	let hash = 0;
+
+	if (str.length === 0) {
+		return hash;
+	}
+
+	for (let i = 0; i < str.length; i++) {
+		const char = str.charCodeAt(i);
+		hash = (hash << 5) - hash + char;
+	}
+
+	return hash;
+}
+// Splits a number into two halves and pads them with zeros to make sure they are the same length
+export function splitAndPadNumber(input: number): [number, number] {
+	const numberString = input.toString();
+	const halfLength = Math.ceil(numberString.length / 2);
+	const firstHalf = parseInt(numberString.padEnd(halfLength, '0').slice(0, halfLength));
+	const secondHalf = parseInt(numberString.slice(halfLength).padEnd(halfLength, '0'));
+	return [firstHalf, secondHalf];
+}
 
 // Function to generate a seeded normal distribution
 export function seededNormalDistribution(
-	seed: string,
+	seedString: string,
 	mean: number,
 	standardDeviation: number
 ): number {
-	const rand = RandomSeed.create(seed);
-
-	// Generate two random numbers using the Box-Muller transform
-	const u1 = rand.random();
-	const u2 = rand.random();
+	// Generate two 'random' numbers from seed for the Box-Muller transform
+	const [v1, v2] = splitAndPadNumber(simpleHash(seedString));
+	const u1 = 1 / v1;
+	const u2 = 1 / v2;
 
 	// Box-Muller transform
 	const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
