@@ -1,13 +1,9 @@
 import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
-import {
-	FrequencyType,
-	type AircraftDetails,
-	type RadioFrequency,
-	type RadioState,
-	type TransponderState,
-} from './ts/SimulatorTypes';
+
 import type { RoutePoint } from './ts/RouteStates';
+import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
+import type RadioCall from './ts/RadioCall';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -40,17 +36,15 @@ const initialTransponderState: TransponderState = {
 	vfrHasExecuted: false
 };
 
-const initialTarget: RadioFrequency = {
-	frequency: 0,
-	callsign: 'NONE',
-	frequencyType: FrequencyType.FIS
-};
-
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
-export const GenerationParametersStore = writable<GenerationParameters>(initialGenerationParameters);
+export const GenerationParametersStore = writable<GenerationParameters>(
+	initialGenerationParameters
+);
 
-export const CurrentTargetStore = writable<RadioFrequency>(initialTarget);
+export const CurrentTargetStore = writable<string>('');
+
+export const CurrentTargetFrequencyStore = writable<number>(0);
 
 export const SpeechInputStore = writable<boolean>(false);
 
@@ -72,10 +66,13 @@ export const RouteStore = writable<RoutePoint[]>([]);
 
 export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
 
+export const RadioCallsStore = writable<RadioCall[]>([]);
+
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
 	GenerationParametersStore.set(initialGenerationParameters);
-	CurrentTargetStore.set(initialTarget);
+	CurrentTargetStore.set('');
+	CurrentTargetFrequencyStore.set(0);
 	SpeechInputStore.set(false);
 	SpeechOutputStore.set(false);
 	RadioStateStore.set(initialRadioState);

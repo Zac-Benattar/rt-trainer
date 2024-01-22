@@ -6,16 +6,18 @@ export enum ParkedStage {
 	ReadbackDepartureInformation = 'ReadbackDepartureInformation',
 	TaxiRequest = 'TaxiRequest',
 	TaxiClearanceReadback = 'TaxiClearanceReadback',
+	RequestTaxiInformation = 'RequestTaxiInformation', // Uncontrolled aerodrome
+	AnnounceTaxiing = 'AnnounceTaxiing' // Uncontrolled aerodrome
 }
 
 export enum TaxiingStage {
 	ReadyForDeparture = 'ReadyForDeparture',
-	InfoGivenForDeparture = 'InfoGivenForDeparture',
+	InfoGivenForDeparture = 'InfoGivenForDeparture'
 }
 
 export enum HoldingPointStage {
 	ClearedForTakeOff = 'ClearedForTakeOff',
-	ReadbackClearance = 'ReadbackClearance',
+	ReadbackClearance = 'ReadbackClearance'
 }
 
 export enum InboundForJoinStage {
@@ -51,7 +53,15 @@ export enum CircuitAndLandingStage {
 
 export enum LandingToParkedStage {
 	Handshake = 'Handshake', // For large airports - may not even be needed
-    ReadbackVacateRunwayRequest = 'ReadbackVacateRunwayRequest',
-    VacatedRunway = 'VacatedRunway',
-    TaxiClearanceReadback = 'TaxiClearanceReadback',
+	ReadbackVacateRunwayRequest = 'ReadbackVacateRunwayRequest',
+	VacatedRunway = 'VacatedRunway',
+	TaxiClearanceReadback = 'TaxiClearanceReadback'
 }
+
+export const StartAerodromeStage = { ...ParkedStage, ...TaxiingStage, ...HoldingPointStage };
+
+export const AirborneStage = {...InboundForJoinStage, ...JoinCircuitStage, ...CircuitAndLandingStage};
+
+export const LandingStage = { ...LandingToParkedStage};
+
+export const RouteStage = { ...ParkedStage, ...TaxiingStage, ...HoldingPointStage, ...AirborneStage, ...LandingToParkedStage};

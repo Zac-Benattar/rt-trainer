@@ -22,13 +22,17 @@
 		KneeboardStore,
 		CurrentRoutePointStore,
 		SpeechOutputStore,
-		ExpectedUserMessageStore
+		ExpectedUserMessageStore,
+		CurrentTargetFrequencyStore,
+		RadioCallsStore as RadioCallsHistoryStore
 	} from '$lib/stores';
-	import ScenarioLink from './ScenarioLink.svelte';
 	import type { RoutePoint } from '$lib/ts/RouteStates';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
+	import { goto } from '$app/navigation';
+	import RadioCall from '$lib/ts/RadioCall';
+	import { Feedback } from '$lib/ts/Feedback';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -39,10 +43,11 @@
 	let transponderState: TransponderState; // Current transponder settings
 	let atcMessage: string;
 	let userMessage: string;
-	let kneeboardText: string = 'Make notes here.';
+	let kneeboardText: string;
 	let route: RoutePoint[] | undefined = [];
 	let currentPointIndex: number = 0;
 	let failedAttempts: number = 0;
+	let currentRadioCall: RadioCall;
 
 	// Page settings
 	let mapEnabled = true;
@@ -59,8 +64,8 @@
 	$: if (serverNotResponding) {
 		modalStore.trigger({
 			type: 'alert',
-			title: 'Connection to server failed',
-			body: 'This may be due to the server being offline. Come back later and try again.'
+			title: 'Server did not respond',
+			body: 'This may be due to a bad request or the server being offline. Come back later and try again.'
 		});
 	}
 
@@ -123,7 +128,11 @@
 		if (awaitingRadioCallCheck) return;
 
 		// Check the call is not empty
-		if (userMessage == '' || userMessage == 'Enter your radio message here.') {
+		if (
+			userMessage == undefined ||
+			userMessage == '' ||
+			userMessage == 'Enter your radio message here.'
+		) {
 			return;
 		}
 
@@ -159,7 +168,7 @@
 			return;
 		} else if (
 			radioState.activeFrequency.toFixed(3) !=
-			route[currentPointIndex].updateData.currentTarget.frequency.toFixed(3)
+			route[currentPointIndex].updateData.currentTargetFrequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -182,41 +191,38 @@
 		awaitingRadioCallCheck = true;
 		let serverResponse = await checkRadioCallByServer();
 		awaitingRadioCallCheck = false;
-		if (serverResponse === undefined) {
+		if (serverResponse === undefined || serverResponse === null) {
 			// Handle error
 			serverNotResponding = true;
-			modalStore.trigger({
-				type: 'alert',
-				title: 'No response from server',
-				body: 'This may be due to the server being offline or an unrecoverable parsing error encountered by the server. Come back later and try again.'
-			});
 
 			return;
 		}
 
 		serverNotResponding = false;
 
-		// Get whether there are severe mistakes, and record all minor ones
-		let severeMistakes: boolean = false;
-		let callsignMentioned: boolean = true; // If user's callsign in their call or not
-		let minorMistakes: string[] = [];
-		for (let i = 0; i < serverResponse.mistakes.length; i++) {
-			// If the user's callsign is mentioned in the mistakes, then they have not said their callsign, so set the flag
-			if (serverResponse.mistakes[i].details.search('your callsign') != -1) {
-				callsignMentioned = false;
-			}
+		// Update stores with the radio call and feedback
+		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
+		const feedback = new Feedback();
+		feedbackData.minorMistakes.forEach((element: string) => {
+			feedback.pushMinorMistake(element);
+		});
+		feedbackData.severeMistakes.forEach((element: string) => {
+			feedback.pushSevereMistake(element);
+		});
 
-			// If the mistake is severe, then set the flag
-			if (serverResponse.mistakes[i].severe) {
-				severeMistakes = true;
-				continue;
-			} else {
-				minorMistakes.push(serverResponse.mistakes[i].details);
-			}
-		}
+		currentRadioCall.setFeedback(feedback);
+		RadioCallsHistoryStore.update((value) => {
+			value.push(currentRadioCall);
+			return value;
+		});
+
+		// Get whether there are severe mistakes, and record all minor ones
+		let callsignMentioned: boolean = userMessage.search(aircraftDetails.callsign) != -1;
+		let minorMistakes: string[] = feedback.getMinorMistakes();
+		let severeMistakes: string[] = feedback.getSevereMistakes();;
 
 		// Handle mistakes
-		if (severeMistakes) {
+		if (severeMistakes.length > 0) {
 			failedAttempts++;
 
 			if (failedAttempts >= 3) {
@@ -230,7 +236,7 @@
 							// Put the correct call in the input box
 							ExpectedUserMessageStore.set(serverResponse.expectedUserCall);
 						} else {
-							failedAttempts = -999;
+							failedAttempts = -7;
 						}
 					}
 				};
@@ -271,6 +277,23 @@
 			toastStore.trigger(t);
 		}
 
+		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
+		if (currentPointIndex == route.length - 1) {
+			const m: ModalSettings = {
+				type: 'confirm',
+				title: 'Scenario Complete',
+				body: 'Do you want view your feedback?',
+				response: (r: boolean) => {
+					if (r) {
+						goto('/scenario/' + seed.seedString + '/results/');
+					}
+				}
+			};
+			modalStore.trigger(m);
+
+			return;
+		}
+
 		// Update the simulator with the next route point
 		failedAttempts = 0;
 		currentPointIndex++;
@@ -290,6 +313,7 @@
 		} else {
 			// Update stores with the route
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
+			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
 		}
@@ -298,7 +322,7 @@
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
 			const response = await axios.get(
-				`/scenario/seed=${seed.scenarioSeed}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+				`/scenario/seed=${seed.seedString}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
 			);
 
 			return response.data;
@@ -318,22 +342,24 @@
 		}
 		try {
 			const currentTarget = route[currentPointIndex].updateData.currentTarget;
-			const callParsingContext = {
-				radioCall: userMessage,
-				seed: seed,
-				routePoint: route[currentPointIndex],
-				prefix: aircraftDetails.prefix,
-				userCallsign: aircraftDetails.callsign,
-				userCallsignModified: route[currentPointIndex].updateData.callsignModified,
-				squark: false,
-				currentTarget: currentTarget,
-				currentRadioFrequency: radioState.activeFrequency,
-				currentTransponderFrequency: transponderState.frequency,
-				aircraftType: aircraftDetails.aircraftType
-			};
+			const currentTargetFrequency = route[currentPointIndex].updateData.currentTargetFrequency;
+			currentRadioCall = new RadioCall(
+				userMessage,
+				seed,
+				route[currentPointIndex],
+				aircraftDetails.prefix,
+				aircraftDetails.callsign,
+				route[currentPointIndex].updateData.callsignModified,
+				transponderState.vfrHasExecuted,
+				currentTarget,
+				currentTargetFrequency,
+				radioState.activeFrequency,
+				transponderState.frequency,
+				aircraftDetails.aircraftType
+			);
 
 			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
-				data: callParsingContext
+				data: currentRadioCall.getJSONData()
 			});
 
 			return response.data;

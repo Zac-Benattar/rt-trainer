@@ -1,5 +1,6 @@
+import type { Feedback } from './Feedback';
 import type Seed from './Seed';
-import type { EmergencyType, RadioFrequency } from './SimulatorTypes';
+import type { EmergencyType } from './SimulatorTypes';
 import type { Location } from './SimulatorTypes';
 
 export type GenerationParameters = {
@@ -8,20 +9,14 @@ export type GenerationParameters = {
 	hasEmergency: boolean;
 };
 
-/* Mistake made in the user's call. Description and whether or not ATC can deal with it. */
-export type Mistake = {
-	details: string;
-	severe: boolean;
-};
-
 /* List of mistakes made by the user and the response from the radio target */
 export class ServerResponse {
-	mistakes: Mistake[];
+	feedbackDataJSON: string;
 	responseCall: string;
 	expectedUserCall: string;
 
-	constructor(mistakes: Mistake[], responseCall: string, expectedUserCall: string) {
-		this.mistakes = mistakes;
+	constructor(feedback: Feedback, responseCall: string, expectedUserCall: string) {
+		this.feedbackDataJSON = feedback.getJSONData();
 		this.responseCall = responseCall;
 		this.expectedUserCall = expectedUserCall;
 	}
@@ -38,7 +33,8 @@ export type CallParsingContext = {
 export type SimulatorUpdateData = {
 	callsignModified: boolean;
 	squark: boolean;
-	currentTarget: RadioFrequency;
+	currentTarget: string;
+	currentTargetFrequency: number;
 	currentTransponderFrequency: number;
 	location: Location;
 	emergency: EmergencyType;

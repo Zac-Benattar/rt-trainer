@@ -1,20 +1,15 @@
 export enum FrequencyType {
-	ATIS = 'ATIS',
-	FIS = 'FIS',
-	TWR = 'TWR',
-	GND = 'GND'
+	Information = 'Information',
+	Tower = 'Tower',
+	Ground = 'Ground',
+	Radar = 'Radar',
+	None = 'None'
 }
 
 export enum FlightRules {
 	IFR = 'IFR', // Instrument Flight Rules
 	VFR = 'VFR' // Visual Flight Rules
 }
-
-export type RadioFrequency = {
-	frequencyType: FrequencyType;
-	frequency: number;
-	callsign: string;
-};
 
 export type Location = {
 	lat: number;
@@ -45,7 +40,6 @@ export type Waypoint = {
 	waypointType: WaypointType;
 	location: Location;
 	name: string;
-	radioFrequencies: RadioFrequency[];
 };
 
 export type TransponderDialMode = 'OFF' | 'SBY' | 'GND' | 'STBY' | 'ON' | 'ALT' | 'TEST';

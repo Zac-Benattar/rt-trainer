@@ -1,14 +1,18 @@
 <script lang="ts">
-	import type { RadioFrequency } from '$lib/ts/SimulatorTypes';
-	import { CurrentTargetStore, ATCMessageStore, SpeechOutputStore } from '$lib/stores';
+	import { CurrentTargetStore, ATCMessageStore, SpeechOutputStore, CurrentTargetFrequencyStore } from '$lib/stores';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
 	import Tooltip from 'sv-tooltip';
 
-	let currentTarget: RadioFrequency;
+	let currentTarget: string;
+	let currentTargetFrequency: string = '0.00';
 	let readRecievedCalls: boolean = false;
 
 	CurrentTargetStore.subscribe((value) => {
 		currentTarget = value;
+	});
+
+	CurrentTargetFrequencyStore.subscribe((value) => {
+		currentTargetFrequency = value.toFixed(3);
 	});
 
 	let atcMessage: string;
@@ -41,7 +45,7 @@
 			cols="50"
 			maxlength="25"
 			placeholder="Radio messages will appear here."
-			>{currentTarget.callsign} {currentTarget.frequency}MHz</textarea
+			>{currentTarget} {currentTargetFrequency}MHz</textarea
 		>
 	</div>
 	<div class="flex flex-row content-evenly justify-end gap-x-3 px-5 bg-surface-500 text-secondary-50">

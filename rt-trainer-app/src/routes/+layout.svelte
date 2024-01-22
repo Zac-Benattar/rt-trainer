@@ -35,7 +35,7 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
-	} else if ($page.url.pathname.search('/scenario') != -1) {
+	} else if ($page.url.pathname.search('/scenario') != -1 && $page.url.pathname.search('/results') == -1) {
 		// If on scenario page hide sidebar and ways to access it as user is not logged in
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
@@ -73,7 +73,7 @@
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		{#if !($page.url.pathname.search('/scenario') != -1 || $page.url.pathname === '/')}
+		{#if !(($page.url.pathname.search('/scenario') != -1 && $page.url.pathname.search('/results') == -1) || $page.url.pathname === '/')}
 			<Navigation />
 		{/if}
 	</svelte:fragment>

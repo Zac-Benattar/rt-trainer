@@ -2,13 +2,7 @@
     {
         "name": "Wellesbourne Mountford",
         "icao": "EGBW",
-        "radioFrequencies": [
-            {
-                "frequencyType": "FIS",
-                "frequency": 180.030,
-                "callsign": "Wellesbourne Information"
-            }
-        ],
+        "informationFrequency": 180.030,
         "runways": [
             {
                 "name": "18",

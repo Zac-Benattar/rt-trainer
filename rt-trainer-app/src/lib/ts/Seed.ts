@@ -21,7 +21,7 @@ export default class Seed {
 		}
 
 		// Simple hash function: hash * 31 + char
-		function simpleHash(str: string) {
+		function simpleHash(str: string): number {
 			let hash = 0;
 
 			if (str.length === 0) {
