@@ -5,6 +5,7 @@ import {
 	getAbbreviatedCallsign,
 	isCallsignStandardRegistration,
 	processString,
+	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet
 } from './utils';
 import type {
@@ -106,20 +107,40 @@ export default class RadioCall {
 		return this.currentTargetFrequency;
 	}
 
+	public getCurrentTargetFrequencyPhonetics(): string {
+		return replaceWithPhoneticAlphabet(this.currentTargetFrequency.toString());
+	}
+
 	public getCurrentRadioFrequency(): number {
 		return this.currentRadioFrequency;
+	}
+
+	public getCurrentRadioFrequencyPhonetics(): string {
+		return replaceWithPhoneticAlphabet(this.currentRadioFrequency.toString());
 	}
 
 	public getCurrentTransponderFrequency(): number {
 		return this.currentTransponderFrequency;
 	}
 
+	public getCurrentTransponderFrequencyPhonetics(): string {
+		return replaceWithPhoneticAlphabet(this.currentTransponderFrequency.toString());
+	}
+
 	public getAircraftType(): string {
 		return this.aircraftType.toLowerCase();
 	}
 
+	public getAircraftTypePhonetics(): string {
+		return replaceWithPhoneticAlphabet(this.aircraftType.toLowerCase());
+	}
+
 	public getFeedback(): Feedback {
 		return this.feedback;
+	}
+
+	public isFlawless(): boolean {
+		return this.feedback.isFlawless();
 	}
 
 	public getJSONData(): string {
@@ -168,17 +189,26 @@ export default class RadioCall {
 		return this.getRadioCallWords()[index];
 	}
 
-	private getRadioFrequencyIndex(): number {
-		return this.getRadioCallWords().findIndex((x) => x.includes('.'));
-	}
-
-	private radioFrequencyIsStated(): boolean {
-		return this.getRadioFrequencyIndex() != -1;
+	private getRadioFrequencyDecimalIndex(): number {
+		return this.getRadioCallWords().findIndex((x) => x.includes('decimal'));
 	}
 
 	private getRadioFrequencyStated(): number {
-		const freq = +this.getRadioCallWord(this.getRadioFrequencyIndex());
-		if (isNaN(freq)) return -1;
+		const radioCallWords = this.getRadioCallWords();
+		const decimalIndex = this.getRadioFrequencyDecimalIndex();
+		if (decimalIndex <= 2) return -1; // Not enough words before decimal to be a frequency
+		if (decimalIndex >= radioCallWords.length - 1) return -1; // Not enough words after decimal to be a frequency
+
+		const beforeDecimal = radioCallWords.slice(decimalIndex - 3, decimalIndex);
+		const convertedBeforeDecimal = beforeDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
+		const beforeDecimalDigits = convertedBeforeDecimal.join('');
+
+		const afterDecimal = radioCallWords.slice(decimalIndex + 1, decimalIndex + 4);
+		const convertedAfterDecimal = afterDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
+		const afterDecimalDigits = "." + convertedAfterDecimal.join('');
+
+		const freq = parseFloat(beforeDecimalDigits + afterDecimalDigits);
+
 		return freq;
 	}
 

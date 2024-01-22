@@ -2,7 +2,7 @@ import type { Location } from './SimulatorTypes';
 import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
 import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import type Seed from './Seed';
-import { seededNormalDistribution } from './utils';
+import { numberToPhoneticString, seededNormalDistribution } from './utils';
 
 export type RunwayHoldingPoint = {
 	name: string;
@@ -131,34 +131,34 @@ export class METORDataSample {
 	}
 
 	public getWindDirectionString(): string {
-		return this.windDirection.toFixed(0) + ' degrees';
+		return numberToPhoneticString(this.windDirection, 0) + ' degrees';
 	}
 
 	public getWindSpeedString(): string {
-		return this.windSpeed.toFixed(0) + ' knots';
+		return numberToPhoneticString(this.windSpeed, 0) + ' knots';
 	}
 
 	public getPressureString(): string {
 		if (this.pressure < 1000.0) {
-			return this.pressure.toFixed(0) + ' millibars';
+			return numberToPhoneticString(this.pressure,0) + ' hectopascals';
 		}
-		return this.pressure.toFixed(0);
+		return numberToPhoneticString(this.pressure,0);
 	}
 
 	public getTemperatureString(): string {
 		if (this.temperature > 0) {
-			return '+' + this.temperature.toFixed(0);
+			return '+' + numberToPhoneticString(this.temperature,0);
 		} else if (this.temperature < 0) {
-			return '-' + this.temperature.toFixed(0);
+			return '-' + numberToPhoneticString(this.temperature,0);
 		}
 		return '0';
 	}
 
 	public getDewpointString(): string {
 		if (this.dewpoint > 0) {
-			return '+' + this.dewpoint.toFixed(0);
+			return '+' + numberToPhoneticString(this.dewpoint,0);
 		} else if (this.dewpoint < 0) {
-			return '-' + this.dewpoint.toFixed(0);
+			return '-' + numberToPhoneticString(this.dewpoint,0);
 		}
 		return '0';
 	}

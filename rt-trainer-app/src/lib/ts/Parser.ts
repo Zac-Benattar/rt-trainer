@@ -26,9 +26,9 @@ export default class Parser {
 		}
 	}
 
-	// Example: Wellesbourne Information, Student Golf Oscar Foxtrot Lima Yankee, radio check 180.030
+	// Example: Wellesbourne Information, student Golf Oscar Foxtrot Lima Yankee, radio check One Eight Zero Decimal Zero Three
 	public static parseRadioCheck(parseContext: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${parseContext.getCurrentTarget()}, ${parseContext.getUserCallsignPhonetics()}, radio check ${parseContext.getCurrentRadioFrequency()}`;
+		const expectedRadioCall: string = `${parseContext.getCurrentTarget()}, ${parseContext.getUserCallsignPhonetics()}, radio check ${parseContext.getCurrentRadioFrequencyPhonetics()}`;
 
 		parseContext.assertCallContainsCurrentRadioFrequency();
 		parseContext.assertCallStartsWithTargetCallsign();
@@ -38,7 +38,7 @@ export default class Parser {
 		// Return ATC response
 		const atcResponse = `${parseContext
 			.getUserCallsignPhonetics()
-			.toUpperCase()}, ${parseContext.getCurrentTarget()}, reading you 5`;
+			.toUpperCase()}, ${parseContext.getCurrentTarget()}, reading you five.`;
 
 		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedRadioCall);
 	}
