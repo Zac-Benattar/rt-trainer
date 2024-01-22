@@ -23,7 +23,6 @@
     "@tailwindcss/forms": "^0.5.6",
     "@tailwindcss/typography": "0.5.10",
     "@types/node": "^20.11.5",
-    "@types/random-seed": "^0.3.5",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "autoprefixer": "10.4.16",
@@ -51,7 +50,6 @@
     "axios": "^1.6.2",
     "geist": "^1.0.0",
     "leaflet": "^1.9.4",
-    "leaflet-rotatedmarker": "^0.2.0",
-    "random-seed": "^0.3.0"
+    "leaflet-rotatedmarker": "^0.2.0"
   }
 }
