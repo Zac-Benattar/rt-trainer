@@ -29,6 +29,107 @@ export enum ClimbOutStage {
 	ReportLeavingZone = 'Report Leaving Zone'
 }
 
+export enum ChangeZoneStage {
+	RequestFrequencyChange = 'Request Frequency Change',
+	AcknowledgeApproval = 'Acknowledge Approval',
+	ContactNewFrequency = 'Contact New Frequency',
+	PassMessage = 'Pass Message',
+	Squawk = 'Squawk',
+	ReadbackApproval = 'Readback Approval',
+	ReadbackAlternative = 'Readback Alternative' // If atc not able to comply with request
+}
+
+export enum RequestServiceStage {
+	RequestTrafficService = 'Request Traffic Service',
+	RequestDeconflictionService = 'Request Deconfliction Service',
+	PassMessage = 'Pass Message',
+	Squawk = 'Squawk',
+	ReadbackApproval = 'Readback Approval'
+}
+
+export enum RequestTrafficServiceMATZATZPenetrationStage {
+	RequestTrafficService = 'Request Traffic Service',
+	RequestMATZATZPenetration = 'Request MATZ/ATZ Penetration',
+	PassMessage = 'Pass Message',
+	Squawk = 'Squawk',
+	ReadbackTrafficService = 'Readback Traffic Service',
+	ReadbackDescendInstruction = 'Readback Descend Instruction',
+	ReadbackClimbInstruction = 'Readback Climb Instruction',
+	ReadbackDescentCompletion = 'Readback Descent Completion',
+	ReadbackClimbCompletion = 'Readback Climb Completion',
+	ReadbackApproval = 'Readback Approval'
+}
+
+export enum PositionReportStage {
+	PositionReport = 'Position Report'
+}
+
+export enum AvoidingActionStage {
+	ReportAvoidingAction = 'Report Avoiding Action' // Reading back the immediate movement to take to avoid action
+}
+
+export enum TrafficServiceStage {
+	AcknowledgeTrafficInformation = 'Acknowledge Traffic Information' // Roger to traffic information
+}
+
+export enum RequestTrueBearingStage {
+	RequestBearing = 'Request Bearing',
+	ReadbackBearing = 'Readback Bearing'
+}
+
+export enum RequestQDMStage {
+	RequestQDM = 'Request QDM',
+	ReadbackQDM = 'Readback QDM'
+}
+
+export enum RequestWeatherStage {
+	RequestWeather = 'Request Weather',
+	RogerOrWilco = 'Roger Or Wilco'
+}
+
+export enum RequestTrueBearingControllerOverloadedStage {
+	RequestBearing = 'Request Bearing',
+	ReportChangingFrequency = 'Report Changing Frequency',
+	RequestBearingFromSecondController = 'Request Bearing From Second Controller',
+	ReportChangingFrequencyBack = 'Report Changing Frequency Back'
+}
+
+export enum RequestWeatherControllerOverloadedStage {
+	RequestWeather = 'Request Weather',
+	ReportChangingFrequency = 'Report Changing Frequency',
+	RequestWeatherFromSecondController = 'Request Weather From Second Controller',
+	ReportChangingFrequencyBack = 'Report Changing Frequency Back'
+}
+
+export enum PanStage {
+	DeclareEmergency = 'Declare Emergency',
+	WilcoInstructions = 'Wilco Instructions',
+	CancelPan = 'Cancel Pan'
+}
+
+export enum PanPanStage {
+	DeclareEmergency = 'Declare Emergency',
+	WilcoInstructions = 'Wilco Instructions',
+	CancelPanPan = 'Cancel Pan Pan'
+}
+
+export enum PanPanPanStage {
+	DeclareEmergency = 'Declare Emergency',
+	WilcoInstructions = 'Wilco Instructions',
+	CancelPanPanPan = 'Cancel Pan Pan Pan'
+}
+
+export enum MaydayStage {
+	DeclareEmergency = 'Declare Emergency',
+	WilcoInstructions = 'Wilco Instructions',
+	CancelMayday = 'Cancel Mayday'
+}
+
+export enum RelayMaydayStage {
+	DeclareRelayedEmergency = 'Declare Relayed Emergency',
+	CancelRelayedMayday = 'Cancel Relayed Mayday'
+}
+
 export enum InboundForJoinStage {
 	RequestJoin = 'Request Join',
 	ReportDetails = 'Report Details',
@@ -56,7 +157,7 @@ export enum CircuitAndLandingStage {
 
 export enum LandingToParkedStage {
 	ReadbackVacateRunwayRequest = 'Readback Vacate Runway Request',
-	ReportVacatedRunway = 'Report Vacated Runway', 
+	ReportVacatedRunway = 'Report Vacated Runway',
 	ReportTaxiing = 'Report Taxiing', // Uncontrolled aerodrome
 	ReadbackTaxiInformation = 'Readback Taxi Information'
 }

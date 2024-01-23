@@ -32,7 +32,8 @@ export enum WaypointType {
 	DME, // Distance Measuring Equipment - helps with positioning by measuring distance from a VOR
 	GPS, // GPS waypoint - arbitrary point defined in terms of lat/long
 	Intersection, // Intersection of two or more airways
-	NewAirspace // Entering new airspace - changing frequency
+	NewAirspace, // Entering new airspace - changing frequency
+	Emergency // Emergency - no special location
 }
 
 /* Point in space. */
@@ -74,6 +75,6 @@ export type AircraftDetails = {
 
 export enum EmergencyType {
 	None = 'None',
-	Mayday = 'Mayday',
-	Pan = 'Pan'
+	EngineFailure = 'Engine Failure',
+	RelayEmergency = 'Relay Emergency',
 }

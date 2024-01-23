@@ -1,6 +1,6 @@
 import waypoints from '../../data/waypoints.json';
-import { haversineDistance } from './utils';
-import { WaypointType, type Pose, type Waypoint } from './SimulatorTypes';
+import { haversineDistance, lerp, lerpLocation } from './utils';
+import { WaypointType, type Pose, type Waypoint, EmergencyType } from './SimulatorTypes';
 import type Seed from './Seed';
 import {
 	StartUpPoint,
@@ -20,10 +20,12 @@ import {
 	LandingToParkedPoint
 } from './RoutePoints';
 import {
+	ChangeZoneStage,
 	CircuitAndLandingStage,
 	ClimbOutStage,
 	InboundForJoinStage,
 	LandingToParkedStage,
+	PanPanStage,
 	StartUpStage,
 	TakeOffStage,
 	TaxiStage
@@ -32,7 +34,7 @@ import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 const MAX_AERODROME_DISTANCE = 100000; // 100km
 const MAX_ROUTE_DISTANCE = 300000; // 300km
-const MAX_AIRBORNE_ROUTE_POINTS = 5;
+const MAX_AIRBORNE_ROUTE_POINTS = 15;
 
 function getWaypointsFromJSON(): Waypoint[] {
 	const airborneWaypoints: Waypoint[] = [];
@@ -263,8 +265,15 @@ export default class Route {
 		// Read in all waypoints from waypoints.json
 		const possibleWaypoints = getWaypointsFromJSON();
 
+		// Limit the number of airborne waypoints to save compute
+		if (airborneWaypoints > MAX_AIRBORNE_ROUTE_POINTS) {
+			airborneWaypoints = MAX_AIRBORNE_ROUTE_POINTS;
+		}
+
+		let iterations = 0;
+		const maxIterations = 1000;
 		// Try many combinations of waypoints until a valid route is found
-		for (let i = 0; i < possibleWaypoints.length * possibleWaypoints.length; i++) {
+		for (let i = 0; i < maxIterations; i++) {
 			// Push the start aerodrome to points in order to calculate the distance from it
 			points = [];
 			points.push({
@@ -275,15 +284,16 @@ export default class Route {
 			let totalDistance = 0.0;
 
 			// Add waypoints until the route is too long or contains too many points
-			for (let i = 1; i < MAX_AIRBORNE_ROUTE_POINTS; i++) {
-				const waypoint = possibleWaypoints[seed.scenarioSeed % possibleWaypoints.length];
+			for (let j = 1; j < airborneWaypoints + 1; j++) {
+				const waypoint =
+					possibleWaypoints[(seed.scenarioSeed * j * (i + 1)) % possibleWaypoints.length];
 				const distance = haversineDistance(points[points.length - 1]?.location, waypoint.location);
 
 				// If route is too long or contains too many points, stop adding points
 				if (
 					totalDistance + distance >
 						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.location, endAerodrome.getLocation()) ||
-					points.length - 1 >= MAX_AIRBORNE_ROUTE_POINTS
+					points.length - 1 >= airborneWaypoints
 				) {
 					break;
 				}
@@ -294,19 +304,130 @@ export default class Route {
 			}
 
 			// Suitable route found
-			if (points.length >= airborneWaypoints) {
+			if (points.length > 1 && points.length - 1 >= airborneWaypoints) {
 				break;
 			}
 
 			// No suitable route found - try again
+			iterations++;
 		}
+
+		if (iterations >= maxIterations) {
+			throw new Error('No suitable route found');
+		}
+
+		console.log('Route generation iterations: ' + iterations);
 
 		// Remove the start aerodrome
 		points.shift();
 
 		// Add events at each point
-		let emergencyGenerated: boolean = false;
 		const routePoints: AirbornePoint[] = [];
+		for (let i = 0; i < points.length; i++) {
+			const waypoint = points[i];
+			const pose: Pose = {
+				location: waypoint.location,
+				heading: 0.0,
+				altitude: 0.0,
+				airSpeed: 0.0
+			};
+
+			const airbornePoint = new AirbornePoint(
+				ChangeZoneStage.RequestFrequencyChange,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					location: waypoint.location,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+
+			routePoints.push(airbornePoint);
+		}
+
+		if (emergency) {
+			// Add emergency before a random point
+			const emergencyPointIndex = (seed.scenarioSeed % (routePoints.length - 1)) + 1;
+			console.log(routePoints.length);
+			console.log('Emergency point index: ' + emergencyPointIndex);
+			let emergencyType: EmergencyType = EmergencyType.None;
+			
+			// Get a random emergency type which is not none
+			const index = seed.scenarioSeed % (Object.keys(EmergencyType).length - 1);
+			emergencyType = Object.values(EmergencyType)[index + 1];
+
+			// Generate the points to add on the route
+			const lerpPercentage: number = (seed.scenarioSeed % 100) / 100;
+			const emergencyWaypoint: Waypoint = {
+				waypointType: WaypointType.Emergency,
+				location: lerpLocation(
+					points[emergencyPointIndex].location,
+					points[emergencyPointIndex - 1].location,
+					lerpPercentage
+				),
+				name: 'Emergency'
+			};
+
+			const emergencyPose: Pose = {
+				location: emergencyWaypoint.location,
+				heading: 0.0,
+				altitude: 0.0,
+				airSpeed: 0.0
+			};
+
+			const declareEmergency = new AirbornePoint(
+				PanPanStage.DeclareEmergency,
+				emergencyPose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					location: emergencyWaypoint.location,
+					emergency: emergencyType
+				},
+				emergencyWaypoint
+			);
+			routePoints.splice(emergencyPointIndex, 0, declareEmergency);
+
+			const wilcoInstructions = new AirbornePoint(
+				PanPanStage.WilcoInstructions,
+				emergencyPose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					location: emergencyWaypoint.location,
+					emergency: emergencyType
+				},
+				emergencyWaypoint
+			);
+			routePoints.splice(emergencyPointIndex + 1, 0, wilcoInstructions);
+
+			const cancelPanPan = new AirbornePoint(
+				PanPanStage.CancelPanPan,
+				emergencyPose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					location: emergencyWaypoint.location,
+					emergency: emergencyType
+				},
+				emergencyWaypoint
+			);
+			routePoints.splice(emergencyPointIndex + 2, 0, cancelPanPan);
+		}
 
 		return routePoints;
 	}

@@ -26,7 +26,7 @@
 		CurrentTargetFrequencyStore,
 		RadioCallsStore as RadioCallsHistoryStore
 	} from '$lib/stores';
-	import type { RoutePoint } from '$lib/ts/RouteStates';
+	import type { RoutePoint } from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';

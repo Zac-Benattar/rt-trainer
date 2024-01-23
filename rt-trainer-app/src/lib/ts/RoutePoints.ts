@@ -62,20 +62,13 @@ export type StartAerodromePoint = StartUpPoint | TaxiPoint | TakeOffPoint | Clim
 
 /* Point in the air. Used for generation and may be visible to the user if it conincides with a waypoint. */
 export class AirbornePoint extends RoutePoint {
-	flightRules: FlightRules = FlightRules.IFR;
-	emergency: EmergencyType = EmergencyType.None;
-
 	constructor(
 		stage: AirborneStage,
-		flightRules: FlightRules,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-		emergency: EmergencyType,
 		waypoint: Waypoint
 	) {
 		super(stage, pose, updateData, waypoint);
-		this.flightRules = flightRules;
-		this.emergency = emergency;
 	}
 }
 

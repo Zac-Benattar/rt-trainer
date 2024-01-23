@@ -27,9 +27,9 @@ export async function GET({ params, url }) {
 
 	// Check if the scenario has enable emergency set
 	let hasEmergency: boolean = false;
-	const emergenciesString: string | null = url.searchParams.get('emergencies');
+	const emergenciesString: string | null = url.searchParams.get('hasEmergency');
 	if (emergenciesString != null) {
-		hasEmergency = emergenciesString === 'True';
+		hasEmergency = emergenciesString === 'true';
 	}
 
 	// Generate the route with the parameters
