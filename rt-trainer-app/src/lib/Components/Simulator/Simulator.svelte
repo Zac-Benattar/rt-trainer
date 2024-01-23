@@ -311,6 +311,8 @@
 
 			return 0;
 		} else {
+			console.log(route);
+
 			// Update stores with the route
 			CurrentTargetStore.set(route[0].updateData.currentTarget);
 			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);

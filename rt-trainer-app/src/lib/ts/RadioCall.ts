@@ -1,5 +1,5 @@
 import Route from './Route';
-import type { RoutePoint } from './RouteStates';
+import type { RoutePoint } from './RoutePoints';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,

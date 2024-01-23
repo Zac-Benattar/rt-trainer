@@ -1,25 +1,25 @@
 import { ServerResponse } from './ServerClientTypes';
-import type { AirbornePoint, ParkedPoint, HoldingPointPoint } from './RouteStates';
+import type { AirbornePoint, StartUpPoint, HoldingPointPoint } from './RoutePoints';
 import type RadioCall from './RadioCall';
-import { ParkedStage } from './RouteStages';
+import { StartUpStage } from './RouteStages';
 import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
 	public static parseCall(parseContext: RadioCall): ServerResponse {
 		switch (parseContext.getRoutePoint().stage) {
-			case ParkedStage.RadioCheck:
+			case StartUpStage.RadioCheck:
 				return this.parseRadioCheck(parseContext);
-			case ParkedStage.DepartureInformationRequest:
+			case StartUpStage.DepartureInformationRequest:
 				return this.parseDepartureInformationRequest(parseContext);
-			case ParkedStage.ReadbackDepartureInformation:
+			case StartUpStage.ReadbackDepartureInformation:
 				return this.parseDepartureInformationReadback(parseContext);
-			case ParkedStage.TaxiRequest:
+			case StartUpStage.TaxiRequest:
 				return this.parseTaxiRequest(parseContext);
-			case ParkedStage.TaxiClearanceReadback:
+			case StartUpStage.TaxiClearanceReadback:
 				return this.parseTaxiReadback(parseContext);
-			case ParkedStage.RequestTaxiInformation:
+			case StartUpStage.RequestTaxiInformation:
 				return this.parseTaxiInformationRequest(parseContext);
-			case ParkedStage.AnnounceTaxiing:
+			case StartUpStage.AnnounceTaxiing:
 				return this.parseAnnounceTaxiing(parseContext);
 			default:
 				throw new Error('Unimplemented route point type');
@@ -161,7 +161,7 @@ export default class Parser {
 	/* Parse initial contact with new ATC unit.
 	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
-		currentPoint: ParkedPoint | HoldingPointPoint | AirbornePoint,
+		currentPoint: StartUpPoint | HoldingPointPoint | AirbornePoint,
 		parseContext: RadioCall
 	): ServerResponse {
 		const expectedradiocall: string = `${parseContext
