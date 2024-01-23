@@ -1,4 +1,3 @@
-import type { Location } from './SimulatorTypes';
 import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
 import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import type Seed from './Seed';
@@ -6,7 +5,8 @@ import { numberToPhoneticString, seededNormalDistribution } from './utils';
 
 export type RunwayHoldingPoint = {
 	name: string;
-	location: Location;
+	lat: number;
+	long: number;
 };
 
 export type Taxiway = {
@@ -17,6 +17,15 @@ export type Taxiway = {
 export type Runway = {
 	name: string;
 	taxiways: Taxiway[];
+};
+
+/* Represents a starting point for an aerodrome. 
+Used to specify the location and heading of the aircraft at the start of a scenario. */
+export type AerodromeStartPoint = {
+	name: string;
+	lat: number;
+	long: number;
+	heading: number;
 };
 
 /* METORlogical data. */
@@ -140,44 +149,37 @@ export class METORDataSample {
 
 	public getPressureString(): string {
 		if (this.pressure < 1000.0) {
-			return numberToPhoneticString(this.pressure,0) + ' hectopascals';
+			return numberToPhoneticString(this.pressure, 0) + ' hectopascals';
 		}
-		return numberToPhoneticString(this.pressure,0);
+		return numberToPhoneticString(this.pressure, 0);
 	}
 
 	public getTemperatureString(): string {
 		if (this.temperature > 0) {
-			return '+' + numberToPhoneticString(this.temperature,0);
+			return '+' + numberToPhoneticString(this.temperature, 0);
 		} else if (this.temperature < 0) {
-			return '-' + numberToPhoneticString(this.temperature,0);
+			return '-' + numberToPhoneticString(this.temperature, 0);
 		}
 		return '0';
 	}
 
 	public getDewpointString(): string {
 		if (this.dewpoint > 0) {
-			return '+' + numberToPhoneticString(this.dewpoint,0);
+			return '+' + numberToPhoneticString(this.dewpoint, 0);
 		} else if (this.dewpoint < 0) {
-			return '-' + numberToPhoneticString(this.dewpoint,0);
+			return '-' + numberToPhoneticString(this.dewpoint, 0);
 		}
 		return '0';
 	}
 }
-
-/* Represents a starting point for an aerodrome. 
-Used to specify the location and heading of the aircraft at the start of a scenario. */
-export type AerodromeStartPoint = {
-	name: string;
-	location: Location;
-	heading: number;
-};
 
 /* Aerodrome data. */
 abstract class Aerodrome {
 	protected name: string;
 	protected icao: string;
 	protected runways: Runway[];
-	protected location: Location;
+	protected lat: number;
+	protected long: number;
 	protected altitude: number;
 	protected startPoints: AerodromeStartPoint[];
 	protected metorData: METORData;
@@ -186,7 +188,8 @@ abstract class Aerodrome {
 		name: string,
 		icao: string,
 		runways: Runway[],
-		location: Location,
+		lat: number,
+		long: number,
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
@@ -194,7 +197,8 @@ abstract class Aerodrome {
 		this.name = name;
 		this.icao = icao;
 		this.runways = runways;
-		this.location = location;
+		this.lat = lat;
+		this.long = long;
 		this.altitude = altitude;
 		this.startPoints = startPoints;
 		this.metorData = metorData;
@@ -216,8 +220,12 @@ abstract class Aerodrome {
 		return this.runways;
 	}
 
-	public getLocation(): Location {
-		return this.location;
+	public getLat(): number {
+		return this.lat;
+	}
+
+	public getLong(): number {
+		return this.long;
 	}
 
 	public getAltitude(): number {
@@ -255,12 +263,13 @@ export class ControlledAerodrome extends Aerodrome {
 		towerFrequency: number,
 		radarFrequency: number,
 		runways: Runway[],
-		location: Location,
+		lat: number,
+		long: number,
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runways, location, altitude, startPoints, metorData);
+		super(name, icao, runways, lat, long, altitude, startPoints, metorData);
 
 		this.groundFrequency = groundFrequency;
 		this.towerFrequency = towerFrequency;
@@ -307,7 +316,8 @@ export class ControlledAerodrome extends Aerodrome {
 					aerodrome.towerFrequency,
 					aerodrome.radarFrequency,
 					aerodrome.runways,
-					aerodrome.location,
+					aerodrome.lat,
+					aerodrome.long,
 					aerodrome.altitude,
 					aerodrome.startPoints,
 					new METORData(
@@ -337,12 +347,13 @@ export class UncontrolledAerodrome extends Aerodrome {
 		icao: string,
 		informationFrequency: number,
 		runways: Runway[],
-		location: Location,
+		lat: number,
+		long: number,
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runways, location, altitude, startPoints, metorData);
+		super(name, icao, runways, lat, long, altitude, startPoints, metorData);
 
 		this.informationFrequency = informationFrequency;
 	}
@@ -381,7 +392,8 @@ export class UncontrolledAerodrome extends Aerodrome {
 					aerodrome.icao,
 					aerodrome.informationFrequency,
 					aerodrome.runways,
-					aerodrome.location,
+					aerodrome.lat,
+					aerodrome.long,
 					aerodrome.altitude,
 					aerodrome.startPoints,
 					new METORData(

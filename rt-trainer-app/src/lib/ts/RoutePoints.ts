@@ -1,7 +1,7 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
-import type { AirborneStage, StartUpStage, RouteStage, TaxiStage } from './RouteStages';
-import { FlightRules, EmergencyType, type Pose, type Waypoint } from './SimulatorTypes';
+import type { StartUpStage,  TaxiStage } from './RouteStages';
+import { EmergencyType, type Pose, type Waypoint } from './SimulatorTypes';
 import type { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 /* A point on the route used in generation. Not necissarily visible to the user */
@@ -119,7 +119,8 @@ export function getParkedInitialControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		location: startAerodrome.getLocation(),
+		lat: startAerodrome.getLat(),
+		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -134,7 +135,8 @@ export function getParkedMadeContactControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		location: startAerodrome.getLocation(),
+		lat: startAerodrome.getLat(),
+		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -149,7 +151,8 @@ export function getParkedInitialUncontrolledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		location: startAerodrome.getLocation(),
+		lat: startAerodrome.getLat(),
+		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -164,7 +167,8 @@ export function getParkedMadeContactUncontrolledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		location: startAerodrome.getLocation(),
+		lat: startAerodrome.getLat(),
+		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }

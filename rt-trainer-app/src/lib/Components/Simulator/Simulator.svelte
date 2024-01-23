@@ -348,7 +348,8 @@
 			currentRadioCall = new RadioCall(
 				userMessage,
 				seed,
-				route[currentPointIndex],
+				route,
+				currentPointIndex,
 				aircraftDetails.prefix,
 				aircraftDetails.callsign,
 				route[currentPointIndex].updateData.callsignModified,

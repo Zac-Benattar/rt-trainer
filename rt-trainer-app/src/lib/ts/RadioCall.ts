@@ -22,7 +22,8 @@ import { Feedback } from './Feedback';
 export default class RadioCall {
 	private message: string;
 	private seed: Seed;
-	private routePoint: RoutePoint;
+	private route: RoutePoint[];
+	private currentPointIndex: number
 	private prefix: string;
 	private userCallsign: string;
 	private userCallsignModified: boolean;
@@ -37,7 +38,8 @@ export default class RadioCall {
 	constructor(
 		message: string,
 		seed: Seed,
-		routePoint: RoutePoint,
+		route: RoutePoint[],
+		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,
 		userCallsignModified: boolean,
@@ -50,7 +52,8 @@ export default class RadioCall {
 	) {
 		this.message = message;
 		this.seed = seed;
-		this.routePoint = routePoint;
+		this.route = route;
+		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
 		this.userCallsignModified = userCallsignModified;
@@ -71,8 +74,8 @@ export default class RadioCall {
 		return this.seed;
 	}
 
-	public getRoutePoint(): RoutePoint {
-		return this.routePoint;
+	public getCurrentRoutePoint(): RoutePoint {
+		return this.route[this.currentPointIndex];
 	}
 
 	public getPrefix(): string {
@@ -147,7 +150,8 @@ export default class RadioCall {
 		return JSON.stringify({
 			message: this.message,
 			seed: this.seed,
-			routePoint: this.routePoint,
+			route: this.route,
+			currentPointIndex: this.currentPointIndex,
 			prefix: this.prefix,
 			userCallsign: this.userCallsign,
 			userCallsignModified: this.userCallsignModified,
@@ -539,7 +543,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsCurrentLocation(): boolean {
-		if (!this.callContainsConsecutiveWords(this.getRoutePoint().waypoint.name.split(' '))) {
+		if (!this.callContainsConsecutiveWords(this.getCurrentRoutePoint().waypoint.name.split(' '))) {
 			this.feedback.pushSevereMistake("Your call didn't contain your location.");
 			return false;
 		}
@@ -549,7 +553,7 @@ export default class RadioCall {
 	public assertCallContainsAltitude(): boolean {
 		if (
 			!this.callContainsWord('altitude') &&
-			!this.callContainsWord(this.routePoint.pose.altitude.toString())
+			!this.callContainsWord(this.getCurrentRoutePoint().pose.altitude.toString())
 		) {
 			this.feedback.pushSevereMistake("Your call didn't contain your altitude.");
 			return false;

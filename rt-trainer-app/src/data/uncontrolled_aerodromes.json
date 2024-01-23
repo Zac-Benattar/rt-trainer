@@ -1,73 +1,63 @@
 [
-    {
-        "name": "Wellesbourne Mountford",
-        "icao": "EGBW",
-        "informationFrequency": 180.030,
-        "runways": [
-            {
-                "name": "18",
-                "taxiways": [
-                    {
-                        "name": "Alpha",
-                        "holdingPoints": [
-                            {
-                                "name": "A1",
-                                "location": {
-                                    "lat": 52.1922,
-                                    "long": -1.6144
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "36",
-                "taxiways": [
-                    {
-                        "name": "Bravo",
-                        "holdingPoints": [
-                            {
-                                "name": "B1",
-                                "location": {
-                                    "lat": 52.1922,
-                                    "long": -1.6144
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        "location": {
-            "lat": 52.1922,
-            "long": -1.6144
-        },
-        "altitude": 163,
-        "startPointLocation": {
-            "lat": 52.1922,
-            "long": -1.6144
-        },
-        "startPoints": [
-            {
-                "name": "South Side Hangers",
-                "location": {
-                    "lat": 52.1955,
-                    "long": -1.6176
-                },
-                "heading": 80.0
-            }
-        ],
-        "metorData": {
-            "avgWindDirection": 240.0,
-            "meanWindSpeed": 11.0,
-            "stdWindSpeed": 2.5,
-            "meanPressure": 960.0,
-            "stdPressure": 1.2,
-            "meanTemperature": 11.0,
-            "stdTemperature": 3.0,
-            "meanDewpoint": 10.0,
-            "stdDewpoint": 3.0
-        }
-    }
+	{
+		"name": "Wellesbourne Mountford",
+		"icao": "EGBW",
+		"informationFrequency": 180.03,
+		"runways": [
+			{
+				"name": "18",
+				"taxiways": [
+					{
+						"name": "Alpha",
+						"holdingPoints": [
+							{
+								"name": "A1",
+								"lat": 52.1922,
+								"long": -1.6144
+							}
+						]
+					}
+				]
+			},
+			{
+				"name": "36",
+				"taxiways": [
+					{
+						"name": "Bravo",
+						"holdingPoints": [
+							{
+								"name": "B1",
+								"lat": 52.1922,
+								"long": -1.6144
+							}
+						]
+					}
+				]
+			}
+		],
+		"lat": 52.1922,
+		"long": -1.6144,
+		"altitude": 163,
+		"startPointLat": 52.1922,
+		"startPointlong": -1.6144,
+		"startPoints": [
+			{
+				"name": "South Side Hangers",
+				"lat": 52.1955,
+				"long": -1.6176,
+				"heading": 80.0
+			}
+		],
+		"metorData": {
+			"avgWindDirection": 240.0,
+			"meanWindSpeed": 11.0,
+			"stdWindSpeed": 2.5,
+			"meanPressure": 960.0,
+			"stdPressure": 1.2,
+			"meanTemperature": 11.0,
+			"stdTemperature": 3.0,
+			"meanDewpoint": 10.0,
+			"stdDewpoint": 3.0
+		}
+	}
 ]

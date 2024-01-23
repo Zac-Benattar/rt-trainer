@@ -11,14 +11,10 @@ export enum FlightRules {
 	VFR = 'VFR' // Visual Flight Rules
 }
 
-export type Location = {
-	lat: number;
-	long: number;
-};
-
 /* Represents location, heading altitude and airSpeed of the aircraft. Term borrowed from robotics */
 export type Pose = {
-	location: Location;
+	lat: number;
+	long: number
 	heading: number;
 	altitude: number;
 	airSpeed: number;
@@ -39,7 +35,8 @@ export enum WaypointType {
 /* Point in space. */
 export type Waypoint = {
 	waypointType: WaypointType;
-	location: Location;
+	lat: number;
+	long: number;
 	name: string;
 };
 

@@ -1,5 +1,5 @@
 import waypoints from '../../data/waypoints.json';
-import { haversineDistance, lerp, lerpLocation } from './utils';
+import { haversineDistance, lerpLocation } from './utils';
 import { WaypointType, type Pose, type Waypoint, EmergencyType } from './SimulatorTypes';
 import type Seed from './Seed';
 import {
@@ -43,7 +43,8 @@ function getWaypointsFromJSON(): Waypoint[] {
 		airborneWaypoints.push({
 			waypointType: WaypointType.VOR,
 			name: waypoint.name,
-			location: waypoint.location
+			lat: waypoint.lat,
+			long: waypoint.long
 		});
 	});
 
@@ -83,7 +84,8 @@ export default class Route {
 		const startPointIndex = seed.scenarioSeed % startPoints.length;
 
 		const parkedPose: Pose = {
-			location: startPoints[startPointIndex].location,
+			lat: startPoints[startPointIndex].lat,
+			long: startPoints[startPointIndex].long,
 			heading: startPoints[startPointIndex].heading,
 			altitude: startAerodrome.getAltitude(),
 			airSpeed: 0.0
@@ -91,7 +93,8 @@ export default class Route {
 
 		const parkedWaypoint: Waypoint = {
 			waypointType: WaypointType.Aerodrome,
-			location: startAerodrome.getLocation(),
+			lat: startAerodrome.getLat(),
+			long: startAerodrome.getLong(),
 			name: startAerodrome.getShortName()
 		};
 
@@ -278,7 +281,8 @@ export default class Route {
 			points = [];
 			points.push({
 				waypointType: WaypointType.Aerodrome,
-				location: startAerodrome.getLocation(),
+				lat: startAerodrome.getLat(),
+				long: startAerodrome.getLong(),
 				name: 'startAerodrome'
 			});
 			let totalDistance = 0.0;
@@ -287,12 +291,12 @@ export default class Route {
 			for (let j = 1; j < airborneWaypoints + 1; j++) {
 				const waypoint =
 					possibleWaypoints[(seed.scenarioSeed * j * (i + 1)) % possibleWaypoints.length];
-				const distance = haversineDistance(points[points.length - 1]?.location, waypoint.location);
+				const distance = haversineDistance(points[points.length - 1]?.lat, points[points.length - 1]?.long, waypoint.lat, waypoint.long);
 
 				// If route is too long or contains too many points, stop adding points
 				if (
 					totalDistance + distance >
-						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.location, endAerodrome.getLocation()) ||
+						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.lat, waypoint.long, endAerodrome.getLat(), endAerodrome.getLong()) ||
 					points.length - 1 >= airborneWaypoints
 				) {
 					break;
@@ -326,7 +330,8 @@ export default class Route {
 		for (let i = 0; i < points.length; i++) {
 			const waypoint = points[i];
 			const pose: Pose = {
-				location: waypoint.location,
+				lat: waypoint.lat,
+				long: waypoint.long,
 				heading: 0.0,
 				altitude: 0.0,
 				airSpeed: 0.0
@@ -341,7 +346,8 @@ export default class Route {
 					currentTarget: '',
 					currentTargetFrequency: 0,
 					currentTransponderFrequency: 0,
-					location: waypoint.location,
+					lat: waypoint.lat,
+					long: waypoint.long,
 					emergency: EmergencyType.None
 				},
 				waypoint
@@ -363,18 +369,23 @@ export default class Route {
 
 			// Generate the points to add on the route
 			const lerpPercentage: number = (seed.scenarioSeed % 100) / 100;
+			const emergencyLocation = lerpLocation(
+				points[emergencyPointIndex].lat,
+				points[emergencyPointIndex].long,
+				points[emergencyPointIndex - 1].lat,
+				points[emergencyPointIndex - 1].long,
+				lerpPercentage
+			);
 			const emergencyWaypoint: Waypoint = {
 				waypointType: WaypointType.Emergency,
-				location: lerpLocation(
-					points[emergencyPointIndex].location,
-					points[emergencyPointIndex - 1].location,
-					lerpPercentage
-				),
+				lat: emergencyLocation.lat,
+				long: emergencyLocation.long,
 				name: 'Emergency'
 			};
 
 			const emergencyPose: Pose = {
-				location: emergencyWaypoint.location,
+				lat: emergencyLocation.lat,
+				long: emergencyLocation.long,
 				heading: 0.0,
 				altitude: 0.0,
 				airSpeed: 0.0
@@ -389,7 +400,8 @@ export default class Route {
 					currentTarget: '',
 					currentTargetFrequency: 0,
 					currentTransponderFrequency: 0,
-					location: emergencyWaypoint.location,
+					lat: emergencyLocation.lat,
+					long: emergencyLocation.long,
 					emergency: emergencyType
 				},
 				emergencyWaypoint
@@ -405,7 +417,8 @@ export default class Route {
 					currentTarget: '',
 					currentTargetFrequency: 0,
 					currentTransponderFrequency: 0,
-					location: emergencyWaypoint.location,
+					lat: emergencyLocation.lat,
+					long: emergencyLocation.long,
 					emergency: emergencyType
 				},
 				emergencyWaypoint
@@ -421,7 +434,8 @@ export default class Route {
 					currentTarget: '',
 					currentTargetFrequency: 0,
 					currentTransponderFrequency: 0,
-					location: emergencyWaypoint.location,
+					lat: emergencyLocation.lat,
+					long: emergencyLocation.long,
 					emergency: emergencyType
 				},
 				emergencyWaypoint
@@ -439,7 +453,8 @@ export default class Route {
 		const parkingPointIndex = seed.scenarioSeed % parkingPoints.length;
 
 		const parkedPose: Pose = {
-			location: parkingPoints[parkingPointIndex].location,
+			lat: parkingPoints[parkingPointIndex].lat,
+			long: parkingPoints[parkingPointIndex].long,
 			heading: parkingPoints[parkingPointIndex].heading,
 			altitude: endAerodrome.getAltitude(),
 			airSpeed: 0.0
@@ -447,7 +462,8 @@ export default class Route {
 
 		const parkedWaypoint: Waypoint = {
 			waypointType: WaypointType.Aerodrome,
-			location: endAerodrome.getLocation(),
+			lat: endAerodrome.getLat(),
+			long: endAerodrome.getLong(),
 			name: endAerodrome.getShortName()
 		};
 
@@ -680,7 +696,7 @@ export default class Route {
 
 		// If the end aerodrome is too far from the start aerodrome, find a new one
 		for (let i = 0; i < possibleEndAerodromes.length; i++) {
-			const distance = haversineDistance(startAerodrome.getLocation(), endAerodrome.getLocation());
+			const distance = haversineDistance(startAerodrome.getLat(), startAerodrome.getLong(), endAerodrome.getLat(), endAerodrome.getLong());
 
 			if (distance <= MAX_AERODROME_DISTANCE) {
 				endAerodromeFound = true;

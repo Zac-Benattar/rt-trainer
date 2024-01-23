@@ -45,7 +45,8 @@ export async function POST({ request }) {
 	const radioCall: RadioCall = new RadioCall(
 		radioCallData.message,
 		radioCallData.seed,
-		radioCallData.routePoint,
+		radioCallData.route,
+		radioCallData.currentPointIndex,
 		radioCallData.prefix,
 		radioCallData.userCallsign,
 		radioCallData.userCallsignModified,

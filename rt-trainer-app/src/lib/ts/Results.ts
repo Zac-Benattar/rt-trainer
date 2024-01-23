@@ -19,15 +19,15 @@ export default class Results {
 
         const callsByCallType: RadioCall[][] = [];
         let currentCalls: RadioCall[] = [];
-        let stage: string = this.radioCalls[0].getRoutePoint().stage;
+        let stage: string = this.radioCalls[0].getCurrentRoutePoint().stage;
         for (let i = 0; i < this.radioCalls.length; i++) {
             const radioCall = this.radioCalls[i];
 
-            if (radioCall.getRoutePoint().stage === stage) {
+            if (radioCall.getCurrentRoutePoint().stage === stage) {
                 currentCalls.push(radioCall);
             } else {
                 callsByCallType.push(currentCalls);
-                stage = radioCall.getRoutePoint().stage;
+                stage = radioCall.getCurrentRoutePoint().stage;
                 currentCalls = [];
             }
         }
@@ -41,7 +41,7 @@ export default class Results {
         if (calls[0].length === 0) {
             return [];
         }
-        return calls.filter((calls) => Object.values(StartAerodromeStage).includes(calls[0].getRoutePoint().stage));
+        return calls.filter((calls) => Object.values(StartAerodromeStage).includes(calls[0].getCurrentRoutePoint().stage));
     }
 
     public getAirborneCalls(): RadioCall[][] {
@@ -49,7 +49,7 @@ export default class Results {
         if (calls[0].length === 0) {
             return [];
         }
-        return calls.filter((calls) => Object.values(AirborneStage).includes(calls[0].getRoutePoint().stage));
+        return calls.filter((calls) => Object.values(AirborneStage).includes(calls[0].getCurrentRoutePoint().stage));
     }
 
     public getLandingCalls(): RadioCall[][] {
@@ -57,6 +57,6 @@ export default class Results {
         if (calls[0].length === 0) {
             return [];
         }
-        return calls.filter((calls) => Object.values(LandingStage).includes(calls[0].getRoutePoint().stage));
+        return calls.filter((calls) => Object.values(LandingStage).includes(calls[0].getCurrentRoutePoint().stage));
     }
 }

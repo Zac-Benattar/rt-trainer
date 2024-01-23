@@ -1,5 +1,3 @@
-import type { Location } from './SimulatorTypes';
-
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
 	let hash = 0;
@@ -45,12 +43,17 @@ export function seededNormalDistribution(
 }
 
 /* Returns the distance between two locations on the earth in metres. */
-export function haversineDistance(location1: Location, location2: Location): number {
+export function haversineDistance(
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number
+): number {
 	const R = 6371e3; // metres
-	const φ1 = (location1.lat * Math.PI) / 180; // φ, λ in radians
-	const φ2 = (location2.lat * Math.PI) / 180;
-	const Δφ = ((location2.lat - location1.lat) * Math.PI) / 180;
-	const Δλ = ((location2.long - location1.long) * Math.PI) / 180;
+	const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
+	const φ2 = (lat2 * Math.PI) / 180;
+	const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+	const Δλ = ((long2 - long1) * Math.PI) / 180;
 
 	return (
 		2 *
@@ -286,10 +289,15 @@ export const clamp = (a: number, min = 0, max = 1) => Math.min(max, Math.max(min
 export const range = (x1: number, y1: number, x2: number, y2: number, a: number) =>
 	lerp(x2, y2, invlerp(x1, y1, a));
 
-
-export const lerpLocation = (loc1: Location, loc2: Location, a: number): Location => {
+export const lerpLocation = (
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number,
+	a: number
+): { lat: number; long: number } => {
 	return {
-		lat: lerp(loc1.lat, loc2.lat, a),
-		long: lerp(loc1.long, loc2.long, a)
+		lat: lerp(lat1, lat2, a),
+		long: lerp(long1, long2, a)
 	};
-}
+};

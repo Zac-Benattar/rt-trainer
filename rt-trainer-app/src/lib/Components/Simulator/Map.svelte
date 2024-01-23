@@ -40,8 +40,8 @@
 				!waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)
 			) {
 				waypoints.push({
-					lat: routePoints[i].waypoint.location.lat,
-					long: routePoints[i].waypoint.location.long,
+					lat: routePoints[i].waypoint.lat,
+					long: routePoints[i].waypoint.long,
 					name: routePoints[i].waypoint.name
 				});
 			}
@@ -58,10 +58,8 @@
 			}
 		} else {
 			targetPose = {
-				location: {
-					lat: 0,
-					long: 0
-				},
+				lat: 0,
+				long: 0,
 				heading: 0,
 				altitude: 0,
 				airSpeed: 0
@@ -93,7 +91,7 @@
 			}
 		});
 
-		map = L.map('myMap').setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
+		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], zoomLevel);
 
 		planeIcon = L.icon({
 			iconUrl: '/images/plane.png',
@@ -116,20 +114,20 @@
 		connectMarkers();
 
 		// Sets the current location marker, done last to make sure it is on top
-		currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+		currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 			icon: planeIcon,
 			rotationAngle: targetPose.heading,
 			rotationOrigin: 'center'
 		}).addTo(map);
 
-		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright'}).addTo(map);
+		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	}
 
 	async function updateMap() {
 		if (mounted) {
 			await map;
 
-			map.setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
+			map.setView([targetPose?.lat, targetPose?.long], zoomLevel);
 
 			removeMarkers();
 
@@ -141,7 +139,7 @@
 			connectMarkers();
 
 			// Updates the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 				icon: planeIcon,
 				rotationAngle: targetPose.heading,
 				rotationOrigin: 'center'
