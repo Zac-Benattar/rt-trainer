@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
 
-import type { RoutePoint } from './ts/RouteStates';
+import type { RoutePoint } from './ts/RoutePoints';
 import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 
