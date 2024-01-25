@@ -1,7 +1,7 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
 import type { StartUpStage,  TaxiStage } from './RouteStages';
-import { EmergencyType, type Pose, type Waypoint } from './SimulatorTypes';
+import { EmergencyType, type Pose, type Waypoint } from './RouteTypes';
 import type { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 /* A point on the route used in generation. Not necissarily visible to the user */

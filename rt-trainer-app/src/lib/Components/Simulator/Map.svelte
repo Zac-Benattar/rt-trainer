@@ -9,7 +9,7 @@
 	import { CurrentRoutePointStore, RouteStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import type { Pose } from '$lib/ts/SimulatorTypes';
+	import { WaypointType, type Pose } from '$lib/ts/RouteTypes';
 
 	type MapWaypoint = {
 		lat: number;
@@ -37,6 +37,7 @@
 		for (let i = 0; i < routePoints.length; i++) {
 			if (
 				routePoints[i].waypoint &&
+				routePoints[i].waypoint.waypointType != WaypointType.Emergency &&
 				!waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)
 			) {
 				waypoints.push({

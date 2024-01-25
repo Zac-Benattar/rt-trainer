@@ -331,7 +331,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	private callContainsUserCallsign(): boolean {
+	public callContainsUserCallsign(): boolean {
 		const validUserCallsigns = this.getValidUserCallsigns();
 		return (
 			this.callContainsConsecutiveWords(validUserCallsigns[0].split(' ')) ||

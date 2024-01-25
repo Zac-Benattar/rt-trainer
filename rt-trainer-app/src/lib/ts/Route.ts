@@ -1,6 +1,6 @@
 import waypoints from '../../data/waypoints.json';
 import { haversineDistance, lerpLocation } from './utils';
-import { WaypointType, type Pose, type Waypoint, EmergencyType } from './SimulatorTypes';
+import { type Pose, EmergencyType, WaypointType, type Waypoint } from './RouteTypes';
 import type Seed from './Seed';
 import {
 	StartUpPoint,

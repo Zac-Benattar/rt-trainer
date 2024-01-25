@@ -2,8 +2,8 @@
 	{
 		"name": "Birmingham Airport",
 		"icao": "EGBB",
-		"groundFrequency": 121.805,
-		"towerFrequency": 118.305,
+		"groundFrequency": 121.800,
+		"towerFrequency": 118.300,
 		"radarFrequency": 123.98,
 		"runways": [
 			{

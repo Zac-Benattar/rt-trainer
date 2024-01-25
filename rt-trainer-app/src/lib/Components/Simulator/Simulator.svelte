@@ -156,14 +156,14 @@
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
-				body: 'Radio dial is off'
+				body: 'Radio is off'
 			});
 			return;
 		} else if (transponderState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
-				body: 'Transponder dial is off'
+				body: 'Transponder is off'
 			});
 			return;
 		} else if (
@@ -215,9 +215,9 @@
 			value.push(currentRadioCall);
 			return value;
 		});
-
+		
 		// Get whether there are severe mistakes, and record all minor ones
-		let callsignMentioned: boolean = userMessage.search(aircraftDetails.callsign) != -1;
+		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();
 		let minorMistakes: string[] = feedback.getMinorMistakes();
 		let severeMistakes: string[] = feedback.getSevereMistakes();;
 
