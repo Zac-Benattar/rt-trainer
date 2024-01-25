@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
-	import { AircraftDetailsStore, GenerationParametersStore } from '$lib/stores';
+	import { AircraftDetailsStore, CurrentRoutePointIndexStore, EndPointIndexStore, GenerationParametersStore } from '$lib/stores';
 	import Seed from '$lib/ts/Seed';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 
@@ -77,8 +77,30 @@
 		hasEmergency = emergenciesString === 'True';
 	}
 
+	// Check whether start point index has been set
+	let startPointIndex: number = 0;
+	const startPointIndexString: string | null = $page.url.searchParams.get('startPointIndex');
+	if (startPointIndexString != null) {
+		startPointIndex = parseInt(startPointIndexString);
+		if (startPointIndex < 0) {
+			startPointIndex = 0;
+		}
+	}
+
+	// Check whether end point index has been set
+	let endPointIndex: number = -1;
+	const endPointIndexString: string | null = $page.url.searchParams.get('endPointIndex');
+	if (endPointIndexString != null) {
+		endPointIndex = parseInt(endPointIndexString);
+		if (endPointIndex < 0 || endPointIndex >= startPointIndex) {
+			endPointIndex = -1;
+		}
+	}
+
 	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 	AircraftDetailsStore.set({ callsign, prefix, aircraftType });
+	CurrentRoutePointIndexStore.set(startPointIndex);
+	EndPointIndexStore.set(endPointIndex);
 </script>
 
 <div class="relative flex" style="justify-content: center;">

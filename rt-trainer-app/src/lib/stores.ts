@@ -66,6 +66,10 @@ export const KneeboardStore = writable<string>('');
 
 export const RouteStore = writable<RoutePoint[]>([]);
 
+export const CurrentRoutePointIndexStore = writable<number>(0);
+
+export const EndPointIndexStore = writable<number>(0);
+
 export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
 
 export const RadioCallsStore = writable<RadioCall[]>([]);
@@ -86,4 +90,6 @@ export function ClearSimulationStores(): void {
 	KneeboardStore.set('');
 	RouteStore.set([]);
 	CurrentRoutePointStore.set(null);
+	CurrentRoutePointIndexStore.set(0);
+	EndPointIndexStore.set(0);
 }

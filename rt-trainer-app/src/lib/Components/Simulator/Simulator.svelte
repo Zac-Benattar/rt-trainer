@@ -25,7 +25,9 @@
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
 		RadioCallsStore as RadioCallsHistoryStore,
-		LiveFeedbackStore
+		LiveFeedbackStore,
+		CurrentRoutePointIndexStore,
+		EndPointIndexStore
 	} from '$lib/stores';
 	import type { RoutePoint } from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -45,8 +47,9 @@
 	let atcMessage: string;
 	let userMessage: string;
 	let kneeboardText: string;
-	let route: RoutePoint[] | undefined = [];
+	let route: RoutePoint[] = [];
 	let currentPointIndex: number = 0;
+	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
 
@@ -111,6 +114,26 @@
 
 	KneeboardStore.subscribe((value) => {
 		kneeboardText = value;
+	});
+
+	CurrentRoutePointIndexStore.subscribe((value) => {
+		if (value < 0) {
+			value = 0;
+		}
+
+		if (route.length > 0 && value >= route.length) {
+			console.log('Invalid route point index: ' + value);
+		} else {
+			currentPointIndex = value;
+		}
+	});
+
+	EndPointIndexStore.subscribe((value) => {
+		if (route && value >= route.length) {
+			value = route.length - 1;
+		}
+
+		endPointIndex = value;
 	});
 
 	function speakATCMessage() {
@@ -301,7 +324,7 @@
 		}
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
-		if (currentPointIndex == route.length - 1) {
+		if (currentPointIndex == endPointIndex) {
 			const m: ModalSettings = {
 				type: 'confirm',
 				title: 'Scenario Complete',
@@ -319,7 +342,10 @@
 
 		// Update the simulator with the next route point
 		failedAttempts = 0;
-		currentPointIndex++;
+		CurrentRoutePointIndexStore.update((value) => {
+			value++;
+			return value;
+		});
 		ATCMessageStore.set(serverResponse.responseCall);
 		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}
@@ -341,6 +367,11 @@
 			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);
 			RouteStore.set(route);
 			CurrentRoutePointStore.set(route[0]);
+			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
+			// So we need to set it to the last point in the route if it has not been set
+			if (endPointIndex == -1) {
+				EndPointIndexStore.set(route.length - 1);
+			}
 		}
 	}
 
