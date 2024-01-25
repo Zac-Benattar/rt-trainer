@@ -8,7 +8,6 @@ import {
 	getParkedMadeContactControlledUpdateData,
 	getParkedInitialUncontrolledUpdateData,
 	getParkedMadeContactUncontrolledUpdateData,
-	AirbornePoint,
 	TaxiPoint,
 	TakeOffPoint,
 	ClimbOutPoint,
@@ -17,7 +16,8 @@ import {
 	type LandingPoint,
 	InboundForJoinPoint,
 	CircuitAndLandingPoint,
-	LandingToParkedPoint
+	LandingToParkedPoint,
+	AirbornePoint
 } from './RoutePoints';
 import {
 	ChangeZoneStage,
@@ -257,8 +257,8 @@ export default class Route {
 
 	public static getAirborneRoutePoints(
 		seed: Seed,
-		airborneWaypoints: number,
-		emergency: boolean
+		numAirborneWaypoints: number,
+		hasEmergency: boolean
 	): AirbornePoint[] {
 		let points: Waypoint[] = [];
 		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
@@ -269,8 +269,8 @@ export default class Route {
 		const possibleWaypoints = getWaypointsFromJSON();
 
 		// Limit the number of airborne waypoints to save compute
-		if (airborneWaypoints > MAX_AIRBORNE_ROUTE_POINTS) {
-			airborneWaypoints = MAX_AIRBORNE_ROUTE_POINTS;
+		if (numAirborneWaypoints > MAX_AIRBORNE_ROUTE_POINTS) {
+			numAirborneWaypoints = MAX_AIRBORNE_ROUTE_POINTS;
 		}
 
 		let iterations = 0;
@@ -288,16 +288,27 @@ export default class Route {
 			let totalDistance = 0.0;
 
 			// Add waypoints until the route is too long or contains too many points
-			for (let j = 1; j < airborneWaypoints + 1; j++) {
+			for (let j = 1; j < numAirborneWaypoints + 1; j++) {
 				const waypoint =
 					possibleWaypoints[(seed.scenarioSeed * j * (i + 1)) % possibleWaypoints.length];
-				const distance = haversineDistance(points[points.length - 1]?.lat, points[points.length - 1]?.long, waypoint.lat, waypoint.long);
+				const distance = haversineDistance(
+					points[points.length - 1]?.lat,
+					points[points.length - 1]?.long,
+					waypoint.lat,
+					waypoint.long
+				);
 
 				// If route is too long or contains too many points, stop adding points
 				if (
 					totalDistance + distance >
-						MAX_ROUTE_DISTANCE - haversineDistance(waypoint.lat, waypoint.long, endAerodrome.getLat(), endAerodrome.getLong()) ||
-					points.length - 1 >= airborneWaypoints
+						MAX_ROUTE_DISTANCE -
+							haversineDistance(
+								waypoint.lat,
+								waypoint.long,
+								endAerodrome.getLat(),
+								endAerodrome.getLong()
+							) ||
+					points.length - 1 >= numAirborneWaypoints
 				) {
 					break;
 				}
@@ -308,7 +319,7 @@ export default class Route {
 			}
 
 			// Suitable route found
-			if (points.length > 1 && points.length - 1 >= airborneWaypoints) {
+			if (points.length > 1 && points.length - 1 >= numAirborneWaypoints) {
 				break;
 			}
 
@@ -327,6 +338,7 @@ export default class Route {
 
 		// Add events at each point
 		const routePoints: AirbornePoint[] = [];
+		const endStageIndexes: number[] = [];
 		for (let i = 0; i < points.length; i++) {
 			const waypoint = points[i];
 			const pose: Pose = {
@@ -337,7 +349,7 @@ export default class Route {
 				airSpeed: 0.0
 			};
 
-			const airbornePoint = new AirbornePoint(
+			const requestFrequencyChange = new AirbornePoint(
 				ChangeZoneStage.RequestFrequencyChange,
 				pose,
 				{
@@ -352,23 +364,112 @@ export default class Route {
 				},
 				waypoint
 			);
+			routePoints.push(requestFrequencyChange);
 
-			routePoints.push(airbornePoint);
+			const acknowledgeApproval = new AirbornePoint(
+				ChangeZoneStage.AcknowledgeApproval,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					lat: waypoint.lat,
+					long: waypoint.long,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+			routePoints.push(acknowledgeApproval);
+
+			const contactNewFrequency = new AirbornePoint(
+				ChangeZoneStage.ContactNewFrequency,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					lat: waypoint.lat,
+					long: waypoint.long,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+			routePoints.push(contactNewFrequency);
+
+			const passMessage = new AirbornePoint(
+				ChangeZoneStage.PassMessage,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					lat: waypoint.lat,
+					long: waypoint.long,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+			routePoints.push(passMessage);
+
+			const squawk = new AirbornePoint(
+				ChangeZoneStage.Squawk,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					lat: waypoint.lat,
+					long: waypoint.long,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+			routePoints.push(squawk);
+
+			const readbackApproval = new AirbornePoint(
+				ChangeZoneStage.ReadbackApproval,
+				pose,
+				{
+					callsignModified: false,
+					squark: false,
+					currentTarget: '',
+					currentTargetFrequency: 0,
+					currentTransponderFrequency: 0,
+					lat: waypoint.lat,
+					long: waypoint.long,
+					emergency: EmergencyType.None
+				},
+				waypoint
+			);
+			routePoints.push(readbackApproval);
+			endStageIndexes.push(routePoints.length - 1);
 		}
 
-		if (emergency) {
+		if (hasEmergency) {
 			// Add emergency before a random point
-			const emergencyPointIndex = (seed.scenarioSeed % (routePoints.length - 1)) + 1;
-			console.log(routePoints.length);
-			console.log('Emergency point index: ' + emergencyPointIndex);
-			let emergencyType: EmergencyType = EmergencyType.None;
+			const emergencyPointIndex = (seed.scenarioSeed % (points.length - 1)) + 1;
+			const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex] + 1;
 			
+			console.log('Route Points: ' + routePoints.length);
+			console.log('Emergency Route Point Index: ' + emergencyRoutePointIndex);
+			let emergencyType: EmergencyType = EmergencyType.None;
+
 			// Get a random emergency type which is not none
 			const index = seed.scenarioSeed % (Object.keys(EmergencyType).length - 1);
 			emergencyType = Object.values(EmergencyType)[index + 1];
 
 			// Generate the points to add on the route
-			const lerpPercentage: number = (seed.scenarioSeed % 100) / 100;
+			// Get the percentage of the distance between the two points to add the emergency at
+			// At least 5% of the distance must be between the two points, and at most 95%
+			const lerpPercentage: number = (seed.scenarioSeed % 90) / 90 + 0.05;
 			const emergencyLocation = lerpLocation(
 				points[emergencyPointIndex].lat,
 				points[emergencyPointIndex].long,
@@ -406,7 +507,7 @@ export default class Route {
 				},
 				emergencyWaypoint
 			);
-			routePoints.splice(emergencyPointIndex, 0, declareEmergency);
+			routePoints.splice(emergencyRoutePointIndex, 0, declareEmergency);
 
 			const wilcoInstructions = new AirbornePoint(
 				PanPanStage.WilcoInstructions,
@@ -423,7 +524,7 @@ export default class Route {
 				},
 				emergencyWaypoint
 			);
-			routePoints.splice(emergencyPointIndex + 1, 0, wilcoInstructions);
+			routePoints.splice(emergencyRoutePointIndex + 1, 0, wilcoInstructions);
 
 			const cancelPanPan = new AirbornePoint(
 				PanPanStage.CancelPanPan,
@@ -440,7 +541,7 @@ export default class Route {
 				},
 				emergencyWaypoint
 			);
-			routePoints.splice(emergencyPointIndex + 2, 0, cancelPanPan);
+			routePoints.splice(emergencyRoutePointIndex + 2, 0, cancelPanPan);
 		}
 
 		return routePoints;
@@ -696,7 +797,12 @@ export default class Route {
 
 		// If the end aerodrome is too far from the start aerodrome, find a new one
 		for (let i = 0; i < possibleEndAerodromes.length; i++) {
-			const distance = haversineDistance(startAerodrome.getLat(), startAerodrome.getLong(), endAerodrome.getLat(), endAerodrome.getLong());
+			const distance = haversineDistance(
+				startAerodrome.getLat(),
+				startAerodrome.getLong(),
+				endAerodrome.getLat(),
+				endAerodrome.getLong()
+			);
 
 			if (distance <= MAX_AERODROME_DISTANCE) {
 				endAerodromeFound = true;

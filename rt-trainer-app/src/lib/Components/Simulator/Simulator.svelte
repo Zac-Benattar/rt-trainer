@@ -65,7 +65,7 @@
 		modalStore.trigger({
 			type: 'alert',
 			title: 'Server did not respond',
-			body: 'This may be due to a bad request or the server being offline. Come back later and try again.'
+			body: 'This may be due to a bad request or the feature you are trying to use not being implemented yet. This software is still early in development, expect errors like this one.'
 		});
 	}
 
@@ -215,11 +215,11 @@
 			value.push(currentRadioCall);
 			return value;
 		});
-		
+
 		// Get whether there are severe mistakes, and record all minor ones
 		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();
 		let minorMistakes: string[] = feedback.getMinorMistakes();
-		let severeMistakes: string[] = feedback.getSevereMistakes();;
+		let severeMistakes: string[] = feedback.getSevereMistakes();
 
 		// Handle mistakes
 		if (severeMistakes.length > 0) {
