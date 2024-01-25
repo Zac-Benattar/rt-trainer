@@ -50,6 +50,8 @@ export const SpeechInputStore = writable<boolean>(false);
 
 export const SpeechOutputStore = writable<boolean>(false);
 
+export const LiveFeedbackStore = writable<boolean>(false);
+
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 
 export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
@@ -75,6 +77,7 @@ export function ClearSimulationStores(): void {
 	CurrentTargetFrequencyStore.set(0);
 	SpeechInputStore.set(false);
 	SpeechOutputStore.set(false);
+	LiveFeedbackStore.set(false);
 	RadioStateStore.set(initialRadioState);
 	TransponderStateStore.set(initialTransponderState);
 	UserMessageStore.set('');

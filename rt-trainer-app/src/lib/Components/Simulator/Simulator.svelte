@@ -24,7 +24,8 @@
 		SpeechOutputStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
-		RadioCallsStore as RadioCallsHistoryStore
+		RadioCallsStore as RadioCallsHistoryStore,
+		LiveFeedbackStore
 	} from '$lib/stores';
 	import type { RoutePoint } from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -53,6 +54,7 @@
 	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let readRecievedCalls: boolean = false;
+	let liveFeedback: boolean = false;
 
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
@@ -75,6 +77,10 @@
 
 	SpeechOutputStore.subscribe((value) => {
 		readRecievedCalls = value;
+	});
+
+	LiveFeedbackStore.subscribe((value) => {
+		liveFeedback = value;
 	});
 
 	GenerationParametersStore.subscribe((value) => {
@@ -215,6 +221,23 @@
 			value.push(currentRadioCall);
 			return value;
 		});
+
+		if (liveFeedback) {
+			// Clear previous toasts so only one feedback shown at a time
+			toastStore.clear();
+
+			// Do nothing if the call was flawless
+			if (!feedback.isFlawless()) {
+				// Show current mistakes
+				const t: ToastSettings = {
+					message: feedback.getMistakes().join('\n'),
+					timeout: 15000,
+					hoverable: true,
+					background: 'variant-filled-warning'
+				};
+				toastStore.trigger(t);
+			}
+		}
 
 		// Get whether there are severe mistakes, and record all minor ones
 		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();

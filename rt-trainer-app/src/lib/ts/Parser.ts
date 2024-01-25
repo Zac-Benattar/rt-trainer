@@ -1,7 +1,7 @@
 import { ServerResponse } from './ServerClientTypes';
 import type { AirbornePoint } from './RoutePoints';
 import type RadioCall from './RadioCall';
-import { StartUpStage, TaxiStage } from './RouteStages';
+import { StartUpStage, TakeOffStage, TaxiStage } from './RouteStages';
 import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
@@ -21,6 +21,10 @@ export default class Parser {
 				return this.parseTaxiInformationRequest(radioCall);
 			case TaxiStage.AnnounceTaxiing:
 				return this.parseAnnounceTaxiing(radioCall);
+			case TakeOffStage.ReadyForDeparture:
+				return this.parseReadyForDeparture(radioCall);
+			case TakeOffStage.ReadbackAfterDepartureInformation:
+				return this.parseReadbackAfterDepartureInformation(radioCall);
 			default:
 				throw new Error('Unimplemented route point type');
 		}
@@ -50,11 +54,7 @@ export default class Parser {
 			.toLowerCase()} request departure information`;
 
 		radioCall.assertCallStartsWithUserCallsign();
-		radioCall.assertCallContainsConsecutiveCriticalWords([
-			'request',
-			'departure',
-			'information'
-		]);
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'departure', 'information']);
 
 		// Return ATC response
 		const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
@@ -68,11 +68,10 @@ export default class Parser {
 	// Example: Runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseDepartureInformationReadback(radioCall: RadioCall): ServerResponse {
 		const runwayName: string = radioCall.getStartAerodromeTakeoffRunway().name;
-		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} runway ${runwayName} qnh ${radioCall
+		const expectedRadioCall: string = `Runway ${runwayName} QNH ${radioCall
 			.getStartAerodromeMETORSample()
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
-		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsTakeOffRunwayName();
 		radioCall.assertCallContainsStartAerodromePressure();
 		radioCall.assertCallEndsWithUserCallsign();
@@ -87,12 +86,11 @@ export default class Parser {
 			radioCall.getStartAerodromeStartingPoint().name
 		} request taxi VFR to ${radioCall.getEndAerodrome().getShortName()}`;
 
-		radioCall.assertCallStartsWithTargetCallsign();
-		radioCall.assertCallContainsAircraftType();
+		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsScenarioStartPoint();
-		radioCall.assertCallContainsStartAerodromeName();
 		radioCall.assertCallContainsEndAerodromeName();
 		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'taxi']);
+		radioCall.assertCallContainsCriticalWord('vfr');
 
 		// Return ATC response
 		const atcResponse = `${radioCall
@@ -106,20 +104,20 @@ export default class Parser {
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, Student Golf Lima Yankee
+	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseTaxiClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} taxi holding point ${
 			radioCall.getTakeoffRunwayHoldingPoint().name
-		} runway ${radioCall.getStartAerodromeTakeoffRunway().name} qnh ${radioCall
+		} runway ${radioCall.getStartAerodromeTakeoffRunway().name} QNH ${radioCall
 			.getStartAerodromeMETORSample()
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
-		radioCall.assertCallStartsWithTargetCallsign();
 		radioCall.assertCallContainsCriticalWord('taxi');
 		radioCall.assertCallContainsConsecutiveCriticalWords(['holding', 'point']);
-		radioCall.assertCallContainsTakeOffRunwayName();
-		radioCall.assertCallEndsWithUserCallsign();
 		radioCall.assertCallContainsTakeOffRunwayHoldingPoint();
+		radioCall.assertCallContainsTakeOffRunwayName();
+		radioCall.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
@@ -158,17 +156,18 @@ export default class Parser {
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
+	// Example: Student Golf Lima Yankee, ready for departure, request right turnout heading 330 degrees
 	public static parseReadyForDeparture(radioCall: RadioCall): ServerResponse {
 		let expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ready for departure`;
 		if (radioCall.getStartAerodrome().isControlled()) {
-			expectedRadioCall += ` request right turnout heading ${radioCall.getTurnoutHeading()}`;
+			expectedRadioCall += ` request right turnout heading ${radioCall.getTakeoffTurnoutHeading()} degrees`;
 		}
 
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsConsecutiveCriticalWords(['ready', 'for', 'departure']);
 
 		if (radioCall.getStartAerodrome().isControlled()) {
-			radioCall.assertCallContainsTurnoutHeading();
+			radioCall.assertCallContainsTakeoffTurnoutHeading();
 		}
 
 		// Return ATC response
@@ -179,6 +178,7 @@ export default class Parser {
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
+	// Example: Holding. After departure right turn approved, not above 1500 feet until zone boundary. Student Golf Lima Yankee
 	public static parseReadbackAfterDepartureInformation(radioCall: RadioCall): ServerResponse {
 		let expectedRadioCall: string = `Holding.`;
 		if (radioCall.getStartAerodrome().isControlled()) {
@@ -186,9 +186,10 @@ export default class Parser {
 		}
 		expectedRadioCall += ` ${radioCall.getTargetAllocatedCallsign()}`;
 
-		radioCall.assertCallStartsWithUserCallsign();
-		radioCall.assertCallContainsTakeOffRunwayName();
-		radioCall.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallContainsNonCriticalWord('Holding');
+		if (radioCall.getStartAerodrome().isControlled()) {
+			radioCall.assertCallContainsNotAboveTransitionAltitude();
+		}
 		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
@@ -222,9 +223,7 @@ rules, departure and destination aerodromes, position,
 flight level/altitude including passing/cleared level if (not
 in level flight, and additional details such as next waypoint(s)
 accompanied with the planned times to reach them */
-	public static parseNewAirspaceGiveFlightInformationToATC(
-		radioCall: RadioCall
-	): ServerResponse {
+	public static parseNewAirspaceGiveFlightInformationToATC(radioCall: RadioCall): ServerResponse {
 		const nearestwaypoint: string = 'Test Waypoint';
 		const distancefromnearestwaypoint: number = 0.0;
 		const directiontonearestwaypoint: string = 'Direction';

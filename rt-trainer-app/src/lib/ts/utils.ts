@@ -13,6 +13,7 @@ export function simpleHash(str: string): number {
 
 	return hash;
 }
+
 // Splits a number into two halves and pads them with zeros to make sure they are the same length
 export function splitAndPadNumber(input: number): [number, number] {
 	const numberString = input.toString();
@@ -301,3 +302,26 @@ export const lerpLocation = (
 		long: lerp(long1, long2, a)
 	};
 };
+
+export function toRadians(degrees: number): number {
+	return degrees * (Math.PI / 180);
+}
+
+export function toDegrees(radians: number): number {
+	return radians * (180 / Math.PI);
+}
+
+export function getHeadingBetween(lat1: number, long1: number, lat2: number, long2: number): number {
+	console.log(lat1, long1, lat2, long2);
+	const dLon = toRadians(long2 - long1);
+
+	const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
+	const x =
+	  Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
+	  Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
+
+	const bearing = toDegrees(Math.atan2(y, x));
+
+	// Normalize the bearing to be in the range [0, 360)
+	return Math.round((bearing + 360) % 360);
+}

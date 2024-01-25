@@ -249,6 +249,11 @@ abstract class Aerodrome {
 	public abstract getAirspaceFrequency(): number;
 
 	public abstract isControlled(): boolean;
+
+	// Needs to be implemented for each aerodrome depending on when pilots move to next frequency from takeoff
+	public getTakeoffTransitionAltitude(): number {
+		return 1500;
+	}
 }
 
 export class ControlledAerodrome extends Aerodrome {
