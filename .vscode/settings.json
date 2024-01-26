@@ -1,9 +1,0 @@
-{
-    "rust-analyzer.showUnlinkedFileNotification": false,
-    "rust-analyzer.linkedProjects": [
-        "./rt-webserver/Cargo.toml",
-        "./rt-webserver/Cargo.toml",
-        "./rt-webserver/Cargo.toml",
-        "./rt-webserver/Cargo.toml"
-    ]
-}
