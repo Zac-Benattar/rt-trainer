@@ -139,6 +139,8 @@
 
 			connectMarkers();
 
+			currentLocationMarker.remove();
+
 			// Updates the current location marker, done last to make sure it is on top
 			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 				icon: planeIcon,

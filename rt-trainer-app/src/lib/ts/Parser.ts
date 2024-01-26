@@ -65,7 +65,7 @@ export default class Parser {
 		// Return ATC response
 		const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, runway ${
-			radioCall.getStartAerodromeTakeoffRunway().name
+			radioCall.getTakeoffRunway().name
 		}, surface wind ${metorSample.getWindDirectionString()} ${metorSample.getWindSpeedString()}, QNH ${metorSample.getPressureString()}, temperature ${metorSample.getTemperatureString()} dewpoint ${metorSample.getDewpointString()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadiocall);
@@ -73,7 +73,7 @@ export default class Parser {
 
 	// Example: Runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseDepartureInformationReadback(radioCall: RadioCall): ServerResponse {
-		const runwayName: string = radioCall.getStartAerodromeTakeoffRunway().name;
+		const runwayName: string = radioCall.getTakeoffRunway().name;
 		const expectedRadioCall: string = `Runway ${runwayName} QNH ${radioCall
 			.getStartAerodromeMETORSample()
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
@@ -102,9 +102,9 @@ export default class Parser {
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
-			radioCall.getTakeoffRunwayHoldingPoint().name
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
 		} via taxiway charlie. Hold short of runway ${
-			radioCall.getStartAerodromeTakeoffRunway().name
+			radioCall.getTakeoffRunway().name
 		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -113,8 +113,8 @@ export default class Parser {
 	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseTaxiClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} taxi holding point ${
-			radioCall.getTakeoffRunwayHoldingPoint().name
-		} runway ${radioCall.getStartAerodromeTakeoffRunway().name} QNH ${radioCall
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
+		} runway ${radioCall.getTakeoffRunway().name} QNH ${radioCall
 			.getStartAerodromeMETORSample()
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
@@ -142,7 +142,7 @@ export default class Parser {
 
 		// Return ATC response
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, runway ${
-			radioCall.getStartAerodromeTakeoffRunway().name
+			radioCall.getTakeoffRunway().name
 		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -150,7 +150,7 @@ export default class Parser {
 
 	public static parseAnnounceTaxiing(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, taxiing to runway ${
-			radioCall.getStartAerodromeTakeoffRunway().name
+			radioCall.getTakeoffRunway().name
 		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
 		radioCall.assertCallStartsWithUserCallsign();

@@ -82,6 +82,7 @@ export default class Route {
 			Route.getStartAerodrome(seed);
 		const startPoints = startAerodrome.getStartPoints();
 		const startPointIndex = seed.scenarioSeed % startPoints.length;
+		const taxiPoint = startAerodrome.getTakeoffRunwayTaxiwayHoldingPoint(seed);
 
 		const parkedPose: Pose = {
 			lat: startPoints[startPointIndex].lat,
@@ -91,7 +92,15 @@ export default class Route {
 			airSpeed: 0.0
 		};
 
-		const parkedWaypoint: Waypoint = {
+		const taxiPose: Pose = {
+			lat: taxiPoint.lat,
+			long: taxiPoint.long,
+			heading: startPoints[startPointIndex].heading,
+			altitude: startAerodrome.getAltitude(),
+			airSpeed: 0.0
+		};
+
+		const aerodromeWaypoint: Waypoint = {
 			waypointType: WaypointType.Aerodrome,
 			lat: startAerodrome.getLat(),
 			long: startAerodrome.getLong(),
@@ -103,7 +112,7 @@ export default class Route {
 				StartUpStage.RadioCheck,
 				parkedPose,
 				getParkedInitialControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(radioCheck);
 
@@ -111,7 +120,7 @@ export default class Route {
 				StartUpStage.DepartureInformationRequest,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(requestDepartInfo);
 
@@ -119,7 +128,7 @@ export default class Route {
 				StartUpStage.ReadbackDepartureInformation,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readbackDepartInfo);
 
@@ -127,7 +136,7 @@ export default class Route {
 				TaxiStage.TaxiRequest,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(taxiRequest);
 
@@ -135,31 +144,31 @@ export default class Route {
 				TaxiStage.TaxiClearanceReadback,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(taxiClearanceReadback);
 
 			const ReadyForDeparture = new TakeOffPoint(
 				TakeOffStage.ReadyForDeparture,
-				parkedPose,
+				taxiPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(ReadyForDeparture);
 
 			const readbackAfterDepartureInformation = new TakeOffPoint(
 				TakeOffStage.ReadbackAfterDepartureInformation,
-				parkedPose,
+				taxiPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readbackAfterDepartureInformation);
 
 			const readbackClearance = new TakeOffPoint(
 				TakeOffStage.ReadbackClearance,
-				parkedPose,
+				taxiPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readbackClearance);
 
@@ -167,7 +176,7 @@ export default class Route {
 				ClimbOutStage.ReadbackNextContact,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readbackNextContact);
 
@@ -175,7 +184,7 @@ export default class Route {
 				ClimbOutStage.ContactNextFrequency,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(contactNextFrequency);
 
@@ -183,7 +192,7 @@ export default class Route {
 				ClimbOutStage.AcknowledgeNewFrequencyRequest,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(acknowledgeNewFrequencyRequest);
 
@@ -191,7 +200,7 @@ export default class Route {
 				ClimbOutStage.ReportLeavingZone,
 				parkedPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(reportLeavingZone);
 		} else {
@@ -199,7 +208,7 @@ export default class Route {
 				StartUpStage.RadioCheck,
 				parkedPose,
 				getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(radioCheck);
 
@@ -207,7 +216,7 @@ export default class Route {
 				TaxiStage.RequestTaxiInformation,
 				parkedPose,
 				getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(requestTaxiInformation);
 
@@ -215,23 +224,23 @@ export default class Route {
 				TaxiStage.AnnounceTaxiing,
 				parkedPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readbackTaxiInformation);
 
 			const readyForDeparture = new TakeOffPoint(
 				TakeOffStage.ReadyForDeparture,
-				parkedPose,
+				taxiPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(readyForDeparture);
 
 			const acknowledgeTraffic = new TakeOffPoint(
 				TakeOffStage.AcknowledgeTraffic,
-				parkedPose,
+				taxiPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(acknowledgeTraffic);
 
@@ -239,7 +248,7 @@ export default class Route {
 				TakeOffStage.AnnounceTakingOff,
 				parkedPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(reportTakingOff);
 
@@ -247,7 +256,7 @@ export default class Route {
 				ClimbOutStage.ReportLeavingZone,
 				parkedPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-				parkedWaypoint
+				aerodromeWaypoint
 			);
 			stages.push(reportLeavingZone);
 		}

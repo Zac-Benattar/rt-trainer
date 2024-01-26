@@ -2,20 +2,20 @@
 	{
 		"name": "Birmingham Airport",
 		"icao": "EGBB",
-		"groundFrequency": 121.800,
-		"towerFrequency": 118.300,
+		"groundFrequency": 121.8,
+		"towerFrequency": 118.3,
 		"radarFrequency": 123.98,
 		"runways": [
 			{
 				"name": "15",
 				"taxiways": [
 					{
-						"name": "Alpha",
+						"name": "Kilo",
 						"holdingPoints": [
 							{
-								"name": "A1",
-								"lat": 52.453997,
-								"long": -1.744041
+								"name": "K1",
+								"lat": 52.4566,
+								"long": -1.7526
 							}
 						]
 					}
@@ -25,19 +25,18 @@
 				"name": "33",
 				"taxiways": [
 					{
-						"name": "Bravo",
+						"name": "Gulf",
 						"holdingPoints": [
 							{
-								"name": "B1",
-								"lat": 52.453997,
-								"long": -1.744041
+								"name": "G1",
+								"lat": 52.4514,
+								"long": -1.7469
 							}
 						]
 					}
 				]
 			}
 		],
-
 		"lat": 52.453997,
 		"long": -1.744041,
 		"altitude": 327,

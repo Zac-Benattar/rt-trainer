@@ -450,19 +450,18 @@ export default class RadioCall {
 		return this.getEndAerodrome().getMETORData().getSample(this.seed);
 	}
 
-	public getStartAerodromeTakeoffRunway(): Runway {
-		const runways = this.getStartAerodrome().getRunways();
-		return runways[this.seed.scenarioSeed % runways.length];
+	public getTakeoffRunway(): Runway {
+		return this.getStartAerodrome().getTakeoffRunway(this.seed);
 	}
 
 	public assertCallContainsTakeOffRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getStartAerodromeTakeoffRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().name])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are taking off from."
 			);
 			return false;
 		} else if (
-			!this.callContainsConsecutiveWords(['runway', this.getStartAerodromeTakeoffRunway().name])
+			!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])
 		) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
@@ -667,15 +666,11 @@ export default class RadioCall {
 	}
 
 	public getTakeoffRunwayTaxiway(): Taxiway {
-		return this.getStartAerodromeTakeoffRunway().taxiways[
-			this.seed.scenarioSeed % this.getStartAerodromeTakeoffRunway().taxiways.length
-		];
+		return this.getStartAerodrome().getTakeoffRunwayTaxiway(this.seed);
 	}
 
-	public getTakeoffRunwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getTakeoffRunwayTaxiway().holdingPoints[
-			this.seed.scenarioSeed % this.getTakeoffRunwayTaxiway().holdingPoints.length
-		];
+	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
+		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint(this.seed);
 	}
 
 	public getTakeoffTurnoutHeading(): number {

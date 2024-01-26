@@ -342,10 +342,8 @@
 
 		// Update the simulator with the next route point
 		failedAttempts = 0;
-		CurrentRoutePointIndexStore.update((value) => {
-			value++;
-			return value;
-		});
+		CurrentRoutePointIndexStore.set(currentPointIndex + 1);
+		CurrentRoutePointStore.set(route[currentPointIndex + 1]);
 		ATCMessageStore.set(serverResponse.responseCall);
 		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}

@@ -250,6 +250,23 @@ abstract class Aerodrome {
 
 	public abstract isControlled(): boolean;
 
+	public getTakeoffRunway(seed: Seed): Runway {
+		const index = seed.scenarioSeed % this.runways.length;
+		return this.runways[index];
+	}
+
+	public getTakeoffRunwayTaxiway(seed: Seed): Taxiway {
+		const runway = this.getTakeoffRunway(seed);
+		const index = seed.scenarioSeed % runway.taxiways.length;
+		return runway.taxiways[index];
+	}
+
+	public getTakeoffRunwayTaxiwayHoldingPoint(seed: Seed): RunwayHoldingPoint {
+		const taxiway = this.getTakeoffRunwayTaxiway(seed);
+		const index = seed.scenarioSeed % taxiway.holdingPoints.length;
+		return taxiway.holdingPoints[index];
+	}
+
 	// Needs to be implemented for each aerodrome depending on when pilots move to next frequency from takeoff
 	public getTakeoffTransitionAltitude(): number {
 		return 1500;

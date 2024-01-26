@@ -79,7 +79,7 @@
 
 	// Check whether start point index has been set
 	let startPointIndex: number = 0;
-	const startPointIndexString: string | null = $page.url.searchParams.get('startPointIndex');
+	const startPointIndexString: string | null = $page.url.searchParams.get('startPoint');
 	if (startPointIndexString != null) {
 		startPointIndex = parseInt(startPointIndexString);
 		if (startPointIndex < 0) {
@@ -89,7 +89,7 @@
 
 	// Check whether end point index has been set
 	let endPointIndex: number = -1;
-	const endPointIndexString: string | null = $page.url.searchParams.get('endPointIndex');
+	const endPointIndexString: string | null = $page.url.searchParams.get('endPoint');
 	if (endPointIndexString != null) {
 		endPointIndex = parseInt(endPointIndexString);
 		if (endPointIndex < 0 || endPointIndex >= startPointIndex) {

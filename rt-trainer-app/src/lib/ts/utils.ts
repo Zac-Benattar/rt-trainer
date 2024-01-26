@@ -312,7 +312,6 @@ export function toDegrees(radians: number): number {
 }
 
 export function getHeadingBetween(lat1: number, long1: number, lat2: number, long2: number): number {
-	console.log(lat1, long1, lat2, long2);
 	const dLon = toRadians(long2 - long1);
 
 	const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
@@ -322,6 +321,6 @@ export function getHeadingBetween(lat1: number, long1: number, lat2: number, lon
 
 	const bearing = toDegrees(Math.atan2(y, x));
 
-	// Normalize the bearing to be in the range [0, 360)
+	// Normalize the bearing to be in the range [0, 360]
 	return Math.round((bearing + 360) % 360);
 }
