@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { ExpectedUserMessageStore, LiveFeedbackStore, SpeechInputStore, UserMessageStore } from '$lib/stores';
+	import {
+		ExpectedUserMessageStore,
+		LiveFeedbackStore,
+		SpeechInputStore,
+		UserMessageStore
+	} from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { SlideToggle, getModalStore } from '@skeletonlabs/skeleton';
@@ -74,10 +79,7 @@
 	</div>
 
 	<div class="flex flex-row gap-x-3 bg-surface-500">
-		<Tooltip
-			tip="Shows feedback immediately, instead of just at the end of the scenario."
-			bottom
-		>
+		<Tooltip tip="Shows feedback immediately, instead of just at the end of the scenario." bottom>
 			<div class="flex flex-col py-2">
 				<SlideToggle
 					id="enable-live-feedback"
@@ -137,7 +139,9 @@
 
 		<button class="submit-button btn px-3 bg-surface-400" on:click={submit}>Submit</button>
 
-		<button class="clear-button btn place-self-end bg-surface-400" on:click={handleDelete}>Clear</button>
+		<button class="clear-button btn bg-surface-400" on:click={handleDelete}
+			>Clear</button
+		>
 	</div>
 </div>
 
@@ -155,5 +159,9 @@
 		width: 100%;
 		resize: none;
 		overflow: auto;
+	}
+
+	.btn {
+		height: 40px;
 	}
 </style>

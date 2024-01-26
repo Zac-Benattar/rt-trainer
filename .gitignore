@@ -3,6 +3,8 @@
 node_modules
 /build
 /.svelte-kit
+/.svelte-kit/generated
+/.svelte-kit/ambient.d.ts
 dist/
 build/
 ## Doesnt seem to work:
