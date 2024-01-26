@@ -25,6 +25,12 @@ export default class Parser {
 				return this.parseReadyForDeparture(radioCall);
 			case TakeOffStage.ReadbackAfterDepartureInformation:
 				return this.parseReadbackAfterDepartureInformation(radioCall);
+			case TakeOffStage.ReadbackClearance:
+				return this.parseReadbackClearance(radioCall);
+			case TakeOffStage.AcknowledgeTraffic:
+				return this.parseAcknowledgeTraffic(radioCall);
+			case TakeOffStage.AnnounceTakingOff:
+				return this.parseAnnounceTakingOff(radioCall);
 			default:
 				throw new Error('Unimplemented route point type');
 		}
@@ -73,7 +79,7 @@ export default class Parser {
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsTakeOffRunwayName();
-		radioCall.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallContainsTakeoffPressure();
 		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
@@ -116,7 +122,7 @@ export default class Parser {
 		radioCall.assertCallContainsConsecutiveCriticalWords(['holding', 'point']);
 		radioCall.assertCallContainsTakeOffRunwayHoldingPoint();
 		radioCall.assertCallContainsTakeOffRunwayName();
-		radioCall.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallContainsTakeoffPressure();
 		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
@@ -150,7 +156,7 @@ export default class Parser {
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsCriticalWord('taxiing');
 		radioCall.assertCallContainsTakeOffRunwayName();
-		radioCall.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallContainsTakeoffPressure();
 
 		// ATC does not respond to this message
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
@@ -171,9 +177,19 @@ export default class Parser {
 		}
 
 		// Return ATC response
-		const atcResponse = `${radioCall
-			.getTargetAllocatedCallsign()
-			.toUpperCase()}, hold position. After departure turn right approved, climb not above ${radioCall.getTakeoffTransitionAltitude()} until zone boundary`;
+		let atcResponse: string = radioCall.getTargetAllocatedCallsign();
+		if (radioCall.getStartAerodrome().isControlled()) {
+			atcResponse += `, hold position. After departure turn right approved, climb not above ${radioCall.getTakeoffTransitionAltitude()} until zone boundary`;
+		} else {
+			const traffic: string = radioCall.getTakeoffTraffic() + ', ';
+			if (traffic) {
+				atcResponse += `traffic is ${traffic}, `;
+			} else {
+				atcResponse += 'no reported traffic, ';
+			}
+			const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
+			atcResponse += metorSample.getWindDirectionString() + ', ' + metorSample.getWindSpeedString();
+		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
@@ -196,8 +212,44 @@ export default class Parser {
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
+	// Example: Cleared for takeoff, Student Golf Lima Yankee
+	public static parseReadbackClearance(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Cleared for takeoff, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['cleared', 'for', 'takeoff']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Roger, holding position, Student Golf Lima Yankee
+	public static parseAcknowledgeTraffic(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Roger, holding position, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsCriticalWord('roger');
+		radioCall.assertCallContainsConsecutiveCriticalWords(['holding', 'position']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Taking off, Student Golf Lima Yankee
+	public static parseAnnounceTakingOff(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Taking off, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['taking', 'off']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, roger.`;
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
 	/* Parse initial contact with new ATC unit.
-	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
+	Example: Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
 		currentPoint: AirbornePoint,
 		radioCall: RadioCall

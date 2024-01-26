@@ -568,7 +568,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromePressure(): boolean {
+	public assertCallContainsTakeoffPressure(): boolean {
 		const pressureSample = this.getStartAerodromeMETORSample().getPressureString().split(' ');
 		if (!this.callContainsWord(pressureSample[0])) {
 			this.feedback.pushSevereMistake("Your call didn't contain the air pressure.");
@@ -583,7 +583,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeTemperature(): boolean {
+	public assertCallContainsTakeoffTemperature(): boolean {
 		let temperatureSample = this.getStartAerodromeMETORSample().getTemperatureString();
 		let sign = '';
 
@@ -608,7 +608,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeDewpoint(): boolean {
+	public assertCallContainsTakeoffDewpoint(): boolean {
 		let dewpointSample = this.getStartAerodromeMETORSample().getDewpointString();
 		let sign = '';
 
@@ -633,7 +633,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindSpeed(): boolean {
+	public assertCallContainsTakeoffWindSpeed(): boolean {
 		// Wind speed followed by 'knots'
 		const windSpeedSample = this.getStartAerodromeMETORSample().getWindSpeedString().split(' ');
 		if (!this.callContainsWord(windSpeedSample[0])) {
@@ -646,7 +646,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindDirection(): boolean {
+	public assertCallContainsTakeoffWindDirection(): boolean {
 		const windDirectionSample = this.getStartAerodromeMETORSample()
 			.getWindDirectionString()
 			.split(' ');
@@ -727,5 +727,10 @@ export default class RadioCall {
 			return false;
 		}
 		return true;
+	}
+
+	public getTakeoffTraffic(): string {
+		if (this.seed.scenarioSeed % 2 == 0) return 'Cessna 152 reported final';
+		else return '';
 	}
 }
