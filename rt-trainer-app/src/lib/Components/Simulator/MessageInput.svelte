@@ -78,7 +78,7 @@
 		/>
 	</div>
 
-	<div class="flex flex-row gap-x-3 bg-surface-500">
+	<div class="flex flex-row gap-x-3 justify-end">
 		<Tooltip tip="Shows feedback immediately, instead of just at the end of the scenario." bottom>
 			<div class="flex flex-col py-2">
 				<SlideToggle

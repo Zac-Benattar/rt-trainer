@@ -9,8 +9,8 @@
 	};
 </script>
 
-<div class="kneeboard-container flex flex-col grid-cols-1 items-end bg-surface-500">
-	<div class="grow">
+<div class="kneeboard-container flex flex-col grid-cols-1 gap-2 bg-surface-500">
+	<div class="grow flex">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
 			id="kneeboard-input"
@@ -22,7 +22,9 @@
 		/>
 	</div>
 
-	<button class="clear-button btn self-end bg-surface-400" on:click={handleDelete}>Clear</button>
+	<div class="flex flex-row gap-x-3 justify-end">
+		<button class="clear-button btn bg-surface-400" on:click={handleDelete}>Clear</button>
+	</div>
 </div>
 
 <style lang="postcss">
@@ -40,5 +42,9 @@
 		width: 100%;
 		resize: none;
 		overflow: auto;
+	}
+
+	.btn {
+		height: 40px;
 	}
 </style>

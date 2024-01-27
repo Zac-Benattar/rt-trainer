@@ -43,7 +43,7 @@
 		>
 	</div>
 
-	<div class="flex flex-row gap-x-3 bg-surface-500 h-40px">
+	<div class="flex flex-row gap-x-1 bg-surface-500 h-40px">
 		<textarea
 			class="textarea shrink bg-secondary-500-50 text-secondary-50 call-target-output"
 			id="call-target-output"
@@ -52,7 +52,7 @@
 			rows="1"
 			cols="50"
 			maxlength="25"
-			placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}MHz</textarea
+			placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}</textarea
 		>
 
 		<div class="toggle px-2 shrink-0">
