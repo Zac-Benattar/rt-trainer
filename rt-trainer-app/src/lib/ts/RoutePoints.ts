@@ -1,113 +1,20 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
-import type { StartUpStage,  TaxiStage } from './RouteStages';
-import { EmergencyType, type Pose, type Waypoint } from './RouteTypes';
+import { EmergencyType, type Pose } from './RouteTypes';
 import type { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
 /* A point on the route used in generation. Not necissarily visible to the user */
-export abstract class RoutePoint {
-	stage: RouteStage;
+export default class RoutePoint {
+	stage: string;
 	pose: Pose;
 	updateData: SimulatorUpdateData;
-	waypoint: Waypoint | null = null;
 
-	constructor(stage: RouteStage, pose: Pose, updateData: SimulatorUpdateData, waypoint?: Waypoint) {
+	constructor(stage: string, pose: Pose, updateData: SimulatorUpdateData) {
 		this.stage = stage;
 		this.pose = pose;
 		this.updateData = updateData;
-		this.waypoint = waypoint || null;
 	}
 }
-
-export class StartUpPoint extends RoutePoint {
-	constructor(
-		stage: StartUpStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint?: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class TaxiPoint extends RoutePoint {
-	constructor(stage: TaxiStage, pose: Pose, updateData: SimulatorUpdateData, waypoint?: Waypoint) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class TakeOffPoint extends RoutePoint {
-	constructor(
-		stage: TakeOffStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint?: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class ClimbOutPoint extends RoutePoint {
-	constructor(
-		stage: ClimbOutStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint?: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export type StartAerodromePoint = StartUpPoint | TaxiPoint | TakeOffPoint | ClimbOutPoint;
-
-/* Point in the air. Used for generation and may be visible to the user if it conincides with a waypoint. */
-export class AirbornePoint extends RoutePoint {
-	constructor(
-		stage: AirborneStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class InboundForJoinPoint extends RoutePoint {
-	constructor(
-		stage: InboundForJoinStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class CircuitAndLandingPoint extends RoutePoint {
-	constructor(
-		stage: CircuitAndLandingStage,
-
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-
-		waypoint: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export class LandingToParkedPoint extends RoutePoint {
-	constructor(
-		stage: LandingToParkedStage,
-		pose: Pose,
-		updateData: SimulatorUpdateData,
-		waypoint?: Waypoint
-	) {
-		super(stage, pose, updateData, waypoint);
-	}
-}
-
-export type LandingPoint = InboundForJoinPoint | CircuitAndLandingPoint | LandingToParkedPoint;
 
 export function getParkedInitialControlledUpdateData(
 	seed: Seed,
@@ -119,8 +26,6 @@ export function getParkedInitialControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		lat: startAerodrome.getLat(),
-		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -135,8 +40,6 @@ export function getParkedMadeContactControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		lat: startAerodrome.getLat(),
-		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -146,13 +49,11 @@ export function getParkedInitialUncontrolledUpdateData(
 	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
 ): SimulatorUpdateData {
 	return {
-		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
+		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		lat: startAerodrome.getLat(),
-		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }
@@ -167,8 +68,6 @@ export function getParkedMadeContactUncontrolledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
-		lat: startAerodrome.getLat(),
-		long: startAerodrome.getLong(),
 		emergency: EmergencyType.None
 	};
 }

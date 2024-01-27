@@ -6,10 +6,10 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { CurrentRoutePointStore, RouteStore } from '$lib/stores';
+	import { CurrentRoutePointStore, WaypointStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { WaypointType, type Pose } from '$lib/ts/RouteTypes';
+	import type { Pose } from '$lib/ts/RouteTypes';
 
 	type MapWaypoint = {
 		lat: number;
@@ -23,7 +23,7 @@
 	let targetPose: Pose;
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
-	let waypoints: MapWaypoint[] = [];
+	let mapWaypoints: MapWaypoint[] = [];
 	let markers: any[] = [];
 	let zoomLevel: number = 13;
 	let map: any;
@@ -31,21 +31,15 @@
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 
-	RouteStore.subscribe((routePoints) => {
+	WaypointStore.subscribe((waypoints) => {
 		// Get all waypoints from the route
-		waypoints = [];
-		for (let i = 0; i < routePoints.length; i++) {
-			if (
-				routePoints[i].waypoint &&
-				routePoints[i].waypoint.waypointType != WaypointType.Emergency &&
-				!waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)
-			) {
-				waypoints.push({
-					lat: routePoints[i].waypoint.lat,
-					long: routePoints[i].waypoint.long,
-					name: routePoints[i].waypoint.name
-				});
-			}
+		mapWaypoints = [];
+		for (let i = 0; i < waypoints.length; i++) {
+			mapWaypoints.push({
+				lat: waypoints[i].lat,
+				long: waypoints[i].long,
+				name: waypoints[i].name
+			});
 		}
 	});
 
@@ -108,8 +102,8 @@
 		}).addTo(map);
 
 		// Adds all waypoints to the map
-		waypoints.forEach((waypoint) => {
-			addMarker(waypoint.lat, waypoint.long, waypoint.name);
+		mapWaypoints.forEach((mapWaypoint) => {
+			addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
 		});
 
 		connectMarkers();
@@ -133,8 +127,8 @@
 			removeMarkers();
 
 			// Adds all waypoints to the map
-			waypoints.forEach((waypoint) => {
-				addMarker(waypoint.lat, waypoint.long, waypoint.name);
+			mapWaypoints.forEach((mapWaypoint) => {
+				addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
 			});
 
 			connectMarkers();

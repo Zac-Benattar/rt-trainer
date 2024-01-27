@@ -5,9 +5,16 @@
 		"groundFrequency": 121.8,
 		"towerFrequency": 118.3,
 		"radarFrequency": 123.98,
-		"runways": [
+		"runwayPairs": [
 			{
-				"name": "15",
+				"number": "15",
+				"altNumber": "33",
+				"heading": 150.0,
+				"use": "takeoff",
+				"startLat": 52.465508,
+				"startLong": -1.761035,
+				"endLat": 52.443174,
+				"endLong": -1.736058,
 				"taxiways": [
 					{
 						"name": "Kilo",
@@ -15,30 +22,25 @@
 							{
 								"name": "K1",
 								"lat": 52.4566,
-								"long": -1.7526
+								"long": -1.7526,
+								"heading": 80.0
 							}
 						]
-					}
-				]
-			},
-			{
-				"name": "33",
-				"taxiways": [
+					},
 					{
 						"name": "Gulf",
 						"holdingPoints": [
 							{
 								"name": "G1",
 								"lat": 52.4514,
-								"long": -1.7469
+								"long": -1.7469,
+								"heading": 15.0
 							}
 						]
 					}
 				]
 			}
 		],
-		"lat": 52.453997,
-		"long": -1.744041,
 		"altitude": 327,
 		"startPoints": [
 			{

@@ -1,12 +1,13 @@
 import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
 import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import type Seed from './Seed';
-import { numberToPhoneticString, seededNormalDistribution } from './utils';
+import { numberToPhoneticString, seededNormalDistribution, toRadians } from './utils';
 
 export type RunwayHoldingPoint = {
 	name: string;
 	lat: number;
 	long: number;
+	heading: number;
 };
 
 export type Taxiway = {
@@ -14,10 +15,134 @@ export type Taxiway = {
 	holdingPoints: RunwayHoldingPoint[];
 };
 
-export type Runway = {
-	name: string;
+/* Represents a physical runway, which has two directions, each considered their own runway. 
+This representation takes the smaller heading runway as the primary and the other direction
+ runway as the alt, encoding information about both. */
+export class RunwayPair {
+	number: string;
+	altNumber: string;
+	heading: number;
+	use: string; // "Landing" or "Takeoff"
+	startLat: number;
+	startLong: number;
+	endLat: number;
+	endLong: number;
 	taxiways: Taxiway[];
-};
+
+	constructor(
+		number: string,
+		altNumber: string,
+		heading: number,
+		use: string,
+		startLat: number,
+		startLong: number,
+		endLat: number,
+		endLong: number,
+		taxiways: Taxiway[]
+	) {
+		this.number = number;
+		this.altNumber = altNumber;
+		this.heading = heading;
+		this.use = use;
+		this.startLat = startLat;
+		this.startLong = startLong;
+		this.endLat = endLat;
+		this.endLong = endLong;
+		this.taxiways = taxiways;
+	}
+
+	public getTakeoffRunway(): Runway {
+		if (this.use == 'Takeoff') {
+			return new Runway(
+				this.number,
+				this.heading,
+				this.startLat,
+				this.startLong,
+				this.endLat,
+				this.endLong,
+				this.taxiways
+			);
+		} else {
+			return new Runway(
+				this.altNumber,
+				this.heading + 180,
+				this.endLat,
+				this.endLong,
+				this.startLat,
+				this.startLong,
+				this.taxiways
+			);
+		}
+	}
+
+	public getLandingRunway(): Runway {
+		if (this.use == 'Landing') {
+			return new Runway(
+				this.number,
+				this.heading,
+				this.startLat,
+				this.startLong,
+				this.endLat,
+				this.endLong,
+				this.taxiways
+			);
+		} else {
+			return new Runway(
+				this.altNumber,
+				this.heading + 180,
+				this.endLat,
+				this.endLong,
+				this.startLat,
+				this.startLong,
+				this.taxiways
+			);
+		}
+	}
+}
+
+export class Runway {
+	name: string;
+	heading: number;
+	startLat: number; // Point at the start relative to direction of movement
+	startLong: number;
+	endLat: number; // Point at the end relative to direction of movement
+	endLong: number;
+	taxiways: Taxiway[];
+
+	constructor(
+		name: string,
+		heading: number,
+		startLat: number,
+		startLong: number,
+		endLat: number,
+		endLong: number,
+		taxiways: Taxiway[]
+	) {
+		this.name = name;
+		this.heading = heading;
+		this.startLat = startLat;
+		this.startLong = startLong;
+		this.endLat = endLat;
+		this.endLong = endLong;
+		this.taxiways = taxiways;
+	}
+
+	public getCenterPoint(): [number, number] {
+		const lat = (this.startLat + this.endLat) / 2.0;
+		const long = (this.startLong + this.endLong) / 2.0;
+
+		return [lat, long];
+	}
+
+	public getPointAlongVector(distanceFromCenter: number): [number, number] {
+		const centerPoint = this.getCenterPoint();
+		const angle = toRadians(this.heading);
+		const lat = centerPoint[0] + Math.sin(angle) * distanceFromCenter;
+		const long = centerPoint[1] + Math.cos(angle) * distanceFromCenter;
+
+		return [lat, long];
+	}
+}
 
 /* Represents a starting point for an aerodrome. 
 Used to specify the location and heading of the aircraft at the start of a scenario. */
@@ -177,9 +302,7 @@ export class METORDataSample {
 abstract class Aerodrome {
 	protected name: string;
 	protected icao: string;
-	protected runways: Runway[];
-	protected lat: number;
-	protected long: number;
+	protected runwayPairs: RunwayPair[];
 	protected altitude: number;
 	protected startPoints: AerodromeStartPoint[];
 	protected metorData: METORData;
@@ -187,18 +310,14 @@ abstract class Aerodrome {
 	constructor(
 		name: string,
 		icao: string,
-		runways: Runway[],
-		lat: number,
-		long: number,
+		runwayPairs: RunwayPair[],
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
 		this.name = name;
 		this.icao = icao;
-		this.runways = runways;
-		this.lat = lat;
-		this.long = long;
+		this.runwayPairs = runwayPairs;
 		this.altitude = altitude;
 		this.startPoints = startPoints;
 		this.metorData = metorData;
@@ -216,16 +335,8 @@ abstract class Aerodrome {
 		return this.icao;
 	}
 
-	public getRunways(): Runway[] {
-		return this.runways;
-	}
-
-	public getLat(): number {
-		return this.lat;
-	}
-
-	public getLong(): number {
-		return this.long;
+	public getRunwayPairs(): RunwayPair[] {
+		return this.runwayPairs;
 	}
 
 	public getAltitude(): number {
@@ -251,8 +362,8 @@ abstract class Aerodrome {
 	public abstract isControlled(): boolean;
 
 	public getTakeoffRunway(seed: Seed): Runway {
-		const index = seed.scenarioSeed % this.runways.length;
-		return this.runways[index];
+		const index = seed.scenarioSeed % this.runwayPairs.length;
+		return this.runwayPairs[index].getTakeoffRunway();
 	}
 
 	public getTakeoffRunwayTaxiway(seed: Seed): Taxiway {
@@ -271,6 +382,11 @@ abstract class Aerodrome {
 	public getTakeoffTransitionAltitude(): number {
 		return 1500;
 	}
+
+	public getLandingRunway(seed: Seed): Runway {
+		const index = seed.scenarioSeed % this.runwayPairs.length;
+		return this.runwayPairs[index].getLandingRunway();
+	}
 }
 
 export class ControlledAerodrome extends Aerodrome {
@@ -284,14 +400,12 @@ export class ControlledAerodrome extends Aerodrome {
 		groundFrequency: number,
 		towerFrequency: number,
 		radarFrequency: number,
-		runways: Runway[],
-		lat: number,
-		long: number,
+		runwayPairs: RunwayPair[],
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runways, lat, long, altitude, startPoints, metorData);
+		super(name, icao, runwayPairs, altitude, startPoints, metorData);
 
 		this.groundFrequency = groundFrequency;
 		this.towerFrequency = towerFrequency;
@@ -330,6 +444,20 @@ export class ControlledAerodrome extends Aerodrome {
 		const aerodromes: ControlledAerodrome[] = [];
 
 		controlledAerodromes.forEach((aerodrome) => {
+			const runwayPairs = aerodrome.runwayPairs.map((runwayPair) => {
+				return new RunwayPair(
+					runwayPair.number,
+					runwayPair.altNumber,
+					runwayPair.heading,
+					runwayPair.use,
+					runwayPair.startLat,
+					runwayPair.startLong,
+					runwayPair.endLat,
+					runwayPair.endLong,
+					runwayPair.taxiways
+				);
+			});
+
 			aerodromes.push(
 				new ControlledAerodrome(
 					aerodrome.name,
@@ -337,9 +465,7 @@ export class ControlledAerodrome extends Aerodrome {
 					aerodrome.groundFrequency,
 					aerodrome.towerFrequency,
 					aerodrome.radarFrequency,
-					aerodrome.runways,
-					aerodrome.lat,
-					aerodrome.long,
+					runwayPairs,
 					aerodrome.altitude,
 					aerodrome.startPoints,
 					new METORData(
@@ -368,14 +494,12 @@ export class UncontrolledAerodrome extends Aerodrome {
 		name: string,
 		icao: string,
 		informationFrequency: number,
-		runways: Runway[],
-		lat: number,
-		long: number,
+		runwayPairs: RunwayPair[],
 		altitude: number,
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runways, lat, long, altitude, startPoints, metorData);
+		super(name, icao, runwayPairs, altitude, startPoints, metorData);
 
 		this.informationFrequency = informationFrequency;
 	}
@@ -408,14 +532,25 @@ export class UncontrolledAerodrome extends Aerodrome {
 		const aerodromes: UncontrolledAerodrome[] = [];
 
 		uncontrolledAerodromes.forEach((aerodrome) => {
+			const runwayPairs = aerodrome.runwayPairs.map((runwayPair) => {
+				return new RunwayPair(
+					runwayPair.number,
+					runwayPair.altNumber,
+					runwayPair.heading,
+					runwayPair.use,
+					runwayPair.startLat,
+					runwayPair.startLong,
+					runwayPair.endLat,
+					runwayPair.endLong,
+					runwayPair.taxiways
+				);
+			});
 			aerodromes.push(
 				new UncontrolledAerodrome(
 					aerodrome.name,
 					aerodrome.icao,
 					aerodrome.informationFrequency,
-					aerodrome.runways,
-					aerodrome.lat,
-					aerodrome.long,
+					runwayPairs,
 					aerodrome.altitude,
 					aerodrome.startPoints,
 					new METORData(

@@ -1,5 +1,5 @@
 import { ServerResponse } from './ServerClientTypes';
-import type { AirbornePoint } from './RoutePoints';
+import type RoutePoint from './RoutePoints';
 import type RadioCall from './RadioCall';
 import { StartUpStage, TakeOffStage, TaxiStage } from './RouteStages';
 import type { METORDataSample } from './Aerodrome';
@@ -32,7 +32,7 @@ export default class Parser {
 			case TakeOffStage.AnnounceTakingOff:
 				return this.parseAnnounceTakingOff(radioCall);
 			default:
-				throw new Error('Unimplemented route point type');
+				throw new Error('Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage);
 		}
 	}
 
@@ -251,7 +251,7 @@ export default class Parser {
 	/* Parse initial contact with new ATC unit.
 	Example: Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
-		currentPoint: AirbornePoint,
+		currentPoint: RoutePoint,
 		radioCall: RadioCall
 	): ServerResponse {
 		const expectedRadioCall: string = `${radioCall
@@ -352,9 +352,9 @@ if (not in level flight. */
 
 		// May need more details to be accurate to specific situation
 		const expectedRadioCall: string = `
-        "${radioCall.getTargetAllocatedCallsign()}, overhead ${
-			radioCall.getCurrentRoutePoint().waypoint.name
-		}, ${radioCall.getCurrentRoutePoint().pose.altitude} feet`;
+        "${radioCall.getTargetAllocatedCallsign()}, overhead ${radioCall.getCurrentFix().name}, ${
+			radioCall.getCurrentRoutePoint().pose.altitude
+		} feet`;
 
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsCurrentLocation();

@@ -3,40 +3,31 @@
 		"name": "Wellesbourne Mountford",
 		"icao": "EGBW",
 		"informationFrequency": 180.03,
-		"runways": [
+		"runwayPairs": [
 			{
-				"name": "18",
+				"number": "18",
+				"altNumber": "36",
+				"heading": 179.0,
+				"use": "takeoff",
+				"startLat": 52.197330,
+				"startLong": -1.615058,
+				"endLat": 52.186728,
+				"endLong": -1.613813,
 				"taxiways": [
 					{
 						"name": "Alpha",
 						"holdingPoints": [
 							{
 								"name": "A1",
-								"lat": 52.1922,
-								"long": -1.6144
-							}
-						]
-					}
-				]
-			},
-			{
-				"name": "36",
-				"taxiways": [
-					{
-						"name": "Bravo",
-						"holdingPoints": [
-							{
-								"name": "B1",
-								"lat": 52.1922,
-								"long": -1.6144
+								"lat": 52.19733,
+								"long": -1.61572,
+								"heading": 75.0
 							}
 						]
 					}
 				]
 			}
 		],
-		"lat": 52.1922,
-		"long": -1.6144,
 		"altitude": 163,
 		"startPointLat": 52.1922,
 		"startPointlong": -1.6144,

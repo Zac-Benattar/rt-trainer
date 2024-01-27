@@ -24,18 +24,20 @@
 		SpeechOutputStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
-		RadioCallsStore as RadioCallsHistoryStore,
+		RadioCallsHistoryStore,
 		LiveFeedbackStore,
 		CurrentRoutePointIndexStore,
-		EndPointIndexStore
+		EndPointIndexStore,
+		WaypointStore
 	} from '$lib/stores';
-	import type { RoutePoint } from '$lib/ts/RoutePoints';
+	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import { Feedback } from '$lib/ts/Feedback';
+	import type { Waypoint } from '$lib/ts/RouteTypes';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -77,6 +79,10 @@
 	$: if (readRecievedCalls && atcMessage) {
 		speakATCMessage();
 	}
+
+	RouteStore.subscribe((value) => {
+		route = value;
+	});
 
 	SpeechOutputStore.subscribe((value) => {
 		readRecievedCalls = value;
@@ -166,19 +172,14 @@
 		}
 
 		// Check state matches expected state
-		if (!route) {
-			// Attempt to get state from server
-			initiateScenario();
-
-			if (!route) {
-				console.log('Error: No route');
-				modalStore.trigger({
-					type: 'alert',
-					title: 'Connection to server failed',
-					body: 'This may be due to the server being offline. Come back later and try again.'
-				});
-				return;
-			}
+		if (route.length == 0) {
+			console.log('Error: No route');
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Connection to server failed',
+				body: 'This may be due to the server being offline. Come back later and try again.'
+			});
+			return;
 		}
 
 		if (radioState.dialMode == 'OFF') {
@@ -343,32 +344,37 @@
 		// Update the simulator with the next route point
 		failedAttempts = 0;
 		CurrentRoutePointIndexStore.set(currentPointIndex + 1);
-		CurrentRoutePointStore.set(route[currentPointIndex + 1]);
+		CurrentRoutePointStore.set(route[currentPointIndex]);
 		ATCMessageStore.set(serverResponse.responseCall);
 		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}
 
 	async function initiateScenario() {
 		// Get the state from the server
-		route = await getRouteFromServer();
+		const serverRouteResponse = await getRouteFromServer();
+		const serverWaypointsResponse = await getWaypointsFromServer();
 
-		if (route === undefined) {
+		if (serverRouteResponse === undefined || serverWaypointsResponse === undefined) {
 			// Handle error
 			serverNotResponding = true;
 
 			return 0;
 		} else {
-			console.log(route);
+			console.log(serverRouteResponse);
+			console.log(serverWaypointsResponse);
 
 			// Update stores with the route
-			CurrentTargetStore.set(route[0].updateData.currentTarget);
-			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);
-			RouteStore.set(route);
-			CurrentRoutePointStore.set(route[0]);
+			CurrentTargetStore.set(serverRouteResponse[currentPointIndex].updateData.currentTarget);
+			CurrentTargetFrequencyStore.set(
+				serverRouteResponse[currentPointIndex].updateData.currentTargetFrequency
+			);
+			RouteStore.set(serverRouteResponse);
+			CurrentRoutePointStore.set(serverRouteResponse[currentPointIndex]);
+			WaypointStore.set(serverWaypointsResponse);
 			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 			// So we need to set it to the last point in the route if it has not been set
 			if (endPointIndex == -1) {
-				EndPointIndexStore.set(route.length - 1);
+				EndPointIndexStore.set(serverRouteResponse.length - 1);
 			}
 		}
 	}
@@ -376,7 +382,23 @@
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
 			const response = await axios.get(
-				`/scenario/seed=${seed.seedString}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+				`/scenario/seed=${seed.seedString}/route?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+			);
+
+			return response.data;
+		} catch (error: any) {
+			if (error.message === 'Network Error') {
+				serverNotResponding = true;
+			} else {
+				console.error('Error: ', error);
+			}
+		}
+	}
+
+	async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> {
+		try {
+			const response = await axios.get(
+				`/scenario/seed=${seed.seedString}/waypoints?airborneWaypoints=${airborneWaypoints}`
 			);
 
 			return response.data;
@@ -413,7 +435,7 @@
 				aircraftDetails.aircraftType
 			);
 
-			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
+			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}/parse`, {
 				data: currentRadioCall.getJSONData()
 			});
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { RadioCallsStore } from '$lib/stores';
+	import { RadioCallsHistoryStore } from '$lib/stores';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import type RadioCall from '$lib/ts/RadioCall';
@@ -7,7 +7,7 @@
 	import Results from '$lib/ts/Results';
 	let results: Results;
 
-	RadioCallsStore.subscribe((value) => {
+	RadioCallsHistoryStore.subscribe((value) => {
 		results = new Results(value);
 	});
 </script>
