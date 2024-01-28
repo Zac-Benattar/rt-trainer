@@ -1,71 +1,65 @@
 [
-    {
-        "name": "Birmingham Airport",
-        "icao": "EGBB",
-        "groundFrequency": 121.805,
-        "towerFrequency": 118.305,
-        "radarFrequency": 123.980,
-        "runways": [
-            {
-                "name": "15",
-                "taxiways": [
-                    {
-                        "name": "Alpha",
-                        "holdingPoints": [
-                            {
-                                "name": "A1",
-                                "location": {
-                                    "lat": 52.453997,
-                                    "long": -1.744041
-                                }
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "name": "33",
-                "taxiways": [
-                    {
-                        "name": "Bravo",
-                        "holdingPoints": [
-                            {
-                                "name": "B1",
-                                "location": {
-                                    "lat": 52.453997,
-                                    "long": -1.744041
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        ],
-        "location": {
-            "lat": 52.453997,
-            "long": -1.744041
-        },
-        "altitude": 327,
-        "startPoints": [
-            {
-                "name": "South Side Hangers",
-                "location": {
-                    "lat": 52.45024,
-                    "long": -1.74737
-                },
-                "heading": 70.0
-            }
-        ],
-        "metorData": {
-            "avgWindDirection": 260.0,
-            "meanWindSpeed": 5.0,
-            "stdWindSpeed": 3.0,
-            "meanPressure": 960.0,
-            "stdPressure": 1.2,
-            "meanTemperature": 10.0,
-            "stdTemperature": 2.0,
-            "meanDewpoint": 9.0,
-            "stdDewpoint": 2.0
-        }
-    }
+	{
+		"name": "Birmingham Airport",
+		"icao": "EGBB",
+		"groundFrequency": 121.8,
+		"towerFrequency": 118.3,
+		"radarFrequency": 123.98,
+		"runwayPairs": [
+			{
+				"number": "15",
+				"altNumber": "33",
+				"heading": 150.0,
+				"use": "takeoff",
+				"startLat": 52.465508,
+				"startLong": -1.761035,
+				"endLat": 52.443174,
+				"endLong": -1.736058,
+				"taxiways": [
+					{
+						"name": "Kilo",
+						"holdingPoints": [
+							{
+								"name": "K1",
+								"lat": 52.4566,
+								"long": -1.7526,
+								"heading": 80.0
+							}
+						]
+					},
+					{
+						"name": "Gulf",
+						"holdingPoints": [
+							{
+								"name": "G1",
+								"lat": 52.4514,
+								"long": -1.7469,
+								"heading": 15.0
+							}
+						]
+					}
+				]
+			}
+		],
+		"altitude": 327,
+		"startPoints": [
+			{
+				"name": "South Side Hangers",
+				"lat": 52.45024,
+				"long": -1.74737,
+				"heading": 70.0
+			}
+		],
+		"metorData": {
+			"avgWindDirection": 260.0,
+			"meanWindSpeed": 5.0,
+			"stdWindSpeed": 3.0,
+			"meanPressure": 960.0,
+			"stdPressure": 1.2,
+			"meanTemperature": 10.0,
+			"stdTemperature": 2.0,
+			"meanDewpoint": 9.0,
+			"stdDewpoint": 2.0
+		}
+	}
 ]

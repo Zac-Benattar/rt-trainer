@@ -1,9 +1,0 @@
-{
-	"/": [],
-	"/about": [],
-	"/profile": [],
-	"/scenario/[seed]": [
-		"src/routes/scenario/[seed]/+server.ts"
-	],
-	"/scenario/[seed]/results": []
-}

@@ -1,7 +1,6 @@
 import type { Feedback } from './Feedback';
+import type { EmergencyType } from './RouteTypes';
 import type Seed from './Seed';
-import type { EmergencyType } from './SimulatorTypes';
-import type { Location } from './SimulatorTypes';
 
 export type GenerationParameters = {
 	seed: Seed;
@@ -36,6 +35,5 @@ export type SimulatorUpdateData = {
 	currentTarget: string;
 	currentTargetFrequency: number;
 	currentTransponderFrequency: number;
-	location: Location;
 	emergency: EmergencyType;
 };

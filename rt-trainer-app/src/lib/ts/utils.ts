@@ -1,5 +1,3 @@
-import type { Location } from './SimulatorTypes';
-
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
 	let hash = 0;
@@ -15,6 +13,7 @@ export function simpleHash(str: string): number {
 
 	return hash;
 }
+
 // Splits a number into two halves and pads them with zeros to make sure they are the same length
 export function splitAndPadNumber(input: number): [number, number] {
 	const numberString = input.toString();
@@ -45,12 +44,17 @@ export function seededNormalDistribution(
 }
 
 /* Returns the distance between two locations on the earth in metres. */
-export function haversineDistance(location1: Location, location2: Location): number {
+export function haversineDistance(
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number
+): number {
 	const R = 6371e3; // metres
-	const φ1 = (location1.lat * Math.PI) / 180; // φ, λ in radians
-	const φ2 = (location2.lat * Math.PI) / 180;
-	const Δφ = ((location2.lat - location1.lat) * Math.PI) / 180;
-	const Δλ = ((location2.long - location1.long) * Math.PI) / 180;
+	const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
+	const φ2 = (lat2 * Math.PI) / 180;
+	const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+	const Δλ = ((long2 - long1) * Math.PI) / 180;
 
 	return (
 		2 *
@@ -151,7 +155,6 @@ export function numberToPhoneticString(number: number, precision: number): strin
 
 	return result.trim();
 }
-
 
 export function replacePhoneticAlphabetWithChars(str: string): string {
 	const phoneticAlphabetMapping = {
@@ -278,4 +281,81 @@ export function generateRandomURLValidString(length: number) {
 	}
 
 	return randomString;
+}
+
+/* Following four functions from https://www.trysmudford.com/blog/linear-interpolation-functions/ */
+export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
+export const invlerp = (x: number, y: number, a: number) => clamp((a - x) / (y - x));
+export const clamp = (a: number, min = 0, max = 1) => Math.min(max, Math.max(min, a));
+export const range = (x1: number, y1: number, x2: number, y2: number, a: number) =>
+	lerp(x2, y2, invlerp(x1, y1, a));
+
+export const lerpLocation = (
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number,
+	a: number
+): { lat: number; long: number } => {
+	return {
+		lat: lerp(lat1, lat2, a),
+		long: lerp(long1, long2, a)
+	};
+};
+
+export function toRadians(degrees: number): number {
+	return degrees * (Math.PI / 180);
+}
+
+export function toDegrees(radians: number): number {
+	return radians * (180 / Math.PI);
+}
+
+export function getHeadingBetween(
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number
+): number {
+	const dLon = toRadians(long2 - long1);
+
+	const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
+	const x =
+		Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
+		Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
+
+	const bearing = toDegrees(Math.atan2(y, x));
+
+	// Normalize the bearing to be in the range [0, 360)
+	return Math.round((bearing + 360) % 360);
+}
+
+export function getNewCoordsFromCoord(
+	startLat: number,
+	startLong: number,
+	angle: number, // Angle in degrees (bearing from the starting point)
+	distance: number // Distance in kilometers
+): { lat: number; long: number } {
+	const earthRadius = 6371; // Earth's radius in kilometers
+
+	const startLatRad = toRadians(startLat);
+	const startLongRad = toRadians(startLong);
+	const angleRad = toRadians(angle);
+
+	const newLatRad = Math.asin(
+		Math.sin(startLatRad) * Math.cos(distance / earthRadius) +
+			Math.cos(startLatRad) * Math.sin(distance / earthRadius) * Math.cos(angleRad)
+	);
+
+	const newLongRad =
+		startLongRad +
+		Math.atan2(
+			Math.sin(angleRad) * Math.sin(distance / earthRadius) * Math.cos(startLatRad),
+			Math.cos(distance / earthRadius) - Math.sin(startLatRad) * Math.sin(newLatRad)
+		);
+
+	const newLat = toDegrees(newLatRad);
+	const newLong = toDegrees(newLongRad);
+
+	return { lat: newLat, long: newLong };
 }

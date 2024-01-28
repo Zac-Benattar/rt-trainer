@@ -21,7 +21,7 @@
 	let radioState: RadioState = {
 		mode: 'OFF',
 		dialMode: 'OFF',
-		activeFrequency: 123.03,
+		activeFrequency: 121.8,
 		standbyFrequency: 180.03,
 		tertiaryFrequency: 177.2
 	};

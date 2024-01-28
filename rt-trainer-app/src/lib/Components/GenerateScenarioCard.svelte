@@ -109,14 +109,14 @@
 
 <div class="card flex flex-col gap-3">
 	<div class="text-2xl">Generate a scenario</div>
-	<div class="flex flex-col justify-center">
+	<div class="flex flex-col gap-2 justify-center">
 		<div>
 			<SlideToggle
 				id="emergency-events"
 				name="slider-medium"
 				checked
 				active="bg-primary-500"
-				size="md">Include Emergency Event</SlideToggle
+				size="sm">Include Emergency Event</SlideToggle
 			>
 		</div>
 
@@ -129,7 +129,7 @@
 				ticked
 			>
 				<div class="flex justify-between items-center">
-					<div class="font-bold">Airborne Waypoints</div>
+					<span>Airborne Waypoints</span>
 					<div class="text-xs">{airborneWaypoints} / {maxAirborneWaypoints}</div>
 				</div>
 			</RangeSlider>

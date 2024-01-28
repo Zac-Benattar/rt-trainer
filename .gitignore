@@ -3,16 +3,23 @@
 node_modules
 /build
 /.svelte-kit
+/.svelte-kit/generated
+/.svelte-kit/ambient.d.ts
 dist/
 build/
 ## Doesnt seem to work:
-/.svelte-kit/generated/internal.js 
 /package
 .env
 .env.*
 !.env.example
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+typing
+internal
+.vscode
+*.tgz
+.eslintcache
+.svelte-kit
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
