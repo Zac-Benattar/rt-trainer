@@ -14,6 +14,10 @@
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import Navigation from '$lib/Components/Sidebar.svelte';
+	import { dev } from '$app/environment';
+	import { inject } from '@vercel/analytics';
+
+	inject({ mode: dev ? 'development' : 'production' });
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	initializeStores();
@@ -35,7 +39,10 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
-	} else if ($page.url.pathname.search('/scenario') != -1 && $page.url.pathname.search('/results') == -1) {
+	} else if (
+		$page.url.pathname.search('/scenario') != -1 &&
+		$page.url.pathname.search('/results') == -1
+	) {
 		// If on scenario page hide sidebar and ways to access it as user is not logged in
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
