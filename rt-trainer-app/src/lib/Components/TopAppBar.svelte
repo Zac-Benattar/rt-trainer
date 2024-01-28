@@ -27,7 +27,7 @@
 						</svg>
 					</span>
 				</button>
-				<strong class="text-xl uppercase">RT Trainer - Dev Branch</strong>
+				<strong class="text-xl uppercase">RT Trainer</strong>
 			</div>
 		</svelte:fragment>
 
