@@ -73,29 +73,43 @@ export default class Route {
 		const startPoints = startAerodrome.getStartPoints();
 		const startPointIndex = seed.scenarioSeed % startPoints.length;
 		const holdingPoint = startAerodrome.getTakeoffRunwayTaxiwayHoldingPoint(seed);
+		const takeoffRunway = startAerodrome.getTakeoffRunway(seed);
 
 		const parkedPose: Pose = {
 			lat: startPoints[startPointIndex].lat,
 			long: startPoints[startPointIndex].long,
-			heading: startPoints[startPointIndex].heading,
-			altitude: startAerodrome.getAltitude(),
+			magneticHeading: startPoints[startPointIndex].heading,
+			trueHeading: startPoints[startPointIndex].heading,
+			altitude: 0,
 			airSpeed: 0.0
 		};
 
 		const taxiPose: Pose = {
 			lat: holdingPoint.lat,
 			long: holdingPoint.long,
-			heading: holdingPoint.heading,
-			altitude: startAerodrome.getAltitude(),
+			magneticHeading: holdingPoint.heading,
+			trueHeading: holdingPoint.heading,
+			altitude: 0,
 			airSpeed: 0.0
 		};
 
 		const onRunwayPose: Pose = {
-			lat: startAerodrome.getTakeoffRunway(seed).startLat,
-			long: startAerodrome.getTakeoffRunway(seed).startLong,
-			heading: startAerodrome.getTakeoffRunway(seed).heading,
-			altitude: startAerodrome.getAltitude(),
+			lat: takeoffRunway.startLat,
+			long: takeoffRunway.startLong,
+			magneticHeading: takeoffRunway.magneticHeading,
+			trueHeading: takeoffRunway.trueHeading,
+			altitude: 0,
 			airSpeed: 0.0
+		};
+
+		const climbingOutPosition = takeoffRunway.getPointAlongVector(1.3);
+		const climbingOutPose: Pose = {
+			lat: climbingOutPosition.lat,
+			long: climbingOutPosition.long,
+			magneticHeading: takeoffRunway.magneticHeading,
+			trueHeading: takeoffRunway.trueHeading,
+			altitude: 1200,
+			airSpeed: 70.0
 		};
 
 		if (startAerodrome instanceof ControlledAerodrome) {
@@ -157,28 +171,28 @@ export default class Route {
 
 			const readbackNextContact = new RoutePoint(
 				ClimbOutStage.ReadbackNextContact,
-				parkedPose,
+				climbingOutPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome)
 			);
 			stages.push(readbackNextContact);
 
 			const contactNextFrequency = new RoutePoint(
 				ClimbOutStage.ContactNextFrequency,
-				parkedPose,
+				climbingOutPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome)
 			);
 			stages.push(contactNextFrequency);
 
 			const acknowledgeNewFrequencyRequest = new RoutePoint(
 				ClimbOutStage.AcknowledgeNewFrequencyRequest,
-				parkedPose,
+				climbingOutPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome)
 			);
 			stages.push(acknowledgeNewFrequencyRequest);
 
 			const reportLeavingZone = new RoutePoint(
 				ClimbOutStage.ReportLeavingZone,
-				parkedPose,
+				climbingOutPose,
 				getParkedMadeContactControlledUpdateData(seed, startAerodrome)
 			);
 			stages.push(reportLeavingZone);
@@ -227,7 +241,7 @@ export default class Route {
 
 			const reportLeavingZone = new RoutePoint(
 				ClimbOutStage.ReportLeavingZone,
-				parkedPose,
+				climbingOutPose,
 				getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome)
 			);
 			stages.push(reportLeavingZone);
@@ -328,7 +342,8 @@ export default class Route {
 			const pose: Pose = {
 				lat: waypoint.lat,
 				long: waypoint.long,
-				heading: 0.0,
+				magneticHeading: 0.0,
+				trueHeading: 0.0,
 				altitude: 0.0,
 				airSpeed: 0.0
 			};
@@ -400,8 +415,6 @@ export default class Route {
 			const emergencyPointIndex = (seed.scenarioSeed % (waypoints.length - 1)) + 1;
 			const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex] + 1;
 
-			console.log('Route Points: ' + routePoints.length);
-			console.log('Emergency Route Point Index: ' + emergencyRoutePointIndex);
 			let emergencyType: EmergencyType = EmergencyType.None;
 
 			// Get a random emergency type which is not none
@@ -423,7 +436,8 @@ export default class Route {
 			const emergencyPose: Pose = {
 				lat: emergencyLocation.lat,
 				long: emergencyLocation.long,
-				heading: 0.0,
+				magneticHeading: 0.0,
+				trueHeading: 0.0,
 				altitude: 0.0,
 				airSpeed: 0.0
 			};
@@ -467,12 +481,53 @@ export default class Route {
 		const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
 		const parkingPoints = endAerodrome.getStartPoints();
 		const parkingPointIndex = seed.scenarioSeed % parkingPoints.length;
+		const landingRunway = endAerodrome.getLandingRunway(seed);
 
 		const parkedPose: Pose = {
 			lat: parkingPoints[parkingPointIndex].lat,
 			long: parkingPoints[parkingPointIndex].long,
-			heading: parkingPoints[parkingPointIndex].heading,
-			altitude: endAerodrome.getAltitude(),
+			magneticHeading: parkingPoints[parkingPointIndex].heading,
+			trueHeading: parkingPoints[parkingPointIndex].heading,
+			altitude: 0,
+			airSpeed: 0.0
+		};
+
+		const followTrafficLocation = landingRunway.getPointAlongVector(-4.5);
+		const followTrafficPose: Pose = {
+			lat: followTrafficLocation.lat,
+			long: followTrafficLocation.long,
+			magneticHeading: landingRunway.magneticHeading,
+			trueHeading: landingRunway.trueHeading,
+			altitude: 1200,
+			airSpeed: 84.0
+		};
+
+		const reportFinalLocation = landingRunway.getPointAlongVector(-3.6);
+		const reportFinalPose: Pose = {
+			lat: reportFinalLocation.lat,
+			long: reportFinalLocation.long,
+			magneticHeading: landingRunway.magneticHeading,
+			trueHeading: landingRunway.trueHeading,
+			altitude: 750,
+			airSpeed: 55.0
+		};
+
+		const onRunwayPose: Pose = {
+			lat: landingRunway.startLat,
+			long: landingRunway.startLong,
+			magneticHeading: landingRunway.magneticHeading,
+			trueHeading: landingRunway.trueHeading,
+			altitude: 0.0,
+			airSpeed: 0.0
+		};
+
+		const holdingPoint = endAerodrome.getLandingRunwayTaxiwayHoldingPoint(seed);
+		const runwayVacatedPose: Pose = {
+			lat: holdingPoint.lat,
+			long: holdingPoint.long,
+			magneticHeading: holdingPoint.heading,
+			trueHeading: holdingPoint.heading,
+			altitude: 0.0,
 			airSpeed: 0.0
 		};
 
@@ -549,42 +604,42 @@ export default class Route {
 
 			const wilcoFollowTraffic = new RoutePoint(
 				CircuitAndLandingStage.WilcoFollowTraffic,
-				parkedPose,
+				followTrafficPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(wilcoFollowTraffic);
 
 			const reportFinal = new RoutePoint(
 				CircuitAndLandingStage.ReportFinal,
-				parkedPose,
+				reportFinalPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(reportFinal);
 
 			const readbackContinueApproach = new RoutePoint(
 				CircuitAndLandingStage.ReadbackContinueApproach,
-				parkedPose,
+				reportFinalPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(readbackContinueApproach);
 
 			const readbackLandingClearance = new RoutePoint(
 				CircuitAndLandingStage.ReadbackLandingClearance,
-				parkedPose,
+				reportFinalPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(readbackLandingClearance);
 
 			const readbackVacateRunwayRequest = new RoutePoint(
 				LandingToParkedStage.ReadbackVacateRunwayRequest,
-				parkedPose,
+				onRunwayPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(readbackVacateRunwayRequest);
 
 			const reportVacatedRunway = new RoutePoint(
 				LandingToParkedStage.ReportVacatedRunway,
-				parkedPose,
+				runwayVacatedPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(reportVacatedRunway);
@@ -626,21 +681,21 @@ export default class Route {
 
 			const reportFinal = new RoutePoint(
 				CircuitAndLandingStage.ReportFinal,
-				parkedPose,
+				reportFinalPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(reportFinal);
 
 			const readbackContinueApproach = new RoutePoint(
 				CircuitAndLandingStage.ReadbackContinueApproach,
-				parkedPose,
+				reportFinalPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(readbackContinueApproach);
 
 			const reportVacatedRunway = new RoutePoint(
 				LandingToParkedStage.ReportVacatedRunway,
-				parkedPose,
+				runwayVacatedPose,
 				getParkedMadeContactControlledUpdateData(seed, endAerodrome)
 			);
 			stages.push(reportVacatedRunway);

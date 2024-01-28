@@ -55,7 +55,8 @@
 			targetPose = {
 				lat: 0,
 				long: 0,
-				heading: 0,
+				magneticHeading: 0,
+				magneticVariation: 0,
 				altitude: 0,
 				airSpeed: 0
 			};
@@ -76,7 +77,7 @@
 				text.style.backgroundColor = 'white';
 				text.innerHTML =
 					'<p> Heading: ' +
-					targetPose.heading +
+					targetPose.magneticHeading +
 					'<br> Altitude: ' +
 					targetPose.altitude +
 					'<br> Airspeed: ' +
@@ -111,7 +112,7 @@
 		// Sets the current location marker, done last to make sure it is on top
 		currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 			icon: planeIcon,
-			rotationAngle: targetPose.heading,
+			rotationAngle: targetPose.trueHeading,
 			rotationOrigin: 'center'
 		}).addTo(map);
 
@@ -138,7 +139,7 @@
 			// Updates the current location marker, done last to make sure it is on top
 			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 				icon: planeIcon,
-				rotationAngle: targetPose.heading,
+				rotationAngle: targetPose.trueHeading,
 				rotationOrigin: 'center'
 			}).addTo(map);
 

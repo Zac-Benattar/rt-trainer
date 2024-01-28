@@ -20,7 +20,8 @@ export enum EmergencyType {
 export type Pose = {
 	lat: number;
 	long: number
-	heading: number;
+	magneticHeading: number;
+	trueHeading: number;
 	altitude: number;
 	airSpeed: number;
 };

@@ -311,16 +311,51 @@ export function toDegrees(radians: number): number {
 	return radians * (180 / Math.PI);
 }
 
-export function getHeadingBetween(lat1: number, long1: number, lat2: number, long2: number): number {
+export function getHeadingBetween(
+	lat1: number,
+	long1: number,
+	lat2: number,
+	long2: number
+): number {
 	const dLon = toRadians(long2 - long1);
 
 	const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
 	const x =
-	  Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
-	  Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
+		Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
+		Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
 
 	const bearing = toDegrees(Math.atan2(y, x));
 
-	// Normalize the bearing to be in the range [0, 360]
+	// Normalize the bearing to be in the range [0, 360)
 	return Math.round((bearing + 360) % 360);
+}
+
+export function getNewCoordsFromCoord(
+	startLat: number,
+	startLong: number,
+	angle: number, // Angle in degrees (bearing from the starting point)
+	distance: number // Distance in kilometers
+): { lat: number; long: number } {
+	const earthRadius = 6371; // Earth's radius in kilometers
+
+	const startLatRad = toRadians(startLat);
+	const startLongRad = toRadians(startLong);
+	const angleRad = toRadians(angle);
+
+	const newLatRad = Math.asin(
+		Math.sin(startLatRad) * Math.cos(distance / earthRadius) +
+			Math.cos(startLatRad) * Math.sin(distance / earthRadius) * Math.cos(angleRad)
+	);
+
+	const newLongRad =
+		startLongRad +
+		Math.atan2(
+			Math.sin(angleRad) * Math.sin(distance / earthRadius) * Math.cos(startLatRad),
+			Math.cos(distance / earthRadius) - Math.sin(startLatRad) * Math.sin(newLatRad)
+		);
+
+	const newLat = toDegrees(newLatRad);
+	const newLong = toDegrees(newLongRad);
+
+	return { lat: newLat, long: newLong };
 }

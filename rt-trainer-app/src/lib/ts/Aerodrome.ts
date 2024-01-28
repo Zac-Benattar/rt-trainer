@@ -1,7 +1,7 @@
 import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
 import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import type Seed from './Seed';
-import { numberToPhoneticString, seededNormalDistribution, toRadians } from './utils';
+import { getHeadingBetween, getNewCoordsFromCoord, numberToPhoneticString, seededNormalDistribution, toRadians } from './utils';
 
 export type RunwayHoldingPoint = {
 	name: string;
@@ -52,7 +52,7 @@ export class RunwayPair {
 	}
 
 	public getTakeoffRunway(): Runway {
-		if (this.use == 'Takeoff') {
+		if (this.use == 'takeoff') {
 			return new Runway(
 				this.number,
 				this.heading,
@@ -76,7 +76,7 @@ export class RunwayPair {
 	}
 
 	public getLandingRunway(): Runway {
-		if (this.use == 'Landing') {
+		if (this.use == 'landing') {
 			return new Runway(
 				this.number,
 				this.heading,
@@ -102,7 +102,8 @@ export class RunwayPair {
 
 export class Runway {
 	name: string;
-	heading: number;
+	magneticHeading: number;
+	trueHeading: number;
 	startLat: number; // Point at the start relative to direction of movement
 	startLong: number;
 	endLat: number; // Point at the end relative to direction of movement
@@ -111,7 +112,7 @@ export class Runway {
 
 	constructor(
 		name: string,
-		heading: number,
+		magneticHeading: number,
 		startLat: number,
 		startLong: number,
 		endLat: number,
@@ -119,12 +120,14 @@ export class Runway {
 		taxiways: Taxiway[]
 	) {
 		this.name = name;
-		this.heading = heading;
+		this.magneticHeading = magneticHeading;
 		this.startLat = startLat;
 		this.startLong = startLong;
 		this.endLat = endLat;
 		this.endLong = endLong;
 		this.taxiways = taxiways;
+
+		this.trueHeading = getHeadingBetween(this.startLat, this.startLong, this.endLat, this.endLong);
 	}
 
 	public getCenterPoint(): [number, number] {
@@ -134,13 +137,11 @@ export class Runway {
 		return [lat, long];
 	}
 
-	public getPointAlongVector(distanceFromCenter: number): [number, number] {
+	/* Returns a point some distance (in kms) along the runway vector. */
+	public getPointAlongVector(distanceFromCenter: number): {lat: number, long: number} {
 		const centerPoint = this.getCenterPoint();
-		const angle = toRadians(this.heading);
-		const lat = centerPoint[0] + Math.sin(angle) * distanceFromCenter;
-		const long = centerPoint[1] + Math.cos(angle) * distanceFromCenter;
-
-		return [lat, long];
+		
+		return getNewCoordsFromCoord(centerPoint[0], centerPoint[1], this.trueHeading, distanceFromCenter);
 	}
 }
 
@@ -386,6 +387,18 @@ abstract class Aerodrome {
 	public getLandingRunway(seed: Seed): Runway {
 		const index = seed.scenarioSeed % this.runwayPairs.length;
 		return this.runwayPairs[index].getLandingRunway();
+	}
+
+	public getLandingRunwayTaxiway(seed: Seed): Taxiway {
+		const runway = this.getLandingRunway(seed);
+		const index = seed.scenarioSeed % runway.taxiways.length;
+		return runway.taxiways[index];
+	}
+
+	public getLandingRunwayTaxiwayHoldingPoint(seed: Seed): RunwayHoldingPoint {
+		const taxiway = this.getLandingRunwayTaxiway(seed);
+		const index = seed.scenarioSeed % taxiway.holdingPoints.length;
+		return taxiway.holdingPoints[index];
 	}
 }
 
