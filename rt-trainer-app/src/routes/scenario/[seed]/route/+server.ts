@@ -1,9 +1,6 @@
 import { json } from '@sveltejs/kit';
 import Route from '$lib/ts/Route';
 import Seed from '$lib/ts/Seed';
-import Parser from '$lib/ts/Parser';
-import RadioCall from '$lib/ts/RadioCall';
-import type { ServerResponse } from '$lib/ts/ServerClientTypes.js';
 
 export async function GET({ params, url }) {
 	const route = new Route();
@@ -27,37 +24,13 @@ export async function GET({ params, url }) {
 
 	// Check if the scenario has enable emergency set
 	let hasEmergency: boolean = false;
-	const emergenciesString: string | null = url.searchParams.get('emergencies');
+	const emergenciesString: string | null = url.searchParams.get('hasEmergency');
 	if (emergenciesString != null) {
-		hasEmergency = emergenciesString === 'True';
+		hasEmergency = emergenciesString === 'true';
 	}
 
 	// Generate the route with the parameters
 	route.generateRoute(seed, airborneWaypoints, hasEmergency);
 
 	return json(route.getPoints());
-}
-
-export async function POST({ request }) {
-	const { data } = await request.json();
-	const radioCallData = JSON.parse(data);
-
-	const radioCall: RadioCall = new RadioCall(
-		radioCallData.message,
-		radioCallData.seed,
-		radioCallData.routePoint,
-		radioCallData.prefix,
-		radioCallData.userCallsign,
-		radioCallData.userCallsignModified,
-		radioCallData.squark,
-		radioCallData.currentTarget,
-		radioCallData.currentTargetFrequency,
-		radioCallData.currentRadioFrequency,
-		radioCallData.currentTransponderFrequency,
-		radioCallData.aircraftType
-	);
-
-	const result: ServerResponse = Parser.parseCall(radioCall);
-
-	return json(result);
 }

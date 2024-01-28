@@ -6,10 +6,10 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { CurrentRoutePointStore, RouteStore } from '$lib/stores';
+	import { CurrentRoutePointStore, WaypointStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import type { Pose } from '$lib/ts/SimulatorTypes';
+	import type { Pose } from '$lib/ts/RouteTypes';
 
 	type MapWaypoint = {
 		lat: number;
@@ -23,7 +23,7 @@
 	let targetPose: Pose;
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
-	let waypoints: MapWaypoint[] = [];
+	let mapWaypoints: MapWaypoint[] = [];
 	let markers: any[] = [];
 	let zoomLevel: number = 13;
 	let map: any;
@@ -31,20 +31,15 @@
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 
-	RouteStore.subscribe((routePoints) => {
+	WaypointStore.subscribe((waypoints) => {
 		// Get all waypoints from the route
-		waypoints = [];
-		for (let i = 0; i < routePoints.length; i++) {
-			if (
-				routePoints[i].waypoint &&
-				!waypoints.find((waypoint) => waypoint.name === routePoints[i].waypoint.name)
-			) {
-				waypoints.push({
-					lat: routePoints[i].waypoint.location.lat,
-					long: routePoints[i].waypoint.location.long,
-					name: routePoints[i].waypoint.name
-				});
-			}
+		mapWaypoints = [];
+		for (let i = 0; i < waypoints.length; i++) {
+			mapWaypoints.push({
+				lat: waypoints[i].lat,
+				long: waypoints[i].long,
+				name: waypoints[i].name
+			});
 		}
 	});
 
@@ -58,11 +53,10 @@
 			}
 		} else {
 			targetPose = {
-				location: {
-					lat: 0,
-					long: 0
-				},
-				heading: 0,
+				lat: 0,
+				long: 0,
+				magneticHeading: 0,
+				magneticVariation: 0,
 				altitude: 0,
 				airSpeed: 0
 			};
@@ -83,7 +77,7 @@
 				text.style.backgroundColor = 'white';
 				text.innerHTML =
 					'<p> Heading: ' +
-					targetPose.heading +
+					targetPose.magneticHeading +
 					'<br> Altitude: ' +
 					targetPose.altitude +
 					'<br> Airspeed: ' +
@@ -93,7 +87,7 @@
 			}
 		});
 
-		map = L.map('myMap').setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
+		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], zoomLevel);
 
 		planeIcon = L.icon({
 			iconUrl: '/images/plane.png',
@@ -109,41 +103,43 @@
 		}).addTo(map);
 
 		// Adds all waypoints to the map
-		waypoints.forEach((waypoint) => {
-			addMarker(waypoint.lat, waypoint.long, waypoint.name);
+		mapWaypoints.forEach((mapWaypoint) => {
+			addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
 		});
 
 		connectMarkers();
 
 		// Sets the current location marker, done last to make sure it is on top
-		currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+		currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 			icon: planeIcon,
-			rotationAngle: targetPose.heading,
+			rotationAngle: targetPose.trueHeading,
 			rotationOrigin: 'center'
 		}).addTo(map);
 
-		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright'}).addTo(map);
+		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	}
 
 	async function updateMap() {
 		if (mounted) {
 			await map;
 
-			map.setView([targetPose?.location.lat, targetPose?.location.long], zoomLevel);
+			map.setView([targetPose?.lat, targetPose?.long], zoomLevel);
 
 			removeMarkers();
 
 			// Adds all waypoints to the map
-			waypoints.forEach((waypoint) => {
-				addMarker(waypoint.lat, waypoint.long, waypoint.name);
+			mapWaypoints.forEach((mapWaypoint) => {
+				addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
 			});
 
 			connectMarkers();
 
+			currentLocationMarker.remove();
+
 			// Updates the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.location.lat, targetPose.location.long], {
+			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 				icon: planeIcon,
-				rotationAngle: targetPose.heading,
+				rotationAngle: targetPose.trueHeading,
 				rotationOrigin: 'center'
 			}).addTo(map);
 

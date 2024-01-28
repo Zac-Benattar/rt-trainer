@@ -1,9 +1,9 @@
 import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
-
-import type { RoutePoint } from './ts/RoutePoints';
+import type RoutePoint from './ts/RoutePoints';
 import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
+import type { Waypoint } from './ts/RouteTypes';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -50,6 +50,8 @@ export const SpeechInputStore = writable<boolean>(false);
 
 export const SpeechOutputStore = writable<boolean>(false);
 
+export const LiveFeedbackStore = writable<boolean>(false);
+
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 
 export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
@@ -64,9 +66,15 @@ export const KneeboardStore = writable<string>('');
 
 export const RouteStore = writable<RoutePoint[]>([]);
 
+export const WaypointStore = writable<Waypoint[]>([]);
+
+export const CurrentRoutePointIndexStore = writable<number>(0);
+
+export const EndPointIndexStore = writable<number>(0);
+
 export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
 
-export const RadioCallsStore = writable<RadioCall[]>([]);
+export const RadioCallsHistoryStore = writable<RadioCall[]>([]);
 
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
@@ -75,6 +83,7 @@ export function ClearSimulationStores(): void {
 	CurrentTargetFrequencyStore.set(0);
 	SpeechInputStore.set(false);
 	SpeechOutputStore.set(false);
+	LiveFeedbackStore.set(false);
 	RadioStateStore.set(initialRadioState);
 	TransponderStateStore.set(initialTransponderState);
 	UserMessageStore.set('');
@@ -82,5 +91,8 @@ export function ClearSimulationStores(): void {
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
 	RouteStore.set([]);
+	WaypointStore.set([]);
 	CurrentRoutePointStore.set(null);
+	CurrentRoutePointIndexStore.set(0);
+	EndPointIndexStore.set(0);
 }

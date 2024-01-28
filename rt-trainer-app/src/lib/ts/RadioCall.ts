@@ -3,6 +3,7 @@ import type { RoutePoint } from './RoutePoints';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
+	getHeadingBetween,
 	isCallsignStandardRegistration,
 	processString,
 	replacePhoneticAlphabetWithChars,
@@ -18,11 +19,13 @@ import type {
 	UncontrolledAerodrome
 } from './Aerodrome';
 import { Feedback } from './Feedback';
+import type { Waypoint } from './RouteTypes';
 
 export default class RadioCall {
 	private message: string;
 	private seed: Seed;
-	private routePoint: RoutePoint;
+	private route: RoutePoint[];
+	private currentPointIndex: number;
 	private prefix: string;
 	private userCallsign: string;
 	private userCallsignModified: boolean;
@@ -37,7 +40,8 @@ export default class RadioCall {
 	constructor(
 		message: string,
 		seed: Seed,
-		routePoint: RoutePoint,
+		route: RoutePoint[],
+		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,
 		userCallsignModified: boolean,
@@ -50,7 +54,8 @@ export default class RadioCall {
 	) {
 		this.message = message;
 		this.seed = seed;
-		this.routePoint = routePoint;
+		this.route = route;
+		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
 		this.userCallsignModified = userCallsignModified;
@@ -71,8 +76,8 @@ export default class RadioCall {
 		return this.seed;
 	}
 
-	public getRoutePoint(): RoutePoint {
-		return this.routePoint;
+	public getCurrentRoutePoint(): RoutePoint {
+		return this.route[this.currentPointIndex];
 	}
 
 	public getPrefix(): string {
@@ -147,7 +152,8 @@ export default class RadioCall {
 		return JSON.stringify({
 			message: this.message,
 			seed: this.seed,
-			routePoint: this.routePoint,
+			route: this.route,
+			currentPointIndex: this.currentPointIndex,
 			prefix: this.prefix,
 			userCallsign: this.userCallsign,
 			userCallsignModified: this.userCallsignModified,
@@ -205,7 +211,7 @@ export default class RadioCall {
 
 		const afterDecimal = radioCallWords.slice(decimalIndex + 1, decimalIndex + 4);
 		const convertedAfterDecimal = afterDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
-		const afterDecimalDigits = "." + convertedAfterDecimal.join('');
+		const afterDecimalDigits = '.' + convertedAfterDecimal.join('');
 
 		const freq = parseFloat(beforeDecimalDigits + afterDecimalDigits);
 
@@ -218,7 +224,7 @@ export default class RadioCall {
 
 	public assertCallContainsCurrentRadioFrequency(): boolean {
 		if (!this.radioFrequencyStatedEqualsCurrent()) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the current radio frequency.');
+			this.feedback.pushSevereMistake("Your call didn't contain the current radio frequency.");
 
 			return false;
 		}
@@ -239,7 +245,7 @@ export default class RadioCall {
 
 	public assertCallContainsCriticalWord(word: string): boolean {
 		if (!this.callContainsWord(word)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the word: ' + word);
+			this.feedback.pushSevereMistake("Your call didn't contain the word: " + word);
 
 			return false;
 		}
@@ -248,7 +254,7 @@ export default class RadioCall {
 
 	public assertCallContainsNonCriticalWord(word: string): boolean {
 		if (!this.callContainsWord(word)) {
-			this.feedback.pushMinorMistake('Your call didn\'t contain the word: ' + word);
+			this.feedback.pushMinorMistake("Your call didn't contain the word: " + word);
 
 			return false;
 		}
@@ -265,7 +271,7 @@ export default class RadioCall {
 
 	public assertCallContainsCriticalWords(words: string[]): boolean {
 		if (!this.callContainsWords(words)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			this.feedback.pushSevereMistake("Your call didn't contain the words: " + words.join(' '));
 			return false;
 		}
 		return true;
@@ -273,7 +279,7 @@ export default class RadioCall {
 
 	public assertCallContainsNonCriticalWords(words: string[]): boolean {
 		if (!this.callContainsWords(words)) {
-			this.feedback.pushMinorMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			this.feedback.pushMinorMistake("Your call didn't contain the words: " + words.join(' '));
 			return false;
 		}
 		return true;
@@ -296,7 +302,10 @@ export default class RadioCall {
 
 	private callEndsWithConsecutiveWords(words: string[]): boolean {
 		for (let i = 0; i < words.length; i++) {
-			if (this.getRadioCallWord(this.getRadioCallWordCount() - i - 1) != words[i].toLowerCase())
+			if (
+				this.getRadioCallWord(this.getRadioCallWordCount() - i - 1) !=
+				words[words.length - i - 1].toLowerCase()
+			)
 				return false;
 		}
 		return true;
@@ -313,7 +322,7 @@ export default class RadioCall {
 
 	public assertCallContainsConsecutiveCriticalWords(words: string[]): boolean {
 		if (!this.callContainsConsecutiveWords(words)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			this.feedback.pushSevereMistake("Your call didn't contain the words: " + words.join(' '));
 			return false;
 		}
 		return true;
@@ -321,13 +330,13 @@ export default class RadioCall {
 
 	public assertCallContainsConsecutiveNonCriticalWords(words: string[]): boolean {
 		if (!this.callContainsConsecutiveWords(words)) {
-			this.feedback.pushMinorMistake('Your call didn\'t contain the words: ' + words.join(' '));
+			this.feedback.pushMinorMistake("Your call didn't contain the words: " + words.join(' '));
 			return false;
 		}
 		return true;
 	}
 
-	private callContainsUserCallsign(): boolean {
+	public callContainsUserCallsign(): boolean {
 		const validUserCallsigns = this.getValidUserCallsigns();
 		return (
 			this.callContainsConsecutiveWords(validUserCallsigns[0].split(' ')) ||
@@ -339,13 +348,11 @@ export default class RadioCall {
 	public assertCallContainsUserCallsign(): boolean {
 		if (!this.callContainsUserCallsign()) {
 			if (this.prefix != '') {
-				this.feedback.pushSevereMistake('Your call didn\'t contain your callsign.');
+				this.feedback.pushSevereMistake("Your call didn't contain your callsign.");
 				return false;
 			}
 
-			this.feedback.pushSevereMistake(
-				'Your call didn\'t contain your callsign, including prefix.'
-			);
+			this.feedback.pushSevereMistake("Your call didn't contain your callsign, including prefix.");
 			return false;
 		}
 		return true;
@@ -361,7 +368,7 @@ export default class RadioCall {
 
 	public assertCallStartsWithUserCallsign(): boolean {
 		if (!this.callStartsWithUserCallsign()) {
-			this.feedback.pushSevereMistake('Your call didn\'t start with your callsign.');
+			this.feedback.pushSevereMistake("Your call didn't start with your callsign.");
 			return false;
 		}
 		return true;
@@ -377,7 +384,7 @@ export default class RadioCall {
 
 	public assertCallEndsWithUserCallsign(): boolean {
 		if (!this.callEndsWithUserCallsign()) {
-			this.feedback.pushSevereMistake('Your call didn\'t end with your callsign.');
+			this.feedback.pushSevereMistake("Your call didn't end with your callsign.");
 			return false;
 		}
 		return true;
@@ -393,9 +400,7 @@ export default class RadioCall {
 
 	public assertCallStartsWithTargetCallsign(): boolean {
 		if (!this.callStartsWithConsecutiveWords(this.getTargetCallsignWords())) {
-			this.feedback.pushSevereMistake(
-				'Your call didn\'t starts with the callsign of the target.'
-			);
+			this.feedback.pushSevereMistake("Your call didn't start with the callsign of the target.");
 			return false;
 		}
 		return true;
@@ -445,19 +450,18 @@ export default class RadioCall {
 		return this.getEndAerodrome().getMETORData().getSample(this.seed);
 	}
 
-	public getStartAerodromeTakeoffRunway(): Runway {
-		const runways = this.getStartAerodrome().getRunways();
-		return runways[this.seed.scenarioSeed % runways.length];
+	public getTakeoffRunway(): Runway {
+		return this.getStartAerodrome().getTakeoffRunway(this.seed);
 	}
 
 	public assertCallContainsTakeOffRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getStartAerodromeTakeoffRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().name])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are taking off from."
 			);
 			return false;
 		} else if (
-			!this.callContainsConsecutiveWords(['runway', this.getStartAerodromeTakeoffRunway().name])
+			!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])
 		) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
@@ -494,7 +498,7 @@ export default class RadioCall {
 	public assertCallContainsStartAerodromeName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().getShortName()])) {
 			this.feedback.pushSevereMistake(
-				'Your call didn\'t contain the name of the starting aerodrome.'
+				"Your call didn't contain the name of the starting aerodrome."
 			);
 			return false;
 		}
@@ -503,9 +507,7 @@ export default class RadioCall {
 
 	public assertCallContainsEndAerodromeName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().getShortName()])) {
-			this.feedback.pushSevereMistake(
-				'Your call didn\'t contain the name of the ending aerodrome.'
-			);
+			this.feedback.pushSevereMistake("Your call didn't contain the name of the ending aerodrome.");
 			return false;
 		}
 		return true;
@@ -513,7 +515,7 @@ export default class RadioCall {
 
 	public assertCallContainsSqwarkCode(): boolean {
 		if (!this.callContainsConsecutiveWords(['squawk', this.currentTransponderFrequency + ''])) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the squawk code.');
+			this.feedback.pushSevereMistake("Your call didn't contain the squawk code.");
 			return false;
 		}
 		return true;
@@ -521,7 +523,7 @@ export default class RadioCall {
 
 	public assertWILCOCallCorrect(): boolean {
 		if (!this.callStartsWithWord('wilco')) {
-			this.feedback.pushSevereMistake('Your call didn\'t start with WILCO (will comply).');
+			this.feedback.pushSevereMistake("Your call didn't start with WILCO (will comply).");
 			return false;
 		}
 		return true;
@@ -532,14 +534,14 @@ export default class RadioCall {
 			!this.callContainsConsecutiveWords(['roger', this.getTargetAllocatedCallsign()]) ||
 			!(this.callStartsWithUserCallsign() && this.getRadioCallWordCount() == 1)
 		) {
-			this.feedback.pushSevereMistake('Your call didn\'t start with ROGER (message received).');
+			this.feedback.pushSevereMistake("Your call didn't start with ROGER (message received).");
 			return false;
 		}
 		return true;
 	}
 
 	public assertCallContainsCurrentLocation(): boolean {
-		if (!this.callContainsConsecutiveWords(this.getRoutePoint().waypoint.name.split(' '))) {
+		if (!this.callContainsConsecutiveWords(this.getCurrentRoutePoint().waypoint.name.split(' '))) {
 			this.feedback.pushSevereMistake("Your call didn't contain your location.");
 			return false;
 		}
@@ -549,7 +551,7 @@ export default class RadioCall {
 	public assertCallContainsAltitude(): boolean {
 		if (
 			!this.callContainsWord('altitude') &&
-			!this.callContainsWord(this.routePoint.pose.altitude.toString())
+			!this.callContainsWord(this.getCurrentRoutePoint().pose.altitude.toString())
 		) {
 			this.feedback.pushSevereMistake("Your call didn't contain your altitude.");
 			return false;
@@ -565,7 +567,7 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromePressure(): boolean {
+	public assertCallContainsTakeoffPressure(): boolean {
 		const pressureSample = this.getStartAerodromeMETORSample().getPressureString().split(' ');
 		if (!this.callContainsWord(pressureSample[0])) {
 			this.feedback.pushSevereMistake("Your call didn't contain the air pressure.");
@@ -580,21 +582,23 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeTemperature(): boolean {
+	public assertCallContainsTakeoffTemperature(): boolean {
 		let temperatureSample = this.getStartAerodromeMETORSample().getTemperatureString();
 		let sign = '';
-		
+
 		if (temperatureSample[0] == '-' || temperatureSample[0] == '+') {
 			temperatureSample = temperatureSample.substring(1);
 			sign = temperatureSample[0];
 		}
 
 		if (!this.callContainsWord(temperatureSample)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the temperature.');
+			this.feedback.pushSevereMistake("Your call didn't contain the temperature.");
 			return false;
 		} else if (!this.callContainsWord(sign + temperatureSample)) {
 			this.feedback.pushMinorMistake(
-				'Your temperature readback didn\'t include the sign ' + sign + '. \n' +
+				"Your temperature readback didn't include the sign " +
+					sign +
+					'. \n' +
 					'Temperatures must have a sign when confusion is possible.'
 			);
 
@@ -603,21 +607,23 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeDewpoint(): boolean {
+	public assertCallContainsTakeoffDewpoint(): boolean {
 		let dewpointSample = this.getStartAerodromeMETORSample().getDewpointString();
 		let sign = '';
-		
+
 		if (dewpointSample[0] == '-' || dewpointSample[0] == '+') {
 			dewpointSample = dewpointSample.substring(1);
 			sign = dewpointSample[0];
 		}
 
 		if (!this.callContainsWord(dewpointSample)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the dewpoint.');
+			this.feedback.pushSevereMistake("Your call didn't contain the dewpoint.");
 			return false;
 		} else if (!this.callContainsWord(sign + dewpointSample)) {
 			this.feedback.pushMinorMistake(
-				'Your dewpoint readback didn\'t include the sign ' + sign + '. \n' +
+				"Your dewpoint readback didn't include the sign " +
+					sign +
+					'. \n' +
 					'Dewpoints must have a sign when confusion is possible.'
 			);
 
@@ -626,25 +632,25 @@ export default class RadioCall {
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindSpeed(): boolean {
-		// Wind speed followed by 'knots' 
+	public assertCallContainsTakeoffWindSpeed(): boolean {
+		// Wind speed followed by 'knots'
 		const windSpeedSample = this.getStartAerodromeMETORSample().getWindSpeedString().split(' ');
 		if (!this.callContainsWord(windSpeedSample[0])) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the wind speed.');
+			this.feedback.pushSevereMistake("Your call didn't contain the wind speed.");
 			return false;
 		} else if (!this.callContainsWord(windSpeedSample[1])) {
-			this.feedback.pushMinorMistake('Your call didn\'t contain the wind speed units.');
+			this.feedback.pushMinorMistake("Your call didn't contain the wind speed units.");
 			return true;
 		}
 		return true;
 	}
 
-	public assertCallContainsStartAerodromeWindDirection(): boolean {
+	public assertCallContainsTakeoffWindDirection(): boolean {
 		const windDirectionSample = this.getStartAerodromeMETORSample()
 			.getWindDirectionString()
 			.split(' ');
 		if (!this.callContainsConsecutiveWords(windDirectionSample)) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain the wind direction.');
+			this.feedback.pushSevereMistake("Your call didn't contain the wind direction.");
 			return false;
 		}
 		return true;
@@ -653,21 +659,73 @@ export default class RadioCall {
 	// Currently only checks for VFR
 	public assertCallContainsFlightRules(): boolean {
 		if (!this.callContainsWord('VFR')) {
-			this.feedback.pushSevereMistake('Your call didn\'t contain your flight rules (VFR).');
+			this.feedback.pushSevereMistake("Your call didn't contain your flight rules (VFR).");
 			return false;
 		}
 		return true;
 	}
 
 	public getTakeoffRunwayTaxiway(): Taxiway {
-		return this.getStartAerodromeTakeoffRunway().taxiways[
-			this.seed.scenarioSeed % this.getStartAerodromeTakeoffRunway().taxiways.length
-		];
+		return this.getStartAerodrome().getTakeoffRunwayTaxiway(this.seed);
 	}
 
-	public getTakeoffRunwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getTakeoffRunwayTaxiway().holdingPoints[
-			this.seed.scenarioSeed % this.getTakeoffRunwayTaxiway().holdingPoints.length
-		];
+	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
+		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint(this.seed);
+	}
+
+	public getTakeoffTurnoutHeading(): number {
+		const firstWaypoint: Waypoint | null | undefined = this.route.find(
+			(x) =>
+				x.waypoint != undefined &&
+				x.waypoint.lat != this.route[0].waypoint.lat &&
+				x.waypoint.long != this.route[0].waypoint.long
+		)?.waypoint;
+
+		// If first waypoint doesnt exist then route generation has failed, unrecoverable
+		if (firstWaypoint == null || firstWaypoint == undefined)
+			throw new Error('No first waypoint in getTakeoffTurnoutHeading.');
+
+		const headingToFirstWaypoint = getHeadingBetween(
+			this.route[0].waypoint.lat,
+			this.route[0].waypoint.long,
+			firstWaypoint.lat,
+			firstWaypoint.long
+		);
+
+		// If turnout heading doesnt exist then most likely something has gone very wrong as
+		// there should have already been an error, issue will be with getHeadingTo method
+		if (headingToFirstWaypoint == undefined)
+			throw new Error('No heading in getTakeoffTurnoutHeading.');
+
+		return headingToFirstWaypoint;
+	}
+
+	public assertCallContainsTakeoffTurnoutHeading(): boolean {
+		if (!this.callContainsWord(this.getTakeoffTurnoutHeading().toString())) {
+			this.feedback.pushSevereMistake("Your call didn't contain your takeoff turnout heading.");
+			return false;
+		}
+		return true;
+	}
+
+	public getTakeoffTransitionAltitude(): number {
+		return this.getStartAerodrome().getTakeoffTransitionAltitude();
+	}
+
+	public assertCallContainsNotAboveTransitionAltitude(): boolean {
+		if (!this.callContainsWord('not') || !this.callContainsWord('above')) {
+			this.feedback.pushSevereMistake("Your call didn't contain 'not above'.");
+			return false;
+		}
+		if (!this.callContainsWord(this.getTakeoffTransitionAltitude().toString())) {
+			this.feedback.pushSevereMistake("Your call didn't contain the takeoff transition altitude.");
+			return false;
+		}
+		return true;
+	}
+
+	public getTakeoffTraffic(): string {
+		if (this.seed.scenarioSeed % 2 == 0) return 'Cessna 152 reported final';
+		else return '';
 	}
 }

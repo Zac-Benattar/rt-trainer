@@ -1,182 +1,272 @@
 import { ServerResponse } from './ServerClientTypes';
-import type { AirbornePoint, StartUpPoint, HoldingPointPoint } from './RoutePoints';
+import type RoutePoint from './RoutePoints';
 import type RadioCall from './RadioCall';
-import { StartUpStage } from './RouteStages';
+import { StartUpStage, TakeOffStage, TaxiStage } from './RouteStages';
 import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
-	public static parseCall(parseContext: RadioCall): ServerResponse {
-		switch (parseContext.getRoutePoint().stage) {
+	public static parseCall(radioCall: RadioCall): ServerResponse {
+		switch (radioCall.getCurrentRoutePoint().stage) {
 			case StartUpStage.RadioCheck:
-				return this.parseRadioCheck(parseContext);
+				return this.parseRadioCheck(radioCall);
 			case StartUpStage.DepartureInformationRequest:
-				return this.parseDepartureInformationRequest(parseContext);
+				return this.parseDepartureInformationRequest(radioCall);
 			case StartUpStage.ReadbackDepartureInformation:
-				return this.parseDepartureInformationReadback(parseContext);
-			case StartUpStage.TaxiRequest:
-				return this.parseTaxiRequest(parseContext);
-			case StartUpStage.TaxiClearanceReadback:
-				return this.parseTaxiReadback(parseContext);
-			case StartUpStage.RequestTaxiInformation:
-				return this.parseTaxiInformationRequest(parseContext);
-			case StartUpStage.AnnounceTaxiing:
-				return this.parseAnnounceTaxiing(parseContext);
+				return this.parseDepartureInformationReadback(radioCall);
+			case TaxiStage.TaxiRequest:
+				return this.parseTaxiRequest(radioCall);
+			case TaxiStage.TaxiClearanceReadback:
+				return this.parseTaxiClearanceReadback(radioCall);
+			case TaxiStage.RequestTaxiInformation:
+				return this.parseTaxiInformationRequest(radioCall);
+			case TaxiStage.AnnounceTaxiing:
+				return this.parseAnnounceTaxiing(radioCall);
+			case TakeOffStage.ReadyForDeparture:
+				return this.parseReadyForDeparture(radioCall);
+			case TakeOffStage.ReadbackAfterDepartureInformation:
+				return this.parseReadbackAfterDepartureInformation(radioCall);
+			case TakeOffStage.ReadbackClearance:
+				return this.parseReadbackClearance(radioCall);
+			case TakeOffStage.AcknowledgeTraffic:
+				return this.parseAcknowledgeTraffic(radioCall);
+			case TakeOffStage.AnnounceTakingOff:
+				return this.parseAnnounceTakingOff(radioCall);
 			default:
-				throw new Error('Unimplemented route point type');
+				throw new Error('Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage);
 		}
 	}
 
 	// Example: Wellesbourne Information, student Golf Oscar Foxtrot Lima Yankee, radio check One Eight Zero Decimal Zero Three
-	public static parseRadioCheck(parseContext: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${parseContext.getCurrentTarget()}, ${parseContext.getUserCallsignPhonetics()}, radio check ${parseContext.getCurrentRadioFrequencyPhonetics()}`;
+	public static parseRadioCheck(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhonetics()}, radio check ${radioCall.getCurrentRadioFrequencyPhonetics()}`;
 
-		parseContext.assertCallContainsCurrentRadioFrequency();
-		parseContext.assertCallStartsWithTargetCallsign();
-		parseContext.assertCallContainsUserCallsign();
-		parseContext.assertCallContainsConsecutiveCriticalWords(['radio', 'check']);
+		radioCall.assertCallContainsCurrentRadioFrequency();
+		radioCall.assertCallStartsWithTargetCallsign();
+		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['radio', 'check']);
 
 		// Return ATC response
-		const atcResponse = `${parseContext
+		const atcResponse = `${radioCall
 			.getUserCallsignPhonetics()
-			.toUpperCase()}, ${parseContext.getCurrentTarget()}, reading you five.`;
+			.toUpperCase()}, ${radioCall.getCurrentTarget()}, reading you five.`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedRadioCall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	// Example: Student Golf Oscar Foxtrot Lima Yankee, request departure information
-	public static parseDepartureInformationRequest(parseContext: RadioCall): ServerResponse {
-		const expectedRadiocall = `${parseContext
+	public static parseDepartureInformationRequest(radioCall: RadioCall): ServerResponse {
+		const expectedRadiocall = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toLowerCase()} request departure information`;
 
-		parseContext.assertCallStartsWithUserCallsign();
-		parseContext.assertCallContainsConsecutiveCriticalWords([
-			'request',
-			'departure',
-			'information'
-		]);
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'departure', 'information']);
 
 		// Return ATC response
-		const metorSample: METORDataSample = parseContext.getStartAerodromeMETORSample();
-		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
-			parseContext.getStartAerodromeTakeoffRunway().name
+		const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, runway ${
+			radioCall.getTakeoffRunway().name
 		}, surface wind ${metorSample.getWindDirectionString()} ${metorSample.getWindSpeedString()}, QNH ${metorSample.getPressureString()}, temperature ${metorSample.getTemperatureString()} dewpoint ${metorSample.getDewpointString()}`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedRadiocall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadiocall);
 	}
 
 	// Example: Runway 24, QNH 1013, Student Golf Lima Yankee
-	public static parseDepartureInformationReadback(parseContext: RadioCall): ServerResponse {
-		const runwayName: string = parseContext.getStartAerodromeTakeoffRunway().name;
-		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()} runway ${runwayName} qnh ${parseContext
+	public static parseDepartureInformationReadback(radioCall: RadioCall): ServerResponse {
+		const runwayName: string = radioCall.getTakeoffRunway().name;
+		const expectedRadioCall: string = `Runway ${runwayName} QNH ${radioCall
 			.getStartAerodromeMETORSample()
-			.getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
+			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertCallStartsWithUserCallsign();
-		parseContext.assertCallContainsTakeOffRunwayName();
-		parseContext.assertCallContainsStartAerodromePressure();
-		parseContext.assertCallEndsWithUserCallsign();
+		radioCall.assertCallContainsTakeOffRunwayName();
+		radioCall.assertCallContainsTakeoffPressure();
+		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
-		return new ServerResponse(parseContext.getFeedback(), '', expectedRadioCall);
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
 	// Example: Student Golf Lima Yankee, by the south side hangers, request taxi for vfr flight to birmingham
-	public static parseTaxiRequest(parseContext: RadioCall): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} ${parseContext.getAircraftType()} by the ${
-			parseContext.getStartAerodromeStartingPoint().name
-		} request taxi VFR to ${parseContext.getEndAerodrome().getShortName()}`;
+	public static parseTaxiRequest(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} ${radioCall.getAircraftType()} by the ${
+			radioCall.getStartAerodromeStartingPoint().name
+		} request taxi VFR to ${radioCall.getEndAerodrome().getShortName()}`;
 
-		parseContext.assertCallStartsWithTargetCallsign();
-		parseContext.assertCallContainsAircraftType();
-		parseContext.assertCallContainsScenarioStartPoint();
-		parseContext.assertCallContainsStartAerodromeName();
-		parseContext.assertCallContainsEndAerodromeName();
-		parseContext.assertCallContainsConsecutiveCriticalWords(['request', 'taxi']);
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsScenarioStartPoint();
+		radioCall.assertCallContainsEndAerodromeName();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'taxi']);
+		radioCall.assertCallContainsCriticalWord('vfr');
 
 		// Return ATC response
-		const atcResponse = `${parseContext
+		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
-			parseContext.getTakeoffRunwayHoldingPoint().name
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
 		} via taxiway charlie. Hold short of runway ${
-			parseContext.getStartAerodromeTakeoffRunway().name
-		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
+			radioCall.getTakeoffRunway().name
+		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedradiocall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, qnh 1013, Student Golf Lima Yankee
-	public static parseTaxiReadback(parseContext: RadioCall): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()} taxi holding point ${
-			parseContext.getTakeoffRunwayHoldingPoint().name
-		} runway ${parseContext.getStartAerodromeTakeoffRunway().name} qnh ${parseContext
+	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, QNH 1013, Student Golf Lima Yankee
+	public static parseTaxiClearanceReadback(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} taxi holding point ${
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
+		} runway ${radioCall.getTakeoffRunway().name} QNH ${radioCall
 			.getStartAerodromeMETORSample()
-			.getPressureString()} ${parseContext.getTargetAllocatedCallsign()}`;
+			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertCallStartsWithTargetCallsign();
-		parseContext.assertCallContainsCriticalWord('taxi');
-		parseContext.assertCallContainsConsecutiveCriticalWords(['holding', 'point']);
-		parseContext.assertCallContainsTakeOffRunwayName();
-		parseContext.assertCallEndsWithUserCallsign();
-		parseContext.assertCallContainsTakeOffRunwayHoldingPoint();
+		radioCall.assertCallContainsCriticalWord('taxi');
+		radioCall.assertCallContainsConsecutiveCriticalWords(['holding', 'point']);
+		radioCall.assertCallContainsTakeOffRunwayHoldingPoint();
+		radioCall.assertCallContainsTakeOffRunwayName();
+		radioCall.assertCallContainsTakeoffPressure();
+		radioCall.assertCallEndsWithUserCallsign();
 
 		// ATC does not respond to this message
-		return new ServerResponse(parseContext.getFeedback(), '', expectedradiocall);
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
-	public static parseTaxiInformationRequest(parseContext: RadioCall): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, by the ${
-			parseContext.getStartAerodromeStartingPoint().name
-		}, request taxi information, VFR to ${parseContext.getEndAerodrome().getShortName()}`;
+	public static parseTaxiInformationRequest(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, by the ${
+			radioCall.getStartAerodromeStartingPoint().name
+		}, request taxi information, VFR to ${radioCall.getEndAerodrome().getShortName()}`;
 
-		parseContext.assertCallStartsWithUserCallsign();
-		parseContext.assertCallContainsConsecutiveCriticalWords(['request', 'taxi', 'information']);
-		parseContext.assertCallContainsFlightRules();
-		parseContext.assertCallContainsScenarioStartPoint();
-		parseContext.assertCallContainsEndAerodromeName();
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'taxi', 'information']);
+		radioCall.assertCallContainsFlightRules();
+		radioCall.assertCallContainsScenarioStartPoint();
+		radioCall.assertCallContainsEndAerodromeName();
 
 		// Return ATC response
-		const atcResponse = `${parseContext.getTargetAllocatedCallsign().toUpperCase()}, runway ${
-			parseContext.getStartAerodromeTakeoffRunway().name
-		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, runway ${
+			radioCall.getTakeoffRunway().name
+		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedradiocall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	public static parseAnnounceTaxiing(parseContext: RadioCall): ServerResponse {
-		const expectedradiocall: string = `${parseContext.getTargetAllocatedCallsign()}, taxiing to runway ${
-			parseContext.getStartAerodromeTakeoffRunway().name
-		}, QNH ${parseContext.getStartAerodromeMETORSample().getPressureString()}`;
+	public static parseAnnounceTaxiing(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, taxiing to runway ${
+			radioCall.getTakeoffRunway().name
+		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
 
-		parseContext.assertCallStartsWithUserCallsign();
-		parseContext.assertCallContainsCriticalWord('taxiing');
-		parseContext.assertCallContainsTakeOffRunwayName();
-		parseContext.assertCallContainsStartAerodromePressure();
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsCriticalWord('taxiing');
+		radioCall.assertCallContainsTakeOffRunwayName();
+		radioCall.assertCallContainsTakeoffPressure();
 
 		// ATC does not respond to this message
-		return new ServerResponse(parseContext.getFeedback(), '', expectedradiocall);
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Student Golf Lima Yankee, ready for departure, request right turnout heading 330 degrees
+	public static parseReadyForDeparture(radioCall: RadioCall): ServerResponse {
+		let expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ready for departure`;
+		if (radioCall.getStartAerodrome().isControlled()) {
+			expectedRadioCall += ` request right turnout heading ${radioCall.getTakeoffTurnoutHeading()} degrees`;
+		}
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['ready', 'for', 'departure']);
+
+		if (radioCall.getStartAerodrome().isControlled()) {
+			radioCall.assertCallContainsTakeoffTurnoutHeading();
+		}
+
+		// Return ATC response
+		let atcResponse: string = radioCall.getTargetAllocatedCallsign();
+		if (radioCall.getStartAerodrome().isControlled()) {
+			atcResponse += `, hold position. After departure turn right approved, climb not above ${radioCall.getTakeoffTransitionAltitude()} until zone boundary`;
+		} else {
+			const traffic: string = radioCall.getTakeoffTraffic() + ', ';
+			if (traffic) {
+				atcResponse += `traffic is ${traffic}, `;
+			} else {
+				atcResponse += 'no reported traffic, ';
+			}
+			const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
+			atcResponse += metorSample.getWindDirectionString() + ', ' + metorSample.getWindSpeedString();
+		}
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	// Example: Holding. After departure right turn approved, not above 1500 feet until zone boundary. Student Golf Lima Yankee
+	public static parseReadbackAfterDepartureInformation(radioCall: RadioCall): ServerResponse {
+		let expectedRadioCall: string = `Holding.`;
+		if (radioCall.getStartAerodrome().isControlled()) {
+			expectedRadioCall += ` After departure right turn approved, not above ${radioCall.getTakeoffTransitionAltitude()} until zone boundary.`;
+		}
+		expectedRadioCall += ` ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsNonCriticalWord('Holding');
+		if (radioCall.getStartAerodrome().isControlled()) {
+			radioCall.assertCallContainsNotAboveTransitionAltitude();
+		}
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Cleared for takeoff, Student Golf Lima Yankee
+	public static parseReadbackClearance(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Cleared for takeoff, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['cleared', 'for', 'takeoff']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Roger, holding position, Student Golf Lima Yankee
+	public static parseAcknowledgeTraffic(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Roger, holding position, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsCriticalWord('roger');
+		radioCall.assertCallContainsConsecutiveCriticalWords(['holding', 'position']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	// Example: Taking off, Student Golf Lima Yankee
+	public static parseAnnounceTakingOff(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Taking off, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['taking', 'off']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, roger.`;
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	/* Parse initial contact with new ATC unit.
-	Example Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
+	Example: Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
 	public static parseNewAirspaceInitialContact(
-		currentPoint: StartUpPoint | HoldingPointPoint | AirbornePoint,
-		parseContext: RadioCall
+		currentPoint: RoutePoint,
+		radioCall: RadioCall
 	): ServerResponse {
-		const expectedradiocall: string = `${parseContext
+		const expectedRadioCall: string = `${radioCall
 			.getCurrentTarget()
-			.toLowerCase()}, ${parseContext.getTargetAllocatedCallsign()}`;
+			.toLowerCase()}, ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertCallStartsWithTargetCallsign();
-		parseContext.assertCallContainsUserCallsign();
+		radioCall.assertCallStartsWithTargetCallsign();
+		radioCall.assertCallContainsUserCallsign();
 
 		// Return ATC response
-		const atcResponse = `${parseContext
+		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
-			.toUpperCase()}, ${parseContext.getCurrentTarget()}.`;
+			.toUpperCase()}, ${radioCall.getCurrentTarget()}.`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedradiocall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	/* Parse response to ATC unit acknowledging initial contact
@@ -185,22 +275,19 @@ rules, departure and destination aerodromes, position,
 flight level/altitude including passing/cleared level if (not
 in level flight, and additional details such as next waypoint(s)
 accompanied with the planned times to reach them */
-	public static parseNewAirspaceGiveFlightInformationToATC(
-		currentPoint: AirbornePoint,
-		parseContext: RadioCall
-	): ServerResponse {
+	public static parseNewAirspaceGiveFlightInformationToATC(radioCall: RadioCall): ServerResponse {
 		const nearestwaypoint: string = 'Test Waypoint';
 		const distancefromnearestwaypoint: number = 0.0;
 		const directiontonearestwaypoint: string = 'Direction';
 
 		const nextwaypoint: string = 'Next Waypoint';
 
-		const expectedRadioCall: string = `${parseContext.getTargetAllocatedCallsign()}, ${parseContext.getAircraftType()} ${currentPoint.flightRules.toString()} from ${parseContext
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getAircraftType()} VFR from ${radioCall
 			.getStartAerodrome()
-			.getShortName()} to ${parseContext
+			.getShortName()} to ${radioCall
 			.getEndAerodrome()
 			.getShortName()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${
-			currentPoint.pose.altitude
+			radioCall.getCurrentRoutePoint().pose.altitude
 		}, ${nextwaypoint}`;
 
 		// TODO
@@ -211,12 +298,12 @@ accompanied with the planned times to reach them */
 Should consist of aircraft callsign and squark code */
 	public static parseNewAirspaceSquark(
 		sqwarkFrequency: number,
-		parseContext: RadioCall
+		radioCall: RadioCall
 	): ServerResponse {
-		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${parseContext.getTargetAllocatedCallsign()}`;
+		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertCallContainsSqwarkCode();
-		parseContext.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsSqwarkCode();
+		radioCall.assertCallContainsUserCallsign();
 
 		const nearestWaypoint: string = 'Test Waypoint';
 		const distanceFromNearestWaypoint: number = 0.0;
@@ -224,54 +311,54 @@ Should consist of aircraft callsign and squark code */
 		const nextWayPoint: string = 'Next Waypoint';
 
 		// Return ATC response
-		const atcResponse = `${parseContext
+		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
 
-		return new ServerResponse(parseContext.getFeedback(), atcResponse, expectedRadioCall);
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	/* Parse Wilco in response to an instruction from ATC unit.
 Should consist of Wilco followed by aircraft callsign */
-	public static parseWILCO(parseContext: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `Wilco, ${parseContext.getTargetAllocatedCallsign()}`;
+	public static parseWILCO(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Wilco, ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertWILCOCallCorrect();
+		radioCall.assertWILCOCallCorrect();
 
 		// ATC does not respond to this message
-		return new ServerResponse(parseContext.getFeedback(), '', expectedRadioCall);
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
 	/* Parse Roger in response to an instruction from ATC unit which
 	requires no readback. Should consist of Roger followed by aircraft
 	callsign or simply just the aircraft callsign alone. */
-	public static parseRoger(parseContext: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `Roger, ${parseContext.getTargetAllocatedCallsign()}`;
+	public static parseRoger(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Roger, ${radioCall.getTargetAllocatedCallsign()}`;
 
-		parseContext.assertRogerCallCorrect();
+		radioCall.assertRogerCallCorrect();
 
 		// ATC does not respond to this message
-		return new ServerResponse(parseContext.getFeedback(), '', expectedRadioCall);
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
 	/* Parse VFR position report.
 Should contain the aircraft callsign, location relative to a waypoint,
 and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
-	public static parseVFRPositionReport(parseContext: RadioCall): ServerResponse {
-		if (parseContext.getRoutePoint().waypoint == null) {
+	public static parseVFRPositionReport(radioCall: RadioCall): ServerResponse {
+		if (radioCall.getCurrentRoutePoint().waypoint == null) {
 			throw new Error('Waypoint not found');
 		}
 
 		// May need more details to be accurate to specific situation
 		const expectedRadioCall: string = `
-        "${parseContext.getTargetAllocatedCallsign()}, overhead ${
-			parseContext.getRoutePoint().waypoint.name
-		}, ${parseContext.getRoutePoint().pose.altitude} feet`;
+        "${radioCall.getTargetAllocatedCallsign()}, overhead ${radioCall.getCurrentFix().name}, ${
+			radioCall.getCurrentRoutePoint().pose.altitude
+		} feet`;
 
-		parseContext.assertCallStartsWithUserCallsign();
-		parseContext.assertCallContainsCurrentLocation();
-		parseContext.assertCallContainsAltitude();
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsCurrentLocation();
+		radioCall.assertCallContainsAltitude();
 
 		// TODO
 	}

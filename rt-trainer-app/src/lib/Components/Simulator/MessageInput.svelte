@@ -1,5 +1,10 @@
 <script lang="ts">
-	import { ExpectedUserMessageStore, SpeechInputStore, UserMessageStore } from '$lib/stores';
+	import {
+		ExpectedUserMessageStore,
+		LiveFeedbackStore,
+		SpeechInputStore,
+		UserMessageStore
+	} from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { SlideToggle, getModalStore } from '@skeletonlabs/skeleton';
@@ -9,6 +14,7 @@
 
 	export let speechRecognitionSupported: boolean = false;
 	let speechInput: boolean = false;
+	let liveFeedback: boolean = false;
 	let mounted: boolean = false;
 	let message: string = '';
 
@@ -52,13 +58,15 @@
 
 	$: SpeechInputStore.set(speechInput);
 
+	$: LiveFeedbackStore.set(liveFeedback);
+
 	onMount(() => {
 		mounted = true;
 	});
 </script>
 
-<div class="message-input-container flex flex-col grid-cols-1 bg-surface-500">
-	<div class="grow">
+<div class="message-input-container flex flex-col grid-cols-1 gap-2 bg-surface-500">
+	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
 			id="call-input"
@@ -70,7 +78,22 @@
 		/>
 	</div>
 
-	<div class="flex flex-row grid-rows-1 justify-end center gap-x-3 px-5 bg-surface-500">
+	<div class="flex flex-row gap-x-3 justify-end">
+		<Tooltip tip="Shows feedback immediately, instead of just at the end of the scenario." bottom>
+			<div class="flex flex-col py-2">
+				<SlideToggle
+					id="enable-live-feedback"
+					name="slider-label"
+					checked={liveFeedback}
+					active="bg-primary-500"
+					size="sm"
+					on:click={() => {
+						liveFeedback = !liveFeedback;
+					}}
+					>Feedback
+				</SlideToggle>
+			</div>
+		</Tooltip>
 		{#if speechRecognitionSupported}
 			<Tooltip
 				tip="Speech recognition is experimental, you may need to correct the recorded text."
@@ -91,7 +114,7 @@
 								body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
 							});
 						}}
-						>Voice input
+						>Voice Input
 					</SlideToggle>
 				</div>
 			</Tooltip>
@@ -108,15 +131,17 @@
 						active="bg-primary-500"
 						size="sm"
 						disabled
-						>Voice input
+						>Voice Input
 					</SlideToggle>
 				</div>
 			</Tooltip>
 		{/if}
 
-		<button class="submit-button btn bg-surface-400" on:click={submit}>Submit</button>
+		<button class="submit-button btn px-3 bg-surface-400" on:click={submit}>Submit</button>
 
-		<button class="clear-button btn self-end bg-surface-400" on:click={handleDelete}>Clear</button>
+		<button class="clear-button btn bg-surface-400" on:click={handleDelete}
+			>Clear</button
+		>
 	</div>
 </div>
 
@@ -134,5 +159,9 @@
 		width: 100%;
 		resize: none;
 		overflow: auto;
+	}
+
+	.btn {
+		height: 40px;
 	}
 </style>

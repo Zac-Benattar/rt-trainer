@@ -24,15 +24,20 @@
 		SpeechOutputStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
-		RadioCallsStore as RadioCallsHistoryStore
+		RadioCallsHistoryStore,
+		LiveFeedbackStore,
+		CurrentRoutePointIndexStore,
+		EndPointIndexStore,
+		WaypointStore
 	} from '$lib/stores';
-	import type { RoutePoint } from '$lib/ts/RouteStates';
+	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import { Feedback } from '$lib/ts/Feedback';
+	import type { Waypoint } from '$lib/ts/RouteTypes';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -44,8 +49,9 @@
 	let atcMessage: string;
 	let userMessage: string;
 	let kneeboardText: string;
-	let route: RoutePoint[] | undefined = [];
+	let route: RoutePoint[] = [];
 	let currentPointIndex: number = 0;
+	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
 
@@ -53,6 +59,7 @@
 	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let readRecievedCalls: boolean = false;
+	let liveFeedback: boolean = false;
 
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
@@ -65,7 +72,7 @@
 		modalStore.trigger({
 			type: 'alert',
 			title: 'Server did not respond',
-			body: 'This may be due to a bad request or the server being offline. Come back later and try again.'
+			body: 'This may be due to a bad request or the feature you are trying to use not being implemented yet. This software is still early in development, expect errors like this one.'
 		});
 	}
 
@@ -73,8 +80,16 @@
 		speakATCMessage();
 	}
 
+	RouteStore.subscribe((value) => {
+		route = value;
+	});
+
 	SpeechOutputStore.subscribe((value) => {
 		readRecievedCalls = value;
+	});
+
+	LiveFeedbackStore.subscribe((value) => {
+		liveFeedback = value;
 	});
 
 	GenerationParametersStore.subscribe((value) => {
@@ -107,6 +122,26 @@
 		kneeboardText = value;
 	});
 
+	CurrentRoutePointIndexStore.subscribe((value) => {
+		if (value < 0) {
+			value = 0;
+		}
+
+		if (route.length > 0 && value >= route.length) {
+			console.log('Invalid route point index: ' + value);
+		} else {
+			currentPointIndex = value;
+		}
+	});
+
+	EndPointIndexStore.subscribe((value) => {
+		if (route && value >= route.length) {
+			value = route.length - 1;
+		}
+
+		endPointIndex = value;
+	});
+
 	function speakATCMessage() {
 		if ('speechSynthesis' in window) {
 			var utterance = new SpeechSynthesisUtterance();
@@ -137,33 +172,28 @@
 		}
 
 		// Check state matches expected state
-		if (!route) {
-			// Attempt to get state from server
-			initiateScenario();
-
-			if (!route) {
-				console.log('Error: No route');
-				modalStore.trigger({
-					type: 'alert',
-					title: 'Connection to server failed',
-					body: 'This may be due to the server being offline. Come back later and try again.'
-				});
-				return;
-			}
+		if (route.length == 0) {
+			console.log('Error: No route');
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Connection to server failed',
+				body: 'This may be due to the server being offline. Come back later and try again.'
+			});
+			return;
 		}
 
 		if (radioState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
-				body: 'Radio dial is off'
+				body: 'Radio is off'
 			});
 			return;
 		} else if (transponderState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
-				body: 'Transponder dial is off'
+				body: 'Transponder is off'
 			});
 			return;
 		} else if (
@@ -216,10 +246,27 @@
 			return value;
 		});
 
+		if (liveFeedback) {
+			// Clear previous toasts so only one feedback shown at a time
+			toastStore.clear();
+
+			// Do nothing if the call was flawless
+			if (!feedback.isFlawless()) {
+				// Show current mistakes
+				const t: ToastSettings = {
+					message: feedback.getMistakes().join('\n'),
+					timeout: 15000,
+					hoverable: true,
+					background: 'variant-filled-warning'
+				};
+				toastStore.trigger(t);
+			}
+		}
+
 		// Get whether there are severe mistakes, and record all minor ones
-		let callsignMentioned: boolean = userMessage.search(aircraftDetails.callsign) != -1;
+		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();
 		let minorMistakes: string[] = feedback.getMinorMistakes();
-		let severeMistakes: string[] = feedback.getSevereMistakes();;
+		let severeMistakes: string[] = feedback.getSevereMistakes();
 
 		// Handle mistakes
 		if (severeMistakes.length > 0) {
@@ -278,7 +325,7 @@
 		}
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
-		if (currentPointIndex == route.length - 1) {
+		if (currentPointIndex == endPointIndex) {
 			const m: ModalSettings = {
 				type: 'confirm',
 				title: 'Scenario Complete',
@@ -296,35 +343,62 @@
 
 		// Update the simulator with the next route point
 		failedAttempts = 0;
-		currentPointIndex++;
+		CurrentRoutePointIndexStore.set(currentPointIndex + 1);
+		CurrentRoutePointStore.set(route[currentPointIndex]);
 		ATCMessageStore.set(serverResponse.responseCall);
 		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}
 
 	async function initiateScenario() {
 		// Get the state from the server
-		route = await getRouteFromServer();
+		const serverRouteResponse = await getRouteFromServer();
+		const serverWaypointsResponse = await getWaypointsFromServer();
 
-		if (route === undefined) {
+		if (serverRouteResponse === undefined || serverWaypointsResponse === undefined) {
 			// Handle error
 			serverNotResponding = true;
 
 			return 0;
 		} else {
-			console.log(route);
+			console.log(serverRouteResponse);
+			console.log(serverWaypointsResponse);
 
 			// Update stores with the route
-			CurrentTargetStore.set(route[0].updateData.currentTarget);
-			CurrentTargetFrequencyStore.set(route[0].updateData.currentTargetFrequency);
-			RouteStore.set(route);
-			CurrentRoutePointStore.set(route[0]);
+			CurrentTargetStore.set(serverRouteResponse[currentPointIndex].updateData.currentTarget);
+			CurrentTargetFrequencyStore.set(
+				serverRouteResponse[currentPointIndex].updateData.currentTargetFrequency
+			);
+			RouteStore.set(serverRouteResponse);
+			CurrentRoutePointStore.set(serverRouteResponse[currentPointIndex]);
+			WaypointStore.set(serverWaypointsResponse);
+			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
+			// So we need to set it to the last point in the route if it has not been set
+			if (endPointIndex == -1) {
+				EndPointIndexStore.set(serverRouteResponse.length - 1);
+			}
 		}
 	}
 
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
 			const response = await axios.get(
-				`/scenario/seed=${seed.seedString}?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+				`/scenario/seed=${seed.seedString}/route?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
+			);
+
+			return response.data;
+		} catch (error: any) {
+			if (error.message === 'Network Error') {
+				serverNotResponding = true;
+			} else {
+				console.error('Error: ', error);
+			}
+		}
+	}
+
+	async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> {
+		try {
+			const response = await axios.get(
+				`/scenario/seed=${seed.seedString}/waypoints?airborneWaypoints=${airborneWaypoints}`
 			);
 
 			return response.data;
@@ -348,7 +422,8 @@
 			currentRadioCall = new RadioCall(
 				userMessage,
 				seed,
-				route[currentPointIndex],
+				route,
+				currentPointIndex,
 				aircraftDetails.prefix,
 				aircraftDetails.callsign,
 				route[currentPointIndex].updateData.callsignModified,
@@ -360,7 +435,7 @@
 				aircraftDetails.aircraftType
 			);
 
-			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}`, {
+			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}/parse`, {
 				data: currentRadioCall.getJSONData()
 			});
 
