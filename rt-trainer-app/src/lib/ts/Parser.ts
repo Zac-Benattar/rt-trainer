@@ -48,7 +48,7 @@ export default class Parser {
 		// Return ATC response
 		const atcResponse = `${radioCall
 			.getUserCallsignPhonetics()
-			.toUpperCase()}, ${radioCall.getCurrentTarget()}, reading you five.`;
+			.toUpperCase()}, ${radioCall.getCurrentTarget()}, readability 5, pass your message.`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
