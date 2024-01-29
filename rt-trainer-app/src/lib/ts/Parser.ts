@@ -1,7 +1,13 @@
 import { ServerResponse } from './ServerClientTypes';
 import type RoutePoint from './RoutePoints';
 import type RadioCall from './RadioCall';
-import { StartUpStage, TakeOffStage, TaxiStage } from './RouteStages';
+import {
+	CircuitAndLandingStage,
+	InboundForJoinStage,
+	StartUpStage,
+	TakeOffStage,
+	TaxiStage
+} from './RouteStages';
 import type { METORDataSample } from './Aerodrome';
 
 export default class Parser {
@@ -31,6 +37,22 @@ export default class Parser {
 				return this.parseAcknowledgeTraffic(radioCall);
 			case TakeOffStage.AnnounceTakingOff:
 				return this.parseAnnounceTakingOff(radioCall);
+			case InboundForJoinStage.RequestJoin:
+				return this.parseRequestJoin(radioCall);
+			case InboundForJoinStage.ReportDetails:
+				return this.parseRequestOverheadJoinPassMessage(radioCall);
+			case InboundForJoinStage.ReadbackOverheadJoinClearance:
+				return this.parseReadbackOverheadJoinClearance(radioCall);
+			case InboundForJoinStage.ReportAerodromeInSight:
+				return this.parseAnnounceAerodromeInSight(radioCall);
+			case InboundForJoinStage.ContactTower:
+				return this.parselandingContactTower(radioCall);
+			case CircuitAndLandingStage.ReportFinal:
+				return this.parseAnnounceFinal(radioCall);
+			case CircuitAndLandingStage.AcknowledgeGoAround:
+				return this.parseAcknowledgeGoAroundInstruction(radioCall);
+			case CircuitAndLandingStage.AnnounceGoAround:
+				return this.parseAnnounceGoAround(radioCall);
 			default:
 				throw new Error(
 					'Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage
@@ -348,15 +370,15 @@ Should contain the aircraft callsign, location relative to a waypoint,
 and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
 	public static parseVFRPositionReport(radioCall: RadioCall): ServerResponse {
-		if (radioCall.getCurrentRoutePoint().waypoint == null) {
+		if (radioCall.getCurrentFix() == null) {
 			throw new Error('Waypoint not found');
 		}
 
 		// May need more details to be accurate to specific situation
 		const expectedRadioCall: string = `
-        "${radioCall.getTargetAllocatedCallsign()}, overhead ${radioCall.getCurrentFix().name}, ${
-			radioCall.getCurrentRoutePoint().pose.altitude
-		} feet`;
+        "${radioCall.getTargetAllocatedCallsign()}, overhead ${
+			radioCall.getCurrentFix().name
+		}, ${radioCall.getCurrentAltitude()} feet`;
 
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsCurrentLocation();
@@ -372,7 +394,6 @@ if (not in level flight. */
 		radioCall.assertCallContainsUserCallsign();
 		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'join']);
 
-		// Return ATC response
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, ${radioCall.getCurrentTarget()}, pass your message`;
@@ -383,17 +404,16 @@ if (not in level flight. */
 	public static parseRequestOverheadJoinPassMessage(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ${
 			radioCall.getAircraftType
-		} inbound from ${radioCall.getPreviousWaypointName()}, ${radioCall.getDistanceToPreviousWaypoint()}, ${radioCall.getCurrentAltitude()}, information ${radioCall.getCurrentATISLetter()}, request overhead join`;
+		} inbound from ${radioCall.getPreviousWaypointName()}, ${radioCall.getPositionRelativeToLastWaypoint()}, ${radioCall.getCurrentAltitude()}, information ${radioCall.getCurrentATISLetter()}, request overhead join`;
 
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsAircraftType();
 		radioCall.assertCallContainsPreviousWaypointName();
-		radioCall.assertCallContainsLocationRelativeToPreviousWaypoint();
+		radioCall.assertCallContainsPositionRelativeToLastWaypoint();
 		radioCall.assertCallContainsCurrentAltitude();
 		radioCall.assertCallContainsCurrentATISLetter();
 		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'overhead', 'join']);
 
-		// Return ATC response
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getJoinOverheadAltitude()} ${radioCall
@@ -476,5 +496,94 @@ if (not in level flight. */
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAnnounceFinal(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, final`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsCriticalWord('final');
+
+		let atcResponse = '';
+		if (radioCall.getEndAerodrome().isControlled()) {
+			atcResponse = `${radioCall
+				.getTargetAllocatedCallsign()
+				.toUpperCase()}, continue approach, ${radioCall.getLandingTraffic()}`;
+		} else {
+			atcResponse = `${radioCall
+				.getTargetAllocatedCallsign()
+				.toUpperCase()}, surface wind ${radioCall
+				.getEndAerodromeMETORSample()
+				.getWindDirectionString()} ${radioCall
+				.getEndAerodromeMETORSample()
+				.getWindSpeedString()}. ${radioCall.getLandingTraffic()}`;
+		}
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAcknowledgeContinueApproach(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Continue approach, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['continue', 'approach']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseAcknowledgeClearedToLand(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Cleared to land, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['cleared', 'to', 'land']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseAcklowledgeVacateRunwayInstruction(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Taxi to the end, wilco, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsCriticalWords(['taxi', 'end']);
+		radioCall.assertCallContainsWilco();
+		radioCall.assertCallEndsWithUserCallsign();
+
+		let atcResponse = '';
+		if (radioCall.getEndAerodrome().isControlled()) {
+			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
+				.getEndAerodrome()
+				.getShortName()} tower on ${radioCall.getEndAerodrome().getLandingFrequency()}`;
+		}
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAnnounceRunwayVacated(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, runway vacated`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['runway', 'vacated']);
+
+		let atcResponse = '';
+		if (radioCall.getEndAerodrome().isControlled()) {
+			atcResponse = `${radioCall
+				.getTargetAllocatedCallsign()
+				.toUpperCase()}, taxi to ${radioCall.getLandingParkingSpot()}`;
+		} else {
+			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, roger`;
+		}
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseReadbackTaxiParkingSpot(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Taxi to ${radioCall.getLandingParkingSpot()}, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['taxi', 'to']);
+		radioCall.assertCallContainsLandingParkingSpot();
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 }

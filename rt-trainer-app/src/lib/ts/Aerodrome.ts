@@ -1,7 +1,13 @@
 import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
 import controlledAerodromes from '../../data/controlled_aerodromes.json';
 import type Seed from './Seed';
-import { getHeadingBetween, getNewCoordsFromCoord, numberToPhoneticString, seededNormalDistribution, toRadians } from './utils';
+import {
+	getHeadingBetween,
+	getNewCoordsFromCoord,
+	numberToPhoneticString,
+	seededNormalDistribution,
+	toRadians
+} from './utils';
 
 export type RunwayHoldingPoint = {
 	name: string;
@@ -138,10 +144,15 @@ export class Runway {
 	}
 
 	/* Returns a point some distance (in kms) along the runway vector. */
-	public getPointAlongVector(distanceFromCenter: number): {lat: number, long: number} {
+	public getPointAlongVector(distanceFromCenter: number): { lat: number; long: number } {
 		const centerPoint = this.getCenterPoint();
-		
-		return getNewCoordsFromCoord(centerPoint[0], centerPoint[1], this.trueHeading, distanceFromCenter);
+
+		return getNewCoordsFromCoord(
+			centerPoint[0],
+			centerPoint[1],
+			this.trueHeading,
+			distanceFromCenter
+		);
 	}
 }
 
@@ -399,6 +410,12 @@ abstract class Aerodrome {
 		const taxiway = this.getLandingRunwayTaxiway(seed);
 		const index = seed.scenarioSeed % taxiway.holdingPoints.length;
 		return taxiway.holdingPoints[index];
+	}
+
+	public getLandingParkingSpot(seed: Seed): string {
+		const startPoints = this.getStartPoints();
+		const index = seed.scenarioSeed % startPoints.length;
+		return startPoints[index].name;
 	}
 }
 

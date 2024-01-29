@@ -133,8 +133,8 @@ export enum RelayMaydayStage {
 export enum InboundForJoinStage {
 	RequestJoin = 'Request Join',
 	ReportDetails = 'Report Details',
-	ReadbackJoinClearance = 'Readback Join Clearance',
-	ReportAirodromeInSight = 'Report Airodrome In Sight',
+	ReadbackOverheadJoinClearance = 'Readback Overhead Join Clearance',
+	ReportAerodromeInSight = 'Report Aerodrome In Sight',
 	ContactTower = 'Contact Tower',
 	AcknowledgeGoAround = 'Acknowledge Go Around', // If told to go around by ATC
 	AnnounceGoAround = 'Announce Go Around' // If pilot decides to go around
