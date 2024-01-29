@@ -454,15 +454,25 @@ export default class RadioCall {
 		return this.getStartAerodrome().getTakeoffRunway(this.seed);
 	}
 
+	public getTakeoffRunwayName(): string {
+		return this.getStartAerodrome().getTakeoffRunway(this.seed).name;
+	}
+
+	public getLandingRunway(): Runway {
+		return this.getEndAerodrome().getLandingRunway(this.seed);
+	}
+
+	public getLandingRunwayName(): string {
+		return this.getEndAerodrome().getLandingRunway(this.seed).name;
+	}
+
 	public assertCallContainsTakeOffRunwayName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().name])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are taking off from."
 			);
 			return false;
-		} else if (
-			!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])
-		) {
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
 			);
@@ -727,5 +737,47 @@ export default class RadioCall {
 	public getTakeoffTraffic(): string {
 		if (this.seed.scenarioSeed % 2 == 0) return 'Cessna 152 reported final';
 		else return '';
+	}
+
+	public getCurrentAltitude(): number {
+		return this.getCurrentRoutePoint().pose.altitude;
+	}
+
+	public assertCallContainsCurrentAltitude(): boolean {
+		if (!this.callContainsWord(this.getCurrentAltitude().toString())) {
+			this.feedback.pushSevereMistake("Your call didn't contain your current altitude.");
+			return false;
+		}
+		return true;
+	}
+
+	public assertCallContainsLandingRunwayName(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getLandingRunway().name])) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the name of the runway you are landing on."
+			);
+			return false;
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getLandingRunway().name])) {
+			this.feedback.pushMinorMistake(
+				'Your call didn\'t contain the word "runway" with the runway name.'
+			);
+			return true;
+		}
+		return true;
+	}
+
+	public assertCallContainsLandingPressure(): boolean {
+		const pressureSample = this.getEndAerodromeMETORSample().getPressureString().split(' ');
+		if (!this.callContainsWord(pressureSample[0])) {
+			this.feedback.pushSevereMistake("Your call didn't contain the air pressure.");
+			return false;
+		} else if (pressureSample.length > 1 && !this.callContainsWord(pressureSample[1])) {
+			this.feedback.pushMinorMistake(
+				'Your air pressure call didn\'t include "millibars" when the pressure was below 1000 millibars. \n' +
+					'Numbers must have units when confusion is possible.'
+			);
+			return true;
+		}
+		return true;
 	}
 }

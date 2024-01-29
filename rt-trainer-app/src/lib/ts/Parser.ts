@@ -32,7 +32,9 @@ export default class Parser {
 			case TakeOffStage.AnnounceTakingOff:
 				return this.parseAnnounceTakingOff(radioCall);
 			default:
-				throw new Error('Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage);
+				throw new Error(
+					'Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage
+				);
 		}
 	}
 
@@ -361,5 +363,118 @@ if (not in level flight. */
 		radioCall.assertCallContainsAltitude();
 
 		// TODO
+	}
+
+	public static parseRequestJoin(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getTargetAllocatedCallsign()}, request join`;
+
+		radioCall.assertCallStartsWithTargetCallsign();
+		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'join']);
+
+		// Return ATC response
+		const atcResponse = `${radioCall
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, ${radioCall.getCurrentTarget()}, pass your message`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseRequestOverheadJoinPassMessage(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ${
+			radioCall.getAircraftType
+		} inbound from ${radioCall.getPreviousWaypointName()}, ${radioCall.getDistanceToPreviousWaypoint()}, ${radioCall.getCurrentAltitude()}, information ${radioCall.getCurrentATISLetter()}, request overhead join`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsAircraftType();
+		radioCall.assertCallContainsPreviousWaypointName();
+		radioCall.assertCallContainsLocationRelativeToPreviousWaypoint();
+		radioCall.assertCallContainsCurrentAltitude();
+		radioCall.assertCallContainsCurrentATISLetter();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['request', 'overhead', 'join']);
+
+		// Return ATC response
+		const atcResponse = `${radioCall
+			.getTargetAllocatedCallsign()
+			.toUpperCase()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getJoinOverheadAltitude()} ${radioCall
+			.getEndAerodromeMETORSample()
+			.getPressureString()}, report aerodrome in sight`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseReadbackOverheadJoinClearance(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getJoinOverheadAltitude()}, ${radioCall
+			.getEndAerodromeMETORSample()
+			.getPressureString()}, wilco, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['join', 'overhead']);
+		radioCall.assertCallContainsLandingRunwayName();
+		radioCall.assertCallContainsLandingPressure();
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseAnnounceAerodromeInSight(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, aerodrome in sight`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsConsecutiveCriticalWords(['aerodrome', 'in', 'sight']);
+
+		let atcResponse = '';
+		if (radioCall.getEndAerodrome().isControlled()) {
+			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
+				.getEndAerodrome()
+				.getShortName()} tower on ${radioCall.getEndAerodrome().getLandingFrequency()}`;
+		}
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parselandingContactTower(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall
+			.getEndAerodrome()
+			.getShortName()} tower ${radioCall
+			.getEndAerodrome()
+			.getLandingFrequency()}, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords([
+			radioCall.getEndAerodrome().getShortName(),
+			'tower'
+		]);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseAcknowledgeGoAroundInstruction(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Going around ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['going', 'around']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseAnnounceGoAround(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Going around, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsConsecutiveCriticalWords(['going', 'around']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		let atcResponse = '';
+		if (radioCall.getEndAerodrome().isControlled()) {
+			atcResponse = `Roger, ${radioCall
+				.getTargetAllocatedCallsign()
+				.toUpperCase()}, contact ${radioCall.getEndAerodrome().getShortName()} tower on ${radioCall
+				.getEndAerodrome()
+				.getLandingFrequency()}`;
+		}
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 }
