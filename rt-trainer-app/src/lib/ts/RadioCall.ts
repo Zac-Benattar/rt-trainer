@@ -1,9 +1,10 @@
 import Route from './Route';
-import type { RoutePoint } from './RoutePoints';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
+	getCompassDirectionFromHeading,
 	getHeadingBetween,
+	haversineDistance,
 	isCallsignStandardRegistration,
 	processString,
 	replacePhoneticAlphabetWithChars,
@@ -20,10 +21,12 @@ import type {
 } from './Aerodrome';
 import { Feedback } from './Feedback';
 import type { Waypoint } from './RouteTypes';
+import type RoutePoint from './RoutePoints';
 
 export default class RadioCall {
 	private message: string;
 	private seed: Seed;
+	private numAirborneWaypoints: number;
 	private route: RoutePoint[];
 	private currentPointIndex: number;
 	private prefix: string;
@@ -40,6 +43,7 @@ export default class RadioCall {
 	constructor(
 		message: string,
 		seed: Seed,
+		numAirborneWaypoints: number,
 		route: RoutePoint[],
 		currentRoutePoint: number,
 		prefix: string,
@@ -54,6 +58,7 @@ export default class RadioCall {
 	) {
 		this.message = message;
 		this.seed = seed;
+		this.numAirborneWaypoints = numAirborneWaypoints;
 		this.route = route;
 		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
@@ -539,20 +544,20 @@ export default class RadioCall {
 		return true;
 	}
 
+	public assertCallContainsWilco(): boolean {
+		if (!this.callContainsWord('wilco')) {
+			this.feedback.pushSevereMistake("Your call didn't contain WILCO (will comply).");
+			return false;
+		}
+		return true;
+	}
+
 	public assertRogerCallCorrect(): boolean {
 		if (
 			!this.callContainsConsecutiveWords(['roger', this.getTargetAllocatedCallsign()]) ||
 			!(this.callStartsWithUserCallsign() && this.getRadioCallWordCount() == 1)
 		) {
 			this.feedback.pushSevereMistake("Your call didn't start with ROGER (message received).");
-			return false;
-		}
-		return true;
-	}
-
-	public assertCallContainsCurrentLocation(): boolean {
-		if (!this.callContainsConsecutiveWords(this.getCurrentRoutePoint().waypoint.name.split(' '))) {
-			this.feedback.pushSevereMistake("Your call didn't contain your location.");
 			return false;
 		}
 		return true;
@@ -684,22 +689,13 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTurnoutHeading(): number {
-		const firstWaypoint: Waypoint | null | undefined = this.route.find(
-			(x) =>
-				x.waypoint != undefined &&
-				x.waypoint.lat != this.route[0].waypoint.lat &&
-				x.waypoint.long != this.route[0].waypoint.long
-		)?.waypoint;
-
-		// If first waypoint doesnt exist then route generation has failed, unrecoverable
-		if (firstWaypoint == null || firstWaypoint == undefined)
-			throw new Error('No first waypoint in getTakeoffTurnoutHeading.');
+		const routeWaypoints = Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints);
 
 		const headingToFirstWaypoint = getHeadingBetween(
-			this.route[0].waypoint.lat,
-			this.route[0].waypoint.long,
-			firstWaypoint.lat,
-			firstWaypoint.long
+			routeWaypoints[0].lat,
+			routeWaypoints[0].long,
+			routeWaypoints[1].lat,
+			routeWaypoints[1].long
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -737,6 +733,16 @@ export default class RadioCall {
 	public getTakeoffTraffic(): string {
 		if (this.seed.scenarioSeed % 2 == 0) return 'Cessna 152 reported final';
 		else return '';
+	}
+
+	public getLandingTraffic(): string {
+		if (this.getEndAerodrome().isControlled()) {
+			if (this.seed.scenarioSeed % 5 == 0) return 'Vehicle crossing';
+			else return '';
+		} else {
+			if (this.seed.scenarioSeed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
+			else return 'no reported traffic';
+		}
 	}
 
 	public getCurrentAltitude(): number {
@@ -780,4 +786,68 @@ export default class RadioCall {
 		}
 		return true;
 	}
+
+	public getPreviousWaypoint(): Waypoint {
+		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
+			this.getCurrentRoutePoint().nextWaypointIndex
+		];
+	}
+
+	public getPreviousWaypointName(): string {
+		return this.getPreviousWaypoint().name;
+	}
+
+	public assertCallContainsPreviousWaypointName(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getPreviousWaypointName()])) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the name of the previous waypoint."
+			);
+			return false;
+		}
+		return true;
+	}
+
+	public getDistanceToPreviousWaypointInMeters(): number {
+		const prev = this.getPreviousWaypoint();
+		const currentPose = this.getCurrentRoutePoint().pose;
+		return haversineDistance(prev.lat, prev.long, currentPose.lat, currentPose.long);
+	}
+
+	public getDistanceToPreviousWaypointNearestMile(): number {
+		// round to nearest mile
+		return Math.round(this.getDistanceToPreviousWaypointInMeters() / 1609.344);
+	}
+
+	public getPositionRelativeToLastWaypoint(): string {
+		const prev = this.getPreviousWaypoint();
+		const currentPose = this.getCurrentRoutePoint().pose;
+		const heading = getHeadingBetween(prev.lat, prev.long, currentPose.lat, currentPose.long);
+		const compassDirection = getCompassDirectionFromHeading(heading);
+		const distance = this.getDistanceToPreviousWaypointNearestMile();
+		return distance + ' miles ' + compassDirection;
+	}
+
+	public assertCallContainsPositionRelativeToLastWaypoint(): boolean {
+		if (!this.callContainsConsecutiveWords(this.getPositionRelativeToLastWaypoint().split(' '))) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain your position relative to the previous waypoint."
+			);
+			return false;
+		}
+		return true;
+	}
+
+	public getLandingParkingSpot(): string {
+		return this.getEndAerodrome().getLandingParkingSpot(this.seed);
+	}
+
+	public assertCallContainsLandingParkingSpot(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getLandingParkingSpot()])) {
+			this.feedback.pushSevereMistake("Your call didn't contain your parking spot.");
+			return false;
+		}
+		return true;
+	}
+
+
 }
