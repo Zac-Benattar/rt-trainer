@@ -422,6 +422,7 @@
 			currentRadioCall = new RadioCall(
 				userMessage,
 				seed,
+				airborneWaypoints,
 				route,
 				currentPointIndex,
 				aircraftDetails.prefix,

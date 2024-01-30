@@ -10,6 +10,7 @@ export async function POST({ request }) {
 	const radioCall: RadioCall = new RadioCall(
 		radioCallData.message,
 		radioCallData.seed,
+		radioCallData.numAirborneWaypoints,
 		radioCallData.route,
 		radioCallData.currentPointIndex,
 		radioCallData.prefix,

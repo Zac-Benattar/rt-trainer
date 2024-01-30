@@ -21,11 +21,13 @@ export default class RoutePoint {
 	stage: string;
 	pose: Pose;
 	updateData: SimulatorUpdateData;
+	nextWaypointIndex: number;
 
-	constructor(stage: string, pose: Pose, updateData: SimulatorUpdateData) {
+	constructor(stage: string, pose: Pose, updateData: SimulatorUpdateData, nextWaypointIndex: number) {
 		this.stage = stage;
 		this.pose = pose;
 		this.updateData = updateData;
+		this.nextWaypointIndex = nextWaypointIndex;
 	}
 }
 

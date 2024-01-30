@@ -359,3 +359,20 @@ export function getNewCoordsFromCoord(
 
 	return { lat: newLat, long: newLong };
 }
+
+export function getCompassDirectionFromHeading(heading: number) {
+	const compassDirections = [
+		'North',
+		'North East',
+		'East',
+		'South East',
+		'South',
+		'South West',
+		'West',
+		'North West'
+	];
+
+	const index = Math.round(heading / 45) % 8;
+
+	return compassDirections[index];
+}
