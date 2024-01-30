@@ -1,4 +1,4 @@
-import waypoints from '../../data/waypoints.json';
+import waypoints from '../data/waypoints.json';
 import { haversineDistance } from './utils';
 import { WaypointType, type Waypoint } from './RouteTypes';
 import type Seed from './Seed';
@@ -177,12 +177,12 @@ export default class Route {
 	}
 
 	/* Generate the route based off of the seed. */
-	public generateRoute(seed: Seed, airborneWaypoints: number, emergency: boolean): RoutePoint[] {
+	public generateRoute(seed: Seed, numAirborneWaypoints: number, emergency: boolean): RoutePoint[] {
 		this.points.push(...getStartAerodromeRoutePoints(seed));
 
-		this.points.push(...getAirborneRoutePoints(seed, airborneWaypoints, emergency));
+		this.points.push(...getAirborneRoutePoints(seed, numAirborneWaypoints, emergency));
 
-		this.points.push(...getEndAerodromeRoutePoints(seed));
+		this.points.push(...getEndAerodromeRoutePoints(seed, numAirborneWaypoints));
 
 		return this.points;
 	}

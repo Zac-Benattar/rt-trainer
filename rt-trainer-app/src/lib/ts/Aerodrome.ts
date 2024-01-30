@@ -1,12 +1,11 @@
-import uncontrolledAerodromes from '../../data/uncontrolled_aerodromes.json';
-import controlledAerodromes from '../../data/controlled_aerodromes.json';
+import uncontrolledAerodromes from '../data/uncontrolled_aerodromes.json';
+import controlledAerodromes from '../data/controlled_aerodromes.json';
 import type Seed from './Seed';
 import {
 	getHeadingBetween,
 	getNewCoordsFromCoord,
 	numberToPhoneticString,
-	seededNormalDistribution,
-	toRadians
+	seededNormalDistribution
 } from './utils';
 
 export type RunwayHoldingPoint = {
