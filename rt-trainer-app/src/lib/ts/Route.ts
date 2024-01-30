@@ -1,4 +1,4 @@
-import waypoints from '../data/waypoints.json';
+import visualReferencePoints from '../data/visual_reference_points.json';
 import {
 	haversineDistance,
 	stringDecimalLatitudeToNumber,
@@ -17,12 +17,12 @@ const MAX_AERODROME_DISTANCE = 150000; // 150km
 const MAX_ROUTE_DISTANCE = 200000; // 200km
 const MAX_AIRBORNE_ROUTE_POINTS = 15;
 
-const VRPs = getWaypointsFromJSON();
+const VRPs = getWaypointsFromVRPsJSON();
 
-function getWaypointsFromJSON(): Waypoint[] {
+export function getWaypointsFromVRPsJSON(): Waypoint[] {
 	const airborneWaypoints: Waypoint[] = [];
 
-	waypoints.forEach((waypoint) => {
+	visualReferencePoints.forEach((waypoint) => {
 		const lat = stringDecimalLatitudeToNumber(waypoint.Latitude);
 		const long = stringDecimalLongitudeToNumber(waypoint.Longitude);
 		if (lat == null || long == null) {
@@ -67,9 +67,6 @@ export default class Route {
 		const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
 		const landingRunwayPosition = endAerodrome.getLandingRunway(seed).getCenterPoint();
 
-		// Read in all waypoints from waypoints.json
-		const possibleWaypoints = VRPs;
-
 		// Limit the number of airborne waypoints to save compute
 		if (numAirborneWaypoints > MAX_AIRBORNE_ROUTE_POINTS) {
 			numAirborneWaypoints = MAX_AIRBORNE_ROUTE_POINTS;
@@ -92,7 +89,7 @@ export default class Route {
 			// Add waypoints until the route is too long or contains too many points
 			for (let j = 1; j < numAirborneWaypoints + 1; j++) {
 				const waypoint =
-					possibleWaypoints[(seed.scenarioSeed * j * (i + 1)) % possibleWaypoints.length];
+					VRPs[(seed.scenarioSeed * j * (i + 1)) % VRPs.length];
 
 				// Prevent same waypoint coming up multiple times
 				if (waypoints.findIndex((x) => x === waypoint) != -1) break;

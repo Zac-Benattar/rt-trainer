@@ -1,4 +1,4 @@
-import Route from './Route';
+import Route, { getWaypointsFromVRPsJSON } from './Route';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
@@ -39,6 +39,7 @@ export default class RadioCall {
 	private currentTransponderFrequency: number;
 	private aircraftType: string;
 	private feedback: Feedback;
+	private closestVRP: Waypoint | undefined;
 
 	constructor(
 		message: string,
@@ -528,10 +529,24 @@ export default class RadioCall {
 		return true;
 	}
 
+	public getSquarkCode(): number {
+		return 2434 + (this.seed.scenarioSeed % 5) - 2;
+	}
+
 	public assertCallContainsSqwarkCode(): boolean {
-		if (!this.callContainsConsecutiveWords(['squawk', this.currentTransponderFrequency + ''])) {
+		if (!this.callContainsWord(this.currentTransponderFrequency.toString())) {
 			this.feedback.pushSevereMistake("Your call didn't contain the squawk code.");
 			return false;
+		} else if (
+			!this.assertCallContainsConsecutiveCriticalWords([
+				'squark',
+				this.currentTransponderFrequency.toString()
+			])
+		) {
+			this.feedback.pushMinorMistake(
+				'Your squawk code readback didn\'t include the word "squark" with the squark code.'
+			);
+			return true;
 		}
 		return true;
 	}
@@ -749,6 +764,10 @@ export default class RadioCall {
 		return this.getCurrentRoutePoint().pose.altitude;
 	}
 
+	public getCurrentAltitudeString() : number {
+		return this.getCurrentRoutePoint().pose.altitude.toString() + ' feet';
+	}
+
 	public assertCallContainsCurrentAltitude(): boolean {
 		if (!this.callContainsWord(this.getCurrentAltitude().toString())) {
 			this.feedback.pushSevereMistake("Your call didn't contain your current altitude.");
@@ -849,5 +868,121 @@ export default class RadioCall {
 		return true;
 	}
 
+	public getOverheadJoinAltitude(): number {
+		return 2000;
+	}
 
+	public assertCallContainsOverheadJoinAltitude(): boolean {
+		if (!this.callContainsWord(this.getOverheadJoinAltitude().toString())) {
+			this.feedback.pushSevereMistake("Your call didn't contain the overhead join altitude.");
+			return false;
+		}
+		return true;
+	}
+
+	private getClosestVRP(): Waypoint {
+		// If already calculated then return known value
+		if (this.closestVRP != undefined) return this.closestVRP;
+
+		const currentLat = this.getCurrentRoutePoint().pose.lat;
+		const currentLong = this.getCurrentRoutePoint().pose.long;
+
+		const vRPs = getWaypointsFromVRPsJSON();
+		let closestVRP = vRPs[0];
+		let closestVRPDistance = haversineDistance(
+			currentLat,
+			currentLong,
+			closestVRP.lat,
+			closestVRP.long
+		);
+
+		for (let i = 1; i < vRPs.length; i++) {
+			const distance = haversineDistance(currentLat, currentLong, vRPs[i].lat, vRPs[i].long);
+			if (distance < closestVRPDistance) {
+				closestVRP = vRPs[i];
+				closestVRPDistance = distance;
+			}
+		}
+
+		this.closestVRP = closestVRP;
+
+		return this.closestVRP;
+	}
+
+	public getClosestVRPName(): string {
+		return this.getClosestVRP().name;
+	}
+
+	public assertCallContainsClosestVRPName(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getClosestVRPName()])) {
+			this.feedback.pushSevereMistake("Your call didn't contain the closest VRP.");
+			return false;
+		}
+		return true;
+	}
+
+	public getNextWaypoint(): Waypoint {
+		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
+			this.getCurrentRoutePoint().nextWaypointIndex
+		];
+	}
+
+	public getNextWaypointName(): string {
+		return this.getNextWaypoint().name;
+	}
+
+	public getNextWaypointDistance(): number {
+		const next = this.getNextWaypoint();
+		const currentPose = this.getCurrentRoutePoint().pose;
+		return haversineDistance(next.lat, next.long, currentPose.lat, currentPose.long);
+	}
+
+	public getNextWaypointDistanceNearestMile(): number {
+		// round to nearest mile
+		return Math.round(this.getNextWaypointDistance() / 1609.344);
+	}
+
+	public assertCallContainsNextWaypointName(): boolean {
+		if (!this.callContainsConsecutiveWords([this.getNextWaypointName()])) {
+			this.feedback.pushSevereMistake("Your call didn't contain the name of the next waypoint.");
+			return false;
+		}
+		return true;
+	}
+
+	public assertCallContainsNextWaypointDistance(): boolean {
+		if (!this.callContainsWord(this.getNextWaypointDistanceNearestMile().toString())) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the distance to the next waypoint."
+			);
+			return false;
+		}
+		return true;
+	}
+
+	public getCurrentTime(): number {
+		return this.getCurrentRoutePoint().time;
+	}
+
+	public assertCallContainsCurrentTime(): boolean {
+		if (!this.callContainsWord(this.getCurrentTime().toString())) {
+			this.feedback.pushSevereMistake("Your call didn't contain the current time.");
+			return false;
+		}
+		return true;
+	}
+
+	public getNextWaypointArrivalTime(): number {
+		return this.getCurrentRoutePoint().nextWaypointArrivalTime;
+	}
+
+	public assertCallContainsNextWaypointArrivalTime(): boolean {
+		if (!this.callContainsWord(this.getCurrentRoutePoint().nextWaypointArrivalTime.toString())) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the arrival time at the next waypoint."
+			);
+			return false;
+		}
+		return true;
+	}
 }

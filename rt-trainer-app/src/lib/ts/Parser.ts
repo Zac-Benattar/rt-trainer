@@ -274,10 +274,7 @@ export default class Parser {
 
 	/* Parse initial contact with new ATC unit.
 	Example: Student Golf Oscar Foxtrot Lima Yankee, Birmingham Radar */
-	public static parseNewAirspaceInitialContact(
-		currentPoint: RoutePoint,
-		radioCall: RadioCall
-	): ServerResponse {
+	public static parseNewAirspaceInitialContact(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall
 			.getCurrentTarget()
 			.toLowerCase()}, ${radioCall.getTargetAllocatedCallsign()}`;
@@ -288,7 +285,7 @@ export default class Parser {
 		// Return ATC response
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
-			.toUpperCase()}, ${radioCall.getCurrentTarget()}.`;
+			.toUpperCase()}, ${radioCall.getCurrentTarget()}, pass your message`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
@@ -300,44 +297,29 @@ flight level/altitude including passing/cleared level if (not
 in level flight, and additional details such as next waypoint(s)
 accompanied with the planned times to reach them */
 	public static parseNewAirspaceGiveFlightInformationToATC(radioCall: RadioCall): ServerResponse {
-		const nearestwaypoint: string = 'Test Waypoint';
-		const distancefromnearestwaypoint: number = 0.0;
-		const directiontonearestwaypoint: string = 'Direction';
-
-		const nextwaypoint: string = 'Next Waypoint';
-
+		// These are not implemented yet - and must be implemented properly can't just use waypoints need stuff not technically in the route
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getAircraftType()} VFR from ${radioCall
 			.getStartAerodrome()
 			.getShortName()} to ${radioCall
 			.getEndAerodrome()
-			.getShortName()}, ${distancefromnearestwaypoint} miles ${directiontonearestwaypoint} of ${nearestwaypoint}, ${
-			radioCall.getCurrentRoutePoint().pose.altitude
-		}, ${nextwaypoint}`;
+			.getShortName()}, ${radioCall.getPositionRelativeToNearestFix()}, ${radioCall.getCurrentAltitudeString()}, VFR to ${radioCall.getNextFixName()}`;
 
 		// TODO
-		return '';
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
 	/* Parse response to ATC unit requesting squark.
 Should consist of aircraft callsign and squark code */
-	public static parseNewAirspaceSquark(
-		sqwarkFrequency: number,
-		radioCall: RadioCall
-	): ServerResponse {
-		const expectedRadioCall: string = `Squawk ${sqwarkFrequency}, ${radioCall.getTargetAllocatedCallsign()}`;
+	public static parseNewAirspaceSquark(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Squawk ${radioCall.getSquarkCode()}, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsSqwarkCode();
-		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallEndsWithUserCallsign();
 
-		const nearestWaypoint: string = 'Test Waypoint';
-		const distanceFromNearestWaypoint: number = 0.0;
-		const directionToNearestWaypoint: string = 'Direction';
-		const nextWayPoint: string = 'Next Waypoint';
-
-		// Return ATC response
+		// These are not implemented yet - and must be implemented properly can't just use waypoints need stuff not technically in the route
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
-			.toUpperCase()}, identified ${nearestWaypoint} miles ${distanceFromNearestWaypoint} of ${directionToNearestWaypoint}. Next report at ${nextWayPoint}`;
+			.toUpperCase()}, identified ${radioCall.getPositionRelativeToNearestFix()}. Next report at ${radioCall.getNextFixName()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
@@ -370,21 +352,15 @@ Should contain the aircraft callsign, location relative to a waypoint,
 and the flight level/altitude including passing level and cleared level
 if (not in level flight. */
 	public static parseVFRPositionReport(radioCall: RadioCall): ServerResponse {
-		if (radioCall.getCurrentFix() == null) {
-			throw new Error('Waypoint not found');
-		}
-
 		// May need more details to be accurate to specific situation
 		const expectedRadioCall: string = `
-        "${radioCall.getTargetAllocatedCallsign()}, overhead ${
-			radioCall.getCurrentFix().name
-		}, ${radioCall.getCurrentAltitude()} feet`;
+        ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getClosestVRPName()} ${radioCall.getCurrentTime()}, ${radioCall.getCurrentAltitude()} feet, ${radioCall.getNextWaypointName()} ${radioCall.getNextWaypointArrivalTime()}`;
 
 		radioCall.assertCallStartsWithUserCallsign();
-		radioCall.assertCallContainsCurrentLocation();
+		radioCall.assertCallContainsClosestVRPName();
 		radioCall.assertCallContainsAltitude();
 
-		// TODO
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
 	public static parseRequestJoin(radioCall: RadioCall): ServerResponse {
@@ -416,7 +392,7 @@ if (not in level flight. */
 
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
-			.toUpperCase()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getJoinOverheadAltitude()} ${radioCall
+			.toUpperCase()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getOverheadJoinAltitude()} ${radioCall
 			.getEndAerodromeMETORSample()
 			.getPressureString()}, report aerodrome in sight`;
 
@@ -424,7 +400,7 @@ if (not in level flight. */
 	}
 
 	public static parseReadbackOverheadJoinClearance(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getJoinOverheadAltitude()}, ${radioCall
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getOverheadJoinAltitude()}, ${radioCall
 			.getEndAerodromeMETORSample()
 			.getPressureString()}, wilco, ${radioCall.getTargetAllocatedCallsign()}`;
 
