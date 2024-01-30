@@ -1,5 +1,9 @@
 import waypoints from '../data/waypoints.json';
-import { haversineDistance } from './utils';
+import {
+	haversineDistance,
+	stringDecimalLatitudeToNumber,
+	stringDecimalLongitudeToNumber
+} from './utils';
 import { WaypointType, type Waypoint } from './RouteTypes';
 import type Seed from './Seed';
 import RoutePoint, {
@@ -9,19 +13,28 @@ import RoutePoint, {
 } from './RoutePoints';
 import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 
-const MAX_AERODROME_DISTANCE = 100000; // 100km
-const MAX_ROUTE_DISTANCE = 300000; // 300km
+const MAX_AERODROME_DISTANCE = 150000; // 150km
+const MAX_ROUTE_DISTANCE = 200000; // 200km
 const MAX_AIRBORNE_ROUTE_POINTS = 15;
+
+const VRPs = getWaypointsFromJSON();
 
 function getWaypointsFromJSON(): Waypoint[] {
 	const airborneWaypoints: Waypoint[] = [];
 
 	waypoints.forEach((waypoint) => {
+		const lat = stringDecimalLatitudeToNumber(waypoint.Latitude);
+		const long = stringDecimalLongitudeToNumber(waypoint.Longitude);
+		if (lat == null || long == null) {
+			console.log('Failed to load VRP: ' + waypoint['VRP name']);
+			return;
+		}
+
 		airborneWaypoints.push({
-			waypointType: WaypointType.VOR,
-			name: waypoint.name,
-			lat: waypoint.lat,
-			long: waypoint.long
+			waypointType: WaypointType.Fix,
+			name: waypoint['VRP name'],
+			lat: lat,
+			long: long
 		});
 	});
 
@@ -55,7 +68,7 @@ export default class Route {
 		const landingRunwayPosition = endAerodrome.getLandingRunway(seed).getCenterPoint();
 
 		// Read in all waypoints from waypoints.json
-		const possibleWaypoints = getWaypointsFromJSON();
+		const possibleWaypoints = VRPs;
 
 		// Limit the number of airborne waypoints to save compute
 		if (numAirborneWaypoints > MAX_AIRBORNE_ROUTE_POINTS) {
@@ -80,6 +93,10 @@ export default class Route {
 			for (let j = 1; j < numAirborneWaypoints + 1; j++) {
 				const waypoint =
 					possibleWaypoints[(seed.scenarioSeed * j * (i + 1)) % possibleWaypoints.length];
+
+				// Prevent same waypoint coming up multiple times
+				if (waypoints.findIndex((x) => x === waypoint) != -1) break;
+
 				const distance = haversineDistance(
 					waypoints[waypoints.length - 1]?.lat,
 					waypoints[waypoints.length - 1]?.long,
@@ -89,6 +106,7 @@ export default class Route {
 
 				// If route is too long or contains too many points, stop adding points
 				if (
+					waypoints.length - 1 >= numAirborneWaypoints ||
 					totalDistance + distance >
 						MAX_ROUTE_DISTANCE -
 							haversineDistance(
@@ -96,8 +114,7 @@ export default class Route {
 								waypoint.long,
 								landingRunwayPosition[0],
 								landingRunwayPosition[1]
-							) ||
-					waypoints.length - 1 >= numAirborneWaypoints
+							)
 				) {
 					break;
 				}

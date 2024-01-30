@@ -376,3 +376,37 @@ export function getCompassDirectionFromHeading(heading: number) {
 
 	return compassDirections[index];
 }
+
+export function stringDecimalLatitudeToNumber(str: string): number | null {
+	const regex = /^(\d+\.?\d*)[NS]$/;
+
+	const match = str.match(regex);
+
+	if (match) {
+		const decimalPointAdded = match[1].slice(0, 2) + '.' + match[1].slice(2, match[1].length);
+		const latitudeValue = parseFloat(decimalPointAdded);
+
+		if (!isNaN(latitudeValue)) {
+			return str.endsWith('N') ? latitudeValue : -latitudeValue;
+		}
+	}
+
+	return null; // Return null if the input string doesn't match the expected format
+}
+
+export function stringDecimalLongitudeToNumber(str: string): number | null {
+	const regex = /^(\d+\.?\d*)[EW]$/;
+
+	const match = str.slice(2, str.length).match(regex);
+
+	if (match) {
+		const decimalPointAdded = match[1].slice(0, 1) + '.' + match[1].slice(2, match[1].length);
+		const latitudeValue = parseFloat(decimalPointAdded);
+
+		if (!isNaN(latitudeValue)) {
+			return str.endsWith('E') ? latitudeValue : -latitudeValue;
+		}
+	}
+
+	return null; // Return null if the input string doesn't match the expected format
+}
