@@ -64,6 +64,7 @@
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
 	let serverNotResponding: boolean = false;
+	let nullRoute: boolean = false;
 
 	const modalStore = getModalStore();
 	const toastStore = getToastStore();
@@ -73,6 +74,14 @@
 			type: 'alert',
 			title: 'Server did not respond',
 			body: 'This may be due to a bad request or the feature you are trying to use not being implemented yet. This software is still early in development, expect errors like this one.'
+		});
+	}
+
+	$: if (nullRoute) {
+		modalStore.trigger({
+			type: 'alert',
+			title: 'No Route Generated',
+			body: 'After 1000 iterations no feasible route was generated for this seed. Please try another one. The route generation is not finalised and will frequently encounter issues like this one. '
 		});
 	}
 
@@ -356,7 +365,7 @@
 
 		if (serverRouteResponse === undefined || serverWaypointsResponse === undefined) {
 			// Handle error
-			serverNotResponding = true;
+			nullRoute = true;
 
 			return 0;
 		} else {
@@ -447,7 +456,7 @@
 	}
 
 	onMount(async () => {
-		if (!initiateScenario()) serverNotResponding = true;
+		initiateScenario();
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;
