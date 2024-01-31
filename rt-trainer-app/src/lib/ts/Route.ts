@@ -16,7 +16,9 @@ import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
 const MAX_AERODROME_DISTANCE = 150000; // 150km
 const MAX_ROUTE_DISTANCE = 200000; // 200km
 const MAX_AIRBORNE_ROUTE_POINTS = 15;
-const AIRCRAFT_AVERAGE_SPEED = 170; // knots
+const AIRCRAFT_AVERAGE_SPEED = 125; // knots
+const NAUTICAL_MILE = 1852;
+const FLIGHT_TIME_MULTIPLIER = 1.3;
 
 const VRPs = getWaypointsFromVRPsJSON();
 
@@ -65,7 +67,7 @@ export default class Route {
 	public static getAirborneWaypoints(seed: Seed, numAirborneWaypoints: number): Waypoint[] {
 		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
 			Route.getStartAerodrome(seed);
-		const takeoffTime = startAerodrome.getStartTime();
+		const takeoffTime = startAerodrome.getTakeoffTime();
 		const takeOffRunwayPosition = startAerodrome.getTakeoffRunway().getCenterPoint();
 		const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
 		const landingRunwayPosition = endAerodrome.getLandingRunway().getCenterPoint();
@@ -83,8 +85,8 @@ export default class Route {
 			// Push the start aerodrome to points in order to calculate the distance from it
 			waypoints.push({
 				waypointType: WaypointType.Aerodrome,
-				lat: takeOffRunwayPosition[0],
-				long: takeOffRunwayPosition[1],
+				lat: takeOffRunwayPosition.lat,
+				long: takeOffRunwayPosition.long,
 				name: 'startAerodrome',
 				arrivalTime: takeoffTime
 			});
@@ -98,8 +100,8 @@ export default class Route {
 				if (waypoints.findIndex((x) => x === waypoint) != -1) break;
 
 				const distance = haversineDistance(
-					waypoints[waypoints.length - 1]?.lat,
-					waypoints[waypoints.length - 1]?.long,
+					waypoints[waypoints.length - 1].lat,
+					waypoints[waypoints.length - 1].long,
 					waypoint.lat,
 					waypoint.long
 				);
@@ -112,19 +114,20 @@ export default class Route {
 							haversineDistance(
 								waypoint.lat,
 								waypoint.long,
-								landingRunwayPosition[0],
-								landingRunwayPosition[1]
+								landingRunwayPosition.lat,
+								landingRunwayPosition.long
 							)
 				) {
 					break;
 				}
 
 				// Route valid with this waypoint - calculate arrival time and add it
-				// Previous arrival time + 1.1 * distance in nautical miles / airspeed * 60 mins
+				// Previous arrival time + distance in nautical miles / airspeed * 60 mins * 1.3
 				const arrivalTime = Math.round(
-					1.1 * waypoints[waypoints.length - 1].arrivalTime +
-						(distance / 1852 / AIRCRAFT_AVERAGE_SPEED) * 60
+					waypoints[waypoints.length - 1].arrivalTime +
+						(distance / NAUTICAL_MILE / AIRCRAFT_AVERAGE_SPEED) * 60 * FLIGHT_TIME_MULTIPLIER
 				);
+
 				waypoint.arrivalTime = arrivalTime;
 				waypoints.push(waypoint);
 				totalDistance += distance;
@@ -174,10 +177,10 @@ export default class Route {
 		// If the end aerodrome is too far from the start aerodrome, find a new one
 		for (let i = 0; i < possibleEndAerodromes.length; i++) {
 			const distance = haversineDistance(
-				takeOffRunwayPosition[0],
-				takeOffRunwayPosition[1],
-				landingRunwayPosition[0],
-				landingRunwayPosition[1]
+				takeOffRunwayPosition.lat,
+				takeOffRunwayPosition.long,
+				landingRunwayPosition.lat,
+				landingRunwayPosition.long
 			);
 
 			if (distance <= MAX_AERODROME_DISTANCE) {
@@ -232,8 +235,8 @@ export default class Route {
 
 		waypoints.push({
 			waypointType: WaypointType.Aerodrome,
-			lat: startAerodromeRunwayCenterPoint[0],
-			long: startAerodromeRunwayCenterPoint[1],
+			lat: startAerodromeRunwayCenterPoint.lat,
+			long: startAerodromeRunwayCenterPoint.long,
 			name: startAerodrome.getShortName(),
 			arrivalTime: takeoffTime
 		});
@@ -243,16 +246,18 @@ export default class Route {
 		const distanceToLandingRunway = haversineDistance(
 			waypoints[waypoints.length - 1].lat,
 			waypoints[waypoints.length - 1].long,
-			endAerodromeRunwayCenterPoint[0],
-			endAerodromeRunwayCenterPoint[1]
+			endAerodromeRunwayCenterPoint.lat,
+			endAerodromeRunwayCenterPoint.long
 		);
-		const arrivalTime =
+		const arrivalTime = Math.round(
 			waypoints[waypoints.length - 1].arrivalTime +
-			Math.round(1.1 * (distanceToLandingRunway / 1852 / AIRCRAFT_AVERAGE_SPEED) * 60);
+				(distanceToLandingRunway / NAUTICAL_MILE / AIRCRAFT_AVERAGE_SPEED) * 60 * FLIGHT_TIME_MULTIPLIER
+		);
+
 		waypoints.push({
 			waypointType: WaypointType.Aerodrome,
-			lat: endAerodromeRunwayCenterPoint[0],
-			long: endAerodromeRunwayCenterPoint[1],
+			lat: endAerodromeRunwayCenterPoint.lat,
+			long: endAerodromeRunwayCenterPoint.long,
 			name: endAerodrome.getShortName(),
 			arrivalTime: arrivalTime
 		});

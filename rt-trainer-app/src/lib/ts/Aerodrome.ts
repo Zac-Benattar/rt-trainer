@@ -135,11 +135,11 @@ export class Runway {
 		this.trueHeading = getHeadingBetween(this.startLat, this.startLong, this.endLat, this.endLong);
 	}
 
-	public getCenterPoint(): [number, number] {
+	public getCenterPoint(): { lat: number; long: number } {
 		const lat = (this.startLat + this.endLat) / 2.0;
 		const long = (this.startLong + this.endLong) / 2.0;
 
-		return [lat, long];
+		return { lat, long };
 	}
 
 	/* Returns a point some distance (in kms) along the runway vector. */
@@ -147,8 +147,8 @@ export class Runway {
 		const centerPoint = this.getCenterPoint();
 
 		return getNewCoordsFromCoord(
-			centerPoint[0],
-			centerPoint[1],
+			centerPoint.lat,
+			centerPoint.long,
 			this.trueHeading,
 			distanceFromCenter
 		);

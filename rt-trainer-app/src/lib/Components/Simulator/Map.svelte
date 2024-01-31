@@ -37,10 +37,14 @@
 		// Get all waypoints from the route
 		mapWaypoints = [];
 		for (let i = 0; i < waypoints.length; i++) {
+			let name = waypoints[i].name;
+			if (i != 0) {
+				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
+			}
 			mapWaypoints.push({
 				lat: waypoints[i].lat,
 				long: waypoints[i].long,
-				name: waypoints[i].name
+				name: name
 			});
 		}
 	});
@@ -127,7 +131,7 @@
 		if (mounted) {
 			await map;
 
-			map.setView([targetPose?.lat, targetPose?.long], zoomLevel);
+			map.setView([targetPose.lat, targetPose.long], zoomLevel);
 
 			removeMarkers();
 
