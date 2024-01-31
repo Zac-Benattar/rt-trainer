@@ -2,7 +2,9 @@ import { ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import {
 	CircuitAndLandingStage,
+	ClimbOutStage,
 	InboundForJoinStage,
+	LandingToParkedStage,
 	StartUpStage,
 	TakeOffStage,
 	TaxiStage
@@ -31,17 +33,19 @@ export default class Parser {
 			case TakeOffStage.ReadbackAfterDepartureInformation:
 				return this.parseReadbackAfterDepartureInformation(radioCall);
 			case TakeOffStage.ReadbackClearance:
-				return this.parseReadbackClearance(radioCall);
+				return this.parseTakeoffClearanceReadback(radioCall);
 			case TakeOffStage.AcknowledgeTraffic:
 				return this.parseAcknowledgeTraffic(radioCall);
 			case TakeOffStage.AnnounceTakingOff:
 				return this.parseAnnounceTakingOff(radioCall);
+			case ClimbOutStage.AnnounceLeavingZone:
+				return this.parseAnnounceLeavingZone(radioCall);
 			case InboundForJoinStage.RequestJoin:
 				return this.parseRequestJoin(radioCall);
 			case InboundForJoinStage.ReportDetails:
 				return this.parseRequestOverheadJoinPassMessage(radioCall);
 			case InboundForJoinStage.ReadbackOverheadJoinClearance:
-				return this.parseReadbackOverheadJoinClearance(radioCall);
+				return this.parseOverheadJoinClearanceReadback(radioCall);
 			case InboundForJoinStage.ReportAerodromeInSight:
 				return this.parseAnnounceAerodromeInSight(radioCall);
 			case InboundForJoinStage.ContactTower:
@@ -52,6 +56,16 @@ export default class Parser {
 				return this.parseAcknowledgeGoAroundInstruction(radioCall);
 			case CircuitAndLandingStage.AnnounceGoAround:
 				return this.parseAnnounceGoAround(radioCall);
+			case CircuitAndLandingStage.ReadbackContinueApproach:
+				return this.parseContinueApproachReadback(radioCall);
+			case CircuitAndLandingStage.ReadbackLandingClearance:
+				return this.parseLandingClearanceReadback(radioCall);
+			case LandingToParkedStage.ReadbackVacateRunwayRequest:
+				return this.parseAcklowledgeVacateRunwayInstruction(radioCall);
+			case LandingToParkedStage.ReportVacatedRunway:
+				return this.parseAnnounceRunwayVacated(radioCall);
+			case LandingToParkedStage.ReadbackTaxiInformation:
+				return this.parseTaxiParkingSpotReadback(radioCall);
 			default:
 				throw new Error(
 					'Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage
@@ -204,14 +218,7 @@ export default class Parser {
 		if (radioCall.getStartAerodrome().isControlled()) {
 			atcResponse += `, hold position. After departure turn right approved, climb not above ${radioCall.getTakeoffTransitionAltitude()} until zone boundary`;
 		} else {
-			const traffic: string = radioCall.getTakeoffTraffic() + ', ';
-			if (traffic) {
-				atcResponse += `traffic is ${traffic}, `;
-			} else {
-				atcResponse += 'no reported traffic, ';
-			}
-			const metorSample: METORDataSample = radioCall.getStartAerodromeMETORSample();
-			atcResponse += metorSample.getWindDirectionString() + ', ' + metorSample.getWindSpeedString();
+			atcResponse += `, ${radioCall.getTakeoffTraffic()}, ${radioCall.getTakeoffWindString()}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -236,7 +243,7 @@ export default class Parser {
 	}
 
 	// Example: Cleared for takeoff, Student Golf Lima Yankee
-	public static parseReadbackClearance(radioCall: RadioCall): ServerResponse {
+	public static parseTakeoffClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `Cleared for takeoff, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords(['cleared', 'for', 'takeoff']);
@@ -268,6 +275,21 @@ export default class Parser {
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, roger.`;
 
 		// ATC does not respond to this message
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAnnounceLeavingZone(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, overhead ${radioCall.getCurrentFixName()} ${radioCall.getCurrentAltitudeString()}, ${radioCall.getCurrentPressureString()}, changing to ${radioCall.getNextFrequency()}`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsCurrentAltitude();
+		radioCall.assertCallContainsCurrentFixName();
+		radioCall.assertCallContainsNonCriticalWords(['changing', 'to']);
+		radioCall.assertCallContainsNextFrequency();
+
+		// Return ATC response
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, roger.`;
+
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
@@ -398,7 +420,7 @@ if (not in level flight. */
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	public static parseReadbackOverheadJoinClearance(radioCall: RadioCall): ServerResponse {
+	public static parseOverheadJoinClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, join overhead runway ${radioCall.getLandingRunwayName()}, height ${radioCall.getOverheadJoinAltitude()}, ${radioCall
 			.getEndAerodromeMETORSample()
 			.getPressureString()}, wilco, ${radioCall.getTargetAllocatedCallsign()}`;
@@ -496,7 +518,7 @@ if (not in level flight. */
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	public static parseAcknowledgeContinueApproach(radioCall: RadioCall): ServerResponse {
+	public static parseContinueApproachReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `Continue approach, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords(['continue', 'approach']);
@@ -506,7 +528,7 @@ if (not in level flight. */
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
-	public static parseAcknowledgeClearedToLand(radioCall: RadioCall): ServerResponse {
+	public static parseLandingClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `Cleared to land, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords(['cleared', 'to', 'land']);
@@ -551,7 +573,7 @@ if (not in level flight. */
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
-	public static parseReadbackTaxiParkingSpot(radioCall: RadioCall): ServerResponse {
+	public static parseTaxiParkingSpotReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `Taxi to ${radioCall.getLandingParkingSpot()}, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords(['taxi', 'to']);

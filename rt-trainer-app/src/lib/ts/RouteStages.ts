@@ -19,14 +19,14 @@ export enum TakeOffStage {
 	ReadbackClearance = 'Readback Clearance',
 	AcknowledgeTraffic = 'Acknowledge Traffic', // Uncontrolled aerodrome
 	AnnounceTakingOff = 'Report Taking Off', // Uncontrolled aerodrome
-	AnnounceLeavingZone = 'Announce Leaving Zone' // Uncontrolled aerodrome
 }
 
 export enum ClimbOutStage {
 	ReadbackNextContact = 'Readback Next Contact',
 	ContactNextFrequency = 'Contact Next Frequency',
 	AcknowledgeNewFrequencyRequest = 'Acknowledge New Frequency Request',
-	ReportLeavingZone = 'Report Leaving Zone'
+	ReportLeavingZone = 'Report Leaving Zone',
+	AnnounceLeavingZone = 'Announce Leaving Zone' // Uncontrolled aerodrome
 }
 
 export enum ChangeZoneStage {

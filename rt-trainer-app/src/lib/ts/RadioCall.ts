@@ -746,8 +746,8 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTraffic(): string {
-		if (this.seed.scenarioSeed % 2 == 0) return 'Cessna 152 reported final';
-		else return '';
+		if (this.seed.scenarioSeed % 2 == 0) return 'traffic is Cessna 152 reported final';
+		else return 'no reported traffic';
 	}
 
 	public getLandingTraffic(): string {
@@ -758,6 +758,10 @@ export default class RadioCall {
 			if (this.seed.scenarioSeed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
 			else return 'no reported traffic';
 		}
+	}
+
+	public getTakeoffWindString(): string {
+		return this.getStartAerodromeMETORSample().getWindString();
 	}
 
 	public getCurrentAltitude(): number {
@@ -984,5 +988,13 @@ export default class RadioCall {
 			return false;
 		}
 		return true;
+	}
+
+	public getCurrentATISLetter(): string {
+		if (this.getEndAerodrome().isControlled()) {
+			return (this.getEndAerodrome() as ControlledAerodrome).getATISLetter();
+		} else {
+			throw new Error('No ATIS letter for uncontrolled aerodrome.');
+		}
 	}
 }

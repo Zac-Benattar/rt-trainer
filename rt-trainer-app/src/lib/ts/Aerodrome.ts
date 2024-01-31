@@ -276,11 +276,15 @@ export class METORDataSample {
 	}
 
 	public getWindDirectionString(): string {
-		return numberToPhoneticString(this.windDirection, 0) + ' degrees';
+		return 'wind ' + numberToPhoneticString(this.windDirection, 0) + ' degrees';
 	}
 
 	public getWindSpeedString(): string {
 		return numberToPhoneticString(this.windSpeed, 0) + ' knots';
+	}
+
+	public getWindString(): string {
+		return this.getWindDirectionString() + ' ' + this.getWindSpeedString();
 	}
 
 	public getPressureString(): string {
@@ -431,7 +435,7 @@ abstract class Aerodrome {
 	}
 
 	public getTakeoffTime(): number {
-		return this.getStartTime() + 18;
+		return this.getStartTime() + 10;
 	}
 }
 
@@ -485,6 +489,11 @@ export class ControlledAerodrome extends Aerodrome {
 
 	public isControlled(): boolean {
 		return true;
+	}
+
+	public getATISLetter(): string {
+		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+		return alphabet.charAt(this.seed.scenarioSeed % alphabet.length);
 	}
 
 	public static getAerodromesFromJSON(seed: Seed): ControlledAerodrome[] {

@@ -311,11 +311,11 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 		stages.push(reportTakingOff);
 
 		const reportLeavingZone = new RoutePoint(
-			ClimbOutStage.ReportLeavingZone,
+			ClimbOutStage.AnnounceLeavingZone,
 			climbingOutPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
 			0,
-			startAerodromeTime + 18
+			startAerodromeTime + 15
 		);
 		stages.push(reportLeavingZone);
 	}
