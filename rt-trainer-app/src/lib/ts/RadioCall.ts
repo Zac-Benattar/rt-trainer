@@ -449,27 +449,27 @@ export default class RadioCall {
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {
-		return this.getStartAerodrome().getMETORData().getSample(this.seed);
+		return this.getStartAerodrome().getMETORSample();
 	}
 
 	public getEndAerodromeMETORSample(): METORDataSample {
-		return this.getEndAerodrome().getMETORData().getSample(this.seed);
+		return this.getEndAerodrome().getMETORSample();
 	}
 
 	public getTakeoffRunway(): Runway {
-		return this.getStartAerodrome().getTakeoffRunway(this.seed);
+		return this.getStartAerodrome().getTakeoffRunway();
 	}
 
 	public getTakeoffRunwayName(): string {
-		return this.getStartAerodrome().getTakeoffRunway(this.seed).name;
+		return this.getStartAerodrome().getTakeoffRunway().name;
 	}
 
 	public getLandingRunway(): Runway {
-		return this.getEndAerodrome().getLandingRunway(this.seed);
+		return this.getEndAerodrome().getLandingRunway();
 	}
 
 	public getLandingRunwayName(): string {
-		return this.getEndAerodrome().getLandingRunway(this.seed).name;
+		return this.getEndAerodrome().getLandingRunway().name;
 	}
 
 	public assertCallContainsTakeOffRunwayName(): boolean {
@@ -696,11 +696,11 @@ export default class RadioCall {
 	}
 
 	public getTakeoffRunwayTaxiway(): Taxiway {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiway(this.seed);
+		return this.getStartAerodrome().getTakeoffRunwayTaxiway();
 	}
 
 	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint(this.seed);
+		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint();
 	}
 
 	public getTakeoffTurnoutHeading(): number {
@@ -764,8 +764,8 @@ export default class RadioCall {
 		return this.getCurrentRoutePoint().pose.altitude;
 	}
 
-	public getCurrentAltitudeString() : number {
-		return this.getCurrentRoutePoint().pose.altitude.toString() + ' feet';
+	public getCurrentAltitudeString(): string {
+		return this.getCurrentAltitude() + ' feet';
 	}
 
 	public assertCallContainsCurrentAltitude(): boolean {
@@ -857,7 +857,7 @@ export default class RadioCall {
 	}
 
 	public getLandingParkingSpot(): string {
-		return this.getEndAerodrome().getLandingParkingSpot(this.seed);
+		return this.getEndAerodrome().getLandingParkingSpot();
 	}
 
 	public assertCallContainsLandingParkingSpot(): boolean {
@@ -961,7 +961,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentTime(): number {
-		return this.getCurrentRoutePoint().time;
+		return this.getCurrentRoutePoint().timeAtPoint;
 	}
 
 	public assertCallContainsCurrentTime(): boolean {
@@ -973,11 +973,11 @@ export default class RadioCall {
 	}
 
 	public getNextWaypointArrivalTime(): number {
-		return this.getCurrentRoutePoint().nextWaypointArrivalTime;
+		return this.getNextWaypoint().arrivalTime;
 	}
 
 	public assertCallContainsNextWaypointArrivalTime(): boolean {
-		if (!this.callContainsWord(this.getCurrentRoutePoint().nextWaypointArrivalTime.toString())) {
+		if (!this.callContainsWord(this.getNextWaypoint().arrivalTime.toString())) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the arrival time at the next waypoint."
 			);

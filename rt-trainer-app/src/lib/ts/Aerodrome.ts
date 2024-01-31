@@ -311,6 +311,7 @@ export class METORDataSample {
 
 /* Aerodrome data. */
 abstract class Aerodrome {
+	protected seed: Seed;
 	protected name: string;
 	protected icao: string;
 	protected runwayPairs: RunwayPair[];
@@ -319,6 +320,7 @@ abstract class Aerodrome {
 	protected metorData: METORData;
 
 	constructor(
+		seed: Seed,
 		name: string,
 		icao: string,
 		runwayPairs: RunwayPair[],
@@ -326,6 +328,7 @@ abstract class Aerodrome {
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
+		this.seed = seed;
 		this.name = name;
 		this.icao = icao;
 		this.runwayPairs = runwayPairs;
@@ -362,6 +365,10 @@ abstract class Aerodrome {
 		return this.metorData;
 	}
 
+	public getMETORSample(): METORDataSample {
+		return this.metorData.getSample(this.seed);
+	}
+
 	public abstract getGroundFrequency(): number;
 
 	public abstract getTakeoffFrequency(): number;
@@ -372,20 +379,20 @@ abstract class Aerodrome {
 
 	public abstract isControlled(): boolean;
 
-	public getTakeoffRunway(seed: Seed): Runway {
-		const index = seed.scenarioSeed % this.runwayPairs.length;
+	public getTakeoffRunway(): Runway {
+		const index = this.seed.scenarioSeed % this.runwayPairs.length;
 		return this.runwayPairs[index].getTakeoffRunway();
 	}
 
-	public getTakeoffRunwayTaxiway(seed: Seed): Taxiway {
-		const runway = this.getTakeoffRunway(seed);
-		const index = seed.scenarioSeed % runway.taxiways.length;
+	public getTakeoffRunwayTaxiway(): Taxiway {
+		const runway = this.getTakeoffRunway();
+		const index = this.seed.scenarioSeed % runway.taxiways.length;
 		return runway.taxiways[index];
 	}
 
-	public getTakeoffRunwayTaxiwayHoldingPoint(seed: Seed): RunwayHoldingPoint {
-		const taxiway = this.getTakeoffRunwayTaxiway(seed);
-		const index = seed.scenarioSeed % taxiway.holdingPoints.length;
+	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
+		const taxiway = this.getTakeoffRunwayTaxiway();
+		const index = this.seed.scenarioSeed % taxiway.holdingPoints.length;
 		return taxiway.holdingPoints[index];
 	}
 
@@ -394,27 +401,37 @@ abstract class Aerodrome {
 		return 1500;
 	}
 
-	public getLandingRunway(seed: Seed): Runway {
-		const index = seed.scenarioSeed % this.runwayPairs.length;
+	public getLandingRunway(): Runway {
+		const index = this.seed.scenarioSeed % this.runwayPairs.length;
 		return this.runwayPairs[index].getLandingRunway();
 	}
 
-	public getLandingRunwayTaxiway(seed: Seed): Taxiway {
-		const runway = this.getLandingRunway(seed);
-		const index = seed.scenarioSeed % runway.taxiways.length;
+	public getLandingRunwayTaxiway(): Taxiway {
+		const runway = this.getLandingRunway();
+		const index = this.seed.scenarioSeed % runway.taxiways.length;
 		return runway.taxiways[index];
 	}
 
-	public getLandingRunwayTaxiwayHoldingPoint(seed: Seed): RunwayHoldingPoint {
-		const taxiway = this.getLandingRunwayTaxiway(seed);
-		const index = seed.scenarioSeed % taxiway.holdingPoints.length;
+	public getLandingRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
+		const taxiway = this.getLandingRunwayTaxiway();
+		const index = this.seed.scenarioSeed % taxiway.holdingPoints.length;
 		return taxiway.holdingPoints[index];
 	}
 
-	public getLandingParkingSpot(seed: Seed): string {
+	public getLandingParkingSpot(): string {
 		const startPoints = this.getStartPoints();
-		const index = seed.scenarioSeed % startPoints.length;
+		const index = this.seed.scenarioSeed % startPoints.length;
 		return startPoints[index].name;
+	}
+
+	public getStartTime(): number {
+		// (In minutes)
+		// 1pm + (0-4hours) - 2 hours -> 11am - 3pm
+		return 780 + (this.seed.scenarioSeed % 240) - 120;
+	}
+
+	public getTakeoffTime(): number {
+		return this.getStartTime() + 18;
 	}
 }
 
@@ -424,6 +441,7 @@ export class ControlledAerodrome extends Aerodrome {
 	protected radarFrequency: number;
 
 	constructor(
+		seed: Seed,
 		name: string,
 		icao: string,
 		groundFrequency: number,
@@ -434,7 +452,7 @@ export class ControlledAerodrome extends Aerodrome {
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runwayPairs, altitude, startPoints, metorData);
+		super(seed, name, icao, runwayPairs, altitude, startPoints, metorData);
 
 		this.groundFrequency = groundFrequency;
 		this.towerFrequency = towerFrequency;
@@ -469,7 +487,7 @@ export class ControlledAerodrome extends Aerodrome {
 		return true;
 	}
 
-	public static getAerodromesFromJSON(): ControlledAerodrome[] {
+	public static getAerodromesFromJSON(seed: Seed): ControlledAerodrome[] {
 		const aerodromes: ControlledAerodrome[] = [];
 
 		controlledAerodromes.forEach((aerodrome) => {
@@ -489,6 +507,7 @@ export class ControlledAerodrome extends Aerodrome {
 
 			aerodromes.push(
 				new ControlledAerodrome(
+					seed,
 					aerodrome.name,
 					aerodrome.icao,
 					aerodrome.groundFrequency,
@@ -520,6 +539,7 @@ export class UncontrolledAerodrome extends Aerodrome {
 	protected informationFrequency: number;
 
 	constructor(
+		seed: Seed,
 		name: string,
 		icao: string,
 		informationFrequency: number,
@@ -528,7 +548,7 @@ export class UncontrolledAerodrome extends Aerodrome {
 		startPoints: AerodromeStartPoint[],
 		metorData: METORData
 	) {
-		super(name, icao, runwayPairs, altitude, startPoints, metorData);
+		super(seed, name, icao, runwayPairs, altitude, startPoints, metorData);
 
 		this.informationFrequency = informationFrequency;
 	}
@@ -557,7 +577,7 @@ export class UncontrolledAerodrome extends Aerodrome {
 		return false;
 	}
 
-	public static getAerodromesFromJSON(): UncontrolledAerodrome[] {
+	public static getAerodromesFromJSON(seed: Seed): UncontrolledAerodrome[] {
 		const aerodromes: UncontrolledAerodrome[] = [];
 
 		uncontrolledAerodromes.forEach((aerodrome) => {
@@ -576,6 +596,7 @@ export class UncontrolledAerodrome extends Aerodrome {
 			});
 			aerodromes.push(
 				new UncontrolledAerodrome(
+					seed,
 					aerodrome.name,
 					aerodrome.icao,
 					aerodrome.informationFrequency,

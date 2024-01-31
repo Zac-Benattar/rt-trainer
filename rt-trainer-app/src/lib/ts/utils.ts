@@ -410,3 +410,18 @@ export function stringDecimalLongitudeToNumber(str: string): number | null {
 
 	return null; // Return null if the input string doesn't match the expected format
 }
+
+export function convertMinutesToTimeString(minutes: number): string {
+	if (typeof minutes !== 'number' || minutes < 0 || minutes >= 24 * 60) {
+		throw new Error('Invalid input. Please provide a valid number representing time in minutes.');
+	}
+
+	const hours = Math.floor(minutes / 60);
+	const remainderMinutes = minutes % 60;
+
+	const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
+	const formattedMinutes = remainderMinutes < 10 ? `0${remainderMinutes}` : `${remainderMinutes}`;
+
+	const timeString = `${formattedHours}:${formattedMinutes}`;
+	return timeString;
+}

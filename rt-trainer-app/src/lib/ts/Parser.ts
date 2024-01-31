@@ -1,5 +1,4 @@
 import { ServerResponse } from './ServerClientTypes';
-import type RoutePoint from './RoutePoints';
 import type RadioCall from './RadioCall';
 import {
 	CircuitAndLandingStage,

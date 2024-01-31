@@ -10,6 +10,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
+	import { convertMinutesToTimeString } from '$lib/ts/utils';
 
 	type MapWaypoint = {
 		lat: number;
@@ -21,6 +22,7 @@
 	let leaflet: any;
 	let rotated_marker: any;
 	let targetPose: Pose;
+	let currentTime: string = '00:00';
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
 	let mapWaypoints: MapWaypoint[] = [];
@@ -46,7 +48,7 @@
 	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
 		if (currentRoutePoint != null) {
 			targetPose = currentRoutePoint.pose;
-
+			currentTime = convertMinutesToTimeString(currentRoutePoint.timeAtPoint);
 			if (mounted) {
 				updateMap();
 			} else {
@@ -56,7 +58,7 @@
 				lat: 0,
 				long: 0,
 				magneticHeading: 0,
-				magneticVariation: 0,
+				trueHeading: 0,
 				altitude: 0,
 				airSpeed: 0
 			};
@@ -82,6 +84,8 @@
 					targetPose.altitude +
 					'<br> Airspeed: ' +
 					targetPose.airSpeed +
+					'<br> Time: ' +
+					currentTime +
 					'</p>';
 				return text;
 			}
