@@ -32,6 +32,7 @@ export type Waypoint = {
 	lat: number;
 	long: number;
 	name: string;
+	arrivalTime: number;
 };
 
 export enum FrequencyType {

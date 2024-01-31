@@ -14,7 +14,7 @@ import {
 	TaxiStage
 } from './RouteStages';
 import Route from './Route';
-import { lerpLocation } from './utils';
+import { lerp, lerpLocation } from './utils';
 
 /* A point on the route used in generation. Not necissarily visible to the user */
 export default class RoutePoint {
@@ -22,17 +22,20 @@ export default class RoutePoint {
 	pose: Pose;
 	updateData: SimulatorUpdateData;
 	nextWaypointIndex: number;
+	timeAtPoint: number;
 
 	constructor(
 		stage: string,
 		pose: Pose,
 		updateData: SimulatorUpdateData,
-		nextWaypointIndex: number
+		nextWaypointIndex: number,
+		timeAtPoint: number
 	) {
 		this.stage = stage;
 		this.pose = pose;
 		this.updateData = updateData;
 		this.nextWaypointIndex = nextWaypointIndex;
+		this.timeAtPoint = timeAtPoint;
 	}
 }
 
@@ -101,10 +104,11 @@ export function getParkedMadeContactUncontrolledUpdateData(
 export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 	const stages: RoutePoint[] = [];
 	const startAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getStartAerodrome(seed);
+	const startAerodromeTime: number = startAerodrome.getStartTime();
 	const startPoints = startAerodrome.getStartPoints();
 	const startPointIndex = seed.scenarioSeed % startPoints.length;
-	const holdingPoint = startAerodrome.getTakeoffRunwayTaxiwayHoldingPoint(seed);
-	const takeoffRunway = startAerodrome.getTakeoffRunway(seed);
+	const holdingPoint = startAerodrome.getTakeoffRunwayTaxiwayHoldingPoint();
+	const takeoffRunway = startAerodrome.getTakeoffRunway();
 
 	const parkedPose: Pose = {
 		lat: startPoints[startPointIndex].lat,
@@ -148,7 +152,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			StartUpStage.RadioCheck,
 			parkedPose,
 			getParkedInitialControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime
 		);
 		stages.push(radioCheck);
 
@@ -156,7 +161,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			StartUpStage.DepartureInformationRequest,
 			parkedPose,
 			getParkedInitialControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime
 		);
 		stages.push(requestDepartInfo);
 
@@ -164,7 +170,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			StartUpStage.ReadbackDepartureInformation,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 1
 		);
 		stages.push(readbackDepartInfo);
 
@@ -172,7 +179,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TaxiStage.TaxiRequest,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 1
 		);
 		stages.push(taxiRequest);
 
@@ -180,7 +188,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TaxiStage.TaxiClearanceReadback,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 5
 		);
 		stages.push(taxiClearanceReadback);
 
@@ -188,7 +197,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.ReadyForDeparture,
 			taxiPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 8
 		);
 		stages.push(ReadyForDeparture);
 
@@ -196,7 +206,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.ReadbackAfterDepartureInformation,
 			taxiPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 9
 		);
 		stages.push(readbackAfterDepartureInformation);
 
@@ -204,7 +215,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.ReadbackClearance,
 			taxiPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 9
 		);
 		stages.push(readbackClearance);
 
@@ -212,7 +224,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			ClimbOutStage.ReadbackNextContact,
 			climbingOutPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 12
 		);
 		stages.push(readbackNextContact);
 
@@ -220,7 +233,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			ClimbOutStage.ContactNextFrequency,
 			climbingOutPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 15
 		);
 		stages.push(contactNextFrequency);
 
@@ -228,7 +242,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			ClimbOutStage.AcknowledgeNewFrequencyRequest,
 			climbingOutPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 15
 		);
 		stages.push(acknowledgeNewFrequencyRequest);
 
@@ -236,7 +251,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			ClimbOutStage.ReportLeavingZone,
 			climbingOutPose,
 			getParkedMadeContactControlledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 18
 		);
 		stages.push(reportLeavingZone);
 	} else {
@@ -244,7 +260,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			StartUpStage.RadioCheck,
 			parkedPose,
 			getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime
 		);
 		stages.push(radioCheck);
 
@@ -252,7 +269,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TaxiStage.RequestTaxiInformation,
 			parkedPose,
 			getParkedInitialUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 1
 		);
 		stages.push(requestTaxiInformation);
 
@@ -260,7 +278,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TaxiStage.AnnounceTaxiing,
 			parkedPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 1
 		);
 		stages.push(readbackTaxiInformation);
 
@@ -268,7 +287,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.ReadyForDeparture,
 			taxiPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 8
 		);
 		stages.push(readyForDeparture);
 
@@ -276,7 +296,8 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.AcknowledgeTraffic,
 			taxiPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 9
 		);
 		stages.push(acknowledgeTraffic);
 
@@ -284,15 +305,17 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 			TakeOffStage.AnnounceTakingOff,
 			onRunwayPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 10
 		);
 		stages.push(reportTakingOff);
 
 		const reportLeavingZone = new RoutePoint(
-			ClimbOutStage.ReportLeavingZone,
+			ClimbOutStage.AnnounceLeavingZone,
 			climbingOutPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAerodrome),
-			0
+			0,
+			startAerodromeTime + 15
 		);
 		stages.push(reportLeavingZone);
 	}
@@ -303,9 +326,11 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: number): RoutePoint[] {
 	const stages: RoutePoint[] = [];
 	const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
+	const waypoints: Waypoint[] = Route.getRouteWaypoints(seed, numAirborneWaypoints);
+	const landingTime = waypoints[waypoints.length - 1].arrivalTime;
 	const parkingPoints = endAerodrome.getStartPoints();
 	const parkingPointIndex = seed.scenarioSeed % parkingPoints.length;
-	const landingRunway = endAerodrome.getLandingRunway(seed);
+	const landingRunway = endAerodrome.getLandingRunway();
 
 	const parkedPose: Pose = {
 		lat: parkingPoints[parkingPointIndex].lat,
@@ -345,7 +370,7 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 		airSpeed: 0.0
 	};
 
-	const holdingPoint = endAerodrome.getLandingRunwayTaxiwayHoldingPoint(seed);
+	const holdingPoint = endAerodrome.getLandingRunwayTaxiwayHoldingPoint();
 	const runwayVacatedPose: Pose = {
 		lat: holdingPoint.lat,
 		long: holdingPoint.long,
@@ -360,7 +385,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.RequestJoin,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 15
 		);
 		stages.push(requestJoin);
 
@@ -368,7 +394,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.ReportDetails,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 15
 		);
 		stages.push(reportDetails);
 
@@ -376,7 +403,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.ReadbackOverheadJoinClearance,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 14
 		);
 		stages.push(readbackOverheadJoinClearance);
 
@@ -384,7 +412,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.ReportAerodromeInSight,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 10
 		);
 		stages.push(reportAirodromeInSight);
 
@@ -392,7 +421,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.ContactTower,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 10
 		);
 		stages.push(contactTower);
 
@@ -400,7 +430,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportStatus,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 9
 		);
 		stages.push(reportStatus);
 
@@ -408,7 +439,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReadbackLandingInformation,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 9
 		);
 		stages.push(readbackLandingInformation);
 
@@ -416,7 +448,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportDescending,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 7
 		);
 		stages.push(reportDescending);
 
@@ -424,7 +457,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.WilcoReportDownwind,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 7
 		);
 		stages.push(wilcoReportDownwind);
 
@@ -432,7 +466,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportDownwind,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 5
 		);
 		stages.push(reportDownwind);
 
@@ -440,7 +475,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.WilcoFollowTraffic,
 			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 4
 		);
 		stages.push(wilcoFollowTraffic);
 
@@ -448,7 +484,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportFinal,
 			reportFinalPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 4
 		);
 		stages.push(reportFinal);
 
@@ -456,7 +493,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReadbackContinueApproach,
 			reportFinalPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 3
 		);
 		stages.push(readbackContinueApproach);
 
@@ -464,7 +502,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReadbackLandingClearance,
 			reportFinalPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 3
 		);
 		stages.push(readbackLandingClearance);
 
@@ -472,7 +511,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			LandingToParkedStage.ReadbackVacateRunwayRequest,
 			onRunwayPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 2
 		);
 		stages.push(readbackVacateRunwayRequest);
 
@@ -480,7 +520,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			LandingToParkedStage.ReportVacatedRunway,
 			runwayVacatedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime + 5
 		);
 		stages.push(reportVacatedRunway);
 
@@ -488,7 +529,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			LandingToParkedStage.ReadbackTaxiInformation,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime + 5
 		);
 		stages.push(readbackTaxiInformation);
 	} else {
@@ -496,7 +538,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.RequestJoin,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 15
 		);
 		stages.push(requestJoin);
 
@@ -504,7 +547,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			InboundForJoinStage.ReportDetails,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 15
 		);
 		stages.push(reportDetails);
 
@@ -512,7 +556,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportCrosswindJoin,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 14
 		);
 		stages.push(reportCrosswindJoin);
 
@@ -520,7 +565,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportDownwind,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 12
 		);
 		stages.push(reportDownwind);
 
@@ -528,7 +574,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReportFinal,
 			reportFinalPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 4
 		);
 		stages.push(reportFinal);
 
@@ -536,7 +583,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			CircuitAndLandingStage.ReadbackContinueApproach,
 			reportFinalPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime - 3
 		);
 		stages.push(readbackContinueApproach);
 
@@ -544,7 +592,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			LandingToParkedStage.ReportVacatedRunway,
 			runwayVacatedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime + 5
 		);
 		stages.push(reportVacatedRunway);
 
@@ -552,7 +601,8 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 			LandingToParkedStage.ReportTaxiing,
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
-			numAirborneWaypoints
+			numAirborneWaypoints + 1,
+			landingTime + 5
 		);
 		stages.push(reportTaxiing);
 	}
@@ -592,7 +642,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime - 1
 		);
 		routePoints.push(requestFrequencyChange);
 
@@ -607,7 +658,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime
 		);
 		routePoints.push(acknowledgeApproval);
 
@@ -622,7 +674,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime + 1
 		);
 		routePoints.push(contactNewFrequency);
 
@@ -637,7 +690,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime + 2
 		);
 		routePoints.push(passMessage);
 
@@ -652,7 +706,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime + 3
 		);
 		routePoints.push(squawk);
 
@@ -667,16 +722,17 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: EmergencyType.None
 			},
-			i + 1
+			i + 1,
+			waypoint.arrivalTime + 4
 		);
 		routePoints.push(readbackApproval);
 		endStageIndexes.push(routePoints.length - 1);
 	}
 
 	if (hasEmergency) {
-		// Add emergency before a random point
+		// Add emergency before a random waypoint on the route, not first point
 		const emergencyPointIndex = (seed.scenarioSeed % (waypoints.length - 1)) + 1;
-		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex] + 1;
+		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex - 1];
 
 		let emergencyType: EmergencyType = EmergencyType.None;
 
@@ -694,6 +750,14 @@ export function getAirborneRoutePoints(
 			waypoints[emergencyPointIndex - 1].lat,
 			waypoints[emergencyPointIndex - 1].long,
 			lerpPercentage
+		);
+
+		const emergencyTime: number = Math.round(
+			lerp(
+				waypoints[emergencyPointIndex].arrivalTime,
+				waypoints[emergencyPointIndex - 1].arrivalTime,
+				lerpPercentage
+			)
 		);
 
 		const emergencyPose: Pose = {
@@ -716,7 +780,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: emergencyType
 			},
-			emergencyPointIndex
+			emergencyPointIndex,
+			emergencyTime
 		);
 		routePoints.splice(emergencyRoutePointIndex, 0, declareEmergency);
 
@@ -731,7 +796,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: emergencyType
 			},
-			emergencyPointIndex
+			emergencyPointIndex,
+			emergencyTime + 1
 		);
 		routePoints.splice(emergencyRoutePointIndex + 1, 0, wilcoInstructions);
 
@@ -746,7 +812,8 @@ export function getAirborneRoutePoints(
 				currentTransponderFrequency: 0,
 				emergency: emergencyType
 			},
-			emergencyPointIndex
+			emergencyPointIndex,
+			emergencyTime + 4
 		);
 		routePoints.splice(emergencyRoutePointIndex + 2, 0, cancelPanPan);
 	}
