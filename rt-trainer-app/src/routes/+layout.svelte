@@ -17,6 +17,7 @@
 	import { dev } from '$app/environment';
 	import { inject } from '@vercel/analytics';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
+	import SvelteSeo from 'svelte-seo';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
@@ -58,6 +59,14 @@
 	}
 </script>
 
+<SvelteSeo
+	title="RT Trainer | FRTOL Practice"
+	description="Gain confidence in your RT skills with our FRTOL practice tool. Practice your RT skills with our randomly generated scenarios and get instant feedback on your performance. Speak or type your radio calls. Share routes with friends and instructors. Use the simulated cockpit controls."
+	keywords="frtol, rt, radio, trainer, practice, atc, air traffic control, pilot, aviation, flight, simulator, training, route, generation, cap413, radio telephony, radiotelephony, pilots license, exam, frtol exam, test, frtol test"
+	notranslate={true}
+	applicationName="RT Trainer"
+/>
+
 <!-- Enable system theme -->
 <svelte:head
 	>{@html `<script>${autoModeWatcher.toString()} autoModeWatcher();</script>`}</svelte:head
@@ -87,6 +96,26 @@
 			<Navigation />
 		{/if}
 	</svelte:fragment>
+	<svelte:fragment slot="pageFooter">
+		<div class="flex flex-col place-items-center grow-0 p-2">
+			{#if $page.url.pathname === '/'}
+				<p>
+					Homepage image by <a
+						href="https://pixabay.com/users/clker-free-vector-images-3736/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=26563"
+						>Clker-Free-Vector-Images</a
+					>
+					from
+					<a
+						href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=26563"
+						>Pixabay</a
+					>
+				</p>
+			{/if}
+			<!-- <p>
+				&copy; 2021 InterVeg Coventry Ltd.<br />Fresh produce from the Midland's green countryside.
+			</p> -->
+		</div></svelte:fragment
+	>
 	<!-- Page Route Content -->
 	<slot />
 </AppShell>
@@ -97,6 +126,7 @@
 		font-style: normal;
 		font-weight: 100;
 		src: url('/fonts/GeistVF.woff2') format('woff2');
+		font-display: swap;
 	}
 
 	@font-face {
@@ -104,5 +134,6 @@
 		font-style: normal;
 		font-weight: 100;
 		src: url('/fonts/DSEG7ClassicMini-Regular.woff2') format('woff2');
+		font-display: swap;
 	}
 </style>
