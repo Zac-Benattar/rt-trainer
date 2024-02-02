@@ -329,6 +329,99 @@ accompanied with the planned times to reach them */
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
+	public static parseRequestMATZPenetration(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhonetics()}, request traffic service, MATZ and ATZ penetration`;
+
+		radioCall.assertCallStartsWithTargetCallsign();
+		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsCriticalWords(['traffic', 'service']);
+		radioCall.assertCallContainsCriticalWords(['matz', 'atz', 'penetration']);
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getCurrentTarget()}, pass your message`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseMATZPenetrationReadback(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} ${radioCall.getAircraftType()}, from ${radioCall
+			.getStartAerodrome()
+			.getShortName()} to ${radioCall
+			.getEndAerodrome()
+			.getShortName()}, ${radioCall.getPositionRelativeToNearestFix()}, ${radioCall.getCurrentAltitudeString()} ${radioCall.getCurrentAltimeterSetting()}, VFR, tracking to ${radioCall.getNextWaypointName()}, squawking ${radioCall.getSquarkCode()}, request Traffic Service, MATZ and ATZ penetration`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsAircraftType();
+		radioCall.assertCallContainsStartAerodromeName();
+		radioCall.assertCallContainsEndAerodromeName();
+		radioCall.assertCallContainsCurrentAltitude();
+		radioCall.assertCallContainsNextWaypointName();
+		radioCall.assertCallContainsSqwarkCode();
+		radioCall.assertCallContainsCriticalWords(['traffic', 'service']);
+		radioCall.assertCallContainsCriticalWords(['matz', 'atz', 'penetration']);
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, sqwuak ${radioCall.getSquarkCode()}`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseSqwuak(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Sqwuak ${radioCall.getSquarkCode()}, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsCriticalWord('sqwuak');
+		radioCall.assertCallContainsSqwarkCode();
+		radioCall.assertCallEndsWithUserCallsign();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, identified ${radioCall.getPositionRelativeToNearestFix()}, Traffic Service`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAcknowledgeTrafficService(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Traffic Service, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsCriticalWords(['traffic', 'service']);
+		radioCall.assertCallEndsWithUserCallsign();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, descend to height ${radioCall.getMATZPenetrationHeight()} for MATZ penetration. ${radioCall.getATCPressureReading()}`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseMATZPenetrationTrafficServiceReadback(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Descend to height ${radioCall.getMATZPenetrationHeight()}, ${radioCall.getATCPressureReading()}, ${radioCall.getTargetAllocatedCallsign()}`;
+
+		radioCall.assertCallContainsMATZPenetrationHeight();
+		radioCall.assertCallContainsATCPressureReading();
+		radioCall.assertCallEndsWithUserCallsign();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, leaving ${radioCall.getCurrentATZName()} MATZ, ${radioCall.getATCPressureReading()}`;
+
+
+		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
+	}
+
+	public static parseLeavingMATZFrequencyChangeRequest(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Roger ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getATCPressureReading()}, request change to ${radioCall.getNextATZName()} ${radioCall.getNextATZFrequency()}`;
+
+		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsCriticalWords(['request', 'change']);
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, radar service terminated, sqwuak 7000, freecall ${radioCall.getNextATZName()}`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseAnnounceReachingMATZPenetrationHeight(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, reaching height ${radioCall.getMATZPenetrationHeight()}`;
+
+		radioCall.assertCallStartsWithUserCallsign();
+		radioCall.assertCallContainsMATZPenetrationHeight();
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, maintain height ${radioCall.getMATZPenetrationHeight()}, MATZ and ATZ penetration approved`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
 	/* Parse response to ATC unit requesting squark.
 Should consist of aircraft callsign and squark code */
 	public static parseNewAirspaceSquark(radioCall: RadioCall): ServerResponse {

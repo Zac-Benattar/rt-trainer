@@ -997,4 +997,30 @@ export default class RadioCall {
 			throw new Error('No ATIS letter for uncontrolled aerodrome.');
 		}
 	}
+
+	public getNextFixName(): string {
+		throw new Error('Unimplemented method');
+	}
+
+	public getPositionRelativeToNearestFix(): string {
+		throw new Error('Unimplemented method');
+	}
+
+	public getCurrentAltimeterSetting(): string {
+		throw new Error('Unimplemented method');
+	}
+
+	public getMATZPenetrationHeight(): string {
+		return '1500 feet';
+	}
+
+	public assertCallContainsMATZPenetrationHeight(): boolean {
+		if (!this.callContainsWords(this.getMATZPenetrationHeight().split(' '))) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the correct height for transiting the MATZ."
+			);
+			return false;
+		}
+		return true;
+	}
 }

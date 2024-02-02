@@ -3,6 +3,7 @@
 	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 	import { ClearSimulationStores } from '$lib/stores';
+	import Tooltip from 'sv-tooltip';
 
 	export let seed: string = generateRandomURLValidString(8);
 	let airborneWaypoints: number = 2;
@@ -118,19 +119,24 @@
 			>
 		</div>
 
-		<div>
-			<RangeSlider
-				name="range-slider"
-				bind:value={airborneWaypoints}
-				max={maxAirborneWaypoints}
-				step={1}
-				ticked
+		<div class="flex grow">
+			<Tooltip tip="Currently disabled while the system is finalised." bottom
+				><div class="waypoints-slider flex grow">
+					<RangeSlider
+						name="range-slider"
+						bind:value={airborneWaypoints}
+						max={maxAirborneWaypoints}
+						step={1}
+						ticked
+						disabled
+					>
+						<div class="flex grow justify-between items-center">
+							<span>Airborne Waypoints</span>
+							<div class="text-xs">{airborneWaypoints} / {maxAirborneWaypoints}</div>
+						</div>
+					</RangeSlider>
+				</div></Tooltip
 			>
-				<div class="flex justify-between items-center">
-					<span>Airborne Waypoints</span>
-					<div class="text-xs">{airborneWaypoints} / {maxAirborneWaypoints}</div>
-				</div>
-			</RangeSlider>
 		</div>
 
 		<div>
@@ -199,5 +205,9 @@
 		padding: 1rem;
 		max-width: 500px;
 		min-width: 400px;
+	}
+
+	:global(.range-slider) {
+		width: 468px;
 	}
 </style>
