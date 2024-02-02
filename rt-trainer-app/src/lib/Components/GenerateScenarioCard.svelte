@@ -11,7 +11,7 @@
 
 	const handleClick = () => {
 		// Reset stores
-		ClearSimulationStores()
+		ClearSimulationStores();
 
 		// Get the values from the form
 		const enableEmergenciesElement = document.getElementById(
@@ -50,7 +50,6 @@
 			} else {
 				callsign = callsignInputElement.value;
 			}
-
 		}
 
 		let aircraftType = '';
@@ -60,8 +59,7 @@
 		if (aircraftTypeInputElement != null) {
 			if (aircraftTypeInputElement.value == '') {
 				aircraftType = 'Cessna 172';
-			}
-			else {
+			} else {
 				aircraftType = aircraftTypeInputElement.value;
 			}
 		}
@@ -200,5 +198,6 @@
 	.card {
 		padding: 1rem;
 		max-width: 500px;
+		min-width: 400px;
 	}
 </style>

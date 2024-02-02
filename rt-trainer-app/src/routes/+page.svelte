@@ -1,49 +1,63 @@
 <script lang="ts">
-	import GenerateScenarioButton from '../lib/Components/GenerateScenarioCard.svelte';
+	import SvgDisplay from '$lib/Components/SVGDisplay.svelte';
 </script>
 
-<div class="container mx-auto p-8 space-y-8">
-	<h1 class="h1">Welcome to RT Trainer</h1>
-	<p class="text-xl">
-		RT Trainer is a web application that lets you practice your radio communication skills. <br />
-	</p>
-
-	<section>
-		<div class="flex flex-row justify-start gap-x-10">
-			<div class="card bg-warning-500 p-4 max-w-50">
-				<h3 class="h3">Please Read</h3>
-				<p class="text-l p-3">
-					<li>This is an early release of RT Trainer. Expect many bugs and missing features.</li>
-					<li>
-						<b>RT Trainer is not a replacement for real world training.</b>
-					</li>
-					<li>
-						The information provided by the system is not accurate to the real world. Routes
-						generated may be impossible to fly and do not reflect the routes found in the R/T exam.
-					</li>
-					<li>
-						It is recommended to use dark mode while the theme is not finalised. Flip the toggle
-						switch on the naviagtion bar at the top of the screen to switch between light and dark
-						mode.
-					</li>
-					<li>
-						For voice input to work use a Chromium based browser such as Google Chrome or Microsoft
-						Edge, or use Safari.
-					</li>
-					<li>To get started, setup a scenario with the "Generate a scenario" card.</li>
-				</p>
+<div class="container mx-auto max-w-screen-lg p-5">
+	<div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+		<div class="space-y-4 md:col-span-6 p-4">
+			<h1 class="text-3xl md:text-5xl font-bold">
+				RT Trainer - A <span class="relative px-1 md:px-3 py-1 bg-surface-300-600-token"
+					>responsive</span
+				> FRTOL practice tool
+			</h1>
+			<p class="max-w-xl opacity-60">
+				Gain confidence in your radio telephony skills by practicing with our RT trainer directly in
+				your browser.
+			</p>
+			<ul class="list-items">
+				<li>
+					<span>✔️</span>
+					<span>
+						<b>Supports voice input</b> – speak your radio calls out loud, just like in real life
+					</span>
+				</li>
+				<li>
+					<span>✔️</span>
+					<span>
+						<b>Generate practice scenarios</b> – scenarios and routes are generated randomly, no more
+						repetition
+					</span>
+				</li>
+				<li>
+					<span>✔️</span>
+					<span>
+						<b>Get instant feedback</b> – see how well you did and where you can improve during and after
+						the scenario
+					</span>
+				</li>
+			</ul>
+			<div class="flex flex-wrap gap-4">
+				<a
+					href="/scenario/demo"
+					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
+					data-sveltekit-preload-data="hover">Demo route</a
+				>
+				<a
+					href="/generate"
+					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
+					data-sveltekit-preload-data="hover">Setup a scenario</a
+				>
 			</div>
-			<GenerateScenarioButton />
 		</div>
-	</section>
+
+		<SvgDisplay name="planeHero" width="500px" height="500px" class="md:col-span-6" />
+	</div>
 </div>
 
-<style lang="postcss">
-	.h1 {
-		font-size: 3rem;
-	}
-
-	.card {
-		max-width: 400px;
+<style>
+	.list-items li {
+		display: flex;
+		gap: 16px;
+		padding: 12px 0px;
 	}
 </style>
