@@ -16,23 +16,22 @@
 			</p>
 			<ul class="list-items">
 				<li>
-					<span>✔️</span>
+					<span class="shrink-0 btn-icon bg-surface-300-600-token py-0">✔️</span>
 					<span>
 						<b>Supports voice input</b> – speak your radio calls out loud, just like in real life
 					</span>
 				</li>
 				<li>
-					<span>✔️</span>
+					<span class="shrink-0 btn-icon bg-surface-300-600-token">✔️</span>
 					<span>
-						<b>Generate practice scenarios</b> – scenarios and routes are generated randomly, no more
+						<b>Generate practice scenarios</b> – routes are generated randomly, no more
 						repetition
 					</span>
 				</li>
 				<li>
-					<span>✔️</span>
+					<span class="shrink-0 btn-icon bg-surface-300-600-token">✔️</span>
 					<span>
-						<b>Get instant feedback</b> – see how well you did and where you can improve during and after
-						the scenario
+						<b>Get instant feedback</b> – see how well you did and where you can improve
 					</span>
 				</li>
 			</ul>
@@ -59,5 +58,10 @@
 		display: flex;
 		gap: 16px;
 		padding: 12px 0px;
+	}
+
+	.btn-icon {
+		width: 40px;
+		height: 40px;
 	}
 </style>
