@@ -425,3 +425,12 @@ export function convertMinutesToTimeString(minutes: number): string {
 	const timeString = `${formattedHours}:${formattedMinutes}`;
 	return timeString;
 }
+
+export function getRandomSqwuakCode(seed: Seed): number {
+	let code: number = 0;
+	for (let i = 0; i < 4; i++) {
+		// Swap this out for a big prime
+		code += ((seed.scenarioSeed * 49823748933 * i) % 8) * (10 ^ i);
+	}
+	return code;
+}
