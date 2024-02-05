@@ -46,9 +46,11 @@ export const CurrentTargetStore = writable<string>('');
 
 export const CurrentTargetFrequencyStore = writable<number>(0);
 
-export const SpeechInputStore = writable<boolean>(false);
+export const SpeechInputEnabledStore = writable<boolean>(false);
 
-export const SpeechOutputStore = writable<boolean>(false);
+export const SpeechBufferStore = writable<string>('');
+
+export const SpeechOutputEnabledStore = writable<boolean>(false);
 
 export const LiveFeedbackStore = writable<boolean>(false);
 
@@ -81,8 +83,8 @@ export function ClearSimulationStores(): void {
 	GenerationParametersStore.set(initialGenerationParameters);
 	CurrentTargetStore.set('');
 	CurrentTargetFrequencyStore.set(0);
-	SpeechInputStore.set(false);
-	SpeechOutputStore.set(false);
+	SpeechInputEnabledStore.set(false);
+	SpeechOutputEnabledStore.set(false);
 	LiveFeedbackStore.set(false);
 	RadioStateStore.set(initialRadioState);
 	TransponderStateStore.set(initialTransponderState);

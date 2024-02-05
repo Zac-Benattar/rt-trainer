@@ -21,7 +21,7 @@
 		GenerationParametersStore,
 		KneeboardStore,
 		CurrentRoutePointStore,
-		SpeechOutputStore,
+		SpeechOutputEnabledStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
 		RadioCallsHistoryStore,
@@ -93,7 +93,7 @@
 		route = value;
 	});
 
-	SpeechOutputStore.subscribe((value) => {
+	SpeechOutputEnabledStore.subscribe((value) => {
 		readRecievedCalls = value;
 	});
 
