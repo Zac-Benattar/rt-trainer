@@ -37,7 +37,7 @@
 			</ul>
 			<div class="flex flex-wrap gap-4">
 				<a
-					href="/scenario/demo"
+					href="/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True"
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
 					data-sveltekit-preload-data="hover">Demo route</a
 				>
