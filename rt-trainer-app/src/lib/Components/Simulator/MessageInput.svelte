@@ -2,7 +2,8 @@
 	import {
 		ExpectedUserMessageStore,
 		LiveFeedbackStore,
-		SpeechInputStore,
+		SpeechBufferStore,
+		SpeechInputEnabledStore,
 		UserMessageStore
 	} from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -56,7 +57,18 @@
 		}
 	});
 
-	$: SpeechInputStore.set(speechInput);
+	SpeechBufferStore.subscribe((value) => {
+		if (value !== '') {
+			resetBox();
+			const inputBox = document.getElementById('call-input') as HTMLTextAreaElement;
+			inputBox.value = value;
+			message = value;
+			UserMessageStore.set(message);
+			SpeechBufferStore.set('');
+		}
+	})
+
+	$: SpeechInputEnabledStore.set(speechInput);
 
 	$: LiveFeedbackStore.set(liveFeedback);
 

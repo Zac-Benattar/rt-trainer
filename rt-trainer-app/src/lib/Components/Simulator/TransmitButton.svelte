@@ -1,20 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { SpeechInputStore, UserMessageStore } from '$lib/stores';
+	import { SpeechBufferStore, SpeechInputEnabledStore, UserMessageStore } from '$lib/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	export let enabled: boolean = false;
 	export let speechEnabled: boolean = true; // User's choice
 	export let transmitting: boolean = false;
 	let mounted: boolean = false;
-	let userMessage: string;
 	const modalStore = getModalStore();
 	let SpeechRecognitionType: any;
 	let SpeechGrammarList: any;
 	let SpeechRecognitionEvent: any;
 	let recognition: any;
 
-	SpeechInputStore.subscribe((value) => {
+	SpeechInputEnabledStore.subscribe((value) => {
 		speechEnabled = value;
 	});
 
@@ -35,9 +34,9 @@
 		recognition.lang = 'en';
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
+			console.log('Speech input:', speechInput);
 			if (event.results[0][0].confidence > 0.5) {
-				userMessage = speechInput;
-				UserMessageStore.set(userMessage);
+				SpeechBufferStore.set(speechInput);
 			} else {
 				modalStore.trigger({
 					type: 'alert',
@@ -55,6 +54,7 @@
 				transmitButton.classList.add('active');
 				transmitting = true;
 				recognition?.start();
+				console.log('Transmitting...');
 			}
 		}
 	};
@@ -66,6 +66,7 @@
 				transmitButton.classList.remove('active');
 				transmitting = false;
 				recognition?.stop();
+				console.log('Stopped transmitting...');
 			}
 		}
 	};

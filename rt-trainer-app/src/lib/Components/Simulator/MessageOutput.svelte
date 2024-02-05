@@ -2,7 +2,7 @@
 	import {
 		CurrentTargetStore,
 		ATCMessageStore,
-		SpeechOutputStore,
+		SpeechOutputEnabledStore,
 		CurrentTargetFrequencyStore
 	} from '$lib/stores';
 	import { SlideToggle } from '@skeletonlabs/skeleton';
@@ -26,7 +26,7 @@
 		atcMessage = value;
 	});
 
-	$: SpeechOutputStore.set(readRecievedCalls);
+	$: SpeechOutputEnabledStore.set(readRecievedCalls);
 </script>
 
 <div class="message-output-container flex flex-col grid-cols-1 gap-2 bg-surface-500">
