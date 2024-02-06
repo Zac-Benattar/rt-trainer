@@ -94,41 +94,41 @@
 </script>
 
 <div
-	class="radio-segdisplay {showDisplayText} card flex flex-row nowrap items-center place-content-between"
+	class="radio-segdisplay {showDisplayText} card flex flex-row items-center place-content-evenly"
 >
-	<div>
+	<div class="flex flex-col place-content-center ml-2 sm:ml-4">
 		<div class="mode-icon">{mode}</div>
 	</div>
-	<div class="sevenSEG flex flex-row flex-wrap">
+	<div class="sevenSEG flex flex-row flex-wrap sm:mr-10">
 		<div class="alternate-frequency flex flex-row">
-			<div id="alternate-rdigit-0" class="rdigit">{AFDigitArr[0]}</div>
-			<div id="alternate-rdigit-1" class="rdigit">{AFDigitArr[1]}</div>
-			<div id="alternate-rdigit-2" class="rdigit">{AFDigitArr[2]}</div>
-			<div class="rdecimal-point">.</div>
-			<div id="alternate-rdigit-dp-0" class="rdigit">{AFDigitArr[3]}</div>
-			<div id="alternate-rdigit-dp-1" class="rdigit">{AFDigitArr[4]}</div>
-			<div id="alternate-rdigit-dp-2" class="rdigit">{AFDigitArr[5]}</div>
+			<div id="alternate-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[0]}</div>
+			<div id="alternate-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[1]}</div>
+			<div id="alternate-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
+			<div id="alternate-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[3]}</div>
+			<div id="alternate-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[4]}</div>
+			<div id="alternate-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[5]}</div>
 		</div>
 		<div>
-			<div class="divider-pipe">|</div>
+			<div class="divider-pipe text-[23px] sm:text-md md:text-2xl sm:mx-8">|</div>
 		</div>
 		<div class="primary-frequency flex flex-row">
-			<div id="primary-rdigit-0" class="rdigit">{SFDigitArr[0]}</div>
-			<div id="primary-rdigit-1" class="rdigit">{SFDigitArr[1]}</div>
-			<div id="primary-rdigit-2" class="rdigit">{SFDigitArr[2]}</div>
-			<div class="rdecimal-point">.</div>
-			<div id="primary-rdigit-dp-0" class="rdigit">{SFDigitArr[3]}</div>
-			<div id="primary-rdigit-dp-1" class="rdigit">{SFDigitArr[4]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit">{SFDigitArr[5]}</div>
+			<div id="primary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[0]}</div>
+			<div id="primary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[1]}</div>
+			<div id="primary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
+			<div id="primary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[3]}</div>
+			<div id="primary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[4]}</div>
+			<div id="primary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[5]}</div>
 		</div>
 		<div class="tertiary-frequency flex flex-row">
-			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
-			<div id="tertiary-rdigit-1" class="rdigit">{TFDigitArr[1]}</div>
-			<div id="tertiary-rdigit-2" class="rdigit">{TFDigitArr[2]}</div>
-			<div class="rdecimal-point">.</div>
-			<div id="tertiary-rdigit-dp-0" class="rdigit">{TFDigitArr[3]}</div>
-			<div id="tertiary-rdigit-dp-1" class="rdigit">{TFDigitArr[4]}</div>
-			<div id="tertiary-rdigit-dp-2" class="rdigit">{TFDigitArr[5]}</div>
+			<div id="tertiary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[0]}</div>
+			<div id="tertiary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[1]}</div>
+			<div id="tertiary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
+			<div id="tertiary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[3]}</div>
+			<div id="tertiary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[4]}</div>
+			<div id="tertiary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[5]}</div>
 		</div>
 	</div>
 </div>
@@ -156,22 +156,13 @@
 
 	.radio-segdisplay .mode-icon {
 		font-family: DSEG7ClassicMini;
-		font-size: 20px;
+		font-size: 23px;
 		text-algin: left;
 		padding: 2px;
-		margin-left: 16px;
-	}
-
-	.radio-segdisplay .sevenSEG {
-		font-size: 30px;
-		opacity: 1;
-		margin-right: 40px;
-		width: 70%;
 	}
 
 	.radio-segdisplay .rdigit {
 		font-family: DSEG7ClassicMini;
-		font-size: 30px;
 		text-algin: right;
 		padding: 8px 0px;
 	}
@@ -183,8 +174,6 @@
 	}
 
 	.radio-segdisplay .divider-pipe {
-		margin-left: 30px;
-		margin-right: 30px;
 		text-algin: right;
 		padding: 8px 0px;
 	}

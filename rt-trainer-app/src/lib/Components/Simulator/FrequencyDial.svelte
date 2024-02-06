@@ -53,7 +53,7 @@
 	});
 </script>
 
-<div class="flex flex-row">
+<div class="flex flex-row order-3">
 	<div
 		id={'dial-and-frequency-container-' + internalName}
 		class="flex flex-col place-content-center"
@@ -66,7 +66,7 @@
 			/>
 			<button
 				id={'frequency-dial-' + internalName}
-				class="frequency-dial w-20 h-20 flex border-2 rounded-full"
+				class="frequency-dial flex w-20 h-20 flex border-2 rounded-full"
 			>
 				<div style="position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.25"
@@ -116,7 +116,7 @@
 					/>
 				</div>
 
-				<div class="frequency-dial-line center" />
+				<div class="absolute w-0.5 h-10 bg-white center" />
 			</button>
 		</div>
 	</div>
@@ -126,14 +126,7 @@
 	.frequency-dial {
 		transition: all 0.35s ease-in-out 0s;
 		justify-content: center;
-		display: flex;
 		boxshadow: rgb(255, 255, 255) 0px 0px 20px -5px;
-	}
-
-	.frequency-dial-line {
-		width: 2px;
-		height: 40px;
-		background: #fff;
 	}
 
 	:global(.enabled) {

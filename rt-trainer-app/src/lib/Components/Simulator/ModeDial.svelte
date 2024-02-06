@@ -17,6 +17,7 @@
 	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
 	let mounted: boolean = false;
+	let width: string = Modes.length > 2 ? 'w-48' : 'w-32';
 
 	const dispatch = createEventDispatcher();
 
@@ -136,8 +137,8 @@
 
 <div
 	id={'dial-and-modes-container-' + internalName}
-	class="flex flex-row place-content-center"
-	style="width:190px; height:full;"
+	class="flex flex-row place-content-center {width}"
+	style="height:130px;"
 >
 	<div id={'dial-container-' + internalName} class="relative flex flex-col place-content-center">
 		<div

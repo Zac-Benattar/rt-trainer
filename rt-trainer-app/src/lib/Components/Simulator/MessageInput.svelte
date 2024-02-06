@@ -77,7 +77,7 @@
 	});
 </script>
 
-<div class="message-input-container flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white">
+<div class="p-1.5 rounded-md max-w-lg flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white">
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
@@ -90,7 +90,7 @@
 		/>
 	</div>
 
-	<div class="flex flex-row gap-x-3 justify-end">
+	<div class="flex flex-row gap-x-3 justify-end flex-wrap">
 		<Tooltip tip="Shows feedback immediately, instead of just at the end of the scenario." bottom>
 			<div class="flex flex-col py-2">
 				<SlideToggle
@@ -158,17 +158,7 @@
 </div>
 
 <style lang="postcss">
-	.message-input-container {
-		box-sizing: border-box;
-		padding: 8px;
-		min-width: 490px;
-		max-width: 490px;
-		height: 200px;
-		border-radius: 5px;
-	}
-
 	.textarea {
-		width: 100%;
 		resize: none;
 		overflow: auto;
 	}

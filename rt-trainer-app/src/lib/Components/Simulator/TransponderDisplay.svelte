@@ -38,7 +38,7 @@
 	<div>
 		<div class="mode-icon">{mode}</div>
 	</div>
-	<div class="sevenSEG flex flex-row">
+	<div class="sevenSEG flex flex-row mr-5">
 		<div id="tdigit-0" class="tdigit tselected">{digitArr[0]}</div>
 		<div id="tdigit-1" class="tdigit">{digitArr[1]}</div>
 		<div id="tdigit-2" class="tdigit">{digitArr[2]}</div>
@@ -77,7 +77,6 @@
 	.transponder-segdisplay .sevenSEG {
 		font-size: 50px;
 		opacity: 1;
-		margin-right: 40px;
 	}
 
 	.transponder-segdisplay .tdigit {

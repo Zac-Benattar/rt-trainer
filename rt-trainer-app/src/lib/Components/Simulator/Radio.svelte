@@ -122,13 +122,13 @@
 </script>
 
 <div
-	class="radio-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-2"
+	class="radio-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-2 max-w-5xl flex-wrap"
 >
 	<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 
 	<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 
-	<div class="center-container flex flex-col justify-center items-center">
+	<div class="display-panel flex flex-col justify-center items-center grow order-first md:order-2">
 		<div class="flex flex-row place-content-evenly grow">
 			<div class="active-standby-label">ACTIVE</div>
 			<div class="active-standby-label">STANDBY</div>
@@ -161,10 +161,9 @@
 		background-color: rgb(65, 65, 65);
 	}
 
-	.center-container {
-		object-position: center;
+	.display-panel {
 		max-width: 600px;
-		min-width: 400px;
+		min-width: 200px;
 		height: 160px;
 	}
 

@@ -29,7 +29,9 @@
 	$: SpeechOutputEnabledStore.set(readRecievedCalls);
 </script>
 
-<div class="message-output-container flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white">
+<div
+	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow"
+>
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-surface-500 text-secondary-50 call-output"
@@ -43,17 +45,19 @@
 		>
 	</div>
 
-	<div class="flex flex-row gap-x-1 bg-surface-500 h-40px">
-		<textarea
-			class="textarea shrink bg-secondary-500-50 text-secondary-50 call-target-output"
-			id="call-target-output"
-			name="call-target-output"
-			disabled
-			rows="1"
-			cols="50"
-			maxlength="25"
-			placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}</textarea
-		>
+	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
+		<div class="md:w-7/12">
+			<textarea
+				class="textarea bg-secondary-500-50 text-secondary-50 call-target-output"
+				id="call-target-output"
+				name="call-target-output"
+				disabled
+				rows="1"
+				cols="50"
+				maxlength="25"
+				placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}</textarea
+			>
+		</div>
 
 		<div class="toggle px-2 shrink-0">
 			<Tooltip
@@ -78,17 +82,7 @@
 </div>
 
 <style lang="postcss">
-	.message-output-container {
-		box-sizing: border-box;
-		padding: 8px;
-		min-width: 490px;
-		max-width: 490px;
-		height: 200px;
-		border-radius: 5px;
-	}
-
 	.textarea {
-		width: 100%;
 		resize: none;
 		overflow: hidden;
 		height: auto;
