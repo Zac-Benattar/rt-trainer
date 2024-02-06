@@ -121,22 +121,16 @@
 	}
 </script>
 
-<div class="radio-container-outer relative card text-white">
-	<div class="left-container absolute inset-y-0 left-0">
-		<div class="power-selector-container content-center">
-			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
-		</div>
-		<div
-			class="transmit-button-container absolute"
-			style="width: 55px; height: 55px; left: 130px; top: 85px;"
-		>
-			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
-		</div>
-	</div>
+<div
+	class="radio-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-2"
+>
+	<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+
+	<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 
 	<div class="center-container flex flex-col justify-center items-center">
-		<div class="active-standby-label-container flex flex-row">
-			<div class="active-standby-label" style="margin-right:130px;">ACTIVE</div>
+		<div class="flex flex-row place-content-evenly grow">
+			<div class="active-standby-label">ACTIVE</div>
 			<div class="active-standby-label">STANDBY</div>
 		</div>
 		<RadioDisplay
@@ -153,68 +147,24 @@
 		</div>
 	</div>
 
-	<div class="right-container absolute inset-y-0 right-0">
-		<DoubleFrequencyDial
-			DialEnabled={frequencyDialEnabled}
-			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceSmall}
-			on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseSmall}
-			on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceLarge}
-			on:dialOuterClockwiseTurn={onRadioFrequencyIncreaseLarge}
-		/>
-	</div>
+	<DoubleFrequencyDial
+		DialEnabled={frequencyDialEnabled}
+		on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceSmall}
+		on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseSmall}
+		on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceLarge}
+		on:dialOuterClockwiseTurn={onRadioFrequencyIncreaseLarge}
+	/>
 </div>
 
 <style lang="postcss">
-	.radio-container-outer {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
+	.radio-container {
 		background-color: rgb(65, 65, 65);
-		width: 1000px;
-		height: 160px;
-	}
-
-	.left-container {
-		display: flex;
-		flex-direction: row;
-		object-position: left;
-		width: 200px;
-		height: 160px;
-	}
-
-	.power-selector-container {
-		width: 75%;
-		height: 100%;
-		justify-content: center;
-	}
-
-	.transmit-button-container {
-		width: 30%;
-		height: 100%;
 	}
 
 	.center-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
 		object-position: center;
-		width: 600px;
-		height: 160px;
-	}
-
-	.display-buttons-container {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		object-position: center bottom;
-	}
-
-	.right-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: right;
-		width: 200px;
+		max-width: 600px;
+		min-width: 400px;
 		height: 160px;
 	}
 

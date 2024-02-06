@@ -136,18 +136,18 @@
 
 <div
 	id={'dial-and-modes-container-' + internalName}
-	class="flex items-center justify-center"
-	style="height:180px; justify-content: center;"
+	class="flex flex-row place-content-center"
+	style="width:190px; height:full;"
 >
-	<div id={'dial-container-' + internalName} class="relative">
+	<div id={'dial-container-' + internalName} class="relative flex flex-col place-content-center">
 		<div
 			id={'mode-center-div-' + internalName}
-			class="absolute"
-			style="top: 50%; left: 50%; margin: auto;"
+			class="absolute m-auto"
+			style="top: 50%; left: 50%;"
 		/>
 		<div
 			id={'mode-dial-' + internalName}
-			class="mode-dial flex"
+			class="mode-dial w-20 h-20 flex border-2 rounded-full"
 			on:click={handleDialClick}
 			on:keydown={handleDialClick}
 			aria-label="Mode Dial"
@@ -199,26 +199,15 @@
 					/>
 				</div>
 			{/if}
-			<div class="absolute mode-dial-line center" />
+			<div class="absolute w-0.5 h-10 bg-white center" />
 		</div>
 	</div>
 </div>
 
 <style lang="postcss">
 	.mode-dial {
-		width: 80px;
-		height: 80px;
-		border: 2px solid #fff;
-		border-radius: 50%;
 		transition: all 0.35s ease-in-out 0s;
 		justify-content: center;
-		display: flex;
-	}
-
-	.mode-dial-line {
-		width: 2px;
-		height: 40px;
-		background: #fff;
 	}
 
 	:global(.dial-label) {

@@ -553,45 +553,22 @@
 	});
 </script>
 
-<div class="relative flex">
-	<div class="simcomponents-container flex flex-col items-center gap-5" style="width:1000px">
-		<div class="h-1" />
-		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
-			<div class="rt-message-input-container">
-				<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
-			</div>
+<div class="w-full sm:w-8/12">
+	<div class="flex flex-row place-content-center gap-5 py-5 flex-wrap">
+		<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
 
-			<div class="rt-message-output-container">
-				<MessageOutput />
-			</div>
+		<MessageOutput />
+
+		<Radio />
+
+		<Transponder />
+
+		<div>
+			<Map enabled={mapEnabled} />
 		</div>
 
-		<div class="radio-transponder-container flex flex-col items center gap-5">
-			<div>
-				<Radio />
-			</div>
-			<div>
-				<Transponder />
-			</div>
-		</div>
+		<Kneeboard />
 
-		<div class="flex flex row items-top content-end grid-cols-2 gap-5 flex-wrap">
-			<div>
-				<Map enabled={mapEnabled} />
-			</div>
-			<div>
-				<Kneeboard />
-			</div>
-
-			<!-- <ScenarioLink /> -->
-		</div>
-
-		<div class="h-1" />
+		<!-- <ScenarioLink /> -->
 	</div>
 </div>
-
-<style lang="postcss">
-	.radio-transponder-container {
-		justify-content: center;
-	}
-</style>

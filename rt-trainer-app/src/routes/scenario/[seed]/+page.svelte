@@ -1,7 +1,12 @@
 <script lang="ts">
 	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
-	import { AircraftDetailsStore, CurrentRoutePointIndexStore, EndPointIndexStore, GenerationParametersStore } from '$lib/stores';
+	import {
+		AircraftDetailsStore,
+		CurrentRoutePointIndexStore,
+		EndPointIndexStore,
+		GenerationParametersStore
+	} from '$lib/stores';
 	import Seed from '$lib/ts/Seed';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 
@@ -103,6 +108,6 @@
 	EndPointIndexStore.set(endPointIndex);
 </script>
 
-<div class="relative flex" style="justify-content: center;">
+<div class="flex" style="justify-content: center;">
 	<Simulator />
 </div>
