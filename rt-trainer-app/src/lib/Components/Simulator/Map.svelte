@@ -209,7 +209,7 @@
 	class="container flex flex-row p-1.5 rounded-md grow h-80 sm:h-96 sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
 >
 	{#if enabled}
-		<div id="myMap" class="card flex grow" />
+		<div id="myMap" class="card flex grow z-[1]" />
 	{:else}
 		<p>Map is disabled</p>
 	{/if}

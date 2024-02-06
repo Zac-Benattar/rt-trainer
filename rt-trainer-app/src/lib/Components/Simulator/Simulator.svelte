@@ -4,7 +4,6 @@
 	import Map from './Map.svelte';
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
-	import Kneeboard from './Kneeboard.svelte';
 	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
@@ -38,6 +37,7 @@
 	import RadioCall from '$lib/ts/RadioCall';
 	import { Feedback } from '$lib/ts/Feedback';
 	import type { Waypoint } from '$lib/ts/RouteTypes';
+	import Altimeter from './Altimeter.svelte';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -564,6 +564,8 @@
 		<Transponder />
 
 		<Map enabled={mapEnabled} />
+
+		<Altimeter />
 
 		<!-- <Kneeboard /> -->
 
