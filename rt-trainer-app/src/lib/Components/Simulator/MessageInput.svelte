@@ -77,7 +77,7 @@
 	});
 </script>
 
-<div class="message-input-container flex flex-col grid-cols-1 gap-2 bg-surface-500">
+<div class="message-input-container flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white">
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"

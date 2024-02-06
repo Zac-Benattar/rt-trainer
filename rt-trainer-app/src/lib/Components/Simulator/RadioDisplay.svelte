@@ -8,13 +8,13 @@
 	export let tertiaryFrequency: number = 177.2;
 
 	let mounted: boolean = false;
-	
+
 	// Digit arrays hold the digits of frequencies
 	let SFDigitArr = ['0', '0', '0', '0', '0', '0']; // Standby frequency
 	let AFDigitArr = ['0', '0', '0', '0', '0', '0']; // Active frequency
 	let TFDigitArr = ['0', '0', '0', '0', '0', '0']; // Tertiary frequency
 
-	$: showDisplayText = DisplayOn ? '' : 'displayoff';
+	$: showDisplayText = DisplayOn ? 'displayon' : 'displayoff';
 	$: {
 		if (!DisplayOn) {
 			mode = 'COM';
@@ -23,7 +23,7 @@
 	$: if (mounted) {
 		let split = standbyFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ["0", "0", "0"];
+		let newDigitArrRight: string[] = ['0', '0', '0'];
 		if (split.length >= 2) {
 			newDigitArrRight = split[1].split('');
 		}
@@ -46,7 +46,7 @@
 	$: if (mounted) {
 		let split = activeFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ["0", "0", "0"];
+		let newDigitArrRight: string[] = ['0', '0', '0'];
 		if (split.length >= 2) {
 			newDigitArrRight = split[1].split('');
 		}
@@ -68,7 +68,7 @@
 	$: if (mounted) {
 		let split = tertiaryFrequency.toString().split('.');
 		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ["0", "0", "0"];
+		let newDigitArrRight: string[] = ['0', '0', '0'];
 		if (split.length >= 2) {
 			newDigitArrRight = split[1].split('');
 		}
@@ -121,9 +121,6 @@
 			<div id="primary-rdigit-dp-1" class="rdigit">{SFDigitArr[4]}</div>
 			<div id="primary-rdigit-dp-2" class="rdigit">{SFDigitArr[5]}</div>
 		</div>
-		<!-- <div>
-			<div class="padding" style="width: 50px;"></div>
-		</div> -->
 		<div class="tertiary-frequency flex flex-row">
 			<div id="tertiary-rdigit-0" class="rdigit">{TFDigitArr[0]}</div>
 			<div id="tertiary-rdigit-1" class="rdigit">{TFDigitArr[1]}</div>
@@ -147,8 +144,14 @@
 		background: rgba(var(--color-surface-900) / 1);
 	}
 
+	:global(.displayon) {
+		color: #f74;
+		text-shadow: 0 0 7px #f07c0765, 0 0 10px #f07c0765, 0 0 21px #f07c0765, 0 0 32px #f74;
+	}
+
 	:global(.displayoff) {
 		color: rgba(var(--color-surface-900) / 1);
+		text-shadow: none;
 	}
 
 	.radio-segdisplay .mode-icon {

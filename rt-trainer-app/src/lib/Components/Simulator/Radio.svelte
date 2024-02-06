@@ -121,7 +121,7 @@
 	}
 </script>
 
-<div class="radio-container-outer relative card">
+<div class="radio-container-outer relative card text-white">
 	<div class="left-container absolute inset-y-0 left-0">
 		<div class="power-selector-container content-center">
 			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />

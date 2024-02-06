@@ -8,7 +8,7 @@
 
 	let mounted: boolean = false;
 
-	$: showDisplayText = DisplayOn ? '' : 'displayoff';
+	$: showDisplayText = DisplayOn ? 'displayon' : 'displayoff';
 	$: {
 		if (!DisplayOn) {
 			DigitSelected = 0;
@@ -55,6 +55,11 @@
 		height: 90px;
 		transition: all 0.4 ease-in-out 0s;
 		background: rgba(var(--color-surface-900) / 1);
+	}
+
+	:global(.displayon) {
+		color: #f74;
+		text-shadow: 0 0 7px #f07c0765, 0 0 10px #f07c0765, 0 0 21px #f07c0765, 0 0 32px #f74;
 	}
 
 	:global(.displayoff) {
