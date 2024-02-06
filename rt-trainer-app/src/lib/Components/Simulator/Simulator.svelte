@@ -151,7 +151,15 @@
 		endPointIndex = value;
 	});
 
-	function speakATCMessage() {
+	/**
+	 * Reads out the current atc message using the speech synthesis API
+	 *
+	 * @remarks
+	 * If the speech synthesis API is not supported in the current browser, then an error is logged to the console.
+	 *
+	 * @returns void
+	 */
+	function speakATCMessage(): void {
 		if ('speechSynthesis' in window) {
 			var utterance = new SpeechSynthesisUtterance();
 
@@ -167,44 +175,29 @@
 		}
 	}
 
-	async function handleSubmit() {
-		// Prevent race conditions from multiple calls
-		if (awaitingRadioCallCheck) return;
-
-		// Check the call is not empty
-		if (
-			userMessage == undefined ||
-			userMessage == '' ||
-			userMessage == 'Enter your radio message here.'
-		) {
-			return;
-		}
-
-		// Check state matches expected state
-		if (route.length == 0) {
-			console.log('Error: No route');
-			modalStore.trigger({
-				type: 'alert',
-				title: 'Connection to server failed',
-				body: 'This may be due to the server being offline. Come back later and try again.'
-			});
-			return;
-		}
-
+	/**
+	 * Checks the client state (radio frequency, transponder frequency, ...) matches the server state
+	 *
+	 * @remarks
+	 * This function checks the client state against the server state to ensure the client is in the correct state to make a radio call.
+	 *
+	 * @returns boolean
+	 */
+	function checkClientStateMatchesServerState(): boolean {
 		if (radioState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Radio is off'
 			});
-			return;
+			return false;
 		} else if (transponderState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
 				title: 'Error',
 				body: 'Transponder is off'
 			});
-			return;
+			return false;
 		} else if (
 			radioState.activeFrequency.toFixed(3) !=
 			route[currentPointIndex].updateData.currentTargetFrequency.toFixed(3)
@@ -214,7 +207,7 @@
 				title: 'Error',
 				body: 'Radio frequency incorrect'
 			});
-			return;
+			return false;
 		} else if (
 			transponderState.frequency != route[currentPointIndex].updateData.currentTransponderFrequency
 		) {
@@ -223,22 +216,23 @@
 				title: 'Error',
 				body: 'Transponder frequency incorrect'
 			});
-			return;
+			return false;
 		}
 
-		// Send message to server
-		awaitingRadioCallCheck = true;
-		let serverResponse = await checkRadioCallByServer();
-		awaitingRadioCallCheck = false;
-		if (serverResponse === undefined || serverResponse === null) {
-			// Handle error
-			serverNotResponding = true;
+		return true;
+	}
 
-			return;
-		}
-
-		serverNotResponding = false;
-
+	/**
+	 * Handles the feedback from the server
+	 *
+	 * @remarks
+	 * This function handles the feedback from the server and adjusts the simulator state accordingly.
+	 * A modal is shown if the user has made 3 mistakes in a row, asking if they want to be given the correct call.
+	 *
+	 * @param serverResponse - The server response
+	 * @returns void
+	 */
+	function handleFeedback(serverResponse: ServerResponse) {
 		// Update stores with the radio call and feedback
 		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
 		const feedback = new Feedback();
@@ -333,6 +327,67 @@
 			toastStore.trigger(t);
 		}
 
+		// Reset failed attempts
+		failedAttempts = 0;
+	}
+
+	/**
+	 * Handles the submit radio message event
+	 *
+	 * @remarks
+	 * This function handles the submit event and sends the user message to the server for processing.
+	 * It also handles the feedback from the server and adjusts the simulator state accordingly.
+	 *
+	 * @returns void
+	 */
+	async function handleSubmit() {
+		// Prevent race conditions from multiple calls
+		if (awaitingRadioCallCheck) return;
+
+		// Check the call is not empty
+		if (
+			userMessage == undefined ||
+			userMessage == '' ||
+			userMessage == 'Enter your radio message here.'
+		) {
+			return;
+		}
+
+		// Check state matches expected state
+		if (route.length == 0) {
+			console.log('Error: No route');
+			modalStore.trigger({
+				type: 'alert',
+				title: 'Connection to server failed',
+				body: 'This may be due to the server being offline. Come back later and try again.'
+			});
+			return;
+		}
+
+		// Ensure the client state (adjustable UI elements such as transponder frequency) matches the server state
+		if (!checkClientStateMatchesServerState()) {
+			return;
+		}
+
+		// Send message to server, use a lock to prevent multiple calls
+		awaitingRadioCallCheck = true;
+		let tempServerResponse = await checkRadioCallByServer();
+		if (tempServerResponse === undefined || tempServerResponse === null) {
+			// Handle error
+			serverNotResponding = true;
+			awaitingRadioCallCheck = false;
+
+			return;
+		}
+
+		// Set server response and flags to false
+		const serverResponse = tempServerResponse;
+		awaitingRadioCallCheck = false;
+		serverNotResponding = false;
+
+		// Adjust the simulator state based on the feedback
+		handleFeedback(serverResponse);
+
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
 		if (currentPointIndex == endPointIndex) {
 			const m: ModalSettings = {
@@ -351,13 +406,20 @@
 		}
 
 		// Update the simulator with the next route point
-		failedAttempts = 0;
 		CurrentRoutePointIndexStore.set(currentPointIndex + 1);
 		CurrentRoutePointStore.set(route[currentPointIndex]);
 		ATCMessageStore.set(serverResponse.responseCall);
 		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
 	}
 
+	/**
+	 * Initiates the scenario
+	 *
+	 * @remarks
+	 * This function initiates the scenario by getting the route and waypoints from the server.
+	 *
+	 * @returns void
+	 */
 	async function initiateScenario() {
 		// Get the state from the server
 		const serverRouteResponse = await getRouteFromServer();
@@ -380,6 +442,7 @@
 			RouteStore.set(serverRouteResponse);
 			CurrentRoutePointStore.set(serverRouteResponse[currentPointIndex]);
 			WaypointStore.set(serverWaypointsResponse);
+
 			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 			// So we need to set it to the last point in the route if it has not been set
 			if (endPointIndex == -1) {
@@ -388,6 +451,14 @@
 		}
 	}
 
+	/**
+	 * Gets the route from the server
+	 *
+	 * @remarks
+	 * This function gets the route from the server.
+	 *
+	 * @returns Promise<RoutePoint[] | undefined>
+	 */
 	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		try {
 			const response = await axios.get(
@@ -404,6 +475,14 @@
 		}
 	}
 
+	/**
+	 * Gets the waypoints from the server
+	 *
+	 * @remarks
+	 * This function gets the waypoints from the server.
+	 *
+	 * @returns Promise<Waypoint[] | undefined>
+	 */
 	async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> {
 		try {
 			const response = await axios.get(
@@ -420,6 +499,14 @@
 		}
 	}
 
+	/**
+	 * Checks the radio call by the server
+	 *
+	 * @remarks
+	 * This function checks the radio call by the server.
+	 *
+	 * @returns Promise<ServerResponse | undefined>
+	 */
 	async function checkRadioCallByServer(): Promise<ServerResponse | undefined> {
 		if (!route) {
 			console.log('Error: No route');
