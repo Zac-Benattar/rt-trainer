@@ -554,7 +554,7 @@
 </script>
 
 <div class="w-full sm:w-9/12">
-	<div class="flex flex-row place-content-center gap-5 py-3 md:py-5 flex-wrap px-2">
+	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
 		<div class="w-50%"><MessageInput {speechRecognitionSupported} on:submit={handleSubmit} /></div>
 
 		<MessageOutput />

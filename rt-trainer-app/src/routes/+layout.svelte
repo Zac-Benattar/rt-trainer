@@ -99,7 +99,7 @@
 	<svelte:fragment slot="pageFooter">
 		<div class="flex flex-col place-items-center grow-0 p-2">
 			{#if $page.url.pathname === '/'}
-				<p>
+				<p class="text-slate-600">
 					Homepage image by <a
 						href="https://pixabay.com/users/clker-free-vector-images-3736/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=26563"
 						>Clker-Free-Vector-Images</a

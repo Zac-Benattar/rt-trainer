@@ -17,7 +17,7 @@
 	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
 	let mounted: boolean = false;
-	let width: string = Modes.length > 2 ? 'w-48' : 'w-32';
+	let width: string = Modes.length > 2 ? 'w-40' : 'w-28';
 
 	const dispatch = createEventDispatcher();
 

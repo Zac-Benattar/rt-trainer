@@ -53,7 +53,7 @@
 	});
 </script>
 
-<div class="flex flex-row order-3">
+<div class="flex flex-row ">
 	<div
 		id={'dial-and-frequency-container-' + internalName}
 		class="flex flex-col place-content-center"

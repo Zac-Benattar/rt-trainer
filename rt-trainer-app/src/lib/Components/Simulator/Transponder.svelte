@@ -141,10 +141,12 @@
 	});
 </script>
 
-<div class="transponder-container flex flex-row card gap-5 md:gap-2 bg-gray-200 pb-5 text-white grow place-content-evenly p-2 md:max-h-40 max-w-5xl flex-wrap">
+<div
+	class="transponder-container flex flex-row card gap-4 sm:gap-2 bg-gray-200 text-white grow place-content-evenly p-3 sm:max-h-40 xl:w-full max-w-5xl flex-wrap"
+>
 	<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 
-	<div class="display-panel flex flex-col justify-center items-center grow order-first md:order-2">
+	<div class="display-panel flex flex-col justify-center items-center grow order-first sm:order-2">
 		<TransponderDisplay
 			DisplayOn={displayOn}
 			mode={transponderDialModes[dialModeIndex]}
@@ -159,11 +161,13 @@
 		</div>
 	</div>
 
-	<FrequencyDial
-		on:dialAntiClockwiseTurn={onTransponderFrequencyReduce}
-		on:dialClockwiseTurn={onTransponderFrequencyIncrease}
-		DialEnabled={frequencyDialEnabled}
-	/>
+	<div class="flex flex-row mx-4 order-3">
+		<FrequencyDial
+			on:dialAntiClockwiseTurn={onTransponderFrequencyReduce}
+			on:dialClockwiseTurn={onTransponderFrequencyIncrease}
+			DialEnabled={frequencyDialEnabled}
+		/>
+	</div>
 </div>
 
 <style lang="postcss">
@@ -174,7 +178,6 @@
 	.display-panel {
 		max-width: 600px;
 		min-width: 200px;
-		height: 160px;
 	}
 
 	.button {

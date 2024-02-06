@@ -46,7 +46,7 @@
 	</div>
 
 	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
-		<div class="md:w-7/12">
+		<div class="sm:w-7/12">
 			<textarea
 				class="textarea bg-secondary-500-50 text-secondary-50 call-target-output"
 				id="call-target-output"

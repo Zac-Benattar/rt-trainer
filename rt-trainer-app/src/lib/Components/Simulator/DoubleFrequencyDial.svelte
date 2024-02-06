@@ -111,7 +111,7 @@
 
 <div
 	id={'dial-and-frequency-container-' + internalName}
-	class="flex items-center justify-center order-5"
+	class="flex items-center justify-center"
 >
 	<div id={'dial-container-' + internalName} class="relative">
 		<div

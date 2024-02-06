@@ -99,36 +99,36 @@
 	<div class="flex flex-col place-content-center ml-2 sm:ml-4">
 		<div class="mode-icon">{mode}</div>
 	</div>
-	<div class="sevenSEG flex flex-row flex-wrap sm:mr-10">
+	<div class="sevenSEG flex flex-row flex-wrap sm:ml-8 sm:mr-10">
 		<div class="alternate-frequency flex flex-row">
-			<div id="alternate-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[0]}</div>
-			<div id="alternate-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[1]}</div>
-			<div id="alternate-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
-			<div id="alternate-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[3]}</div>
-			<div id="alternate-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[4]}</div>
-			<div id="alternate-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{AFDigitArr[5]}</div>
+			<div id="alternate-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[0]}</div>
+			<div id="alternate-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[1]}</div>
+			<div id="alternate-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
+			<div id="alternate-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[3]}</div>
+			<div id="alternate-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[4]}</div>
+			<div id="alternate-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[5]}</div>
 		</div>
 		<div>
-			<div class="divider-pipe text-[23px] sm:text-md md:text-2xl sm:mx-8">|</div>
+			<div class="divider-pipe text-[23px] sm:text-md md:text-3xl/6 mx-2 sm:mx-8">|</div>
 		</div>
 		<div class="primary-frequency flex flex-row">
-			<div id="primary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[0]}</div>
-			<div id="primary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[1]}</div>
-			<div id="primary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
-			<div id="primary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[3]}</div>
-			<div id="primary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[4]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{SFDigitArr[5]}</div>
+			<div id="primary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[0]}</div>
+			<div id="primary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[1]}</div>
+			<div id="primary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
+			<div id="primary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[3]}</div>
+			<div id="primary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[4]}</div>
+			<div id="primary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[5]}</div>
 		</div>
 		<div class="tertiary-frequency flex flex-row">
-			<div id="tertiary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[0]}</div>
-			<div id="tertiary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[1]}</div>
-			<div id="tertiary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-2xl">.</div>
-			<div id="tertiary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[3]}</div>
-			<div id="tertiary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[4]}</div>
-			<div id="tertiary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-2xl">{TFDigitArr[5]}</div>
+			<div id="tertiary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[0]}</div>
+			<div id="tertiary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[1]}</div>
+			<div id="tertiary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[2]}</div>
+			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
+			<div id="tertiary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[3]}</div>
+			<div id="tertiary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[4]}</div>
+			<div id="tertiary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[5]}</div>
 		</div>
 	</div>
 </div>
