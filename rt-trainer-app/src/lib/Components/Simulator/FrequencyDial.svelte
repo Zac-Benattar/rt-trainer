@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { createEventDispatcher } from 'svelte';
 	export let DialEnabled: boolean = false;
 	let internalName = Math.random().toString(36).substring(7);
-	let mounted: boolean = false;
 	var intervalId: any;
 	let intervalDuration: number = 250;
 
@@ -55,10 +54,6 @@
 	function stopIncrementingClockwiseHold() {
 		clearInterval(intervalId);
 	}
-
-	onMount(() => {
-		mounted = true;
-	});
 </script>
 
 <div class="flex flex-row {$$props.class}">

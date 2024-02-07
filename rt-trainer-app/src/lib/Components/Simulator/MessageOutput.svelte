@@ -5,9 +5,7 @@
 		SpeechOutputEnabledStore,
 		CurrentTargetFrequencyStore
 	} from '$lib/stores';
-	import { SlideToggle } from '@skeletonlabs/skeleton';
-	import Tooltip from 'sv-tooltip';
-
+	import { SlideToggle, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	let currentTarget: string;
 	let currentTargetFrequency: string = '0.00';
 	let readRecievedCalls: boolean = false;
@@ -27,6 +25,12 @@
 	});
 
 	$: SpeechOutputEnabledStore.set(readRecievedCalls);
+
+	const audioMessagesInfoTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'audioMessagesInfoPopupHover',
+		placement: 'bottom'
+	};
 </script>
 
 <div
@@ -60,23 +64,22 @@
 		</div>
 
 		<div class="toggle px-2 shrink-0">
-			<Tooltip
-				tip="Audio messages read aloud when you recieve a call from ATC or another aircraft."
-				bottom
-			>
-				<div class="flex flex-col py-2">
-					<SlideToggle
-						id="enabled-audio-messages"
-						name="slider-label"
-						active="bg-primary-500"
-						size="sm"
-						on:click={() => {
-							readRecievedCalls = !readRecievedCalls;
-						}}
-						>Read Aloud
-					</SlideToggle>
+			<div class="flex flex-col py-2 [&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
+				<SlideToggle
+					id="enabled-audio-messages"
+					name="slider-label"
+					active="bg-primary-500"
+					size="sm"
+					on:click={() => {
+						readRecievedCalls = !readRecievedCalls;
+					}}
+					>Read Aloud
+				</SlideToggle>
+				<div class="card p-4 variant-filled-secondary z-[3]" data-popup="audioMessagesInfoPopupHover">
+					<p>Audio messages read aloud when you recieve a call from ATC or another aircraft.</p>
+					<div class="arrow variant-filled-secondary" />
 				</div>
-			</Tooltip>
+			</div>
 		</div>
 	</div>
 </div>
