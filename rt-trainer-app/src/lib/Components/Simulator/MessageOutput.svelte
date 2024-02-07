@@ -64,7 +64,7 @@
 		</div>
 
 		<div class="toggle px-2 shrink-0">
-			<div class="flex flex-col py-2 [&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
+			<div class="flex flex-col py-2">
 				<SlideToggle
 					id="enabled-audio-messages"
 					name="slider-label"
@@ -73,7 +73,8 @@
 					on:click={() => {
 						readRecievedCalls = !readRecievedCalls;
 					}}
-					>Read Aloud
+					><div class="[&>*]:pointer-events-none"
+						use:popup={audioMessagesInfoTooltip}>Read Aloud</div>
 				</SlideToggle>
 				<div class="card p-4 variant-filled-secondary z-[3]" data-popup="audioMessagesInfoPopupHover">
 					<p>Audio messages read aloud when you recieve a call from ATC or another aircraft.</p>
