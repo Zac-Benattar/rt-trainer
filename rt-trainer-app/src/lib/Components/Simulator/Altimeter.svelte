@@ -39,7 +39,6 @@
 		if (dialFace != null) {
 			// 90 degrees is 1035 (max), -20 degrees is 980 (min), correct with - 540
 			var newRotation = Math.round(((pressure % 360) / 55) * 110) - 540;
-			console.log(newRotation);
 			dialFace.style.transform = 'rotate(' + newRotation + 'deg)';
 		}
 	}

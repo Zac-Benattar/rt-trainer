@@ -35,7 +35,7 @@
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
 			console.log('Speech input:', speechInput);
-			if (event.results[0][0].confidence > 0.5) {
+			if (event.results[0][0].confidence > 0.3) {
 				SpeechBufferStore.set(speechInput);
 			} else {
 				modalStore.trigger({
