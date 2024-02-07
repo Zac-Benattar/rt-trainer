@@ -18,7 +18,6 @@
 		RouteStore,
 		AircraftDetailsStore,
 		GenerationParametersStore,
-		KneeboardStore,
 		CurrentRoutePointStore,
 		SpeechOutputEnabledStore,
 		ExpectedUserMessageStore,
@@ -48,7 +47,6 @@
 	let transponderState: TransponderState; // Current transponder settings
 	let atcMessage: string;
 	let userMessage: string;
-	let kneeboardText: string;
 	let route: RoutePoint[] = [];
 	let currentPointIndex: number = 0;
 	let endPointIndex: number = 0;
@@ -125,10 +123,6 @@
 
 	ATCMessageStore.subscribe((value) => {
 		atcMessage = value;
-	});
-
-	KneeboardStore.subscribe((value) => {
-		kneeboardText = value;
 	});
 
 	CurrentRoutePointIndexStore.subscribe((value) => {

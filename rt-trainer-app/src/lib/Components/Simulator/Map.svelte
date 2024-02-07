@@ -84,8 +84,6 @@
 				text.innerHTML =
 					'<p> Heading: ' +
 					targetPose.magneticHeading +
-					'<br> Altitude: ' +
-					targetPose.altitude +
 					'<br> Airspeed: ' +
 					targetPose.airSpeed +
 					'<br> Time: ' +
