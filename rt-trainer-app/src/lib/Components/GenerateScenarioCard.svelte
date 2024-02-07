@@ -1,9 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { RangeSlider, SlideToggle } from '@skeletonlabs/skeleton';
+	import { RangeSlider, SlideToggle, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 	import { ClearSimulationStores } from '$lib/stores';
-	import Tooltip from 'sv-tooltip';
 
 	export let seed: string = generateRandomURLValidString(8);
 	let airborneWaypoints: number = 2;
@@ -104,9 +103,15 @@
 		}
 		goto(url);
 	};
+
+	const airborneWaypointsTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'airborneWaypointsPopupHover',
+		placement: 'bottom'
+	};
 </script>
 
-<div class="card flex flex-col gap-3">
+<div class="card p-5 flex flex-col gap-5">
 	<div class="text-2xl">Generate a scenario</div>
 	<div class="flex flex-col gap-2 justify-center">
 		<div>
@@ -120,23 +125,29 @@
 		</div>
 
 		<div class="flex grow">
-			<Tooltip tip="Currently disabled while the system is finalised." bottom
-				><div class="waypoints-slider flex grow">
-					<RangeSlider
-						name="range-slider"
-						bind:value={airborneWaypoints}
-						max={maxAirborneWaypoints}
-						step={1}
-						ticked
-						disabled
-					>
-						<div class="flex grow justify-between items-center">
-							<span>Airborne Waypoints</span>
-							<div class="text-xs">{airborneWaypoints} / {maxAirborneWaypoints}</div>
-						</div>
-					</RangeSlider>
-				</div></Tooltip
+			<div
+				class="flex flex-row w-full [&>*]:pointer-events-none"
+				use:popup={airborneWaypointsTooltip}
 			>
+				<RangeSlider
+					name="range-slider"
+					class="w-full"
+					bind:value={airborneWaypoints}
+					max={maxAirborneWaypoints}
+					step={1}
+					ticked
+					disabled
+				>
+					<div class="flex grow justify-between items-center">
+						<span>Airborne Waypoints</span>
+						<div class="text-xs">{airborneWaypoints} / {maxAirborneWaypoints}</div>
+					</div>
+				</RangeSlider>
+			</div>
+			<div class="card p-4 variant-filled-secondary" data-popup="airborneWaypointsPopupHover">
+				<p>Currently disabled while the system is finalised.</p>
+				<div class="arrow variant-filled-secondary" />
+			</div>
 		</div>
 
 		<div>
@@ -199,15 +210,3 @@
 	</div>
 	<button type="button" class="btn variant-filled" on:click={handleClick}>Generate</button>
 </div>
-
-<style lang="postcss">
-	.card {
-		padding: 1rem;
-		max-width: 500px;
-		min-width: 400px;
-	}
-
-	:global(.range-slider) {
-		width: 468px;
-	}
-</style>

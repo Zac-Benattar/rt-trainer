@@ -8,8 +8,7 @@
 	} from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
-	import { SlideToggle, getModalStore } from '@skeletonlabs/skeleton';
-	import Tooltip from 'sv-tooltip';
+	import { SlideToggle, getModalStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 
 	const modalStore = getModalStore();
 
@@ -66,7 +65,7 @@
 			UserMessageStore.set(message);
 			SpeechBufferStore.set('');
 		}
-	})
+	});
 
 	$: SpeechInputEnabledStore.set(speechInput);
 
@@ -75,6 +74,24 @@
 	onMount(() => {
 		mounted = true;
 	});
+
+	const feedbackTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'feedbackPopupHover',
+		placement: 'bottom'
+	};
+
+	const speechRecognitionExperimentalWarningTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'speechRecognitionExperimentalWarningPopupHover',
+		placement: 'bottom'
+	};
+
+	const speechRecognitionNotSupportedTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'speechRecognitionNotSupportedPopupHover',
+		placement: 'bottom'
+	};
 </script>
 
 <div class="p-1.5 rounded-md max-w-lg flex flex-col grid-cols-1 sm:gap-2 bg-surface-500 text-white">
@@ -91,69 +108,84 @@
 	</div>
 
 	<div class="flex flex-row px-2 gap-x-3 place-content-end sm:place-content-evenly flex-wrap">
-		<Tooltip tip="Shows feedback immediately, instead of just at the end of the scenario." bottom>
-			<div class="flex flex-col py-2">
+		<div class="flex flex-col py-2 [&>*]:pointer-events-none" use:popup={feedbackTooltip}>
+			<SlideToggle
+				id="enable-live-feedback"
+				name="slider-label"
+				checked={liveFeedback}
+				active="bg-primary-500"
+				size="sm"
+				on:click={() => {
+					liveFeedback = !liveFeedback;
+				}}
+				>Feedback
+			</SlideToggle>
+		</div>
+		<div class="card p-4 variant-filled-secondary z-[3]" data-popup="feedbackPopupHover">
+			<p>Shows feedback immediately, instead of just at the end of the scenario.</p>
+			<div class="arrow variant-filled-secondary" />
+		</div>
+
+		{#if speechRecognitionSupported}
+			<div
+				class="flex flex-col py-2 [&>*]:pointer-events-none"
+				use:popup={speechRecognitionExperimentalWarningTooltip}
+			>
 				<SlideToggle
-					id="enable-live-feedback"
+					id="enable-voice-input"
 					name="slider-label"
-					checked={liveFeedback}
+					checked={speechInput}
 					active="bg-primary-500"
 					size="sm"
 					on:click={() => {
-						liveFeedback = !liveFeedback;
+						speechInput = !speechInput;
+						modalStore.trigger({
+							type: 'alert',
+							title: 'Speech input is enabled',
+							body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
+						});
 					}}
-					>Feedback
+					>Voice Input
 				</SlideToggle>
 			</div>
-		</Tooltip>
-		{#if speechRecognitionSupported}
-			<Tooltip
-				tip="Speech recognition is experimental, you may need to correct the recorded text."
-				bottom
+			<div
+				class="card p-4 variant-filled-secondary z-[3]"
+				data-popup="speechRecognitionExperimentalWarningPopupHover"
 			>
-				<div class="flex flex-col py-2">
-					<SlideToggle
-						id="enable-voice-input"
-						name="slider-label"
-						checked={speechInput}
-						active="bg-primary-500"
-						size="sm"
-						on:click={() => {
-							speechInput = !speechInput;
-							modalStore.trigger({
-								type: 'alert',
-								title: 'Speech input is enabled',
-								body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
-							});
-						}}
-						>Voice Input
-					</SlideToggle>
-				</div>
-			</Tooltip>
+				<p>Speech recognition is experimental, you may need to correct the recorded text.</p>
+				<div class="arrow variant-filled-secondary" />
+			</div>
 		{:else}
-			<Tooltip
-				tip="Speech recognition is not supported in this browser.<br>Please use a different browser if you would like to use this feature.<br>Google Chrome, Microsoft Edge and Safari are recommended."
-				bottom
+			<div
+				class="flex flex-col py-2 [&>*]:pointer-events-none"
+				use:popup={speechRecognitionNotSupportedTooltip}
 			>
-				<div class="flex flex-col py-2">
-					<SlideToggle
-						id="enable-voice-input"
-						name="slider-label"
-						checked={speechInput}
-						active="bg-primary-500"
-						size="sm"
-						disabled
-						>Voice Input
-					</SlideToggle>
-				</div>
-			</Tooltip>
+				<SlideToggle
+					id="enable-voice-input"
+					name="slider-label"
+					checked={speechInput}
+					active="bg-primary-500"
+					size="sm"
+					disabled
+					>Voice Input
+				</SlideToggle>
+			</div>
+			<div
+				class="card p-4 variant-filled-secondary z-[3]"
+				data-popup="speechRecognitionNotSupportedPopupHover"
+			>
+				<p>
+					Speech recognition is not supported in this browser.<br />Please use a different browser
+					if you would like to use this feature.<br />Google Chrome, Microsoft Edge and Safari are
+					recommended.
+				</p>
+				<div class="arrow variant-filled-secondary" />
+			</div>
 		{/if}
 
 		<button class="submit-button btn px-3 bg-surface-400" on:click={submit}>Submit</button>
 
-		<button class="clear-button btn bg-surface-400" on:click={handleDelete}
-			>Clear</button
-		>
+		<button class="clear-button btn bg-surface-400" on:click={handleDelete}>Clear</button>
 	</div>
 </div>
 
