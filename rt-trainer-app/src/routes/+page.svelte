@@ -49,7 +49,7 @@
 			</div>
 		</div>
 
-		<SvgDisplay name="planeHero" width="500px" height="500px" class="md:col-span-6" />
+		<SvgDisplay name="planeHero" width="500px" height="500px" class="my-2 p-2 sm:col-span-6" />
 	</div>
 </div>
 

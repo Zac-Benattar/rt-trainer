@@ -1,10 +1,13 @@
 import { ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import {
+	ChangeZoneStage,
 	CircuitAndLandingStage,
 	ClimbOutStage,
 	InboundForJoinStage,
 	LandingToParkedStage,
+	PositionReportStage,
+	RequestTrafficServiceMATZATZPenetrationStage,
 	StartUpStage,
 	TakeOffStage,
 	TaxiStage
@@ -66,6 +69,28 @@ export default class Parser {
 				return this.parseAnnounceRunwayVacated(radioCall);
 			case LandingToParkedStage.ReadbackTaxiInformation:
 				return this.parseTaxiParkingSpotReadback(radioCall);
+			case ChangeZoneStage.ContactNewFrequency:
+				return this.parseNewAirspaceInitialContact(radioCall);
+			case ChangeZoneStage.PassMessage:
+				return this.parseNewAirspaceGiveFlightInformationToATC(radioCall);
+			case ChangeZoneStage.Squawk:
+				return this.parseNewAirspaceSquark(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.RequestTrafficService:
+				return this.parseRequestMATZPenetration(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.RequestMATZATZPenetration:
+				return this.parseMATZPenetrationReadback(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.Squawk:
+				return this.parseSqwuak(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.AcknowledgeTrafficService:
+				return this.parseAcknowledgeTrafficService(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.ReadbackDescendInstruction:
+				return this.parseMATZPenetrationTrafficServiceReadback(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.AnnounceReachMATZPenetrationHeight:
+				return this.parseAnnounceReachingMATZPenetrationHeight(radioCall);
+			case RequestTrafficServiceMATZATZPenetrationStage.RequestLeavingZoneChangeFrequency:
+				return this.parseLeavingMATZFrequencyChangeRequest(radioCall);
+			case PositionReportStage.PositionReport:
+				return this.parseVFRPositionReport(radioCall);
 			default:
 				throw new Error(
 					'Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage
@@ -396,19 +421,7 @@ accompanied with the planned times to reach them */
 
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, leaving ${radioCall.getCurrentATZName()} MATZ, ${radioCall.getATCPressureReading()}`;
 
-
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
-	}
-
-	public static parseLeavingMATZFrequencyChangeRequest(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `Roger ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getATCPressureReading()}, request change to ${radioCall.getNextATZName()} ${radioCall.getNextATZFrequency()}`;
-
-		radioCall.assertCallContainsUserCallsign();
-		radioCall.assertCallContainsCriticalWords(['request', 'change']);
-
-		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, radar service terminated, sqwuak 7000, freecall ${radioCall.getNextATZName()}`;
-
-		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	public static parseAnnounceReachingMATZPenetrationHeight(radioCall: RadioCall): ServerResponse {
@@ -418,6 +431,17 @@ accompanied with the planned times to reach them */
 		radioCall.assertCallContainsMATZPenetrationHeight();
 
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, maintain height ${radioCall.getMATZPenetrationHeight()}, MATZ and ATZ penetration approved`;
+
+		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
+	}
+
+	public static parseLeavingMATZFrequencyChangeRequest(radioCall: RadioCall): ServerResponse {
+		const expectedRadioCall: string = `Roger ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getATCPressureReading()}, request change to ${radioCall.getNextATZName()} ${radioCall.getNextATZFrequency()}`;
+
+		radioCall.assertCallContainsUserCallsign();
+		radioCall.assertCallContainsCriticalWords(['request', 'change']);
+
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, radar service terminated, sqwuak 7000, freecall ${radioCall.getNextATZName()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}

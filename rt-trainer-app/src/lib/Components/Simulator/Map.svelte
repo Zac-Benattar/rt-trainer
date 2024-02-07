@@ -205,29 +205,27 @@
 	{/if}
 </svelte:head>
 
-<div class="map-container bg-surface-500">
+<div
+	class="container flex flex-row p-1.5 rounded-md grow h-80 sm:h-96 sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
+>
 	{#if enabled}
-		<div
-			id="myMap"
-			class="card"
-			style="position: relative; width: 100%; height: 100%;  z-index: 2;"
-		/>
-	{/if}
-	{#if !enabled}
+		<div id="myMap" class="card flex grow z-[1]" />
+	{:else}
 		<p>Map is disabled</p>
 	{/if}
 </div>
 
 <style lang="postcss">
-	.map-container {
-		position: relative;
+	.card {
 		width: 100%;
-		height: 100%;
-		min-width: 490px;
-		min-height: 390px;
+	}
 
-		padding: 8px;
-
-		border-radius: 5px;
+	.container {
+		@media (min-width: 640px) {
+			min-width: 512px;
+			min-height: 452px;
+			max-height: 452px;
+			max-width: 512px;
+		}
 	}
 </style>

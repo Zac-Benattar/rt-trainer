@@ -52,12 +52,13 @@ export enum RequestTrafficServiceMATZATZPenetrationStage {
 	RequestMATZATZPenetration = 'Request MATZ/ATZ Penetration',
 	PassMessage = 'Pass Message',
 	Squawk = 'Squawk',
-	ReadbackTrafficService = 'Readback Traffic Service',
+	AcknowledgeTrafficService = 'Readback Traffic Service',
 	ReadbackDescendInstruction = 'Readback Descend Instruction',
 	ReadbackClimbInstruction = 'Readback Climb Instruction',
-	ReadbackDescentCompletion = 'Readback Descent Completion',
+	AnnounceReachMATZPenetrationHeight = 'Readback Descent Completion',
 	ReadbackClimbCompletion = 'Readback Climb Completion',
-	ReadbackApproval = 'Readback Approval'
+	ReadbackApproval = 'Readback Approval',
+	RequestLeavingZoneChangeFrequency = 'Request Change Frequency Leave Zone'
 }
 
 export enum PositionReportStage {

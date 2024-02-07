@@ -121,23 +121,22 @@
 	}
 </script>
 
-<div class="radio-container-outer relative card">
-	<div class="left-container absolute inset-y-0 left-0">
-		<div class="power-selector-container content-center">
-			<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
-		</div>
-		<div
-			class="transmit-button-container absolute"
-			style="width: 55px; height: 55px; left: 130px; top: 85px;"
-		>
+<div
+	class="radio-container flex flex-row card gap-4 sm:gap-2 bg-gray-200 text-white grow place-content-evenly p-3 xl:w-full max-w-5xl flex-wrap"
+>
+	<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+
+	<div class="flex flex-col place-content-end gap-1">
+		<div class="flex flex-row place-content-center">
 			<TransmitButton enabled={transmitButtonEnabled} {transmitting} />
 		</div>
+		<div class="flex flex-row place-content-center">Transmit</div>
 	</div>
 
-	<div class="center-container flex flex-col justify-center items-center">
-		<div class="active-standby-label-container flex flex-row">
-			<div class="active-standby-label" style="margin-right:130px;">ACTIVE</div>
-			<div class="active-standby-label">STANDBY</div>
+	<div class="display-panel flex flex-col w-full grow order-first sm:order-2">
+		<div class="flex flex-row place-content-evenly grow">
+			<div>ACTIVE</div>
+			<div>STANDBY</div>
 		</div>
 		<RadioDisplay
 			DisplayOn={displayOn}
@@ -146,14 +145,13 @@
 			bind:standbyFrequency={radioState.standbyFrequency}
 			bind:tertiaryFrequency={radioState.tertiaryFrequency}
 		/>
-		<div class="display-buttons-container">
+		<div class="display-buttons-container flex flex-row grow place-content-center">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>
 			<button class="button" id="button-swap" on:click={handleSWAPButtonClick}>⇆</button>
 			<button class="button" id="button-nav" on:click={handleNAVButtonClick}>NAV</button>
 		</div>
 	</div>
-
-	<div class="right-container absolute inset-y-0 right-0">
+	<div class="flex flex-row mx-2 order-5">
 		<DoubleFrequencyDial
 			DialEnabled={frequencyDialEnabled}
 			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceSmall}
@@ -165,57 +163,13 @@
 </div>
 
 <style lang="postcss">
-	.radio-container-outer {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
+	.radio-container {
 		background-color: rgb(65, 65, 65);
-		width: 1000px;
-		height: 160px;
 	}
 
-	.left-container {
-		display: flex;
-		flex-direction: row;
-		object-position: left;
-		width: 200px;
-		height: 160px;
-	}
-
-	.power-selector-container {
-		width: 75%;
-		height: 100%;
-		justify-content: center;
-	}
-
-	.transmit-button-container {
-		width: 30%;
-		height: 100%;
-	}
-
-	.center-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: center;
-		width: 600px;
-		height: 160px;
-	}
-
-	.display-buttons-container {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		object-position: center bottom;
-	}
-
-	.right-container {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: right;
-		width: 200px;
-		height: 160px;
+	.display-panel {
+		max-width: 600px;
+		min-width: 200px;
 	}
 
 	.button {

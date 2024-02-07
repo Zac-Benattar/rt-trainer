@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
-	import { Avatar } from '@skeletonlabs/skeleton';
+	// import { Avatar } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
 
 	export let burgerButton: string;
@@ -34,7 +34,7 @@
 
 		<svelte:fragment slot="trail">
 			<LightSwitch />
-			<a class="btn-icon variant-ghost-surface" href="/profile"
+			<!-- <a class="btn-icon variant-ghost-surface" href="/profile"
 				><Avatar
 					src="https://i.pravatar.cc/"
 					fallback="/images/headshot.png"
@@ -43,7 +43,7 @@
 					cursor="cursor-pointer"
 					data-sveltekit-preload-data="hover"
 				/></a
-			>
+			> -->
 		</svelte:fragment>
 	</AppBar>
 {:else}

@@ -141,19 +141,19 @@
 	});
 </script>
 
-<div class="transponder-container-outer relative card">
-	<div class="mode-selecter absolute inset-y-0 left-0">
-		<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
-	</div>
+<div
+	class="transponder-container flex flex-row card gap-4 sm:gap-2 bg-gray-200 text-white grow place-content-evenly p-3 sm:max-h-40 xl:w-full max-w-5xl flex-wrap"
+>
+	<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 
-	<div class="display-panel flex flex-col justify-center items-center">
+	<div class="display-panel flex flex-col justify-center items-center grow order-first sm:order-2">
 		<TransponderDisplay
 			DisplayOn={displayOn}
 			mode={transponderDialModes[dialModeIndex]}
 			{digitArr}
 			DigitSelected={displayDigitSelected}
 		/>
-		<div class="display-buttons-container relative flex flex-row items-center gap-2">
+		<div class="pt-1 flex flex-row items-center gap-2">
 			<button class="button" id="button-ident" on:click={handleIDENTButtonClick}>IDENT</button>
 			<button class="button" id="button-vfr" on:click={handleVFRButtonClick}>VFR</button>
 			<button class="button" id="button-enter" on:click={handleENTERButtonClick}>ENT</button>
@@ -161,7 +161,7 @@
 		</div>
 	</div>
 
-	<div class="frequency-selecter absolute inset-y-0 right-0">
+	<div class="flex flex-row mx-4 order-3">
 		<FrequencyDial
 			on:dialAntiClockwiseTurn={onTransponderFrequencyReduce}
 			on:dialClockwiseTurn={onTransponderFrequencyIncrease}
@@ -171,44 +171,13 @@
 </div>
 
 <style lang="postcss">
-	.transponder-container-outer {
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
+	.transponder-container {
 		background-color: rgb(65, 65, 65);
-		width: 1000px;
-		height: 160px;
-	}
-
-	.mode-selecter {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: left;
-		width: 200px;
-		height: 160px;
 	}
 
 	.display-panel {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: center;
-		width: 600px;
-		height: 160px;
-	}
-
-	.display-buttons-container {
-		padding-top: 10px;
-	}
-
-	.frequency-selecter {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		object-position: right;
-		width: 200px;
-		height: 160px;
+		max-width: 600px;
+		min-width: 200px;
 	}
 
 	.button {

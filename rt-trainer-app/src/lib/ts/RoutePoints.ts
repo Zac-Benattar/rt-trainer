@@ -732,7 +732,7 @@ export function getAirborneRoutePoints(
 	if (hasEmergency) {
 		// Add emergency before a random waypoint on the route, not first point
 		const emergencyPointIndex = (seed.scenarioSeed % (waypoints.length - 1)) + 1;
-		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex - 1];
+		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex - 1] + 1;
 
 		let emergencyType: EmergencyType = EmergencyType.None;
 
@@ -742,8 +742,9 @@ export function getAirborneRoutePoints(
 
 		// Generate the points to add on the route
 		// Get the percentage of the distance between the two points to add the emergency at
-		// At least 5% of the distance must be between the two points, and at most 95%
-		const lerpPercentage: number = (seed.scenarioSeed % 90) / 90 + 0.05;
+		// At least 5% of the distance must be between the two points, and at most 90%
+		// This minimises the chance of the emergency ending after the next actual route point time
+		const lerpPercentage: number = (seed.scenarioSeed % 85) / 100 + 0.05;
 		const emergencyLocation = lerpLocation(
 			waypoints[emergencyPointIndex].lat,
 			waypoints[emergencyPointIndex].long,
@@ -754,8 +755,8 @@ export function getAirborneRoutePoints(
 
 		const emergencyTime: number = Math.round(
 			lerp(
-				waypoints[emergencyPointIndex].arrivalTime,
 				waypoints[emergencyPointIndex - 1].arrivalTime,
+				waypoints[emergencyPointIndex].arrivalTime,
 				lerpPercentage
 			)
 		);

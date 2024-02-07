@@ -112,7 +112,6 @@
 <div
 	id={'dial-and-frequency-container-' + internalName}
 	class="flex items-center justify-center"
-	style="width: 200px; height: 200px; justify-content: center;"
 >
 	<div id={'dial-container-' + internalName} class="relative">
 		<div

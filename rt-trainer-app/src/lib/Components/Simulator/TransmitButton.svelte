@@ -82,7 +82,7 @@
 		}
 	};
 
-	function onKeyDown(e: { keyCode: any; }) {
+	function onKeyDown(e: { keyCode: any }) {
 		switch (e.keyCode) {
 			case 32:
 				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
@@ -95,7 +95,7 @@
 		}
 	}
 
-	function onKeyUp(e: { keyCode: any; }) {
+	function onKeyUp(e: { keyCode: any }) {
 		switch (e.keyCode) {
 			case 32:
 				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
@@ -115,7 +115,7 @@
 
 <div
 	id="transmit-button"
-	class="transmit-button absolute cursor-pointer"
+	class="transmit-button rounded-full cursor-pointer"
 	on:mousedown={handleTransmitMouseDown}
 	on:keydown={handleTransmitMouseDown}
 	on:mouseup={handleTransmitMouseUp}
@@ -126,13 +126,12 @@
 	role="button"
 />
 
-<svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp}/>
+<svelte:window on:keydown={onKeyDown} on:keyup={onKeyUp} />
 
 <style lang="postcss">
 	.transmit-button {
 		width: 50px;
 		height: 50px;
-		border-radius: 50%;
 		background-color: rgba(80, 40, 40, 1);
 	}
 
