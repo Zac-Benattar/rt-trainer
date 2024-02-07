@@ -4,17 +4,9 @@
 	let internalName = Math.random().toString(36).substring(7);
 	let mounted: boolean = false;
 	var intervalId: any;
+	let intervalDuration: number = 250;
 
-	$: if (mounted) {
-		const frequencyDial = document.getElementById(
-			'frequency-dial-' + internalName
-		) as HTMLDivElement;
-		if (DialEnabled) {
-			frequencyDial.classList.add('enabled');
-		} else {
-			frequencyDial.classList.remove('enabled');
-		}
-	}
+	$: enabledClass = DialEnabled ? 'enabled' : 'disabled';
 
 	$: if (!DialEnabled) {
 		clearInterval(intervalId);
@@ -30,18 +22,34 @@
 		dispatch('dialClockwiseTurn');
 	};
 
-	function startIncrementingAntiClockwiseHold() {
+	function onAntiClockwiseTick() {
 		onDialAntiClockwiseTurn();
-		intervalId = setInterval(onDialAntiClockwiseTurn, 100);
+		clearInterval(intervalId);
+		intervalDuration = intervalDuration * 0.9 + 5;
+		intervalId = setInterval(onAntiClockwiseTick, intervalDuration);
+	}
+
+	function startIncrementingAntiClockwiseHold() {
+		intervalDuration = 250;
+		onDialAntiClockwiseTurn();
+		intervalId = setInterval(onAntiClockwiseTick, intervalDuration);
 	}
 
 	function stopIncrementingAntiClockwiseHold() {
 		clearInterval(intervalId);
 	}
 
-	function startIncrementingClockwiseHold() {
+	function onClockwiseTick() {
 		onDialClockwiseTurn();
-		intervalId = setInterval(onDialClockwiseTurn, 100);
+		clearInterval(intervalId);
+		intervalDuration = intervalDuration * 0.9 + 5;
+		intervalId = setInterval(onClockwiseTick, intervalDuration);
+	}
+
+	function startIncrementingClockwiseHold() {
+		intervalDuration = 250;
+		onDialClockwiseTurn();
+		intervalId = setInterval(onClockwiseTick, intervalDuration);
 	}
 
 	function stopIncrementingClockwiseHold() {
@@ -53,7 +61,7 @@
 	});
 </script>
 
-<div class="flex flex-row ">
+<div class="flex flex-row {$$props.class}">
 	<div
 		id={'dial-and-frequency-container-' + internalName}
 		class="flex flex-col place-content-center"
@@ -66,7 +74,7 @@
 			/>
 			<button
 				id={'frequency-dial-' + internalName}
-				class="frequency-dial flex w-20 h-20 flex border-2 rounded-full"
+				class="frequency-dial flex w-20 h-20 flex border-2 rounded-full {enabledClass}"
 			>
 				<div style="position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2.7 6.25"
@@ -100,7 +108,7 @@
 				>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
+						class="w-100 h-100 z-[3]"
 						style="width: 50%; height: 100%;"
 						on:mousedown={startIncrementingAntiClockwiseHold}
 						on:mouseup={stopIncrementingAntiClockwiseHold}
@@ -108,7 +116,7 @@
 					/>
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
-						class="w-100 h-100"
+						class="w-100 h-100 z-[3]"
 						style="width: 50%; height: 100%;"
 						on:mousedown={startIncrementingClockwiseHold}
 						on:mouseup={stopIncrementingClockwiseHold}

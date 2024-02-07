@@ -223,8 +223,8 @@
 	.container {
 		@media (min-width: 640px) {
 			min-width: 512px;
-			min-height: 512px;
-			max-height: 512px;
+			min-height: 452px;
+			max-height: 452px;
 			max-width: 512px;
 		}
 	}
