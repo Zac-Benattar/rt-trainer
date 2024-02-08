@@ -7,8 +7,8 @@
 	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore, getToastStore, Stepper, Step } from '@skeletonlabs/skeleton';
 	import {
 		RadioStateStore,
 		TransponderStateStore,
@@ -59,6 +59,12 @@
 	let readRecievedCalls: boolean = false;
 	let liveFeedback: boolean = false;
 
+	// Tutorial state
+	let tutorialEnabled: boolean = true;
+	let tutorialComplete: boolean = false;
+	let tutorialStep: number = 1;
+	let tutorialStep2: boolean = false;
+
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
 	let serverNotResponding: boolean = false;
@@ -86,6 +92,12 @@
 	$: if (readRecievedCalls && atcMessage) {
 		speakATCMessage();
 	}
+
+	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
+	$: tutorialStep3 =
+		radioState?.activeFrequency.toFixed(3) ==
+		route[currentPointIndex]?.updateData.currentTargetFrequency.toFixed(3);
+	$: tutorialStep4 = true;
 
 	RouteStore.subscribe((value) => {
 		route = value;
@@ -536,6 +548,20 @@
 		}
 	}
 
+	function onStepHandler(e: {
+		detail: { state: { current: number; total: number }; step: number };
+	}): void {
+		tutorialStep = e.detail.state.current + 1;
+	}
+
+	function onCompleteHandler(e: Event): void {
+		tutorialComplete = true;
+	}
+
+	function cancelTutorial(): void {
+		tutorialEnabled = false;
+	}
+
 	onMount(async () => {
 		initiateScenario();
 
@@ -549,6 +575,43 @@
 
 <div class="w-full sm:w-9/12">
 	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
+		{#if tutorialEnabled && !tutorialComplete}
+			<div class="card p-4 rounded-lg max-w-lg w-full sm:mx-10">
+				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
+					<Step>
+						<svelte:fragment slot="header">Get Started!</svelte:fragment>
+						Welcome to RT Trainer. This tutorial will explain how to use the simulator. Click next to
+						continue.
+						<svelte:fragment slot="navigation">
+							<button class="btn variant-ghost-warning" on:click={cancelTutorial}
+								>Skip Tutorial</button
+							>
+						</svelte:fragment>
+					</Step>
+					<Step locked={!tutorialStep2}>
+						<svelte:fragment slot="header">Turning on your Radio Stack</svelte:fragment>
+						<ul class="list-disc ml-5">
+							<li>Turn on your radio by clicking on the dial or standby (SBY) label.</li>
+							<li>Set your transponder to standby in the same way.</li>
+						</ul>
+					</Step>
+					<Step locked={!tutorialStep3}>
+						<svelte:fragment slot="header">Setting Your Radio Frequency</svelte:fragment>
+						Set your radio frequency to the current target frequency shown in the message output box.
+					</Step>
+					<Step locked={!tutorialStep4}>
+						<svelte:fragment slot="header">Make your first Radio Call</svelte:fragment>
+						Now you are ready to make your first radio call.
+						<ul class="list-disc ml-5">
+							<li>Type your message in the input box.</li>
+							<li>Or enable speech input and say your message out loud.</li>
+						</ul>
+						Remember to click submit.
+					</Step>
+				</Stepper>
+			</div>
+		{/if}
+
 		<div class="w-50%"><MessageInput {speechRecognitionSupported} on:submit={handleSubmit} /></div>
 
 		<MessageOutput />

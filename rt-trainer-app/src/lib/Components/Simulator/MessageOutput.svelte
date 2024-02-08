@@ -34,7 +34,7 @@
 </script>
 
 <div
-	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow"
+	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow {$$props.class}"
 >
 	<div class="grow flex justify-self-stretch">
 		<textarea

@@ -94,7 +94,7 @@
 	};
 </script>
 
-<div class="p-1.5 rounded-md max-w-lg flex flex-col grid-cols-1 sm:gap-2 bg-surface-500 text-white">
+<div class="p-1.5 rounded-md max-w-lg flex flex-col grid-cols-1 sm:gap-2 bg-surface-500 text-white {$$props.class}">
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
