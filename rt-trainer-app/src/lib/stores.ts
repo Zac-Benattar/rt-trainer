@@ -78,6 +78,8 @@ export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
 
 export const RadioCallsHistoryStore = writable<RadioCall[]>([]);
 
+export const TutorialStore = writable<boolean>(false);
+
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
 	GenerationParametersStore.set(initialGenerationParameters);
@@ -97,4 +99,5 @@ export function ClearSimulationStores(): void {
 	CurrentRoutePointStore.set(null);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
+	TutorialStore.set(false);
 }

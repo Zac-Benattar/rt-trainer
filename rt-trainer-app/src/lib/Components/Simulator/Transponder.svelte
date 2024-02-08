@@ -10,7 +10,6 @@
 		'OFF',
 		'SBY',
 		'GND',
-		'STBY',
 		'ON',
 		'ALT',
 		'TEST'
@@ -103,21 +102,28 @@
 			switch (newModeIndex) {
 				case 1:
 					transponderState.dialMode = 'SBY';
+					break;
 				case 2:
 					transponderState.dialMode = 'GND';
+					break;
 				case 3:
-					transponderState.dialMode = 'STBY';
-				case 4:
 					transponderState.dialMode = 'ON';
-				case 5:
+					break;
+				case 4:
 					transponderState.dialMode = 'ALT';
-				case 6:
+					break;
+				case 5:
 					transponderState.dialMode = 'TEST';
+					break;
 			}
 
 			displayOn = true;
 			frequencyDialEnabled = true;
 		}
+
+		// Shouldnt need to do this here as we have a reactive statement for this, but it seems to be necessary
+		// for the store to update when the dail mode changes
+		TransponderStateStore.set(transponderState);
 	}
 
 	function onTransponderFrequencyIncrease(event: Event) {

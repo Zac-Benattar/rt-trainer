@@ -7,8 +7,8 @@
 	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
-	import { getModalStore, getToastStore } from '@skeletonlabs/skeleton';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
+	import { getModalStore, getToastStore, Stepper, Step } from '@skeletonlabs/skeleton';
 	import {
 		RadioStateStore,
 		TransponderStateStore,
@@ -26,7 +26,8 @@
 		LiveFeedbackStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
-		WaypointStore
+		WaypointStore,
+		TutorialStore
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -37,6 +38,7 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import type { Waypoint } from '$lib/ts/RouteTypes';
 	import Altimeter from './Altimeter.svelte';
+	import { updated } from '$app/stores';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -58,6 +60,12 @@
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let readRecievedCalls: boolean = false;
 	let liveFeedback: boolean = false;
+	let tutorialStep4: boolean = false;
+
+	// Tutorial state
+	let tutorialEnabled: boolean = false;
+	let tutorialComplete: boolean = false;
+	let tutorialStep: number = 1;
 
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
@@ -86,6 +94,11 @@
 	$: if (readRecievedCalls && atcMessage) {
 		speakATCMessage();
 	}
+
+	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
+	$: tutorialStep3 =
+		radioState?.activeFrequency.toFixed(3) ==
+		route[currentPointIndex]?.updateData.currentTargetFrequency.toFixed(3);
 
 	RouteStore.subscribe((value) => {
 		route = value;
@@ -143,6 +156,10 @@
 		}
 
 		endPointIndex = value;
+	});
+
+	TutorialStore.subscribe((value) => {
+		tutorialEnabled = value;
 	});
 
 	/**
@@ -226,7 +243,7 @@
 	 * @param serverResponse - The server response
 	 * @returns void
 	 */
-	function handleFeedback(serverResponse: ServerResponse) {
+	function handleFeedback(serverResponse: ServerResponse): boolean {
 		// Update stores with the radio call and feedback
 		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
 		const feedback = new Feedback();
@@ -286,7 +303,7 @@
 				};
 				modalStore.trigger(m);
 
-				return;
+				return false;
 			}
 
 			// Make ATC respond with say again and do not advance the simulator
@@ -307,7 +324,7 @@
 				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
 			}
 
-			return;
+			return false;
 		} else if (minorMistakes.length > 0) {
 			// Show a toast with the minor mistakes and advance scenario
 			const t: ToastSettings = {
@@ -321,8 +338,11 @@
 			toastStore.trigger(t);
 		}
 
+		tutorialStep4 = true;
 		// Reset failed attempts
 		failedAttempts = 0;
+
+		return true;
 	}
 
 	/**
@@ -380,7 +400,7 @@
 		serverNotResponding = false;
 
 		// Adjust the simulator state based on the feedback
-		handleFeedback(serverResponse);
+		if (!handleFeedback(serverResponse)) return;
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
 		if (currentPointIndex == endPointIndex) {
@@ -536,6 +556,20 @@
 		}
 	}
 
+	function onStepHandler(e: {
+		detail: { state: { current: number; total: number }; step: number };
+	}): void {
+		tutorialStep = e.detail.state.current + 1;
+	}
+
+	function onCompleteHandler(e: Event): void {
+		tutorialComplete = true;
+	}
+
+	function cancelTutorial(): void {
+		tutorialEnabled = false;
+	}
+
 	onMount(async () => {
 		initiateScenario();
 
@@ -547,8 +581,59 @@
 	});
 </script>
 
+{#if $updated}
+	<div class="toast">
+		<p>
+			A new version of the app is available
+
+			<button on:click={() => location.reload()}> reload the page </button>
+		</p>
+	</div>
+{/if}
 <div class="w-full sm:w-9/12">
 	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
+		{#if tutorialEnabled && !tutorialComplete}
+			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
+				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
+					<Step>
+						<svelte:fragment slot="header">Get Started!</svelte:fragment>
+						Welcome to RT Trainer. This tutorial will explain how to use the simulator. <br />Click
+						<span class="underline">next</span>
+						to continue.
+						<svelte:fragment slot="navigation">
+							<button class="btn variant-ghost-warning" on:click={cancelTutorial}
+								>Skip Tutorial</button
+							>
+						</svelte:fragment>
+					</Step>
+					<Step locked={!tutorialStep2}>
+						<svelte:fragment slot="header">Turning on your Radio Stack</svelte:fragment>
+						<ul class="list-disc ml-5">
+							<li>Turn on your radio by clicking on the dial or standby (SBY) label.</li>
+							<li>Set your transponder to standby in the same way.</li>
+						</ul>
+					</Step>
+					<Step locked={!tutorialStep3}>
+						<svelte:fragment slot="header">Setting Your Radio Frequency</svelte:fragment>
+						Set your radio frequency to the current target frequency shown in the message output box.
+					</Step>
+					<Step locked={!tutorialStep4}>
+						<svelte:fragment slot="header">Make your first Radio Call</svelte:fragment>
+						Now you are ready to make your first radio call.
+						<ul class="list-disc ml-5">
+							<li>Type your message in the input box.</li>
+							<li>Or enable speech input and say your message out loud.</li>
+						</ul>
+					</Step>
+					<Step>
+						<svelte:fragment slot="header">Well Done!</svelte:fragment>
+						You have completed the basic tutorial. Familiarise yourself with the rest of the simulator
+						and complete the route.
+					</Step>
+				</Stepper>
+			</div>
+		{/if}
+
 		<div class="w-50%"><MessageInput {speechRecognitionSupported} on:submit={handleSubmit} /></div>
 
 		<MessageOutput />

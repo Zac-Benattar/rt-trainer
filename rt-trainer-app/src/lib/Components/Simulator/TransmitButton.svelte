@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { SpeechBufferStore, SpeechInputEnabledStore, UserMessageStore } from '$lib/stores';
+	import { SpeechBufferStore, SpeechInputEnabledStore } from '$lib/stores';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 
 	export let enabled: boolean = false;
@@ -115,7 +115,7 @@
 
 <div
 	id="transmit-button"
-	class="transmit-button rounded-full cursor-pointer"
+	class="{$$props.class} transmit-button rounded-full cursor-pointer"
 	on:mousedown={handleTransmitMouseDown}
 	on:keydown={handleTransmitMouseDown}
 	on:mouseup={handleTransmitMouseUp}

@@ -15,7 +15,7 @@
 
 <!-- Hide app bar if not enabled -->
 {#if enabled}
-	<AppBar>
+	<AppBar padding="py-2 px-4 sm:p-4">
 		<svelte:fragment slot="lead">
 			<div class="flex items-center">
 				<button class="{burgerButton} btn btn-sm mr-4" on:click={burgerButtonClicked} on:keypress={burgerButtonClicked}>
@@ -27,7 +27,7 @@
 						</svg>
 					</span>
 				</button>
-				<strong><a href="/" class="btn text-2xl uppercase" data-sveltekit-preload-data="hover">RT Trainer</a
+				<strong><a href="/" class="btn text-xl sm:text-2xl uppercase" data-sveltekit-preload-data="hover">RT Trainer</a
 					></strong>
 			</div>
 		</svelte:fragment>
