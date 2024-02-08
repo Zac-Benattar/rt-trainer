@@ -27,9 +27,7 @@
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		WaypointStore,
-
 		TutorialStore
-
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -62,6 +60,7 @@
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let readRecievedCalls: boolean = false;
 	let liveFeedback: boolean = false;
+	let tutorialStep4: boolean = false;
 
 	// Tutorial state
 	let tutorialEnabled: boolean = false;
@@ -100,7 +99,6 @@
 	$: tutorialStep3 =
 		radioState?.activeFrequency.toFixed(3) ==
 		route[currentPointIndex]?.updateData.currentTargetFrequency.toFixed(3);
-	$: tutorialStep4 = true;
 
 	RouteStore.subscribe((value) => {
 		route = value;
@@ -245,7 +243,7 @@
 	 * @param serverResponse - The server response
 	 * @returns void
 	 */
-	function handleFeedback(serverResponse: ServerResponse) {
+	function handleFeedback(serverResponse: ServerResponse): boolean {
 		// Update stores with the radio call and feedback
 		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
 		const feedback = new Feedback();
@@ -305,7 +303,7 @@
 				};
 				modalStore.trigger(m);
 
-				return;
+				return false;
 			}
 
 			// Make ATC respond with say again and do not advance the simulator
@@ -326,7 +324,7 @@
 				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
 			}
 
-			return;
+			return false;
 		} else if (minorMistakes.length > 0) {
 			// Show a toast with the minor mistakes and advance scenario
 			const t: ToastSettings = {
@@ -340,8 +338,11 @@
 			toastStore.trigger(t);
 		}
 
+		tutorialStep4 = true;
 		// Reset failed attempts
 		failedAttempts = 0;
+
+		return true;
 	}
 
 	/**
@@ -399,7 +400,7 @@
 		serverNotResponding = false;
 
 		// Adjust the simulator state based on the feedback
-		handleFeedback(serverResponse);
+		if (!handleFeedback(serverResponse)) return;
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
 		if (currentPointIndex == endPointIndex) {
