@@ -587,11 +587,11 @@
 <div class="w-full sm:w-9/12">
 	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
 		{#if tutorialEnabled && !tutorialComplete}
-			<div class="card p-4 rounded-lg max-w-lg w-full sm:mx-10">
+			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
 				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
 					<Step>
 						<svelte:fragment slot="header">Get Started!</svelte:fragment>
-						Welcome to RT Trainer. This tutorial will explain how to use the simulator. Click next to
+						Welcome to RT Trainer. This tutorial will explain how to use the simulator. <br>Click <span class="underline">next</span> to
 						continue.
 						<svelte:fragment slot="navigation">
 							<button class="btn variant-ghost-warning" on:click={cancelTutorial}
@@ -617,7 +617,6 @@
 							<li>Type your message in the input box.</li>
 							<li>Or enable speech input and say your message out loud.</li>
 						</ul>
-						Remember to click submit.
 					</Step>
 				</Stepper>
 			</div>
