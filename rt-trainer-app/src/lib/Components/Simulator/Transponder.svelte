@@ -120,6 +120,10 @@
 			displayOn = true;
 			frequencyDialEnabled = true;
 		}
+
+		// Shouldnt need to do this here as we have a reactive statement for this, but it seems to be necessary
+		// for the store to update when the dail mode changes
+		TransponderStateStore.set(transponderState);
 	}
 
 	function onTransponderFrequencyIncrease(event: Event) {

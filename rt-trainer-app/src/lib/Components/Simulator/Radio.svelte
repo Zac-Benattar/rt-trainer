@@ -101,6 +101,10 @@
 		} else {
 			radioState.dialMode = 'SBY';
 		}
+
+		// Shouldnt need to do this here as we have a reactive statement for this, but it seems to be necessary
+		// for the store to update when the dail mode changes
+		RadioStateStore.set(radioState);
 	}
 
 	function onRadioFrequencyIncreaseLarge() {

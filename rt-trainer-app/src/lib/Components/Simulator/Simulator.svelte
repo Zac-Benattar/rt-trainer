@@ -26,7 +26,9 @@
 		LiveFeedbackStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
-		WaypointStore
+		WaypointStore,
+		RadioDialModeStore,
+		TransponderDialModeStore
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -37,6 +39,7 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import type { Waypoint } from '$lib/ts/RouteTypes';
 	import Altimeter from './Altimeter.svelte';
+	import { updated } from '$app/stores';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -63,7 +66,6 @@
 	let tutorialEnabled: boolean = true;
 	let tutorialComplete: boolean = false;
 	let tutorialStep: number = 1;
-	let tutorialStep2: boolean = false;
 
 	// Server state
 	let awaitingRadioCallCheck: boolean = false;
@@ -573,6 +575,15 @@
 	});
 </script>
 
+{#if $updated}
+	<div class="toast">
+		<p>
+			A new version of the app is available
+
+			<button on:click={() => location.reload()}> reload the page </button>
+		</p>
+	</div>
+{/if}
 <div class="w-full sm:w-9/12">
 	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
 		{#if tutorialEnabled && !tutorialComplete}
