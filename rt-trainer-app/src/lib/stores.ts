@@ -1,4 +1,4 @@
-import { derived, writable } from 'svelte/store';
+import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
 import type RoutePoint from './ts/RoutePoints';
 import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
@@ -56,16 +56,7 @@ export const LiveFeedbackStore = writable<boolean>(false);
 
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 
-export const RadioDialModeStore = derived(RadioStateStore, ($radioState) => {
-	return $radioState.dialMode;
-});
-
 export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
-
-export const TransponderDialModeStore = derived(TransponderStateStore, ($transponderState) => {
-	console.log('TransponderStateStore', $transponderState);
-	return $transponderState.dialMode;
-});
 
 export const UserMessageStore = writable<string>('');
 
@@ -87,6 +78,8 @@ export const CurrentRoutePointStore = writable<RoutePoint | null>(null);
 
 export const RadioCallsHistoryStore = writable<RadioCall[]>([]);
 
+export const TutorialStore = writable<boolean>(false);
+
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
 	GenerationParametersStore.set(initialGenerationParameters);
@@ -106,4 +99,5 @@ export function ClearSimulationStores(): void {
 	CurrentRoutePointStore.set(null);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
+	TutorialStore.set(false);
 }

@@ -24,8 +24,7 @@
 				<li>
 					<span class="shrink-0 btn-icon bg-surface-300-600-token">✔️</span>
 					<span>
-						<b>Generate practice scenarios</b> – routes are generated randomly, no more
-						repetition
+						<b>Generate practice scenarios</b> – routes are generated randomly, no more repetition
 					</span>
 				</li>
 				<li>
@@ -37,7 +36,7 @@
 			</ul>
 			<div class="flex flex-wrap gap-4">
 				<a
-					href="/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True"
+					href="/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True"
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
 					data-sveltekit-preload-data="hover">Demo route</a
 				>

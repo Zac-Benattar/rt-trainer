@@ -27,8 +27,9 @@
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		WaypointStore,
-		RadioDialModeStore,
-		TransponderDialModeStore
+
+		TutorialStore
+
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
 	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
@@ -63,7 +64,7 @@
 	let liveFeedback: boolean = false;
 
 	// Tutorial state
-	let tutorialEnabled: boolean = true;
+	let tutorialEnabled: boolean = false;
 	let tutorialComplete: boolean = false;
 	let tutorialStep: number = 1;
 
@@ -157,6 +158,10 @@
 		}
 
 		endPointIndex = value;
+	});
+
+	TutorialStore.subscribe((value) => {
+		tutorialEnabled = value;
 	});
 
 	/**
@@ -591,8 +596,9 @@
 				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
 					<Step>
 						<svelte:fragment slot="header">Get Started!</svelte:fragment>
-						Welcome to RT Trainer. This tutorial will explain how to use the simulator. <br>Click <span class="underline">next</span> to
-						continue.
+						Welcome to RT Trainer. This tutorial will explain how to use the simulator. <br />Click
+						<span class="underline">next</span>
+						to continue.
 						<svelte:fragment slot="navigation">
 							<button class="btn variant-ghost-warning" on:click={cancelTutorial}
 								>Skip Tutorial</button
@@ -617,6 +623,11 @@
 							<li>Type your message in the input box.</li>
 							<li>Or enable speech input and say your message out loud.</li>
 						</ul>
+					</Step>
+					<Step>
+						<svelte:fragment slot="header">Well Done!</svelte:fragment>
+						You have completed the basic tutorial. Familiarise yourself with the rest of the simulator
+						and complete the route.
 					</Step>
 				</Stepper>
 			</div>

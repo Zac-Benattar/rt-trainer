@@ -5,12 +5,15 @@
 		AircraftDetailsStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
-		GenerationParametersStore
+		GenerationParametersStore,
+
+		TutorialStore
+
 	} from '$lib/stores';
 	import Seed from '$lib/ts/Seed';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 
-	/* Need to read in generation parameters from the URL. Using stores would not be sufficent 
+	/* Read in generation parameters from the URL. Using stores would not be sufficent 
 	given that this would prevent users from pasting in a URL and getting the correct parameters. */
 
 	// Get the seed
@@ -102,10 +105,17 @@
 		}
 	}
 
+	let tutorial: boolean = false;
+	const tutorialString: string | null = $page.url.searchParams.get('tutorial');
+	if (tutorialString != null) {
+		tutorial = tutorialString === 'True';
+	}
+
 	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 	AircraftDetailsStore.set({ callsign, prefix, aircraftType });
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	EndPointIndexStore.set(endPointIndex);
+	TutorialStore.set(tutorial);
 </script>
 
 <div class="flex" style="justify-content: center;">
