@@ -27,10 +27,16 @@
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		WaypointStore,
-		TutorialStore
+		TutorialStore,
+		AltimeterStateStore
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
-	import type { TransponderState, AircraftDetails, RadioState } from '$lib/ts/SimulatorTypes';
+	import type {
+		TransponderState,
+		AircraftDetails,
+		RadioState,
+		AltimeterState
+	} from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
@@ -47,6 +53,7 @@
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
+	let altimeterState: AltimeterState;
 	let atcMessage: string;
 	let userMessage: string;
 	let route: RoutePoint[] = [];
@@ -128,6 +135,10 @@
 
 	TransponderStateStore.subscribe((value) => {
 		transponderState = value;
+	});
+
+	AltimeterStateStore.subscribe((value) => {
+		altimeterState = value;
 	});
 
 	UserMessageStore.subscribe((value) => {
@@ -228,6 +239,13 @@
 				body: 'Transponder frequency incorrect'
 			});
 			return false;
+		} else if (altimeterState.pressure != route[currentPointIndex].updateData.currentPressure) {
+			// modalStore.trigger({
+			// 	type: 'alert',
+			// 	title: 'Error',
+			// 	body: 'Altimeter pressure setting incorrect'
+			// });
+			// return false;
 		}
 
 		return true;
@@ -591,7 +609,7 @@
 	</div>
 {/if}
 <div class="w-full sm:w-9/12">
-	<div class="flex flex-row place-content-center gap-5 py-3 sm:py-5 flex-wrap px-2">
+	<div class="flex flex-row place-content-center gap-5 pt-3 sm:pt-5 flex-wrap px-2">
 		{#if tutorialEnabled && !tutorialComplete}
 			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
 				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>

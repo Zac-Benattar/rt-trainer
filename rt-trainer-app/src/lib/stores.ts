@@ -1,7 +1,12 @@
 import { writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
 import type RoutePoint from './ts/RoutePoints';
-import type { AircraftDetails, RadioState, TransponderState } from './ts/SimulatorTypes';
+import type {
+	AircraftDetails,
+	AltimeterState,
+	RadioState,
+	TransponderState
+} from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 import type { Waypoint } from './ts/RouteTypes';
 
@@ -36,6 +41,10 @@ const initialTransponderState: TransponderState = {
 	vfrHasExecuted: false
 };
 
+const initialAltimeterState: AltimeterState = {
+	pressure: 1013
+};
+
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
 export const GenerationParametersStore = writable<GenerationParameters>(
@@ -57,6 +66,8 @@ export const LiveFeedbackStore = writable<boolean>(false);
 export const RadioStateStore = writable<RadioState>(initialRadioState);
 
 export const TransponderStateStore = writable<TransponderState>(initialTransponderState);
+
+export const AltimeterStateStore = writable<AltimeterState>(initialAltimeterState);
 
 export const UserMessageStore = writable<string>('');
 
@@ -90,6 +101,7 @@ export function ClearSimulationStores(): void {
 	LiveFeedbackStore.set(false);
 	RadioStateStore.set(initialRadioState);
 	TransponderStateStore.set(initialTransponderState);
+	AltimeterStateStore.set(initialAltimeterState);
 	UserMessageStore.set('');
 	ExpectedUserMessageStore.set('');
 	ATCMessageStore.set('');

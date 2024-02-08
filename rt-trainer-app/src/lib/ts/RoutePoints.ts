@@ -49,6 +49,7 @@ export function getParkedInitialControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
+		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
 }
@@ -63,6 +64,7 @@ export function getParkedMadeContactControlledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
+		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
 }
@@ -77,6 +79,7 @@ export function getParkedInitialUncontrolledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
+		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
 }
@@ -91,6 +94,7 @@ export function getParkedMadeContactUncontrolledUpdateData(
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
 		currentTransponderFrequency: 7000,
+		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
 }
@@ -640,6 +644,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -656,6 +661,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -672,6 +678,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -688,6 +695,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -704,6 +712,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -720,6 +729,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
 			i + 1,
@@ -779,6 +789,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: emergencyType
 			},
 			emergencyPointIndex,
@@ -795,6 +806,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: emergencyType
 			},
 			emergencyPointIndex,
@@ -811,6 +823,7 @@ export function getAirborneRoutePoints(
 				currentTarget: '',
 				currentTargetFrequency: 0,
 				currentTransponderFrequency: 0,
+				currentPressure: 1013,
 				emergency: emergencyType
 			},
 			emergencyPointIndex,

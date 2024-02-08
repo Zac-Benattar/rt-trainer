@@ -97,8 +97,8 @@
 		{/if}
 	</svelte:fragment>
 	<svelte:fragment slot="pageFooter">
-		<div class="flex flex-col place-items-center grow-0 p-2">
-			{#if $page.url.pathname === '/'}
+		{#if $page.url.pathname === '/'}
+			<div class="flex flex-col place-items-center grow-0 p-2">
 				<p class="text-slate-600">
 					Homepage image by <a
 						href="https://pixabay.com/users/clker-free-vector-images-3736/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=26563"
@@ -110,11 +110,8 @@
 						>Pixabay</a
 					>
 				</p>
-			{/if}
-			<!-- <p>
-				&copy; 2021 InterVeg Coventry Ltd.<br />Fresh produce from the Midland's green countryside.
-			</p> -->
-		</div></svelte:fragment
+			</div>
+		{/if}</svelte:fragment
 	>
 	<!-- Page Route Content -->
 	<slot />
