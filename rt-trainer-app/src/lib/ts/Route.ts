@@ -309,7 +309,7 @@ export function ResetCurrentRoutePointIndex(): void {
  *
  * @returns void
  */
-export async function initiateScenario() {
+export async function initiateScenario(): Promise<void> {
 	// Get the state from the server
 	const serverRouteResponse = await getRouteFromServer();
 	const serverWaypointsResponse = await getWaypointsFromServer();
@@ -360,6 +360,27 @@ export async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 	}
 }
 
+// For testing
+export async function initiateRouteV2(): Promise<void> {
+	try {
+		const response = await axios.get(
+			`/routetest/seed=${generationParameters.seed.seedString}?airborneWaypoints=${generationParameters.airborneWaypoints}&hasEmergency=${generationParameters.hasEmergency}`
+		);
+
+		if (response.data === undefined) {
+			NullRouteStore.set(true);
+		} else {
+			RouteStore.set(response.data);
+		}
+	} catch (error: unknown) {
+		if (error.message === 'Network Error') {
+			NullRouteStore.set(true);
+		} else {
+			console.error('Error: ', error);
+		}
+	}
+}
+
 /**
  * Gets the waypoints from the server
  *
@@ -385,22 +406,27 @@ export async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> 
 }
 
 /**
-	 * Checks the radio call by the server
-	 *
-	 * @remarks
-	 * This function checks the radio call by the server.
-	 *
-	 * @returns Promise<ServerResponse | undefined>
-	 */
-export async function checkRadioCallByServer(radioCall: RadioCall): Promise<ServerResponse | undefined> {
+ * Checks the radio call by the server
+ *
+ * @remarks
+ * This function checks the radio call by the server.
+ *
+ * @returns Promise<ServerResponse | undefined>
+ */
+export async function checkRadioCallByServer(
+	radioCall: RadioCall
+): Promise<ServerResponse | undefined> {
 	if (!routeGenerated) {
 		console.log('Error: No route');
 		return;
 	}
 	try {
-		const response = await axios.post(`/scenario/seed=${generationParameters.seed.scenarioSeed}/parse`, {
-			data: radioCall.getJSONData()
-		});
+		const response = await axios.post(
+			`/scenario/seed=${generationParameters.seed.scenarioSeed}/parse`,
+			{
+				data: radioCall.getJSONData()
+			}
+		);
 
 		return response.data;
 	} catch (error) {

@@ -1,15 +1,14 @@
 <script lang="ts">
 	import Map from "$lib/Components/Simulator/Map.svelte";
 	import { ClearSimulationStores, OpenAIPHealthStore } from "$lib/stores";
-	import { checkSystemHealth } from "$lib/ts/OpenAIPHandler";
-	import { initiateScenario } from "$lib/ts/Route";
+	import { initiateRouteV2 } from "$lib/ts/Route";
 
 	ClearSimulationStores();
 
-	initiateScenario();
+	initiateRouteV2();
 
-	// Don't keep in actual route gen code/simulator, just do a single check
-	setInterval(checkSystemHealth, 10000);
+	// // Don't keep in actual route gen code/simulator, just do a single check
+	// setInterval(checkSystemHealth, 10000);
 
 	let openAIPHealth: string = "Unknown";
 
