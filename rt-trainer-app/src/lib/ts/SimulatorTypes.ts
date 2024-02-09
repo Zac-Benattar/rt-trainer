@@ -21,6 +21,11 @@ export type TransponderState = {
 	vfrHasExecuted: boolean;
 };
 
+/* The state of the altimeter. */
+export type AltimeterState = {
+	pressure: number; 
+}
+
 /* The details of a aircraft selected by the user. */
 export type AircraftDetails = {
 	callsign: string;

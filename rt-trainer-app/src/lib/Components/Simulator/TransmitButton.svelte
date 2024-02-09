@@ -34,16 +34,9 @@
 		recognition.lang = 'en';
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
 			const speechInput = event.results[0][0].transcript;
-			console.log('Speech input:', speechInput);
-			if (event.results[0][0].confidence > 0.3) {
-				SpeechBufferStore.set(speechInput);
-			} else {
-				modalStore.trigger({
-					type: 'alert',
-					title: 'Speech Recognition Error',
-					body: 'Low confidence in speech recognition. Please repeat your message clearly.'
-				});
-			}
+			console.log(`You said: ${speechInput}, Confidence: ${event.results[0][0].confidence}`);
+
+			SpeechBufferStore.set(speechInput);
 		};
 	}
 

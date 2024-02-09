@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import SvgDisplay from '$lib/Components/SVGDisplay.svelte';
+	import { ClearSimulationStores } from '$lib/stores';
+
 </script>
 
 <div class="container mx-auto max-w-screen-lg p-5">
@@ -35,15 +38,15 @@
 				</li>
 			</ul>
 			<div class="flex flex-wrap gap-4">
-				<a
-					href="/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True"
+				<button
+					on:click={() => { ClearSimulationStores(); goto("/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True")}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
-					data-sveltekit-preload-data="hover">Demo route</a
+					data-sveltekit-preload-data="hover">Demo route</button
 				>
-				<a
-					href="/generate"
+				<button
+					on:click={() => { ClearSimulationStores(); goto("/generate")}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
-					data-sveltekit-preload-data="hover">Setup a scenario</a
+					data-sveltekit-preload-data="hover">Setup a scenario</button
 				>
 			</div>
 		</div>

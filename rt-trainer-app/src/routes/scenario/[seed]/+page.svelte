@@ -7,6 +7,8 @@
 		EndPointIndexStore,
 		GenerationParametersStore,
 
+		StartPointIndexStore,
+
 		TutorialStore
 
 	} from '$lib/stores';
@@ -90,6 +92,7 @@
 	const startPointIndexString: string | null = $page.url.searchParams.get('startPoint');
 	if (startPointIndexString != null) {
 		startPointIndex = parseInt(startPointIndexString);
+		console.log(startPointIndex);
 		if (startPointIndex < 0) {
 			startPointIndex = 0;
 		}
@@ -114,6 +117,7 @@
 	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 	AircraftDetailsStore.set({ callsign, prefix, aircraftType });
 	CurrentRoutePointIndexStore.set(startPointIndex);
+	StartPointIndexStore.set(startPointIndex);
 	EndPointIndexStore.set(endPointIndex);
 	TutorialStore.set(tutorial);
 </script>

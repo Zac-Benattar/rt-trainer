@@ -35,5 +35,6 @@ export type SimulatorUpdateData = {
 	currentTarget: string;
 	currentTargetFrequency: number;
 	currentTransponderFrequency: number;
+	currentPressure: number;
 	emergency: EmergencyType;
 };
