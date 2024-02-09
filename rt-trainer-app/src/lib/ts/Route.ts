@@ -351,7 +351,7 @@ export async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
 		);
 
 		return response.data;
-	} catch (error: any) {
+	} catch (error: unknown) {
 		if (error.message === 'Network Error') {
 			NullRouteStore.set(true);
 		} else {
@@ -375,7 +375,7 @@ export async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> 
 		);
 
 		return response.data;
-	} catch (error: any) {
+	} catch (error: unknown) {
 		if (error.message === 'Network Error') {
 			NullRouteStore.set(true);
 		} else {
