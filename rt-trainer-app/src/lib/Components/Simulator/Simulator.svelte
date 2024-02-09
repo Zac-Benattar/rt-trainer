@@ -26,7 +26,6 @@
 		LiveFeedbackStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
-		WaypointStore,
 		TutorialStore,
 		AltimeterStateStore
 	} from '$lib/stores';
@@ -42,9 +41,9 @@
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import { Feedback } from '$lib/ts/Feedback';
-	import type { Waypoint } from '$lib/ts/RouteTypes';
 	import Altimeter from './Altimeter.svelte';
 	import { updated } from '$app/stores';
+	import { checkRadioCallByServer, initiateScenario } from '$lib/ts/Route';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -56,8 +55,11 @@
 	let altimeterState: AltimeterState;
 	let atcMessage: string;
 	let userMessage: string;
+	let currentTarget: string;
+	let currentTargetFrequency: number;
 	let route: RoutePoint[] = [];
-	let currentPointIndex: number = 0;
+	let currentRoutePointIndex: number = 0;
+	let currentRoutePoint: RoutePoint;
 	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
@@ -105,7 +107,7 @@
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
 	$: tutorialStep3 =
 		radioState?.activeFrequency.toFixed(3) ==
-		route[currentPointIndex]?.updateData.currentTargetFrequency.toFixed(3);
+		currentRoutePoint?.updateData.currentTargetFrequency.toFixed(3);
 
 	RouteStore.subscribe((value) => {
 		route = value;
@@ -150,15 +152,19 @@
 	});
 
 	CurrentRoutePointIndexStore.subscribe((value) => {
-		if (value < 0) {
-			value = 0;
-		}
+		currentRoutePointIndex = value;
+	});
 
-		if (route.length > 0 && value >= route.length) {
-			console.log('Invalid route point index: ' + value);
-		} else {
-			currentPointIndex = value;
-		}
+	CurrentRoutePointStore.subscribe((value) => {
+		currentRoutePoint = value;
+	});
+
+	CurrentTargetStore.subscribe((value) => {
+		currentTarget = value;
+	});
+
+	CurrentTargetFrequencyStore.subscribe((value) => {
+		currentTargetFrequency = value;
 	});
 
 	EndPointIndexStore.subscribe((value) => {
@@ -222,7 +228,7 @@
 			return false;
 		} else if (
 			radioState.activeFrequency.toFixed(3) !=
-			route[currentPointIndex].updateData.currentTargetFrequency.toFixed(3)
+			currentRoutePoint.updateData.currentTargetFrequency.toFixed(3)
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -231,7 +237,7 @@
 			});
 			return false;
 		} else if (
-			transponderState.frequency != route[currentPointIndex].updateData.currentTransponderFrequency
+			transponderState.frequency != currentRoutePoint.updateData.currentTransponderFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -239,7 +245,7 @@
 				body: 'Transponder frequency incorrect'
 			});
 			return false;
-		} else if (altimeterState.pressure != route[currentPointIndex].updateData.currentPressure) {
+		} else if (altimeterState.pressure != currentRoutePoint.updateData.currentPressure) {
 			// modalStore.trigger({
 			// 	type: 'alert',
 			// 	title: 'Error',
@@ -403,7 +409,23 @@
 
 		// Send message to server, use a lock to prevent multiple calls
 		awaitingRadioCallCheck = true;
-		let tempServerResponse = await checkRadioCallByServer();
+		currentRadioCall = new RadioCall(
+			userMessage,
+			seed,
+			airborneWaypoints,
+			route,
+			currentRoutePointIndex,
+			aircraftDetails.prefix,
+			aircraftDetails.callsign,
+			currentRoutePoint.updateData.callsignModified,
+			transponderState.vfrHasExecuted,
+			currentTarget,
+			currentTargetFrequency,
+			radioState.activeFrequency,
+			transponderState.frequency,
+			aircraftDetails.aircraftType
+		);
+		let tempServerResponse = await checkRadioCallByServer(currentRadioCall);
 		if (tempServerResponse === undefined || tempServerResponse === null) {
 			// Handle error
 			serverNotResponding = true;
@@ -421,7 +443,7 @@
 		if (!handleFeedback(serverResponse)) return;
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
-		if (currentPointIndex == endPointIndex) {
+		if (currentRoutePointIndex == endPointIndex) {
 			const m: ModalSettings = {
 				type: 'confirm',
 				title: 'Scenario Complete',
@@ -438,140 +460,11 @@
 		}
 
 		// Update the simulator with the next route point
-		CurrentRoutePointIndexStore.set(currentPointIndex + 1);
-		CurrentRoutePointStore.set(route[currentPointIndex]);
+		CurrentRoutePointIndexStore.update((value) => {
+			value++;
+			return value;
+		});
 		ATCMessageStore.set(serverResponse.responseCall);
-		CurrentTargetStore.set(route[currentPointIndex].updateData.currentTarget);
-	}
-
-	/**
-	 * Initiates the scenario
-	 *
-	 * @remarks
-	 * This function initiates the scenario by getting the route and waypoints from the server.
-	 *
-	 * @returns void
-	 */
-	async function initiateScenario() {
-		// Get the state from the server
-		const serverRouteResponse = await getRouteFromServer();
-		const serverWaypointsResponse = await getWaypointsFromServer();
-
-		if (serverRouteResponse === undefined || serverWaypointsResponse === undefined) {
-			// Handle error
-			nullRoute = true;
-
-			return 0;
-		} else {
-			console.log(serverRouteResponse);
-			console.log(serverWaypointsResponse);
-
-			// Update stores with the route
-			CurrentTargetStore.set(serverRouteResponse[currentPointIndex].updateData.currentTarget);
-			CurrentTargetFrequencyStore.set(
-				serverRouteResponse[currentPointIndex].updateData.currentTargetFrequency
-			);
-			RouteStore.set(serverRouteResponse);
-			CurrentRoutePointStore.set(serverRouteResponse[currentPointIndex]);
-			WaypointStore.set(serverWaypointsResponse);
-
-			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
-			// So we need to set it to the last point in the route if it has not been set
-			if (endPointIndex == -1) {
-				EndPointIndexStore.set(serverRouteResponse.length - 1);
-			}
-		}
-	}
-
-	/**
-	 * Gets the route from the server
-	 *
-	 * @remarks
-	 * This function gets the route from the server.
-	 *
-	 * @returns Promise<RoutePoint[] | undefined>
-	 */
-	async function getRouteFromServer(): Promise<RoutePoint[] | undefined> {
-		try {
-			const response = await axios.get(
-				`/scenario/seed=${seed.seedString}/route?airborneWaypoints=${airborneWaypoints}&hasEmergency=${hasEmergency}`
-			);
-
-			return response.data;
-		} catch (error: any) {
-			if (error.message === 'Network Error') {
-				serverNotResponding = true;
-			} else {
-				console.error('Error: ', error);
-			}
-		}
-	}
-
-	/**
-	 * Gets the waypoints from the server
-	 *
-	 * @remarks
-	 * This function gets the waypoints from the server.
-	 *
-	 * @returns Promise<Waypoint[] | undefined>
-	 */
-	async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> {
-		try {
-			const response = await axios.get(
-				`/scenario/seed=${seed.seedString}/waypoints?airborneWaypoints=${airborneWaypoints}`
-			);
-
-			return response.data;
-		} catch (error: any) {
-			if (error.message === 'Network Error') {
-				serverNotResponding = true;
-			} else {
-				console.error('Error: ', error);
-			}
-		}
-	}
-
-	/**
-	 * Checks the radio call by the server
-	 *
-	 * @remarks
-	 * This function checks the radio call by the server.
-	 *
-	 * @returns Promise<ServerResponse | undefined>
-	 */
-	async function checkRadioCallByServer(): Promise<ServerResponse | undefined> {
-		if (!route) {
-			console.log('Error: No route');
-			return;
-		}
-		try {
-			const currentTarget = route[currentPointIndex].updateData.currentTarget;
-			const currentTargetFrequency = route[currentPointIndex].updateData.currentTargetFrequency;
-			currentRadioCall = new RadioCall(
-				userMessage,
-				seed,
-				airborneWaypoints,
-				route,
-				currentPointIndex,
-				aircraftDetails.prefix,
-				aircraftDetails.callsign,
-				route[currentPointIndex].updateData.callsignModified,
-				transponderState.vfrHasExecuted,
-				currentTarget,
-				currentTargetFrequency,
-				radioState.activeFrequency,
-				transponderState.frequency,
-				aircraftDetails.aircraftType
-			);
-
-			const response = await axios.post(`/scenario/seed=${seed.scenarioSeed}/parse`, {
-				data: currentRadioCall.getJSONData()
-			});
-
-			return response.data;
-		} catch (error) {
-			console.error('Error: ', error);
-		}
 	}
 
 	function onStepHandler(e: {

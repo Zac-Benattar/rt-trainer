@@ -6,7 +6,7 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { CurrentRoutePointStore, WaypointStore } from '$lib/stores';
+	import { CurrentRoutePointStore, WaypointsStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
@@ -19,6 +19,8 @@
 	};
 
 	export let enabled: boolean = true;
+	export let widthSmScreen: string = "512px";
+	export let heightSmScreen: string = "452px";
 	let leaflet: any;
 	let rotated_marker: any;
 	let targetPose: Pose;
@@ -27,13 +29,13 @@
 	let currentLocationMarker: any;
 	let mapWaypoints: MapWaypoint[] = [];
 	let markers: any[] = [];
-	let zoomLevel: number = 13;
+	export let initialZoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 
-	WaypointStore.subscribe((waypoints) => {
+	WaypointsStore.subscribe((waypoints) => {
 		// Get all waypoints from the route
 		mapWaypoints = [];
 		for (let i = 0; i < waypoints.length; i++) {
@@ -93,7 +95,7 @@
 			}
 		});
 
-		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], zoomLevel);
+		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
 
 		planeIcon = L.icon({
 			iconUrl: '/images/plane.png',
@@ -129,7 +131,7 @@
 		if (mounted) {
 			await map;
 
-			map.setView([targetPose.lat, targetPose.long], zoomLevel);
+			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
 			removeMarkers();
 
@@ -205,7 +207,8 @@
 
 <div
 	class="container flex flex-row p-1.5 rounded-md grow h-80 sm:h-96 sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
->
+	style="--widthSmScreen: {widthSmScreen}; --heightSmScreen: {heightSmScreen};"
+	>
 	{#if enabled}
 		<div id="myMap" class="card flex grow z-[1]" />
 	{:else}
@@ -220,10 +223,10 @@
 
 	.container {
 		@media (min-width: 640px) {
-			min-width: 512px;
-			min-height: 452px;
-			max-height: 452px;
-			max-width: 512px;
+			min-width: var(--widthSmScreen);
+			min-height: var(--heightSmScreen);
+			max-width: var(--widthSmScreen);
+			max-height: var(--heightSmScreen);
 		}
 	}
 </style>
