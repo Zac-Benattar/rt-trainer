@@ -370,7 +370,8 @@ export async function initiateRouteV2(): Promise<void> {
 		if (response.data === undefined) {
 			NullRouteStore.set(true);
 		} else {
-			RouteStore.set(response.data);
+			console.log(response.data);
+			WaypointsStore.set(response.data);
 		}
 	} catch (error: unknown) {
 		if (error.message === 'Network Error') {

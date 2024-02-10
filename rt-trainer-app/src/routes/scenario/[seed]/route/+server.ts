@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import Route from '$lib/ts/Route';
 import Seed from '$lib/ts/Seed';
 
-export async function GET({ params, url }) {
+export async function GET({ params, url, setHeaders }) {
 	const route = new Route();
 	const seed = new Seed(params.seed.replace('seed=', ''));
 
@@ -28,6 +28,10 @@ export async function GET({ params, url }) {
 	if (emergenciesString != null) {
 		hasEmergency = emergenciesString === 'true';
 	}
+
+	setHeaders({
+		"cache-control": "max-age=60",
+	  });
 
 	// Generate the route with the parameters
 	route.generateRoute(seed, airborneWaypoints, hasEmergency);

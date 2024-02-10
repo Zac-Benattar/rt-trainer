@@ -19,8 +19,8 @@
 	};
 
 	export let enabled: boolean = true;
-	export let widthSmScreen: string = "512px";
-	export let heightSmScreen: string = "452px";
+	export let widthSmScreen: string = '512px';
+	export let heightSmScreen: string = '452px';
 	let leaflet: any;
 	let rotated_marker: any;
 	let targetPose: Pose;
@@ -29,11 +29,17 @@
 	let currentLocationMarker: any;
 	let mapWaypoints: MapWaypoint[] = [];
 	let markers: any[] = [];
+	let needsToBeUpdated: boolean = false;
 	export let initialZoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
+
+	$: if (needsToBeUpdated && mounted) {
+		updateMap();
+		needsToBeUpdated = false;
+	}
 
 	WaypointsStore.subscribe((waypoints) => {
 		// Get all waypoints from the route
@@ -49,6 +55,8 @@
 				name: name
 			});
 		}
+
+		needsToBeUpdated = true;
 	});
 
 	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
@@ -208,7 +216,7 @@
 <div
 	class="container flex flex-row p-1.5 rounded-md grow h-80 sm:h-96 sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
 	style="--widthSmScreen: {widthSmScreen}; --heightSmScreen: {heightSmScreen};"
-	>
+>
 	{#if enabled}
 		<div id="myMap" class="card flex grow z-[1]" />
 	{:else}

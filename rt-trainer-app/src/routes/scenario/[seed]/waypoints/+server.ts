@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import Route from '$lib/ts/Route';
 import Seed from '$lib/ts/Seed';
 
-export async function GET({ params, url }) {
+export async function GET({ params, url, setHeaders }) {
 	const seed = new Seed(params.seed.replace('seed=', ''));
 
 	// Check if the url has the number of airborne waypoints specified
@@ -20,6 +20,10 @@ export async function GET({ params, url }) {
 			airborneWaypoints = 2;
 		}
 	}
+
+	setHeaders({
+		'cache-control': 'max-age=60'
+	});
 
 	return json(Route.getRouteWaypoints(seed, airborneWaypoints));
 }
