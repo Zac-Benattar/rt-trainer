@@ -31,24 +31,47 @@ export async function getAllUKAirports(): Promise<unknown> {
     }
 }
 
-export async function getAirspacesNearCoords(coords: { lat: number, long: number}, radius: number): Promise<unknown> {
-    try {
-        const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
-            headers: {
-                'Content-Type': 'application/json',
-                'x-openaip-client-id': OPENAIPKEY
-            },
-            params: {
-                dist: radius,
-                pos: coords.lat + ',' + coords.long,
-            }
-        });
-
-        console.log('Fetched all airspaces near point from OpenAIP');
-
-        return response.data.items;
-    } catch (error: unknown) {
-        console.error('Error: ', error);
+export async function getAirspacesNearCoords(coords: { lat: number, long: number}, radius: number, type: number): Promise<unknown> {
+    if (type === -1) {
+        try {
+            const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-openaip-client-id': OPENAIPKEY
+                },
+                params: {
+                    dist: radius,
+                    pos: coords.lat + ',' + coords.long,
+                }
+            });
+    
+            console.log('Fetched all airspaces near point from OpenAIP');
+    
+            return response.data.items;
+        } catch (error: unknown) {
+            console.error('Error: ', error);
+        }
+    } else {
+        try {
+            const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-openaip-client-id': OPENAIPKEY
+                },
+                params: {
+                    dist: radius,
+                    pos: coords.lat + ',' + coords.long,
+                    type: type
+                }
+            });
+    
+            console.log('Fetched all airspaces near point from OpenAIP');
+    
+            return response.data.items;
+        } catch (error: unknown) {
+            console.error('Error: ', error);
+        }
     }
+
 }
 
