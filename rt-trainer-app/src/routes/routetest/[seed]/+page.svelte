@@ -29,4 +29,4 @@
 
 <div>OpenAIP Status: {openAIPHealth}</div>
 <div>Route Test: {waypoints}</div>
-<Map enabled={true} widthSmScreen={"w-full"} heightSmScreen={"800px"} initialZoomLevel={8}/>
+<Map enabled={true} widthSmScreen={"w-full"} heightSmScreen={"800px"} initialZoomLevel={9}/>

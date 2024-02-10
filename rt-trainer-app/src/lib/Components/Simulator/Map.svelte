@@ -6,11 +6,17 @@
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
 
-	import { CurrentRoutePointStore, WaypointsStore } from '$lib/stores';
+	import {
+		ATZsStore,
+		CurrentRoutePointStore,
+		RouteElementStore,
+		WaypointsStore
+	} from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
+	import type ATZ from '$lib/ts/ATZ';
 
 	type MapWaypoint = {
 		lat: number;
@@ -23,7 +29,14 @@
 	export let heightSmScreen: string = '452px';
 	let leaflet: any;
 	let rotated_marker: any;
-	let targetPose: Pose;
+	let targetPose: Pose = {
+		lat: 0,
+		long: 0,
+		magneticHeading: 0,
+		trueHeading: 0,
+		altitude: 0,
+		airSpeed: 0
+	};
 	let currentTime: string = '00:00';
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
@@ -41,6 +54,12 @@
 		needsToBeUpdated = false;
 	}
 
+	ATZsStore.subscribe((atzs) => {
+		atzs.forEach((atz) => {
+			drawATZ(atz);
+		});
+	});
+
 	WaypointsStore.subscribe((waypoints) => {
 		// Get all waypoints from the route
 		mapWaypoints = [];
@@ -50,10 +69,25 @@
 				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 			}
 			mapWaypoints.push({
-				lat: waypoints[i].lat,
-				long: waypoints[i].long,
+				lat: waypoints[i].getWaypointCoords()[0][1],
+				long: waypoints[i].getWaypointCoords()[0][0],
 				name: name
 			});
+		}
+
+		// If no current route point data, set the targetPose to the first waypoint
+		if (
+			(targetPose == null || (targetPose.lat == 0 && targetPose.long == 0)) &&
+			mapWaypoints.length > 0
+		) {
+			targetPose = {
+				lat: mapWaypoints[0].lat,
+				long: mapWaypoints[0].long,
+				magneticHeading: 0,
+				trueHeading: 0,
+				altitude: 0,
+				airSpeed: 0
+			};
 		}
 
 		needsToBeUpdated = true;
@@ -68,14 +102,16 @@
 			} else {
 			}
 		} else {
-			targetPose = {
-				lat: 0,
-				long: 0,
-				magneticHeading: 0,
-				trueHeading: 0,
-				altitude: 0,
-				airSpeed: 0
-			};
+			if (targetPose == null) {
+				targetPose = {
+					lat: 0,
+					long: 0,
+					magneticHeading: 0,
+					trueHeading: 0,
+					altitude: 0,
+					airSpeed: 0
+				};
+			}
 		}
 	});
 
@@ -188,6 +224,15 @@
 					smoothFactor: 1
 				}).addTo(map);
 			}
+		}
+	}
+
+	async function drawATZ(atz: ATZ) {
+		if (mounted) {
+			await map;
+
+			// Draw the ATZ
+			L.polygon(atz.getLeafletCoords(), { color: 'red' }).bindPopup(atz.getName()).addTo(map);
 		}
 	}
 

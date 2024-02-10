@@ -4,7 +4,6 @@ import {
 	stringDecimalLatitudeToNumber,
 	stringDecimalLongitudeToNumber
 } from './utils';
-import { WaypointType, type Waypoint } from './RouteTypes';
 import type Seed from './Seed';
 import RoutePoint, {
 	getAirborneRoutePoints,
@@ -17,6 +16,7 @@ import {
 	EndPointIndexStore,
 	GenerationParametersStore,
 	NullRouteStore,
+	RouteElementStore,
 	RouteStore,
 	StartPointIndexStore,
 	WaypointsStore
@@ -24,6 +24,7 @@ import {
 import axios from 'axios';
 import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
+import { Waypoint, WaypointType } from './Waypoint';
 
 const MAX_AERODROME_DISTANCE = 150000; // 150km
 const MAX_ROUTE_DISTANCE = 200000; // 200km
@@ -45,13 +46,7 @@ export function getWaypointsFromVRPsJSON(): Waypoint[] {
 			return;
 		}
 
-		airborneWaypoints.push({
-			waypointType: WaypointType.Fix,
-			name: waypoint['VRP name'],
-			lat: lat,
-			long: long,
-			arrivalTime: -1
-		});
+		airborneWaypoints.push(new Waypoint(WaypointType.Fix, waypoint['VRP name'], lat, long, -1));
 	});
 
 	return airborneWaypoints;
@@ -95,13 +90,15 @@ export default class Route {
 		for (let i = 0; i < maxIterations; i++) {
 			const waypoints: Waypoint[] = [];
 			// Push the start aerodrome to points in order to calculate the distance from it
-			waypoints.push({
-				waypointType: WaypointType.Aerodrome,
-				lat: takeOffRunwayPosition.lat,
-				long: takeOffRunwayPosition.long,
-				name: 'startAerodrome',
-				arrivalTime: takeoffTime
-			});
+			waypoints.push(
+				new Waypoint(
+					WaypointType.Aerodrome,
+					takeOffRunwayPosition.lat,
+					takeOffRunwayPosition.long,
+					'startAerodrome',
+					takeoffTime
+				)
+			);
 			let totalDistance = 0.0;
 
 			// Add waypoints until the route is too long or contains too many points
@@ -245,13 +242,7 @@ export default class Route {
 		const endAerodrome = Route.getEndAerodrome(seed);
 		const endAerodromeRunwayCenterPoint = endAerodrome.getLandingRunway().getCenterPoint();
 
-		waypoints.push({
-			waypointType: WaypointType.Aerodrome,
-			lat: startAerodromeRunwayCenterPoint.lat,
-			long: startAerodromeRunwayCenterPoint.long,
-			name: startAerodrome.getShortName(),
-			arrivalTime: takeoffTime
-		});
+		waypoints.push(new Waypoint(WaypointType.Aerodrome, startAerodromeRunwayCenterPoint.lat, startAerodromeRunwayCenterPoint.long, startAerodrome.getShortName(), takeoffTime));
 
 		waypoints.push(...Route.getAirborneWaypoints(seed, numAirborneWaypoints));
 
@@ -268,13 +259,7 @@ export default class Route {
 					FLIGHT_TIME_MULTIPLIER
 		);
 
-		waypoints.push({
-			waypointType: WaypointType.Aerodrome,
-			lat: endAerodromeRunwayCenterPoint.lat,
-			long: endAerodromeRunwayCenterPoint.long,
-			name: endAerodrome.getShortName(),
-			arrivalTime: arrivalTime
-		});
+		waypoints.push(new Waypoint(WaypointType.Aerodrome, endAerodromeRunwayCenterPoint.lat, endAerodromeRunwayCenterPoint.long, endAerodrome.getShortName(), arrivalTime));
 
 		return waypoints;
 	}
@@ -318,7 +303,7 @@ export async function initiateScenario(): Promise<void> {
 		// Handle error
 		NullRouteStore.set(true);
 
-		return 0;
+		return;
 	} else {
 		console.log(serverRouteResponse);
 		console.log(serverWaypointsResponse);
@@ -371,7 +356,7 @@ export async function initiateRouteV2(): Promise<void> {
 			NullRouteStore.set(true);
 		} else {
 			console.log(response.data);
-			WaypointsStore.set(response.data);
+			RouteElementStore.set(response.data);
 		}
 	} catch (error: unknown) {
 		if (error.message === 'Network Error') {

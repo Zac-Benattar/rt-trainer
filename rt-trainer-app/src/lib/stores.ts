@@ -8,7 +8,9 @@ import type {
 	TransponderState
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
-import type { Waypoint } from './ts/RouteTypes';
+import type RouteElement from './ts/RouteElement';
+import { Waypoint } from './ts/Waypoint';
+import ATZ from './ts/ATZ';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -76,7 +78,41 @@ export const KneeboardStore = writable<string>('');
 // Route stores
 export const RouteStore = writable<RoutePoint[]>([]);
 
-export const WaypointsStore = writable<Waypoint[]>([]);
+export const RouteElementStore = writable<RouteElement[]>([]);
+
+export const WaypointsStore = derived(RouteElementStore, ($RouteElementStore) => {
+	const waypointsData = $RouteElementStore.filter(
+		(element) => (<Waypoint>element).waypointType != undefined
+	);
+
+	// waypoints data only holds the data, we need to turn them into actual waypoint objects
+	// so we can use the methods
+	const waypoints: Waypoint[] = [];
+	waypointsData.forEach((waypoint) => {
+		waypoints.push(
+			new Waypoint(waypoint.waypointType, waypoint.coords, waypoint.name, waypoint.arrivalTime)
+		);
+	});
+
+	console.log(waypoints);
+
+	return waypoints;
+});
+
+export const ATZsStore = derived(RouteElementStore, ($RouteElementStore) => {
+	const ATZData = $RouteElementStore.filter((element) => (<ATZ>element).height != undefined);
+
+	// ATZ data only holds the data, we need to turn them into actual ATZ objects
+	// so we can use the methods
+	const ATZs: ATZ[] = [];
+	ATZData.forEach((atz) => {
+		ATZs.push(new ATZ(atz.name, atz.coords, atz.height));
+	});
+
+	console.log(ATZs);
+
+	return ATZs;
+});
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
 
@@ -152,7 +188,7 @@ export function ClearSimulationStores(): void {
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
 	RouteStore.set([]);
-	WaypointsStore.set([]);
+	RouteElementStore.set([]);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

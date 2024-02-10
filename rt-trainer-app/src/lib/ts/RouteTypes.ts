@@ -1,15 +1,3 @@
-export enum WaypointType {
-	Aerodrome, // For use when not in the air
-	NDB, // Non-directional beacon - helps with positioning
-	VOR, // VHF Omnidirectional Range station - helps with positioning
-	Fix, // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir
-	DME, // Distance Measuring Equipment - helps with positioning by measuring distance from a VOR
-	GPS, // GPS waypoint - arbitrary point defined in terms of lat/long
-	Intersection, // Intersection of two or more airways
-	NewAirspace, // Entering new airspace - changing frequency
-	Emergency // Emergency - no special location
-}
-
 export enum EmergencyType {
 	None = 'None',
 	EngineFailure = 'Engine Failure',
@@ -24,15 +12,6 @@ export type Pose = {
 	trueHeading: number;
 	altitude: number;
 	airSpeed: number;
-};
-
-/* Point in space. */
-export type Waypoint = {
-	waypointType: WaypointType;
-	lat: number;
-	long: number;
-	name: string;
-	arrivalTime: number;
 };
 
 export enum FrequencyType {
