@@ -2,9 +2,11 @@ import RouteElement from './RouteElement';
 
 export default class ATZ extends RouteElement {
 	public height: string;
+    public type: number;
 
-	constructor(name: string, coords: [number, number][], height?: string) {
+	constructor(name: string, coords: [number, number][], type: number, height?: string) {
 		super(name, coords);
+        this.type = type;
 		if (height) {
 			this.height = height;
 		} else {

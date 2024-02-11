@@ -33,5 +33,5 @@ export async function GET({ url, setHeaders }) {
 		'cache-control': 'public, max-age=600'
 	});
 
-	return json(await getAirspacesNearCoords(coordsStruct, radiusNumber, -1));
+	return json(await getAirspacesNearCoords(coordsStruct, radiusNumber));
 }
