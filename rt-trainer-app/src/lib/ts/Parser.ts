@@ -12,7 +12,7 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './RouteStages';
-import type { METORDataSample } from './Aerodrome';
+import type { METORDataSample } from './Airport';
 
 export default class Parser {
 	public static parseCall(radioCall: RadioCall): ServerResponse {

@@ -18,7 +18,7 @@ import type {
 	RunwayHoldingPoint,
 	Taxiway,
 	UncontrolledAerodrome
-} from './Aerodrome';
+} from './Airport';
 import { Feedback } from './Feedback';
 import type { Waypoint } from './RouteTypes';
 import type RoutePoint from './RoutePoints';
