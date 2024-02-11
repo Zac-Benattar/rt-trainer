@@ -14,7 +14,7 @@ export default class RouteGenerator {
 	): Promise<RouteElement[]> {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
-		const airports = airportsResponse.data.filter(x => x.type != 5);
+		const airports = airportsResponse.data.filter(x => x.type == 0 || x.type == 2 || x.type == 9);
 		const numberOfAirports = airports.length;
 		let startAirport: any;
 		let destinationAirport: any;
@@ -22,6 +22,8 @@ export default class RouteGenerator {
 
 		let validRoute = false;
 		let iterations = 0;
+
+		console.log('seed:', seed.scenarioSeed);
 
 		while (!validRoute && iterations < 20) {
 			iterations++;
@@ -65,18 +67,15 @@ export default class RouteGenerator {
 			const possibleDestinations: any[] = [];
 			for (let i = 0; i < airports.length; i++) {
 				const airport = airports[i];
-				if (airport.type == 5) {
-					continue;
-				}
 				const distance = haversineDistance(
 					airport.geometry.coordinates[1],
 					airport.geometry.coordinates[0],
 					chosenMATZ.getCoords()[0][1],
 					chosenMATZ.getCoords()[0][0]
 				)
-				console.log('matz coords', chosenMATZ.getCoords()[0]);
-				console.log('destination airport coords', airport.geometry.coordinates);
-				console.log('distance: ', distance);
+				// console.log('matz coords', chosenMATZ.getCoords()[0]);
+				// console.log('destination airport coords', airport.geometry.coordinates);
+				// console.log('distance: ', distance);
 				if (distance < 80000) {
 					possibleDestinations.push(airport);
 				}
