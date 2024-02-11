@@ -56,7 +56,12 @@
 
 	ATZsStore.subscribe((atzs) => {
 		atzs.forEach((atz) => {
-			drawATZ(atz);
+			console.log('type: ', atz.type);
+			if (atz.type != 14) {
+				drawATZ(atz);
+			} else {
+				drawMATZ(atz);
+			}
 		});
 	});
 
@@ -228,6 +233,15 @@
 	}
 
 	async function drawATZ(atz: ATZ) {
+		if (mounted) {
+			await map;
+
+			// Draw the ATZ
+			L.polygon(atz.getLeafletCoords(), { color: 'blue' }).bindPopup(atz.getName()).addTo(map);
+		}
+	}
+
+	async function drawMATZ(atz: ATZ) {
 		if (mounted) {
 			await map;
 

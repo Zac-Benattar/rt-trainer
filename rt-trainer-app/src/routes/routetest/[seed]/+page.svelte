@@ -1,22 +1,28 @@
 <script lang="ts">
-	import { page } from "$app/stores";
-	import Map from "$lib/Components/Simulator/Map.svelte";
-	import { ClearSimulationStores, GenerationParametersStore, OpenAIPHealthStore, RouteStore, WaypointsStore } from "$lib/stores";
-	import { initiateRouteV2 } from "$lib/ts/Route";
-	import Seed from "$lib/ts/Seed";
-	import { generateRandomURLValidString } from "$lib/ts/utils";
+	import { page } from '$app/stores';
+	import Map from '$lib/Components/Simulator/Map.svelte';
+	import {
+		ClearSimulationStores,
+		GenerationParametersStore,
+		OpenAIPHealthStore,
+		WaypointsStore
+	} from '$lib/stores';
+	import { initiateRouteV2 } from '$lib/ts/Route';
+	import Seed from '$lib/ts/Seed';
+	import type { Waypoint } from '$lib/ts/Waypoint';
+	import { generateRandomURLValidString } from '$lib/ts/utils';
 
 	ClearSimulationStores();
 
-		// Get the seed
-		let seedString = $page.params.seed;
+	// Get the seed
+	let seedString = $page.params.seed;
 	if (seedString == null) {
 		seedString = generateRandomURLValidString(8);
 	}
 	let seed: Seed = new Seed(seedString);
 
-		// Check whether the number of airborne waypoints are specified
-		const airborneWaypointsString: string | null = $page.url.searchParams.get('airborneWaypoints');
+	// Check whether the number of airborne waypoints are specified
+	const airborneWaypointsString: string | null = $page.url.searchParams.get('airborneWaypoints');
 	let airborneWaypoints: number = 2;
 	if (
 		airborneWaypointsString == null ||
@@ -38,17 +44,11 @@
 		hasEmergency = emergenciesString === 'True';
 	}
 
-	GenerationParametersStore.set({seed, airborneWaypoints, hasEmergency});
+	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 
 	initiateRouteV2();
 
-	// Testing
-	// setInterval(initiateRouteV2, 10000);
-
-	// // Don't keep in actual route gen code/simulator, just do a single check
-	// setInterval(checkSystemHealth, 10000);
-
-	let openAIPHealth: string = "Unknown";
+	let openAIPHealth: string = 'Unknown';
 
 	OpenAIPHealthStore.subscribe((health) => {
 		openAIPHealth = health;
@@ -58,9 +58,8 @@
 	WaypointsStore.subscribe((route) => {
 		waypoints = route;
 	});
-
 </script>
 
 <div>OpenAIP Status: {openAIPHealth}</div>
 <div>Route Test: {waypoints}</div>
-<Map enabled={true} widthSmScreen={"w-full"} heightSmScreen={"800px"} initialZoomLevel={9}/>
+<Map enabled={true} widthSmScreen={'w-full'} heightSmScreen={'800px'} initialZoomLevel={9} />

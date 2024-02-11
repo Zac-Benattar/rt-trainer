@@ -2,7 +2,6 @@ import axios from 'axios';
 import type Seed from './Seed';
 import { WaypointType, Waypoint } from './Waypoint';
 import type RouteElement from './RouteElement';
-import MATZ from './MATZ';
 import ATZ from './ATZ';
 import { haversineDistance } from './utils';
 
@@ -14,16 +13,15 @@ export default class RouteGenerator {
 	): Promise<RouteElement[]> {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
-		const airports = airportsResponse.data.filter(x => x.type == 0 || x.type == 2 || x.type == 9);
+		const airports = airportsResponse.data.filter((x) => x.type == 0 || x.type == 2 || x.type == 9);
 		const numberOfAirports = airports.length;
 		let startAirport: any;
 		let destinationAirport: any;
 		let chosenMATZ: ATZ;
+		let onRouteAirspace: ATZ[] = [];
 
 		let validRoute = false;
 		let iterations = 0;
-
-		console.log('seed:', seed.scenarioSeed);
 
 		while (!validRoute && iterations < 20) {
 			iterations++;
@@ -49,11 +47,11 @@ export default class RouteGenerator {
 			const nearbyATZs: ATZ[] = [];
 			for (let i = 0; i < nearbyATZsResponse.data.length; i++) {
 				const atz = nearbyATZsResponse.data[i];
-				nearbyATZs.push(new ATZ(atz.name, atz.geometry.coordinates[0],atz.type, atz.height));
+				nearbyATZs.push(new ATZ(atz.name, atz.geometry.coordinates[0], atz.type, atz.height));
 			}
 
 			// Get all MATZ from nearby ATZs
-			const nearbyMATZs: ATZ[] = nearbyATZs.filter(x => x.type == 14);
+			const nearbyMATZs: ATZ[] = nearbyATZs.filter((x) => x.type == 14);
 			if (nearbyMATZs == undefined || nearbyMATZs == null || nearbyMATZs.length == 0) {
 				validRoute = false;
 				continue;
@@ -63,7 +61,7 @@ export default class RouteGenerator {
 			const numberOfMATZs = nearbyMATZs.length;
 			chosenMATZ = nearbyMATZs[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfMATZs];
 
-			// Choose a destination airport within 50km of the chosen MATZ
+			// Get airports within 50km of the chosen MATZ
 			const possibleDestinations: any[] = [];
 			for (let i = 0; i < airports.length; i++) {
 				const airport = airports[i];
@@ -72,7 +70,7 @@ export default class RouteGenerator {
 					airport.geometry.coordinates[0],
 					chosenMATZ.getCoords()[0][1],
 					chosenMATZ.getCoords()[0][0]
-				)
+				);
 				// console.log('matz coords', chosenMATZ.getCoords()[0]);
 				// console.log('destination airport coords', airport.geometry.coordinates);
 				// console.log('distance: ', distance);
@@ -88,7 +86,32 @@ export default class RouteGenerator {
 
 			// Choose a destination airport
 			destinationAirport =
-				possibleDestinations[(seed.scenarioSeed * 7867 * (iterations + 1)) % possibleDestinations.length];
+				possibleDestinations[
+					(seed.scenarioSeed * 7867 * (iterations + 1)) % possibleDestinations.length
+				];
+
+			// Get all airspace along the route
+			const route = [
+				startAirport.geometry.coordinates,
+				chosenMATZ.getClosestPointOnEdge(startAirport.geometry.coordinates),
+				chosenMATZ.getClosestPointOnEdge(destinationAirport.geometry.coordinates),
+				destinationAirport.geometry.coordinates
+			];
+			onRouteAirspace = [];
+			for (let i = 0; i < nearbyATZs.length; i++) {
+				const atz = nearbyATZs[i];
+				if (
+					atz.isIncludedInRoute(route) &&
+					atz != chosenMATZ &&
+					onRouteAirspace.indexOf(atz) == -1
+				) {
+					if (atz.type == 14) {
+						validRoute = false;
+						break;
+					}
+					onRouteAirspace.push(atz);
+				}
+			}
 		}
 
 		if (iterations >= 20 || chosenMATZ == undefined || startAirport == undefined) {
@@ -102,12 +125,17 @@ export default class RouteGenerator {
 			0
 		);
 
-		const matz = new MATZ(chosenMATZ.getName(), chosenMATZ.getCoords());
-
 		const enterMATZWaypoint: Waypoint = new Waypoint(
 			WaypointType.NewAirspace,
-			matz.getClosestPointOnEdge(startWaypoint.getWaypointCoords()),
-			chosenMATZ.getName(),
+			chosenMATZ.getClosestPointOnEdge(startWaypoint.getWaypointCoords()),
+			chosenMATZ.getName() + ' Entry',
+			0
+		);
+
+		const exitMATZWaypoint: Waypoint = new Waypoint(
+			WaypointType.NewAirspace,
+			chosenMATZ.getClosestPointOnEdge(destinationAirport.geometry.coordinates),
+			chosenMATZ.getName() + ' Exit',
 			0
 		);
 
@@ -118,6 +146,13 @@ export default class RouteGenerator {
 			0
 		);
 
-		return [startWaypoint, enterMATZWaypoint, matz, endWaypoint];
+		return [
+			startWaypoint,
+			enterMATZWaypoint,
+			exitMATZWaypoint,
+			endWaypoint,
+			chosenMATZ,
+			...onRouteAirspace
+		];
 	}
 }

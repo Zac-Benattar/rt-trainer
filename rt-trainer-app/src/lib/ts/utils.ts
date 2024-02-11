@@ -1,3 +1,5 @@
+import type Seed from "./Seed";
+
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
 	let hash = 0;
@@ -433,4 +435,97 @@ export function getRandomSqwuakCode(seed: Seed): number {
 		code += ((seed.scenarioSeed * 49823748933 * i) % 8) * (10 ^ i);
 	}
 	return code;
+}
+
+type Point = [number, number];
+
+export function pointInPolygon(point: Point, polygon: Point[]): boolean {
+    const x = point[0];
+    const y = point[1];
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i][0];
+        const yi = polygon[i][1];
+        const xj = polygon[j][0];
+        const yj = polygon[j][1];
+
+        const intersect =
+            ((yi > y) !== (yj > y)) &&
+            (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+
+        if (intersect) {
+            inside = !inside;
+        }
+    }
+
+    return inside;
+}
+
+export function anyPointsWithinPolygon(point: Point[], polygon: Point[]): boolean {
+	for (const p of point) {
+		if (pointInPolygon(p, polygon)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export function lineIntersectsPolygon(point1: Point, point2: Point, polygon: Point[]): boolean {
+    // Check if any of the line's end points are inside the polygon
+    if (pointInPolygon(point1, polygon) || pointInPolygon(point2, polygon)) {
+        return true;
+    }
+
+    // Check for intersection by iterating through each edge of the polygon
+    for (let i = 0; i < polygon.length; i++) {
+        const j = (i + 1) % polygon.length;
+        const edgeStart = polygon[i];
+        const edgeEnd = polygon[j];
+
+        // Check if the line segment defined by point1 and point2 intersects the current edge
+        if (doSegmentsIntersect(point1, point2, edgeStart, edgeEnd)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+export function doSegmentsIntersect(a: Point, b: Point, c: Point, d: Point): boolean {
+    const ccw = (p1: Point, p2: Point, p3: Point) => {
+        return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0]);
+    };
+
+    return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
+}
+
+export function polygonIntersectsOrWithinPolygon(innerPolygon: Point[], outerPolygon: Point[]): boolean {
+    // Check if any vertex of the inner polygon is inside the outer polygon
+    for (const vertex of innerPolygon) {
+        if (pointInPolygon(vertex, outerPolygon)) {
+            return true;
+        }
+    }
+
+    // Check for intersection by iterating through each edge of both polygons
+    for (let i = 0; i < outerPolygon.length; i++) {
+        const j = (i + 1) % outerPolygon.length;
+        const edgeStartOuter = outerPolygon[i];
+        const edgeEndOuter = outerPolygon[j];
+
+        for (let k = 0; k < innerPolygon.length; k++) {
+            const l = (k + 1) % innerPolygon.length;
+            const edgeStartInner = innerPolygon[k];
+            const edgeEndInner = innerPolygon[l];
+
+            // Check if the edges of both polygons intersect
+            if (doSegmentsIntersect(edgeStartOuter, edgeEndOuter, edgeStartInner, edgeEndInner)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

@@ -106,7 +106,7 @@ export const ATZsStore = derived(RouteElementStore, ($RouteElementStore) => {
 	// so we can use the methods
 	const ATZs: ATZ[] = [];
 	ATZData.forEach((atz) => {
-		ATZs.push(new ATZ(atz.name, atz.coords, atz.height));
+		ATZs.push(new ATZ(atz.name, atz.coords, atz.type, atz.height));
 	});
 
 	console.log(ATZs);

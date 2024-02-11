@@ -1,4 +1,5 @@
 import RouteElement from './RouteElement';
+import { lineIntersectsPolygon, anyPointsWithinPolygon } from './utils';
 
 export default class ATZ extends RouteElement {
 	public height: string;
@@ -15,6 +16,9 @@ export default class ATZ extends RouteElement {
 	}   
 
     public getName(): string {
+        if (this.type === 14) {
+            return this.name + ' MATZ';
+        }
         return this.name + ' ATZ';
     }
 
@@ -28,6 +32,14 @@ export default class ATZ extends RouteElement {
 
     public getClosestPointOnEdge(coords: [number, number]): [number, number] {
         return findClosestPoint(coords, this.coords);
+    }
+
+    public lineIntersectsATZ(start: [number, number], end: [number, number]): boolean {
+        return lineIntersectsPolygon(start, end, this.coords);
+    }
+
+    public isIncludedInRoute(route: [number, number][]): boolean {
+        return anyPointsWithinPolygon(this.coords, route);
     }
 }
 
