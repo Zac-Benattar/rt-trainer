@@ -1,6 +1,6 @@
 import type { OperatingHours } from './Airport';
 import RouteElement from './RouteElement';
-import { lineIntersectsPolygon, anyPointsWithinPolygon } from './utils';
+import { lineIntersectsPolygon, anyPointsInPolygon, pointInPolygon } from './utils';
 
 export type ATZData = {
 	_id: string;
@@ -95,12 +95,16 @@ export default class ATZ extends RouteElement {
 		return findClosestPoint(coords, this.coords);
 	}
 
+    public pointInsideATZ(point: [number, number]): boolean {
+        return pointInPolygon(point, this.coords);
+    }
+
 	public lineIntersectsATZ(start: [number, number], end: [number, number]): boolean {
 		return lineIntersectsPolygon(start, end, this.coords);
 	}
 
 	public isIncludedInRoute(route: [number, number][]): boolean {
-		return anyPointsWithinPolygon(this.coords, route);
+		return anyPointsInPolygon(this.coords, route);
 	}
 }
 
