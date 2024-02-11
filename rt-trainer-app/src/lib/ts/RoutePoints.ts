@@ -1,7 +1,7 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
 import { EmergencyType, type Pose, type Waypoint } from './RouteTypes';
-import { ControlledAerodrome, type UncontrolledAerodrome } from './Aerodrome';
+import { ControlledAerodrome, type UncontrolledAerodrome } from './Airport';
 import {
 	ChangeZoneStage,
 	CircuitAndLandingStage,

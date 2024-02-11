@@ -56,7 +56,6 @@
 
 	ATZsStore.subscribe((atzs) => {
 		atzs.forEach((atz) => {
-			console.log('type: ', atz.type);
 			if (atz.type != 14) {
 				drawATZ(atz);
 			} else {

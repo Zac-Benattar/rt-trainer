@@ -1,8 +1,5 @@
-import visualReferencePoints from '../data/visual_reference_points.json';
 import {
-	haversineDistance,
-	stringDecimalLatitudeToNumber,
-	stringDecimalLongitudeToNumber
+	haversineDistance
 } from './utils';
 import type Seed from './Seed';
 import RoutePoint, {
@@ -10,7 +7,7 @@ import RoutePoint, {
 	getEndAerodromeRoutePoints,
 	getStartAerodromeRoutePoints
 } from './RoutePoints';
-import { ControlledAerodrome, UncontrolledAerodrome } from './Aerodrome';
+import { ControlledAerodrome, UncontrolledAerodrome } from './Airport';
 import {
 	CurrentRoutePointIndexStore,
 	EndPointIndexStore,
@@ -32,25 +29,6 @@ const MAX_AIRBORNE_ROUTE_POINTS = 15;
 const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 const NAUTICAL_MILE = 1852;
 const FLIGHT_TIME_MULTIPLIER = 1.3;
-
-const VRPs = getWaypointsFromVRPsJSON();
-
-export function getWaypointsFromVRPsJSON(): Waypoint[] {
-	const airborneWaypoints: Waypoint[] = [];
-
-	visualReferencePoints.forEach((waypoint) => {
-		const lat = stringDecimalLatitudeToNumber(waypoint.Latitude);
-		const long = stringDecimalLongitudeToNumber(waypoint.Longitude);
-		if (lat == null || long == null) {
-			console.log('Failed to load VRP: ' + waypoint['VRP name']);
-			return;
-		}
-
-		airborneWaypoints.push(new Waypoint(WaypointType.Fix, waypoint['VRP name'], lat, long, -1));
-	});
-
-	return airborneWaypoints;
-}
 
 /* Route generated for a scenario. */
 export default class Route {
@@ -93,8 +71,7 @@ export default class Route {
 			waypoints.push(
 				new Waypoint(
 					WaypointType.Aerodrome,
-					takeOffRunwayPosition.lat,
-					takeOffRunwayPosition.long,
+					takeOffRunwayPosition,
 					'startAerodrome',
 					takeoffTime
 				)

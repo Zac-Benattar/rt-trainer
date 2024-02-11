@@ -4,18 +4,18 @@ import { WaypointType, Waypoint } from './Waypoint';
 import type RouteElement from './RouteElement';
 import ATZ from './ATZ';
 import { haversineDistance } from './utils';
+import type { AirportData } from './Airport';
 
 // TODO
 export default class RouteGenerator {
 	public static async getRouteWaypoints(
-		seed: Seed,
-		airborneWaypoints: number
+		seed: Seed
 	): Promise<RouteElement[]> {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
-		const airports = airportsResponse.data.filter((x) => x.type == 0 || x.type == 2 || x.type == 9);
+		const airports: AirportData[] = airportsResponse.data.filter((x) => x.type == 0 || x.type == 2 || x.type == 9);
 		const numberOfAirports = airports.length;
-		let startAirport: any;
+		let startAirport: Airport;
 		let destinationAirport: any;
 		let chosenMATZ: ATZ;
 		let onRouteAirspace: ATZ[] = [];
