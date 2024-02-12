@@ -50,11 +50,11 @@ export default class RouteGenerator {
 		 */
 		const airportsData = await getAllUKAirports();
 
-        /**
-         * Add airports to database
-         */
+		/**
+		 * Add airports to database
+		 */
 		for (let i = 0; i < airportsData.length; i++) {
-            await db.insert(airport).values({json: airportsData[i]});
+			await db.insert(airport).values({ json: airportsData[i] });
 		}
 
 		return true;
@@ -65,12 +65,18 @@ export default class RouteGenerator {
 			this.updateDatabaseWithNewOpenAIPData();
 		}
 
-		// Hard coded localhost port because axios doesnt resolve port properly on server
+		// Fetch all airports from the database
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
-		const airports: AirportData[] = airportsResponse.data.filter(
-			(x: AirportData) => x.type == 0 || x.type == 2 || x.type == 3 || x.type == 9
-		);
-		const numberOfAirports = airports.length;
+
+		// Add valid (correct type) airports to list of valid airports for takeoff/landing
+		const validAirports: AirportData[] = [];
+		for (let i = 0; i < airportsResponse.data.length; i++) {
+			const airport = airportsResponse.data[i].json;
+			if (airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9)
+				validAirports.push(airport);
+		}
+
+		const numberOfAirports = validAirports.length;
 		let startAirport: AirportData;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport: AirportData;
@@ -86,7 +92,8 @@ export default class RouteGenerator {
 			validRoute = true;
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
-			startAirport = airports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfAirports];
+			startAirport =
+				validAirports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfAirports];
 			if (startAirport.type == 3) {
 				startAirportIsControlled = true;
 			}
@@ -124,8 +131,8 @@ export default class RouteGenerator {
 			// Get airports within 50km of the chosen MATZ
 			const possibleDestinations: AirportData[] = [];
 			const matzCenter = getPolygonCenter(chosenMATZ.getCoords());
-			for (let i = 0; i < airports.length; i++) {
-				const airport = airports[i];
+			for (let i = 0; i < validAirports.length; i++) {
+				const airport = validAirports[i];
 				if (chosenMATZ.pointInsideATZ(airport.geometry.coordinates)) {
 					continue;
 				}

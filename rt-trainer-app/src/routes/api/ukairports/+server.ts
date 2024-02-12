@@ -1,4 +1,4 @@
-import { getAllUKAirports } from '$lib/ts/OpenAIPHandler.js';
+import { db } from '$lib/db/db';
 import { json } from '@sveltejs/kit';
 
 export async function GET({ setHeaders }) {
@@ -6,5 +6,7 @@ export async function GET({ setHeaders }) {
 		'cache-control': 'public, max-age=31536000'
 	});
 
-	return json(await getAllUKAirports());
+	const airports = await db.query.airport.findMany();
+
+	return json(airports);
 }
