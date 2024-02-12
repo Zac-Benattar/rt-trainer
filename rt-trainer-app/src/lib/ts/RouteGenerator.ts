@@ -6,9 +6,9 @@ import ATZ from './ATZ';
 import { getPolygonCenter, haversineDistance } from './utils';
 import type { AirportData } from './Airport';
 import { db } from '$lib/db/db';
-import { checkSystemHealth, getAllUKAirports } from './OpenAIPHandler';
+import { checkSystemHealth, getAllUKAirportReportingPoints, getAllUKAirports, getAllUKAirspace } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
-import { airport } from '$lib/db/schema';
+import { airport, airportReportingPoint, airspace } from '$lib/db/schema';
 
 // TODO
 export default class RouteGenerator {
@@ -57,10 +57,48 @@ export default class RouteGenerator {
 			await db.insert(airport).values({ json: airportsData[i] });
 		}
 
+		/**
+		 * Clear airspace table
+		 */
+		await db.delete(airspace);
+
+		/**
+		 * Fetch all UK airspace
+		 */
+		const airspaceData = await getAllUKAirspace();
+
+		/**
+		 * Add airspace to database
+		 */
+		for (let i = 0; i < airspaceData.length; i++) {
+			await db.insert(airspace).values({ json: airspaceData[i] });
+		}
+
+		/**
+		 * Clear airspace table
+		 */
+		await db.delete(airspace);
+
+		/**
+		 * Fetch all UK airspace
+		 */
+		const airportReportingPointsData = await getAllUKAirportReportingPoints();
+
+		/**
+		 * Add airspace to database
+		 */
+		for (let i = 0; i < airportReportingPointsData.length; i++) {
+			await db.insert(airportReportingPoint).values({ json: airportReportingPointsData[i] });
+		}
+
+		console.log("Sucessfully updated OpenAIP data");
+
 		return true;
 	}
 
 	public static async getRouteWaypoints(seed: Seed): Promise<RouteElement[]> {
+		// Ensure database data is up to date - can be moved to somewhere it is run less for even faster responses
+		// Currently going to slow down all route gen methods a decent amount, please move
 		if (!this.checkOpenAIPDataUpToDate()) {
 			this.updateDatabaseWithNewOpenAIPData();
 		}
@@ -76,7 +114,7 @@ export default class RouteGenerator {
 				validAirports.push(airport);
 		}
 
-		const numberOfAirports = validAirports.length;
+		const numberOfValidAirports = validAirports.length;
 		let startAirport: AirportData;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport: AirportData;
@@ -93,7 +131,7 @@ export default class RouteGenerator {
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
 			startAirport =
-				validAirports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfAirports];
+				validAirports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfValidAirports];
 			if (startAirport.type == 3) {
 				startAirportIsControlled = true;
 			}

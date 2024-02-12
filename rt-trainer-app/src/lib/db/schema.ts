@@ -12,7 +12,7 @@ export const airspace = mysqlTable('airspace', {
     created_at: timestamp('created_at').defaultNow(),
 });
 
-export const reportingPoint = mysqlTable('reportingPoint', {
+export const airportReportingPoint = mysqlTable('reportingPoint', {
     id: int('id').autoincrement().primaryKey(),
     json: json('json').notNull(),
     created_at: timestamp('created_at').defaultNow(),

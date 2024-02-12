@@ -68,10 +68,10 @@
 		try {
 			const response = await axios.get(`/api/openaiphealth`);
 
-			if (response.data === undefined) {
+			if (response === undefined) {
 				NullRouteStore.set(true);
 			} else {
-				OpenAIPHealthStore.set(response.data.system);
+				OpenAIPHealthStore.set(response.data);
 			}
 		} catch (error: unknown) {
 			if (error.message === 'Network Error') {
@@ -83,9 +83,6 @@
 	}
 </script>
 
-<form method="post" action="/data?/updateOpenAIPDatabase">
-	<button formaction="/data?/updateOpenAIPDatabase">Update Data</button>
-</form>
 <div>OpenAIP Status: {openAIPHealth}</div>
 <div>Route Length: {waypoints.length}</div>
 <Map enabled={true} widthSmScreen={'w-full'} heightSmScreen={'800px'} initialZoomLevel={9} />
