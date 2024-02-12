@@ -3,20 +3,20 @@ import type Seed from './Seed';
 import { WaypointType, Waypoint } from './Waypoint';
 import type RouteElement from './RouteElement';
 import ATZ from './ATZ';
-import { haversineDistance } from './utils';
+import { getPolygonCenter, haversineDistance } from './utils';
 import type { AirportData } from './Airport';
 
 // TODO
 export default class RouteGenerator {
-	public static async getRouteWaypoints(
-		seed: Seed
-	): Promise<RouteElement[]> {
+	public static async getRouteWaypoints(seed: Seed): Promise<RouteElement[]> {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
-		const airports: AirportData[] = airportsResponse.data.filter((x) => x.type == 0 || x.type == 2 || x.type == 9);
+		const airports: AirportData[] = airportsResponse.data.filter(
+			(x: AirportData) => x.type == 0 || x.type == 2 || x.type == 9
+		);
 		const numberOfAirports = airports.length;
-		let startAirport: Airport;
-		let destinationAirport: any;
+		let startAirport: AirportData;
+		let destinationAirport: AirportData;
 		let chosenMATZ: ATZ;
 		let onRouteAirspace: ATZ[] = [];
 
@@ -62,19 +62,20 @@ export default class RouteGenerator {
 			chosenMATZ = nearbyMATZs[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfMATZs];
 
 			// Get airports within 50km of the chosen MATZ
-			const possibleDestinations: any[] = [];
+			const possibleDestinations: AirportData[] = [];
+			const matzCenter = getPolygonCenter(chosenMATZ.getCoords());
 			for (let i = 0; i < airports.length; i++) {
 				const airport = airports[i];
+				if (chosenMATZ.pointInsideATZ(airport.geometry.coordinates)) {
+					continue;
+				}
 				const distance = haversineDistance(
 					airport.geometry.coordinates[1],
 					airport.geometry.coordinates[0],
-					chosenMATZ.getCoords()[0][1],
-					chosenMATZ.getCoords()[0][0]
+					matzCenter[1],
+					matzCenter[0]
 				);
-				// console.log('matz coords', chosenMATZ.getCoords()[0]);
-				// console.log('destination airport coords', airport.geometry.coordinates);
-				// console.log('distance: ', distance);
-				if (distance < 80000) {
+				if (distance < 50000) {
 					possibleDestinations.push(airport);
 				}
 			}

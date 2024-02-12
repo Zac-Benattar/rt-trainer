@@ -462,8 +462,8 @@ export function pointInPolygon(point: Point, polygon: Point[]): boolean {
     return inside;
 }
 
-export function anyPointsWithinPolygon(point: Point[], polygon: Point[]): boolean {
-	for (const p of point) {
+export function anyPointsInPolygon(points: Point[], polygon: Point[]): boolean {
+	for (const p of points) {
 		if (pointInPolygon(p, polygon)) {
 			return true;
 		}
@@ -529,3 +529,18 @@ export function polygonIntersectsOrWithinPolygon(innerPolygon: Point[], outerPol
 
     return false;
 }
+
+export function getPolygonCenter(polygon: Point[]): Point {
+	if (polygon.length === 0) {
+	  throw new Error("Empty polygon");
+	}
+  
+	// Calculate the average of x-coordinates
+	const centerX = polygon.reduce((sum, point) => sum + point[0], 0) / polygon.length;
+  
+	// Calculate the average of y-coordinates
+	const centerY = polygon.reduce((sum, point) => sum + point[1], 0) / polygon.length;
+  
+	return [centerX, centerY];
+  }
+  
