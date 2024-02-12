@@ -1,13 +1,13 @@
-import { OpenAIPHealthStore } from '$lib/stores';
 import axios from 'axios';
 import { OPENAIPKEY } from '$env/static/private';
 
-export async function checkSystemHealth() {
+export async function checkSystemHealth(): Promise<unknown> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/system/health`);
-		OpenAIPHealthStore.set(response.data.system);
+		return response.data;
 	} catch (error: unknown) {
 		console.error('Error: ', error);
+		return 'error'
 	}
 }
 
@@ -20,7 +20,7 @@ export async function getAllUKAirports(): Promise<unknown> {
 			},
 			params: {
 				country: 'GB',
-                sortBy: 'geometry.coordinates[0]'
+				sortBy: 'geometry.coordinates[0]'
 			}
 		});
 

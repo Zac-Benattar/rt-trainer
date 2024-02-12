@@ -4,6 +4,7 @@
 	import {
 		ClearSimulationStores,
 		GenerationParametersStore,
+		NullRouteStore,
 		OpenAIPHealthStore,
 		WaypointsStore
 	} from '$lib/stores';
@@ -11,8 +12,11 @@
 	import Seed from '$lib/ts/Seed';
 	import type { Waypoint } from '$lib/ts/Waypoint';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
+	import axios from 'axios';
 
 	ClearSimulationStores();
+
+	checkOpenAIPHealth();
 
 	// Get the seed
 	let seedString = $page.params.seed;
@@ -58,8 +62,29 @@
 	WaypointsStore.subscribe((route) => {
 		waypoints = route;
 	});
+
+	// For testing
+	async function checkOpenAIPHealth(): Promise<void> {
+		try {
+			const response = await axios.get(
+				`/api/openaiphealth`
+			);
+
+			if (response.data === undefined) {
+				NullRouteStore.set(true);
+			} else {
+				OpenAIPHealthStore.set(response.data.system);
+			}
+		} catch (error: unknown) {
+			if (error.message === 'Network Error') {
+				NullRouteStore.set(true);
+			} else {
+				console.error('Error: ', error);
+			}
+		}
+	}
 </script>
 
 <div>OpenAIP Status: {openAIPHealth}</div>
-<div>Route Test: {waypoints}</div>
+<div>Route Length: {waypoints.length}</div>
 <Map enabled={true} widthSmScreen={'w-full'} heightSmScreen={'800px'} initialZoomLevel={9} />

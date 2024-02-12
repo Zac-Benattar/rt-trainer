@@ -12,10 +12,11 @@ export default class RouteGenerator {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
 		const airports: AirportData[] = airportsResponse.data.filter(
-			(x: AirportData) => x.type == 0 || x.type == 2 || x.type == 9
+			(x: AirportData) => x.type == 0 || x.type == 2 || x.type == 3 || x.type == 9
 		);
 		const numberOfAirports = airports.length;
 		let startAirport: AirportData;
+		let startAirportIsControlled: boolean = false;
 		let destinationAirport: AirportData;
 		let chosenMATZ: ATZ;
 		let onRouteAirspace: ATZ[] = [];
@@ -30,6 +31,9 @@ export default class RouteGenerator {
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
 			startAirport = airports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfAirports];
+			if (startAirport.type == 3) {
+				startAirportIsControlled = true;
+			}
 
 			// Get all MATZ within 20km of the start airport
 			const nearbyATZsResponse = await axios.get(
@@ -86,10 +90,28 @@ export default class RouteGenerator {
 			}
 
 			// Choose a destination airport
-			destinationAirport =
-				possibleDestinations[
-					(seed.scenarioSeed * 7867 * (iterations + 1)) % possibleDestinations.length
-				];
+			let validDestinationAirport: boolean = false;
+			let destIterations: number = -1;
+			while (!validDestinationAirport && destIterations < 200) {
+				destIterations++;
+				destinationAirport =
+					possibleDestinations[
+						(seed.scenarioSeed * (destIterations + 1)) % possibleDestinations.length
+					];
+
+				if (startAirportIsControlled && destinationAirport.type != 3) {
+					validDestinationAirport = true;
+				} else if (
+					!startAirportIsControlled &&
+					(destinationAirport.type == 3 || destinationAirport.type == 9)
+				) {
+					validDestinationAirport = true;
+				}
+			}
+			if (destIterations >= 200) {
+				validRoute = false;
+				continue;
+			}
 
 			// Get all airspace along the route
 			const route = [
