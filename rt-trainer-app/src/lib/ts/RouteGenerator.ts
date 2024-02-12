@@ -5,19 +5,66 @@ import type RouteElement from './RouteElement';
 import ATZ from './ATZ';
 import { getPolygonCenter, haversineDistance } from './utils';
 import type { AirportData } from './Airport';
+import { db } from '$lib/db/db';
+import { checkSystemHealth, getAllUKAirports } from './OpenAIPHandler';
+import { fail } from '@sveltejs/kit';
+import { airport } from '$lib/db/schema';
 
 // TODO
 export default class RouteGenerator {
-	public static checkIfDataUpToDate(): boolean {
-		// TODO
+	public static async checkOpenAIPDataUpToDate(): Promise<boolean> {
+		// Get from the database the age of the first entry to airports
+		const airport = await db.query.airport.findFirst();
+
+		const airportCreatedDate = airport?.created_at?.getTime();
+		const currentDate = Date.now();
+
+		if (airportCreatedDate == undefined) return true;
+
+		if (currentDate - airportCreatedDate > 86400000) {
+			return false;
+		}
+
 		return true;
 	}
 
-	public static updateDatabaseWithNewOpenAIPData(): void {
+	public static async updateDatabaseWithNewOpenAIPData() {
+		console.log('Updating database with fresh data');
 
+		/**
+		 * Check OpenAIP system health
+		 */
+		const health = await checkSystemHealth();
+
+		if (health != 'OK') {
+			return fail(400, { message: 'OpenAIP system health not OK' });
+		}
+
+		/**
+		 * Clear airports table
+		 */
+		await db.delete(airport);
+
+		/**
+		 * Fetch all UK airports
+		 */
+		const airportsData = await getAllUKAirports();
+
+        /**
+         * Add airports to database
+         */
+		for (let i = 0; i < airportsData.length; i++) {
+            await db.insert(airport).values({json: airportsData[i]});
+		}
+
+		return true;
 	}
 
 	public static async getRouteWaypoints(seed: Seed): Promise<RouteElement[]> {
+		if (!this.checkOpenAIPDataUpToDate()) {
+			this.updateDatabaseWithNewOpenAIPData();
+		}
+
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
 		const airports: AirportData[] = airportsResponse.data.filter(
