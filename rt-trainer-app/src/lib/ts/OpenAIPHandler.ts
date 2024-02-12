@@ -1,17 +1,18 @@
 import axios from 'axios';
 import { OPENAIPKEY } from '$env/static/private';
+import type { AirportData } from './Airport';
 
-export async function checkSystemHealth(): Promise<unknown> {
+export async function checkSystemHealth(): Promise<string> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/system/health`);
-		return response.data;
+		return response.data.system;
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 		return 'error'
 	}
 }
 
-export async function getAllUKAirports(): Promise<unknown> {
+export async function getAllUKAirports(): Promise<AirportData[]> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
 			headers: {
@@ -26,10 +27,11 @@ export async function getAllUKAirports(): Promise<unknown> {
 
 		console.log('Fetched all airports from OpenAIP');
 
-		return response.data.items;
+		return response.data.items as AirportData[];
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 	}
+	return [];
 }
 
 export async function getAirspacesNearCoords(

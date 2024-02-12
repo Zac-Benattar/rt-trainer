@@ -66,9 +66,7 @@
 	// For testing
 	async function checkOpenAIPHealth(): Promise<void> {
 		try {
-			const response = await axios.get(
-				`/api/openaiphealth`
-			);
+			const response = await axios.get(`/api/openaiphealth`);
 
 			if (response.data === undefined) {
 				NullRouteStore.set(true);
@@ -85,6 +83,9 @@
 	}
 </script>
 
+<form method="post" action="/data?/updateOpenAIPDatabase">
+	<button formaction="/data?/updateOpenAIPDatabase">Update Data</button>
+</form>
 <div>OpenAIP Status: {openAIPHealth}</div>
 <div>Route Length: {waypoints.length}</div>
 <Map enabled={true} widthSmScreen={'w-full'} heightSmScreen={'800px'} initialZoomLevel={9} />

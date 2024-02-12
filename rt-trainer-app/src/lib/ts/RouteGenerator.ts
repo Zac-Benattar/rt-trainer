@@ -8,6 +8,15 @@ import type { AirportData } from './Airport';
 
 // TODO
 export default class RouteGenerator {
+	public static checkIfDataUpToDate(): boolean {
+		// TODO
+		return true;
+	}
+
+	public static updateDatabaseWithNewOpenAIPData(): void {
+
+	}
+
 	public static async getRouteWaypoints(seed: Seed): Promise<RouteElement[]> {
 		// Hard coded localhost port because axios doesnt resolve port properly on server
 		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
