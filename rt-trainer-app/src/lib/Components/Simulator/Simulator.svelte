@@ -4,7 +4,6 @@
 	import Map from './Map.svelte';
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
-	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
