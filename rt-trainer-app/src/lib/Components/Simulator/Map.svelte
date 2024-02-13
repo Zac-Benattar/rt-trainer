@@ -73,8 +73,8 @@
 				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 			}
 			mapWaypoints.push({
-				lat: waypoints[i].getWaypointCoords()[0][1],
-				long: waypoints[i].getWaypointCoords()[0][0],
+				lat: waypoints[i].getWaypointCoords()[1],
+				long: waypoints[i].getWaypointCoords()[0],
 				name: name
 			});
 		}

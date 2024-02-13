@@ -26,7 +26,7 @@ export const frequency = mysqlTable('frequency', {
 
 export const airport = mysqlTable('airport', {
 	id: int('id').autoincrement().primaryKey(),
-	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
+	openaip_id: varchar('openaip_id', { length: 100 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
     icao_code: varchar('icao_code', { length: 4 }).default('none'),
     iata_code: varchar('iata_code', { length: 3 }).default('no'),

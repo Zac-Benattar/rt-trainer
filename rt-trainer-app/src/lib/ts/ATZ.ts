@@ -5,10 +5,12 @@ import { lineIntersectsPolygon, anyPointsInPolygon, pointInPolygon } from './uti
 export default class ATZ extends RouteElement {
 	public height: string;
 	public type: number;
+	public centre: [number, number];
 
-	constructor(name: string, coords: [number, number][], type: number, height?: string) {
-		super(name, coords);
+	constructor(name: string, geometry: [number, number][], centre: [number, number], type: number, height?: string) {
+		super(name, geometry);
 		this.type = type;
+		this.centre = centre;
 		if (height) {
 			this.height = height;
 		} else {
@@ -28,23 +30,23 @@ export default class ATZ extends RouteElement {
 	}
 
 	public getCoords(): [number, number][] {
-		return this.coords;
+		return this.geometry;
 	}
 
 	public getClosestPointOnEdge(coords: [number, number]): [number, number] {
-		return findClosestPoint(coords, this.coords);
+		return findClosestPoint(coords, this.geometry[0]);
 	}
 
     public pointInsideATZ(point: [number, number]): boolean {
-        return pointInPolygon(point, this.coords);
+        return pointInPolygon(point, this.geometry[0]);
     }
 
 	public lineIntersectsATZ(start: [number, number], end: [number, number]): boolean {
-		return lineIntersectsPolygon(start, end, this.coords);
+		return lineIntersectsPolygon(start, end, this.geometry[0]);
 	}
 
 	public isIncludedInRoute(route: [number, number][]): boolean {
-		return anyPointsInPolygon(this.coords, route);
+		return anyPointsInPolygon(this.geometry[0], route);
 	}
 }
 

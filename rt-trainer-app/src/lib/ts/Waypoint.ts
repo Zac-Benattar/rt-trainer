@@ -23,11 +23,11 @@ export class Waypoint extends RouteElement {
 	}
 
 	public getCoords(): [number, number][] {
-		return this.coords;
+		return this.geometry;
 	}
 
     public getWaypointCoords(): [number, number] {
-        return this.coords[0];
+        return this.geometry[0];
     }
 }
 

@@ -1,10 +1,10 @@
 export default abstract class RouteElement {
 	protected name: string;
-	protected coords: [number, number][];
+	protected geometry: [number, number][];
 
-	constructor(name: string, coords: [number, number][]) {
+	constructor(name: string, geometry: [number, number][]) {
 		this.name = name;
-		this.coords = coords;
+		this.geometry = geometry;
 	}
 
 	public abstract getName(): string;
