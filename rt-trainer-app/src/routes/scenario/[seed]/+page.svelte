@@ -6,11 +6,8 @@
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		GenerationParametersStore,
-
 		StartPointIndexStore,
-
 		TutorialStore
-
 	} from '$lib/stores';
 	import Seed from '$lib/ts/Seed';
 	import { generateRandomURLValidString } from '$lib/ts/utils';

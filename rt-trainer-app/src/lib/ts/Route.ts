@@ -2,12 +2,6 @@ import {
 	haversineDistance
 } from './utils';
 import type Seed from './Seed';
-import RoutePoint, {
-	getAirborneRoutePoints,
-	getEndAerodromeRoutePoints,
-	getStartAerodromeRoutePoints
-} from './RoutePoints';
-import { ControlledAerodrome, UncontrolledAerodrome } from './Airport';
 import {
 	CurrentRoutePointIndexStore,
 	EndPointIndexStore,
@@ -15,8 +9,7 @@ import {
 	NullRouteStore,
 	RouteElementStore,
 	RouteStore,
-	StartPointIndexStore,
-	WaypointsStore
+	StartPointIndexStore
 } from '$lib/stores';
 import axios from 'axios';
 import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
@@ -37,16 +30,6 @@ export default class Route {
 
 	public getCurrentPoint(): RoutePoint {
 		return this.points[this.currentPointIndex];
-	}
-
-	/* Get a start aerodrome. */
-	public static getStartAerodrome(seed: Seed): ControlledAerodrome | UncontrolledAerodrome {
-		if (seed.scenarioSeed % 2 === 0) {
-			const controlledAerodromes = ControlledAerodrome.getAerodromesFromJSON(seed);
-			return controlledAerodromes[seed.scenarioSeed % controlledAerodromes.length];
-		}
-		const uncontrolledAerodromes = UncontrolledAerodrome.getAerodromesFromJSON(seed);
-		return uncontrolledAerodromes[seed.scenarioSeed % uncontrolledAerodromes.length];
 	}
 
 	public static getAirborneWaypoints(seed: Seed, numAirborneWaypoints: number): Waypoint[] {
@@ -134,69 +117,6 @@ export default class Route {
 
 		// No suitable route found after max iterations - unrecoverable error
 		throw new Error('No suitable route found in ' + maxIterations + ' iterations');
-	}
-
-	/* Get end aerodrome for a given seed.
-		Depending on whether the seed is odd or even a the large or small aerodrome list is loaded.
-		Then an potential airodrome is picked based on the seed modulo number of possible 
-		end aerodromes. If this is not within the maximum distance from the start aerodrome, 
-		the next aerodrome is checked, and so on until all are checked. 
-		Error thrown if none found as the whole route generation is based on start and 
-		end aerodromes so this is not recoverable. */
-	public static getEndAerodrome(seed: Seed): ControlledAerodrome | UncontrolledAerodrome {
-		const startAerodrome: ControlledAerodrome | UncontrolledAerodrome =
-			Route.getStartAerodrome(seed);
-		const takeOffRunwayPosition = startAerodrome.getTakeoffRunway().getCenterPoint();
-		const possibleEndAerodromes: (ControlledAerodrome | UncontrolledAerodrome)[] = [];
-
-		if (seed.scenarioSeed % 2 === 0) {
-			possibleEndAerodromes.push(...UncontrolledAerodrome.getAerodromesFromJSON(seed));
-		} else {
-			possibleEndAerodromes.push(...ControlledAerodrome.getAerodromesFromJSON(seed));
-		}
-
-		let endAerodrome: ControlledAerodrome | UncontrolledAerodrome =
-			possibleEndAerodromes[seed.scenarioSeed % possibleEndAerodromes.length];
-		const landingRunwayPosition = endAerodrome.getLandingRunway().getCenterPoint();
-		let endAerodromeFound: boolean = false;
-
-		// If the end aerodrome is too far from the start aerodrome, find a new one
-		for (let i = 0; i < possibleEndAerodromes.length; i++) {
-			const distance = haversineDistance(
-				takeOffRunwayPosition.lat,
-				takeOffRunwayPosition.long,
-				landingRunwayPosition.lat,
-				landingRunwayPosition.long
-			);
-
-			if (distance <= MAX_AERODROME_DISTANCE) {
-				endAerodromeFound = true;
-				break;
-			}
-
-			endAerodrome = possibleEndAerodromes[(seed.scenarioSeed + i) % possibleEndAerodromes.length];
-		}
-
-		if (!endAerodromeFound) {
-			throw new Error(
-				'Could not find an end aerodrome within the maximum distance: ' +
-					MAX_AERODROME_DISTANCE +
-					'm'
-			);
-		}
-
-		return endAerodrome;
-	}
-
-	/* Generate the route based off of the seed. */
-	public generateRoute(seed: Seed, numAirborneWaypoints: number, emergency: boolean): RoutePoint[] {
-		this.points.push(...getStartAerodromeRoutePoints(seed));
-
-		this.points.push(...getAirborneRoutePoints(seed, numAirborneWaypoints, emergency));
-
-		this.points.push(...getEndAerodromeRoutePoints(seed, numAirborneWaypoints));
-
-		return this.points;
 	}
 
 	public getPoints(): RoutePoint[] {
@@ -288,7 +208,6 @@ export async function initiateScenario(): Promise<void> {
 		// Update stores with the route
 		ResetCurrentRoutePointIndex();
 		RouteStore.set(serverRouteResponse);
-		WaypointsStore.set(serverWaypointsResponse);
 
 		// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 		// So we need to set it to the last point in the route if it has not been set

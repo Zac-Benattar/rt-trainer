@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
 	import SvgDisplay from '$lib/Components/SVGDisplay.svelte';
 	import { ClearSimulationStores } from '$lib/stores';
-
 </script>
 
 <div class="container mx-auto max-w-screen-lg p-5">
@@ -39,12 +38,20 @@
 			</ul>
 			<div class="flex flex-wrap gap-4">
 				<button
-					on:click={() => { ClearSimulationStores(); goto("/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True")}}
+					on:click={() => {
+						ClearSimulationStores();
+						goto(
+							'/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True'
+						);
+					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
 					data-sveltekit-preload-data="hover">Demo route</button
 				>
 				<button
-					on:click={() => { ClearSimulationStores(); goto("/generate")}}
+					on:click={() => {
+						ClearSimulationStores();
+						goto('/generate');
+					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
 					data-sveltekit-preload-data="hover">Setup a scenario</button
 				>

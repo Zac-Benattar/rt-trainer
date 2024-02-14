@@ -1,4 +1,3 @@
-
 import RouteElement from './RouteElement';
 import { lineIntersectsPolygon, anyPointsInPolygon, pointInPolygon } from './utils';
 
@@ -7,7 +6,13 @@ export default class ATZ extends RouteElement {
 	public type: number;
 	public centre: [number, number];
 
-	constructor(name: string, geometry: [number, number][], centre: [number, number], type: number, height?: string) {
+	constructor(
+		name: string,
+		geometry: [number, number][],
+		centre: [number, number],
+		type: number,
+		height?: string
+	) {
 		super(name, geometry);
 		this.type = type;
 		this.centre = centre;
@@ -37,16 +42,22 @@ export default class ATZ extends RouteElement {
 		return findClosestPoint(coords, this.geometry[0]);
 	}
 
-    public pointInsideATZ(point: [number, number]): boolean {
-        return pointInPolygon(point, this.geometry[0]);
-    }
+	public pointInsideATZ(point: [number, number]): boolean {
+		return pointInPolygon(point, this.geometry[0]);
+	}
 
 	public lineIntersectsATZ(start: [number, number], end: [number, number]): boolean {
 		return lineIntersectsPolygon(start, end, this.geometry[0]);
 	}
 
 	public isIncludedInRoute(route: [number, number][]): boolean {
-		return anyPointsInPolygon(this.geometry[0], route);
+		// For each line in the route, check if it intersects the ATZ
+		for (let i = 0; i < route.length - 1; i++) {
+			if (this.lineIntersectsATZ(route[i], route[i + 1])) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
