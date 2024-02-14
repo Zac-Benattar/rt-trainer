@@ -101,6 +101,29 @@ export const aeronauticalData = mysqlTable('aeronauticalData', {
  * User tables schema
  */
 
+// Maybe requires a point type - e.g. cross between MATZ and ATZ, etc.
+export const routePoints = mysqlTable('routePoint', {
+	id: int('id').autoincrement().primaryKey(),
+	name: varchar('name', { length: 100 }).notNull(),
+	description: varchar('description', { length: 2000 }),
+	latitude: varchar('latitude', { length: 100 }).notNull(),
+	longitude: varchar('longitude', { length: 100 }).notNull(),
+	route: int('route').references(() => routes.id, { onDelete: 'cascade' }),
+	created_at: timestamp('created_at').defaultNow(),
+	updated_at: timestamp('updated_at').defaultNow(),
+	created_by: int('created_by').references(() => users.id, { onDelete: 'cascade' }),
+	updated_by: int('updated_by').references(() => users.id, { onDelete: 'cascade' })
+});
+
+export const routes = mysqlTable('route', {
+	id: int('id').autoincrement().primaryKey(),
+	name: varchar('name', { length: 100 }).notNull(),
+	created_at: timestamp('created_at').defaultNow(),
+	updated_at: timestamp('updated_at').defaultNow(),
+	created_by: int('created_by').references(() => users.id, { onDelete: 'cascade' }),
+	updated_by: int('updated_by').references(() => users.id, { onDelete: 'cascade' })
+});
+
 export const users = mysqlTable('user', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
 	name: varchar('name', { length: 255 }),
