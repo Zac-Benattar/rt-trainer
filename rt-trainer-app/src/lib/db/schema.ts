@@ -16,7 +16,7 @@ import type { AdapterAccount } from '@auth/core/adapters';
  * Flight planning data schema
  */
 
-export const frequency = mysqlTable('frequency', {
+export const frequencies = mysqlTable('frequency', {
 	id: int('id').autoincrement().primaryKey(),
 	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
 	value: varchar('value', { length: 10 }).notNull(),
@@ -26,7 +26,7 @@ export const frequency = mysqlTable('frequency', {
 	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
 });
 
-export const airport = mysqlTable('airport', {
+export const airports = mysqlTable('airport', {
 	id: int('id').autoincrement().primaryKey(),
 	openaip_id: varchar('openaip_id', { length: 100 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
@@ -71,7 +71,7 @@ export const airspace = mysqlTable('airspace', {
 	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
 });
 
-export const airportReportingPoint = mysqlTable('reportingPoint', {
+export const airportReportingPoints = mysqlTable('reportingPoint', {
 	id: int('id').autoincrement().primaryKey(),
 	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
 	name: varchar('name', { length: 100 }).notNull(),
@@ -85,7 +85,7 @@ export const airportReportingPoint = mysqlTable('reportingPoint', {
 	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
 });
 
-export const aeronauticalDataType = mysqlTable('aeronauticalDataType', {
+export const aeronauticalDataTypes = mysqlTable('aeronauticalDataType', {
 	id: int('id').autoincrement().primaryKey(),
 	name: varchar('name', { length: 100 }).notNull(),
 	created_at: timestamp('created_at').defaultNow()
@@ -93,7 +93,7 @@ export const aeronauticalDataType = mysqlTable('aeronauticalDataType', {
 
 export const aeronauticalData = mysqlTable('aeronauticalData', {
 	id: int('id').autoincrement().primaryKey(),
-	type: int('type').references(() => aeronauticalDataType.id),
+	type: int('type').references(() => aeronauticalDataTypes.id),
 	created_at: timestamp('created_at').defaultNow()
 });
 
@@ -101,9 +101,10 @@ export const aeronauticalData = mysqlTable('aeronauticalData', {
  * User tables schema
  */
 
-// Maybe requires a point type - e.g. cross between MATZ and ATZ, etc.
 export const routePoints = mysqlTable('routePoint', {
 	id: int('id').autoincrement().primaryKey(),
+	index: smallint('index').notNull(), // Holds the position of the point in the route
+	type: tinyint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
 	latitude: varchar('latitude', { length: 100 }).notNull(),

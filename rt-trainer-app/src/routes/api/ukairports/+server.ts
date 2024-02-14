@@ -1,5 +1,5 @@
 import { db } from '$lib/db/db';
-import { airport } from '$lib/db/schema';
+import { airports } from '$lib/db/schema';
 import { json } from '@sveltejs/kit';
 import { Column, sql } from 'drizzle-orm';
 
@@ -49,27 +49,27 @@ export async function GET({ setHeaders, url }) {
 	if (radiusMode) {
 		airportRows = await db
 			.select({
-				id: airport.id,
-				openaip_id: airport.openaip_id,
-				name: airport.name,
-				icao_code: airport.icao_code,
-				iata_code: airport.iata_code,
-				alt_identifier: airport.alt_identifier,
-				type: airport.type,
-				country: airport.country,
-				geometry: geometryToGeoJSON(airport.geometry),
-				elevation: airport.elevation,
-				traffic_type: airport.traffic_type,
-				ppr: airport.ppr,
-				private: airport.private,
-				skydive_activity: airport.skydive_activity,
-				winch_only: airport.winch_only,
-				runways: airport.runways,
-				frequencies: airport.frequencies,
-				created_at: airport.created_at,
-				aeronautical_data_object: airport.aeronautical_data_object
+				id: airports.id,
+				openaip_id: airports.openaip_id,
+				name: airports.name,
+				icao_code: airports.icao_code,
+				iata_code: airports.iata_code,
+				alt_identifier: airports.alt_identifier,
+				type: airports.type,
+				country: airports.country,
+				geometry: geometryToGeoJSON(airports.geometry),
+				elevation: airports.elevation,
+				traffic_type: airports.traffic_type,
+				ppr: airports.ppr,
+				private: airports.private,
+				skydive_activity: airports.skydive_activity,
+				winch_only: airports.winch_only,
+				runways: airports.runways,
+				frequencies: airports.frequencies,
+				created_at: airports.created_at,
+				aeronautical_data_object: airports.aeronautical_data_object
 			})
-			.from(airport)
+			.from(airports)
 			.where(
 				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(geometry)) < ${radiusNumber}`
 			)
@@ -77,27 +77,27 @@ export async function GET({ setHeaders, url }) {
 	} else {
 		airportRows = await db
 			.select({
-				id: airport.id,
-				openaip_id: airport.openaip_id,
-				name: airport.name,
-				icao_code: airport.icao_code,
-				iata_code: airport.iata_code,
-				alt_identifier: airport.alt_identifier,
-				type: airport.type,
-				country: airport.country,
-				geometry: geometryToGeoJSON(airport.geometry),
-				elevation: airport.elevation,
-				traffic_type: airport.traffic_type,
-				ppr: airport.ppr,
-				private: airport.private,
-				skydive_activity: airport.skydive_activity,
-				winch_only: airport.winch_only,
-				runways: airport.runways,
-				frequencies: airport.frequencies,
-				created_at: airport.created_at,
-				aeronautical_data_object: airport.aeronautical_data_object
+				id: airports.id,
+				openaip_id: airports.openaip_id,
+				name: airports.name,
+				icao_code: airports.icao_code,
+				iata_code: airports.iata_code,
+				alt_identifier: airports.alt_identifier,
+				type: airports.type,
+				country: airports.country,
+				geometry: geometryToGeoJSON(airports.geometry),
+				elevation: airports.elevation,
+				traffic_type: airports.traffic_type,
+				ppr: airports.ppr,
+				private: airports.private,
+				skydive_activity: airports.skydive_activity,
+				winch_only: airports.winch_only,
+				runways: airports.runways,
+				frequencies: airports.frequencies,
+				created_at: airports.created_at,
+				aeronautical_data_object: airports.aeronautical_data_object
 			})
-			.from(airport)
+			.from(airports)
 			.execute();
 	}
 
@@ -105,7 +105,7 @@ export async function GET({ setHeaders, url }) {
 		return sql`ST_AsGeoJSON(ST_GeomFromText(${geometry}))`;
 	}
 
-	const airports = airportRows.map((row) => {
+	const airportsAPIFormat = airportRows.map((row) => {
 		return {
 			id: row.id,
 			openaip_id: row.openaip_id,
@@ -129,5 +129,5 @@ export async function GET({ setHeaders, url }) {
 		};
 	});
 
-	return json(airports);
+	return json(airportsAPIFormat);
 }

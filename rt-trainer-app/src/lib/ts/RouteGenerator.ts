@@ -12,14 +12,14 @@ import {
 	getAllUKAirspace
 } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
-import { airport, airportReportingPoint, airspace } from '$lib/db/schema';
+import { airports, airportReportingPoints, airspace } from '$lib/db/schema';
 import type { AirportData } from './OpenAIPTypes';
 
 // TODO
 export default class RouteGenerator {
 	public static async checkOpenAIPDataUpToDate(): Promise<boolean> {
 		// Get from the database the age of the first entry to airports
-		const airport = await db.query.airport.findFirst();
+		const airport = await db.query.airports.findFirst();
 
 		const airportCreatedDate = airport?.created_at?.getTime();
 		const currentDate = Date.now();
@@ -50,7 +50,7 @@ export default class RouteGenerator {
 		/**
 		 * Clear airports table
 		 */
-		await db.delete(airport);
+		await db.delete(airports);
 
 		/**
 		 * Fetch all UK airports
@@ -61,7 +61,7 @@ export default class RouteGenerator {
 		 * Add airports to database
 		 */
 		for (let i = 0; i < airportsData.length; i++) {
-			await db.insert(airport).values({
+			await db.insert(airports).values({
 				openaip_id: airportsData[i]._id,
 				name: airportsData[i].name,
 				icao_code: airportsData[i].icaoCode,
@@ -126,7 +126,7 @@ export default class RouteGenerator {
 		/**
 		 * Clear airport reporting point table
 		 */
-		await db.delete(airportReportingPoint);
+		await db.delete(airportReportingPoints);
 
 		/**
 		 * Fetch all UK airspace
@@ -137,7 +137,7 @@ export default class RouteGenerator {
 		 * Add airspace to database
 		 */
 		for (let i = 0; i < airportReportingPointsData.length; i++) {
-			await db.insert(airportReportingPoint).values({
+			await db.insert(airportReportingPoints).values({
 				openaip_id: airportReportingPointsData[i]._id,
 				name: airportReportingPointsData[i].name,
 				compulsary: airportReportingPointsData[i].compulsory,
