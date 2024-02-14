@@ -20,14 +20,14 @@
 	};
 </script>
 
-<div class="flex flex-col p-5 place-content-center">
-	<div class="flex flex-row p-5 place-content-center">
+<div class="flex flex-col place-content-center">
+	<div class="flex flex-row p-3 place-content-center sm:place-content-start">
 		{#if $page.data.session}
-			<div class="flex flex-col w-9/12">
-				<div>
+			<div class="flex flex-col px-2 xs:w-9/12 gap-3">
+				<span class="h3 p-1">
 					Welcome, {$page.data.session.user?.name}
-				</div>
-				<div class="card p-6 flex justify-between">
+				</span>
+				<div class="card p-5 flex justify-between">
 					<div class="space-y-6">
 						<div class="font-bold h3">{radioCallData.title}</div>
 						<div>
@@ -35,9 +35,9 @@
 							<div class="text-sm opacity-70">Total Calls</div>
 						</div>
 
-						<div class="flex flex-col justify-between gap-4 card p-5">
-							<div class="h4">Last 30 Days</div>
-							<div class="flex flex-row p-1 gap-3">
+						<div class="flex flex-col justify-between sm:gap-4 card py-2 sm:p-3">
+							<div class="h4 place-self-center sm:place-self-start">Last 30 Days</div>
+							<div class="flex flex-row p-1 gap-2 place-self-center sm:place-self-start">
 								{#each radioCallData.last30DaysStats as item}
 									<div class="p-2">
 										<b>{item.value}</b>

@@ -1,10 +1,8 @@
 <script lang="ts">
 </script>
 
-<div class="p-5 w-10/12">
-	<div class="p-1">
-		<h1 class="text-xl">About</h1>
-	</div>
+<div class="p-5 sm:ml-10 sm:w-9/12">
+	<div class="p-1 h2">About</div>
 	<div class="px-3">
 		<p class="p-2">
 			<b>RT Trainer</b> - A web based training platform for future pilots to learn
@@ -36,9 +34,7 @@
 		</p>
 	</div>
 
-	<div class="p-1">
-		<h1 class="text-xl">Contact</h1>
-	</div>
+	<div class="p-1 h3">Contact</div>
 	<div class="px-3">
 		<p class="p-2">
 			<b>Developer</b> - Zac Benattar
@@ -47,27 +43,38 @@
 		</p>
 	</div>
 
-	<div class="p-1">
-		<h2 class="text-xl">Attributions</h2>
-	</div>
-	<div class="px-3">
-		<h3>Aeronatical Data</h3>
-		<p class="p-2">
-			The datacomes from <a href="https://www.openaip.net/">OpenAIP</a>, a free and up to date
-			aeronautical information database for flight simulation and aviation. The data is licensed
-			under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
-		</p>
-		<h3>Map</h3>
-		<p class="p-2">
-			The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
-			<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
-			<a href="https://www.mapbox.com/">Mapbox</a> tiles.
-		</p>
-		<h3>Images</h3>
-		<p class="p-2">
-			<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
-				>Plane icon created by Freepik - Flaticon</a
-			>
-		</p>
-	</div>
+	<div class="p-1 h3">Attributions</div>
+	<ul class="px-5 list-disc">
+		<li class="py-2">
+			<div class="h4">Aeronatical Data</div>
+			<p>
+				The datacomes from <a href="https://www.openaip.net/">OpenAIP</a>, a free and up to date
+				aeronautical information database for flight simulation and aviation. The data is licensed
+				under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
+			</p>
+		</li>
+		<li class="py-2">
+			<div class="h4">Map</div>
+			<p>
+				The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
+				<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
+				<a href="https://www.mapbox.com/">Mapbox</a> tiles.
+			</p>
+		</li>
+		<li class="py-2">
+			<div class="h4">Images</div>
+			<p>
+				<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
+					>Plane icon created by Freepik - Flaticon</a
+				>
+			</p>
+		</li>
+	</ul>
 </div>
+
+<style lang="postcss">
+	a {
+		color: #0000FF;
+		text-decoration: underline;
+	}
+</style>
