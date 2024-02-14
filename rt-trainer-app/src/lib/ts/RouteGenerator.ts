@@ -13,7 +13,6 @@ import {
 } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
 import { airports, airportReportingPoints, airspaces } from '$lib/db/schema';
-import type { AirportData } from './OpenAIPTypes';
 
 // TODO
 export default class RouteGenerator {
@@ -21,7 +20,7 @@ export default class RouteGenerator {
 		// Get from the database the age of the first entry to airports
 		const airport = await db.query.airports.findFirst();
 
-		const airportCreatedDate = airport?.created_at?.getTime();
+		const airportCreatedDate = airport?.createdAt?.getTime();
 		const currentDate = Date.now();
 
 		if (airportCreatedDate == undefined) return true;
@@ -62,20 +61,20 @@ export default class RouteGenerator {
 		 */
 		for (let i = 0; i < airportsData.length; i++) {
 			await db.insert(airports).values({
-				openaip_id: airportsData[i]._id,
+				openaipId: airportsData[i]._id,
 				name: airportsData[i].name,
-				icao_code: airportsData[i].icaoCode,
-				iata_code: airportsData[i].iataCode,
-				alt_identifier: airportsData[i].altIdentifier,
+				icaoCode: airportsData[i].icaoCode,
+				iataCode: airportsData[i].iataCode,
+				altIdentifier: airportsData[i].altIdentifier,
 				type: airportsData[i].type,
 				country: airportsData[i].country,
 				geometry: `POINT(${airportsData[i].geometry.coordinates.join(' ')})`,
 				elevation: airportsData[i].elevation.value,
-				traffic_type: airportsData[i].trafficType.join(', '),
+				trafficType: airportsData[i].trafficType.join(', '),
 				ppr: airportsData[i].ppr,
 				private: airportsData[i].private,
-				skydive_activity: airportsData[i].skydiveActivity,
-				winch_only: airportsData[i].winchOnly,
+				skydiveActivity: airportsData[i].skydiveActivity,
+				winchOnly: airportsData[i].winchOnly,
 				runways: airportsData[i].runways,
 				frequencies: airportsData[i].frequencies
 			});
@@ -104,21 +103,21 @@ export default class RouteGenerator {
 			const centerPointWKT = `POINT(${polygonCenter[1]} ${polygonCenter[0]})`;
 
 			await db.insert(airspaces).values({
-				openaip_id: airspaceData[i]._id,
+				openaipId: airspaceData[i]._id,
 				name: airspaceData[i].name,
 				type: airspaceData[i].type,
-				icao_class: airspaceData[i].icaoClass,
+				icaoClass: airspaceData[i].icaoClass,
 				activity: airspaceData[i].activity,
-				on_demand: airspaceData[i].onDemand,
-				on_request: airspaceData[i].onRequest,
+				onDemand: airspaceData[i].onDemand,
+				onRequest: airspaceData[i].onRequest,
 				byNotam: airspaceData[i].byNotam,
-				special_agreement: airspaceData[i].specialAgreement,
-				request_compliance: airspaceData[i].requestCompliance,
+				specialAgreement: airspaceData[i].specialAgreement,
+				requestCompliance: airspaceData[i].requestCompliance,
 				geometry: geometryWKT,
 				centre: centerPointWKT,
 				country: airspaceData[i].country,
-				upper_limit: airspaceData[i].upperLimit.value,
-				lower_limit: airspaceData[i].lowerLimit.value
+				upperLimit: airspaceData[i].upperLimit.value,
+				lowerLimit: airspaceData[i].lowerLimit.value
 			});
 		}
 		console.log('Sucessfully inserted Airspace data');
@@ -138,7 +137,7 @@ export default class RouteGenerator {
 		 */
 		for (let i = 0; i < airportReportingPointsData.length; i++) {
 			await db.insert(airportReportingPoints).values({
-				openaip_id: airportReportingPointsData[i]._id,
+				openaipId: airportReportingPointsData[i]._id,
 				name: airportReportingPointsData[i].name,
 				compulsary: airportReportingPointsData[i].compulsory,
 				country: airportReportingPointsData[i].country,
@@ -277,7 +276,7 @@ export default class RouteGenerator {
 					possibleDestinations[
 						(seed.scenarioSeed * (destIterations + 1)) % possibleDestinations.length
 					];
-					console.log(destinationAirport);
+				console.log(destinationAirport);
 
 				if (startAirportIsControlled && destinationAirport.type != 3) {
 					validDestinationAirport = true;
@@ -319,29 +318,37 @@ export default class RouteGenerator {
 
 		const startWaypoint: Waypoint = new Waypoint(
 			WaypointType.Aerodrome,
+			1,
 			startAirport.geometry.coordinates,
 			startAirport.name,
+			'',
 			0
 		);
 
 		const enterMATZWaypoint: Waypoint = new Waypoint(
 			WaypointType.NewAirspace,
+			2,
 			chosenMATZ.getClosestPointOnEdge(startAirport.geometry.coordinates),
 			chosenMATZ.getName() + ' Entry',
+			'',
 			0
 		);
 
 		const exitMATZWaypoint: Waypoint = new Waypoint(
 			WaypointType.NewAirspace,
+			3,
 			chosenMATZ.getClosestPointOnEdge(destinationAirport.geometry.coordinates),
 			chosenMATZ.getName() + ' Exit',
+			'',
 			0
 		);
 
 		const endWaypoint: Waypoint = new Waypoint(
 			WaypointType.Aerodrome,
+			4,
 			destinationAirport.geometry.coordinates,
 			destinationAirport.name,
+			'',
 			0
 		);
 

@@ -3,19 +3,29 @@ import RouteElement from './RouteElement';
 /* Point in space. */
 export class Waypoint extends RouteElement {
 	waypointType: WaypointType;
+	index: number;
 	name: string;
-	arrivalTime: number;
+	description: string = '';
+	arrivalTime: number = 0;
 
 	constructor(
 		waypointType: WaypointType,
+		index: number,
         coords: [number, number],
 		name: string,
-		arrivalTime: number
+		description?: string,
+		arrivalTime?: number
 	) {
 		super(name, [coords]);
 		this.waypointType = waypointType;
+		this.index = index;
 		this.name = name;
-		this.arrivalTime = arrivalTime;
+		if (description) {
+			this.description = description;
+		}
+		if (arrivalTime) {
+			this.arrivalTime = arrivalTime;
+		}
 	}
 
 	public getName(): string {

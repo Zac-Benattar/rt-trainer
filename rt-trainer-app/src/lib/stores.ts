@@ -91,7 +91,7 @@ export const WaypointsStore = derived(RouteElementStore, ($RouteElementStore) =>
 	waypointsData.forEach((waypoint) => {
 		console.log(waypoint);
 		waypoints.push(
-			new Waypoint(waypoint.waypointType, waypoint.geometry[0], waypoint.name, waypoint.arrivalTime)
+			new Waypoint(waypoint.waypointType, waypoint.index, waypoint.geometry[0], waypoint.name, waypoint.description, waypoint.arrivalTime)
 		);
 	});
 

@@ -1,6 +1,6 @@
 export default abstract class RouteElement {
-	protected name: string;
-	protected geometry: [number, number][];
+	name: string;
+	geometry: [number, number][];
 
 	constructor(name: string, geometry: [number, number][]) {
 		this.name = name;
@@ -11,7 +11,7 @@ export default abstract class RouteElement {
 
 	public abstract getCoords(): [number, number][];
 
-    public getLeafletCoords(): [number, number][] {
-        return this.getCoords().map((coord) => [coord[1], coord[0]]);
-    }
+	public getLeafletCoords(): [number, number][] {
+		return this.getCoords().map((coord) => [coord[1], coord[0]]);
+	}
 }
