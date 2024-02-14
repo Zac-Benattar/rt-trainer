@@ -2,8 +2,8 @@
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
 	import { Avatar } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
-	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
 
 	export let burgerButton: string;
 	export let enabled: boolean;
@@ -44,7 +44,6 @@
 		<svelte:fragment slot="trail">
 			<LightSwitch />
 			{#if $page.data.session != null}
-				<button on:click={() => signOut()}>Sign Out</button>
 				<a class="btn-icon variant-ghost-surface" href="/profile"
 					><Avatar
 						src="https://i.pravatar.cc/"
@@ -56,7 +55,7 @@
 					/></a
 				>
 			{:else}
-				<button on:click={() => signIn('google')}>Sign In</button>
+				<button on:click={() => goto('/login')}>Sign In</button>
 			{/if}
 		</svelte:fragment>
 	</AppBar>

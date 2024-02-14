@@ -3,6 +3,6 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	if (!session?.user) throw redirect(303, '/login');
+	if (!session?.user) throw redirect(303, '/'); // Send user back to the homepage if they're not logged in
 	return {};
 };
