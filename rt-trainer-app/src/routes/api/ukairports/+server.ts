@@ -50,24 +50,23 @@ export async function GET({ setHeaders, url }) {
 		airportRows = await db
 			.select({
 				id: airports.id,
-				openaip_id: airports.openaip_id,
+				openaip_id: airports.openaipId,
 				name: airports.name,
-				icao_code: airports.icao_code,
-				iata_code: airports.iata_code,
-				alt_identifier: airports.alt_identifier,
+				icao_code: airports.icaoCode,
+				iata_code: airports.iataCode,
+				alt_identifier: airports.altIdentifier,
 				type: airports.type,
 				country: airports.country,
 				geometry: geometryToGeoJSON(airports.geometry),
 				elevation: airports.elevation,
-				traffic_type: airports.traffic_type,
+				traffic_type: airports.trafficType,
 				ppr: airports.ppr,
 				private: airports.private,
-				skydive_activity: airports.skydive_activity,
-				winch_only: airports.winch_only,
+				skydive_activity: airports.skydiveActivity,
+				winch_only: airports.winchOnly,
 				runways: airports.runways,
 				frequencies: airports.frequencies,
-				created_at: airports.created_at,
-				aeronautical_data_object: airports.aeronautical_data_object
+				created_at: airports.createdAt,
 			})
 			.from(airports)
 			.where(
@@ -78,24 +77,23 @@ export async function GET({ setHeaders, url }) {
 		airportRows = await db
 			.select({
 				id: airports.id,
-				openaip_id: airports.openaip_id,
+				openaip_id: airports.openaipId,
 				name: airports.name,
-				icao_code: airports.icao_code,
-				iata_code: airports.iata_code,
-				alt_identifier: airports.alt_identifier,
+				icao_code: airports.icaoCode,
+				iata_code: airports.iataCode,
+				alt_identifier: airports.altIdentifier,
 				type: airports.type,
 				country: airports.country,
 				geometry: geometryToGeoJSON(airports.geometry),
 				elevation: airports.elevation,
-				traffic_type: airports.traffic_type,
+				traffic_type: airports.trafficType,
 				ppr: airports.ppr,
 				private: airports.private,
-				skydive_activity: airports.skydive_activity,
-				winch_only: airports.winch_only,
+				skydive_activity: airports.skydiveActivity,
+				winch_only: airports.winchOnly,
 				runways: airports.runways,
 				frequencies: airports.frequencies,
-				created_at: airports.created_at,
-				aeronautical_data_object: airports.aeronautical_data_object
+				created_at: airports.createdAt,
 			})
 			.from(airports)
 			.execute();

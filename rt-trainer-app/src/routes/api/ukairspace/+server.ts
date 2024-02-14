@@ -1,6 +1,6 @@
 import { db } from '$lib/db/db';
 import { json } from '@sveltejs/kit';
-import { airspace } from '$lib/db/schema';
+import { airspaces } from '$lib/db/schema';
 import { Column, sql } from 'drizzle-orm';
 
 export async function GET({ url, setHeaders }) {
@@ -49,26 +49,26 @@ export async function GET({ url, setHeaders }) {
 	if (radiusMode) {
 		airspaceRows = await db
 			.select({
-				id: airspace.id,
-				openaip_id: airspace.openaip_id,
-				name: airspace.name,
-				type: airspace.type,
-				icao_class: airspace.icao_class,
-				activity: airspace.activity,
-				on_demand: airspace.on_demand,
-				on_request: airspace.on_request,
-				by_notam: airspace.byNotam,
-				special_agreement: airspace.special_agreement,
-				request_compliance: airspace.request_compliance,
-				geometry: geometryToGeoJSON(airspace.geometry),
-				centre: geometryToGeoJSON(airspace.centre),
-				country: airspace.country,
-				upper_limit: airspace.upper_limit,
-				lower_limit: airspace.lower_limit,
-				upper_limit_max: airspace.upper_limit_max,
-				lower_limit_min: airspace.lower_limit_min
+				id: airspaces.id,
+				openaip_id: airspaces.openaipId,
+				name: airspaces.name,
+				type: airspaces.type,
+				icao_class: airspaces.icaoClass,
+				activity: airspaces.activity,
+				on_demand: airspaces.onDemand,
+				on_request: airspaces.onRequest,
+				by_notam: airspaces.byNotam,
+				special_agreement: airspaces.specialAgreement,
+				request_compliance: airspaces.requestCompliance,
+				geometry: geometryToGeoJSON(airspaces.geometry),
+				centre: geometryToGeoJSON(airspaces.centre),
+				country: airspaces.country,
+				upper_limit: airspaces.upperLimit,
+				lower_limit: airspaces.lowerLimit,
+				upper_limit_max: airspaces.upperLimitMax,
+				lower_limit_min: airspaces.lowerLimit_Min
 			})
-			.from(airspace)
+			.from(airspaces)
 			.where(
 				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(centre)) < ${radiusNumber}`
 			)
@@ -76,26 +76,26 @@ export async function GET({ url, setHeaders }) {
 	} else {
 		airspaceRows = await db
 			.select({
-				id: airspace.id,
-				openaip_id: airspace.openaip_id,
-				name: airspace.name,
-				type: airspace.type,
-				icao_class: airspace.icao_class,
-				activity: airspace.activity,
-				on_demand: airspace.on_demand,
-				on_request: airspace.on_request,
-				by_notam: airspace.byNotam,
-				special_agreement: airspace.special_agreement,
-				request_compliance: airspace.request_compliance,
-				geometry: geometryToGeoJSON(airspace.geometry),
-				centre: geometryToGeoJSON(airspace.centre),
-				country: airspace.country,
-				upper_limit: airspace.upper_limit,
-				lower_limit: airspace.lower_limit,
-				upper_limit_max: airspace.upper_limit_max,
-				lower_limit_min: airspace.lower_limit_min
+				id: airspaces.id,
+				openaip_id: airspaces.openaipId,
+				name: airspaces.name,
+				type: airspaces.type,
+				icao_class: airspaces.icaoClass,
+				activity: airspaces.activity,
+				on_demand: airspaces.onDemand,
+				on_request: airspaces.onRequest,
+				by_notam: airspaces.byNotam,
+				special_agreement: airspaces.specialAgreement,
+				request_compliance: airspaces.requestCompliance,
+				geometry: geometryToGeoJSON(airspaces.geometry),
+				centre: geometryToGeoJSON(airspaces.centre),
+				country: airspaces.country,
+				upper_limit: airspaces.upperLimit,
+				lower_limit: airspaces.lowerLimit,
+				upper_limit_max: airspaces.upperLimitMax,
+				lower_limit_min: airspaces.lowerLimit_Min
 			})
-			.from(airspace)
+			.from(airspaces)
 			.execute();
 	}
 
@@ -103,7 +103,7 @@ export async function GET({ url, setHeaders }) {
 		return sql`ST_AsGeoJSON(ST_GeomFromText(${geometry}))`;
 	}
 
-	const airspaces = airspaceRows.map((row) => {
+	const airspacesAPIFormat = airspaceRows.map((row) => {
 		return {
 			id: row.id,
 			_id: row.openaip_id,
@@ -126,5 +126,5 @@ export async function GET({ url, setHeaders }) {
 		};
 	});
 
-	return json(airspaces);
+	return json(airspacesAPIFormat);
 }
