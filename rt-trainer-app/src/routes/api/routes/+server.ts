@@ -4,7 +4,7 @@ import type { Waypoint } from '$lib/ts/Waypoint';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
-	const { name, createdBy, routePointsObject: waypointsObject } = await request.json();
+	const { name, createdBy, waypointsObject } = await request.json();
 
 	console.log(name, createdBy, waypointsObject);
 
@@ -19,16 +19,16 @@ export async function POST({ request }) {
 	if (waypointsObject && waypointsObject.length > 0) {
 		for (let i = 0; i < waypointsObject.length; i++) {
 			if (!waypointsObject[i].name) {
-				return json({ error: 'No name provided for route point ', i });
+				return json({ error: `No name provided for waypoint point ${i}` });
 			}
-			if (!waypointsObject[i].waypointType) {
-				return json({ error: 'No type provided for route point ', i });
+			if (waypointsObject[i].waypointType == null || waypointsObject[i].waypointType == undefined) {
+				return json({ error: `No type provided for waypoint point ${i}` });
 			}
 			if (!waypointsObject[i].geometry[0][1]) {
-				return json({ error: 'No latitude provided for route point ', i });
+				return json({ error: `No lat provided for waypoint point ${i}` });
 			}
 			if (!waypointsObject[i].geometry[0][0]) {
-				return json({ error: 'No longitude provided for route point ', i });
+				return json({ error: `No long provided for waypoint point ${i}` });
 			}
 		}
 	}

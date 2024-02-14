@@ -18,7 +18,7 @@
 
 	checkOpenAIPHealth();
 
-	let user = $page.data.session?.user?.id ? $page.data.session.user.id : 'Unknown';
+	let user: number = $page.data.session?.user?.id ? parseInt($page.data.session.user.id) : -1;
 
 	// Get the seed
 	let seedString = $page.params.seed;
@@ -86,7 +86,11 @@
 
 	async function pushRouteToDB(): Promise<void> {
 		try {
-			const response = await axios.post(`/api/routes`, {name:'test', createdBy: user, waypointsObject: waypoints});
+			const response = await axios.post(`/api/routes`, {
+				name: 'test',
+				createdBy: user,
+				waypointsObject: waypoints
+			});
 
 			if (response === undefined) {
 				console.log('Failed to push route to DB');
@@ -94,7 +98,7 @@
 				if (response.data.result) console.log('Route pushed to DB');
 				else {
 					console.log('Failed to push route to DB');
-					console.log(response.data.error)
+					console.log(response.data.error);
 				}
 			}
 		} catch (error: unknown) {
