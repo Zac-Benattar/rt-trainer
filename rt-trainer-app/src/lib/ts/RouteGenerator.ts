@@ -12,7 +12,7 @@ import {
 	getAllUKAirspace
 } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
-import { airports, airportReportingPoints, airspace } from '$lib/db/schema';
+import { airports, airportReportingPoints, airspaces } from '$lib/db/schema';
 import type { AirportData } from './OpenAIPTypes';
 
 // TODO
@@ -85,7 +85,7 @@ export default class RouteGenerator {
 		/**
 		 * Clear airspace table
 		 */
-		await db.delete(airspace);
+		await db.delete(airspaces);
 
 		/**
 		 * Fetch all UK airspace
@@ -103,7 +103,7 @@ export default class RouteGenerator {
 			const polygonCenter = getPolygonCenter(airspaceData[i].geometry.coordinates[0]);
 			const centerPointWKT = `POINT(${polygonCenter[1]} ${polygonCenter[0]})`;
 
-			await db.insert(airspace).values({
+			await db.insert(airspaces).values({
 				openaip_id: airspaceData[i]._id,
 				name: airspaceData[i].name,
 				type: airspaceData[i].type,

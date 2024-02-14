@@ -11,94 +11,84 @@ import {
 	mediumint
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
+import { relations } from 'drizzle-orm';
 
 /**
- * Flight planning data schema
+ * Aeronautical data schema (For data from OpenAIP)
  */
 
 export const frequencies = mysqlTable('frequency', {
 	id: int('id').autoincrement().primaryKey(),
-	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
+	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
+	frequencyFor: varchar('frequency_for', { length: 100 }).notNull(),
 	value: varchar('value', { length: 10 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
 	primary: boolean('primary').notNull(),
-	created_at: timestamp('created_at').defaultNow(),
-	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
+	createdAt: timestamp('created_at').defaultNow()
 });
+
+export const frequenciesRelations = relations(frequencies, ({ one }) => ({
+	airports: one(airports, { fields: [frequencies.frequencyFor], references: [airports.openaipId] })
+}));
 
 export const airports = mysqlTable('airport', {
 	id: int('id').autoincrement().primaryKey(),
-	openaip_id: varchar('openaip_id', { length: 100 }).notNull(),
+	openaipId: varchar('openaip_id', { length: 100 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
-	icao_code: varchar('icao_code', { length: 4 }).default('none'),
-	iata_code: varchar('iata_code', { length: 3 }).default('no'),
-	alt_identifier: varchar('alt_identifier', { length: 100 }),
+	icaoCode: varchar('icao_code', { length: 4 }).default('none'),
+	iataCode: varchar('iata_code', { length: 3 }).default('no'),
+	altIdentifier: varchar('alt_identifier', { length: 100 }),
 	type: tinyint('type').notNull(),
 	country: varchar('country', { length: 2 }).notNull(),
 	geometry: varchar('geometry', { length: 1000 }).notNull(),
 	elevation: smallint('elevation').notNull(),
-	traffic_type: varchar('traffic_type', { length: 20 }).notNull(),
+	trafficType: varchar('traffic_type', { length: 20 }).notNull(),
 	ppr: boolean('ppr'),
 	private: boolean('private'),
-	skydive_activity: boolean('skydive_activity'),
-	winch_only: boolean('winch_only'),
+	skydiveActivity: boolean('skydive_activity'),
+	winchOnly: boolean('winch_only'),
 	runways: json('runways'),
 	frequencies: json('frequencies'),
-	created_at: timestamp('created_at').defaultNow(),
-	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
+	createdAt: timestamp('created_at').defaultNow()
 });
 
-export const airspace = mysqlTable('airspace', {
+export const airspaces = mysqlTable('airspace', {
 	id: int('id').autoincrement().primaryKey(),
-	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
+	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
 	name: varchar('name', { length: 100 }).notNull(),
 	type: tinyint('type').notNull(),
-	icao_class: tinyint('icao_class').notNull(),
+	icaoClass: tinyint('icao_class').notNull(),
 	activity: tinyint('activity').notNull(),
-	on_demand: boolean('on_demand').notNull(),
-	on_request: boolean('on_request').notNull(),
+	onDemand: boolean('on_demand').notNull(),
+	onRequest: boolean('on_request').notNull(),
 	byNotam: boolean('byNotam').notNull(),
-	special_agreement: boolean('special_agreement').notNull(),
-	request_compliance: boolean('request_compliance').notNull(),
+	specialAgreement: boolean('special_agreement').notNull(),
+	requestCompliance: boolean('request_compliance').notNull(),
 	geometry: varchar('geometry', { length: 10000 }).notNull(),
 	centre: varchar('centre', { length: 100 }).notNull(),
 	country: varchar('country', { length: 2 }).notNull(),
-	upper_limit: mediumint('upper_limit').notNull(),
-	lower_limit: mediumint('lower_limit').notNull(),
-	upper_limit_max: mediumint('upper_limit_max'),
-	lower_limit_min: mediumint('lower_limit_min'),
-	created_at: timestamp('created_at').defaultNow(),
-	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
+	upperLimit: mediumint('upper_limit').notNull(),
+	lowerLimit: mediumint('lower_limit').notNull(),
+	upperLimitMax: mediumint('upper_limit_max'),
+	lowerLimit_Min: mediumint('lower_limit_min'),
+	createdAt: timestamp('created_at').defaultNow()
 });
 
 export const airportReportingPoints = mysqlTable('reportingPoint', {
 	id: int('id').autoincrement().primaryKey(),
-	openaip_id: varchar('openaip_id', { length: 100 }).notNull().unique(),
+	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
 	name: varchar('name', { length: 100 }).notNull(),
 	compulsary: boolean('compulsary').notNull(),
 	country: varchar('country', { length: 2 }).notNull(),
 	geometry: varchar('geometry', { length: 1000 }).notNull(),
 	elevation: smallint('elevation').notNull(),
 	// currently comma separated list of
-	airports: varchar('airports', { length: 1000 }).notNull(),
-	created_at: timestamp('created_at').defaultNow(),
-	aeronautical_data_object: int('aeronautical_data_object').references(() => aeronauticalData.id)
-});
-
-export const aeronauticalDataTypes = mysqlTable('aeronauticalDataType', {
-	id: int('id').autoincrement().primaryKey(),
-	name: varchar('name', { length: 100 }).notNull(),
-	created_at: timestamp('created_at').defaultNow()
-});
-
-export const aeronauticalData = mysqlTable('aeronauticalData', {
-	id: int('id').autoincrement().primaryKey(),
-	type: int('type').references(() => aeronauticalDataTypes.id),
-	created_at: timestamp('created_at').defaultNow()
+	airports: varchar('airports', { length: 100 }).notNull(),
+	createdAt: timestamp('created_at').defaultNow()
 });
 
 /**
- * User tables schema
+ * Route data schema
  */
 
 export const routePoints = mysqlTable('routePoint', {
@@ -109,21 +99,56 @@ export const routePoints = mysqlTable('routePoint', {
 	description: varchar('description', { length: 2000 }),
 	latitude: varchar('latitude', { length: 100 }).notNull(),
 	longitude: varchar('longitude', { length: 100 }).notNull(),
-	route: int('route').references(() => routes.id, { onDelete: 'cascade' }),
-	created_at: timestamp('created_at').defaultNow(),
-	updated_at: timestamp('updated_at').defaultNow(),
-	created_by: int('created_by').references(() => users.id, { onDelete: 'cascade' }),
-	updated_by: int('updated_by').references(() => users.id, { onDelete: 'cascade' })
+	routeId: int('route').notNull(),
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow()
 });
+
+export const routePointsRelations = relations(routePoints, ({ one }) => ({
+	route: one(routes, { fields: [routePoints.routeId], references: [routes.id] })
+}));
 
 export const routes = mysqlTable('route', {
 	id: int('id').autoincrement().primaryKey(),
 	name: varchar('name', { length: 100 }).notNull(),
-	created_at: timestamp('created_at').defaultNow(),
-	updated_at: timestamp('updated_at').defaultNow(),
-	created_by: int('created_by').references(() => users.id, { onDelete: 'cascade' }),
-	updated_by: int('updated_by').references(() => users.id, { onDelete: 'cascade' })
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow(),
+	createdBy: int('created_by').notNull()
 });
+
+export const routesRelations = relations(routes, ({ one, many }) => ({
+	users: one(users, { fields: [routes.createdBy], references: [users.id] }),
+	routePoints: many(routePoints),
+	airspace: many(routesToAirspaces)
+}));
+
+export const routesToAirspaces = mysqlTable(
+	'routes_to_airspaces',
+	{
+		routeId: int('route_id').notNull(),
+		airspaceId: int('airspace_id').notNull()
+	},
+	(t) => ({
+		compoundKey: primaryKey({
+			columns: [t.routeId, t.airspaceId]
+		})
+	})
+);
+
+export const routesToAirspacesRelations = relations(routesToAirspaces, ({ one }) => ({
+	routes: one(routes, {
+		fields: [routesToAirspaces.routeId],
+		references: [routes.id]
+	}),
+	airspaces: one(airspaces, {
+		fields: [routesToAirspaces.airspaceId],
+		references: [airspaces.id]
+	})
+}));
+
+/**
+ * User tables schema
+ */
 
 export const users = mysqlTable('user', {
 	id: varchar('id', { length: 255 }).notNull().primaryKey(),
@@ -133,12 +158,16 @@ export const users = mysqlTable('user', {
 	image: varchar('image', { length: 255 })
 });
 
+export const usersRelations = relations(users, ({ many }) => ({
+	routes: many(routes),
+	accounts: many(accounts),
+	sessions: many(sessions)
+}));
+
 export const accounts = mysqlTable(
 	'account',
 	{
-		userId: varchar('userId', { length: 255 })
-			.notNull()
-			.references(() => users.id, { onDelete: 'cascade' }),
+		userId: varchar('userId', { length: 255 }).notNull(),
 		type: varchar('type', { length: 255 }).$type<AdapterAccount['type']>().notNull(),
 		provider: varchar('provider', { length: 255 }).notNull(),
 		providerAccountId: varchar('providerAccountId', { length: 255 }).notNull(),
@@ -157,13 +186,19 @@ export const accounts = mysqlTable(
 	})
 );
 
+export const accountsRelations = relations(accounts, ({ one }) => ({
+	users: one(users, { fields: [accounts.userId], references: [users.id] })
+}));
+
 export const sessions = mysqlTable('session', {
 	sessionToken: varchar('sessionToken', { length: 255 }).notNull().primaryKey(),
-	userId: varchar('userId', { length: 255 })
-		.notNull()
-		.references(() => users.id, { onDelete: 'cascade' }),
+	userId: varchar('userId', { length: 255 }).notNull(),
 	expires: timestamp('expires', { mode: 'date' }).notNull()
 });
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+	users: one(users, { fields: [sessions.userId], references: [users.id] })
+}));
 
 export const verificationTokens = mysqlTable(
 	'verificationToken',

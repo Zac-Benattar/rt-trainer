@@ -83,6 +83,12 @@
 	}
 </script>
 
-<div>OpenAIP Status: {openAIPHealth}</div>
-<div>Route Length: {waypoints.length}</div>
-<Map enabled={true} widthSmScreen={'w-full'} heightSmScreen={'800px'} initialZoomLevel={9} />
+<div class="flex flex-col gap-3 p-5">
+	<div class="flex flex-col gap-1 card p-5 max-w-lg">
+		<div>OpenAIP Status: {openAIPHealth}</div>
+		<div>Route Length: {waypoints.length}</div>
+		<button class="btn-md rounded-md variant-filled w-48">Push to route table</button>
+	</div>
+
+	<Map enabled={true} widthSmScreen={'800px'} heightSmScreen={'500px'} initialZoomLevel={9} />
+</div>

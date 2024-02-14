@@ -8,6 +8,17 @@
 	export let burgerButton: string;
 	export let enabled: boolean;
 
+	let userInitials: string = '  ';
+	let userImage: string;
+	if ($page.data.session && $page.data.session.user) {
+		if ($page.data.session.user.name)
+			userInitials = $page.data.session.user.name
+				.split(' ')
+				.map((n) => n[0])
+				.join('');
+		if ($page.data.session.user.image) userImage = $page.data.session.user.image;
+	}
+
 	const dispatch = createEventDispatcher();
 
 	const burgerButtonClicked = () => {
@@ -46,8 +57,8 @@
 			{#if $page.data.session != null}
 				<a class="btn-icon variant-ghost-surface" href="/profile"
 					><Avatar
-						src="https://i.pravatar.cc/"
-						fallback="/images/headshot.png"
+						src={userImage}
+						fallback={userInitials}
 						initials="ZB"
 						border="border-4 border-surface-300-600-token hover:!border-primary-500"
 						cursor="cursor-pointer"
