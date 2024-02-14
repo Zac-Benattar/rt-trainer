@@ -10,8 +10,10 @@ export async function GET({ url, setHeaders }) {
 	let longNumber: number = 0.1278;
 	const radius: string | null = url.searchParams.get('radius');
 	let radiusNumber: number = 10000000;
+	const radiusMode: boolean = lat != null || long != null || radius != null;
+	let airspaceRows: any;
 
-	if (lat != null || long != null || radius != null) {
+	if (radiusMode) {
 		if (radius == null) {
 			return json({ error: 'No radius provided' });
 		}
@@ -44,56 +46,58 @@ export async function GET({ url, setHeaders }) {
 		'cache-control': 'public, max-age=600'
 	});
 
-	// const airspaceRows = await db
-	// .select({
-	// 	id: airspace.id,
-	// 	openaip_id: airspace.openaip_id,
-	// 	name: airspace.name,
-	// 	type: airspace.type,
-	// 	icao_class: airspace.icao_class,
-	// 	activity: airspace.activity,
-	// 	on_demand: airspace.on_demand,
-	// 	on_request: airspace.on_request,
-	// 	by_notam: airspace.byNotam,
-	// 	special_agreement: airspace.special_agreement,
-	// 	request_compliance: airspace.request_compliance,
-	// 	geometry: geometryToGeoJSON(airspace.geometry),
-	// 	centre: geometryToGeoJSON(airspace.centre),
-	// 	country: airspace.country,
-	// 	upper_limit: airspace.upper_limit,
-	// 	lower_limit: airspace.lower_limit,
-	// 	upper_limit_max: airspace.upper_limit_max,
-	// 	lower_limit_min: airspace.lower_limit_min
-	// })
-	// .from(airspace)
-	// .where(
-	// 	sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(centre)) < ${radiusNumber}`
-	// )
-	// .execute();
-
-	const airspaceRows = await db
-		.select({
-			id: airspace.id,
-			openaip_id: airspace.openaip_id,
-			name: airspace.name,
-			type: airspace.type,
-			icao_class: airspace.icao_class,
-			activity: airspace.activity,
-			on_demand: airspace.on_demand,
-			on_request: airspace.on_request,
-			by_notam: airspace.byNotam,
-			special_agreement: airspace.special_agreement,
-			request_compliance: airspace.request_compliance,
-			geometry: geometryToGeoJSON(airspace.geometry),
-			centre: geometryToGeoJSON(airspace.centre),
-			country: airspace.country,
-			upper_limit: airspace.upper_limit,
-			lower_limit: airspace.lower_limit,
-			upper_limit_max: airspace.upper_limit_max,
-			lower_limit_min: airspace.lower_limit_min
-		})
-		.from(airspace)
-		.execute();
+	if (radiusMode) {
+		airspaceRows = await db
+			.select({
+				id: airspace.id,
+				openaip_id: airspace.openaip_id,
+				name: airspace.name,
+				type: airspace.type,
+				icao_class: airspace.icao_class,
+				activity: airspace.activity,
+				on_demand: airspace.on_demand,
+				on_request: airspace.on_request,
+				by_notam: airspace.byNotam,
+				special_agreement: airspace.special_agreement,
+				request_compliance: airspace.request_compliance,
+				geometry: geometryToGeoJSON(airspace.geometry),
+				centre: geometryToGeoJSON(airspace.centre),
+				country: airspace.country,
+				upper_limit: airspace.upper_limit,
+				lower_limit: airspace.lower_limit,
+				upper_limit_max: airspace.upper_limit_max,
+				lower_limit_min: airspace.lower_limit_min
+			})
+			.from(airspace)
+			.where(
+				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(centre)) < ${radiusNumber}`
+			)
+			.execute();
+	} else {
+		airspaceRows = await db
+			.select({
+				id: airspace.id,
+				openaip_id: airspace.openaip_id,
+				name: airspace.name,
+				type: airspace.type,
+				icao_class: airspace.icao_class,
+				activity: airspace.activity,
+				on_demand: airspace.on_demand,
+				on_request: airspace.on_request,
+				by_notam: airspace.byNotam,
+				special_agreement: airspace.special_agreement,
+				request_compliance: airspace.request_compliance,
+				geometry: geometryToGeoJSON(airspace.geometry),
+				centre: geometryToGeoJSON(airspace.centre),
+				country: airspace.country,
+				upper_limit: airspace.upper_limit,
+				lower_limit: airspace.lower_limit,
+				upper_limit_max: airspace.upper_limit_max,
+				lower_limit_min: airspace.lower_limit_min
+			})
+			.from(airspace)
+			.execute();
+	}
 
 	function geometryToGeoJSON(geometry: Column) {
 		return sql`ST_AsGeoJSON(ST_GeomFromText(${geometry}))`;

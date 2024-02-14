@@ -10,8 +10,10 @@ export async function GET({ setHeaders, url }) {
 	let longNumber: number = 0.1278;
 	const radius: string | null = url.searchParams.get('radius');
 	let radiusNumber: number = 10000000;
+	const radiusMode: boolean = lat != null || long != null || radius != null;
+	let airportRows: any;
 
-	if (lat != null || long != null || radius != null) {
+	if (radiusMode) {
 		if (radius == null) {
 			return json({ error: 'No radius provided' });
 		}
@@ -44,58 +46,60 @@ export async function GET({ setHeaders, url }) {
 		'cache-control': 'public, max-age=31536000'
 	});
 
-	// const airportRows = await db
-	// 	.select({
-	// 		id: airport.id,
-	// 		openaip_id: airport.openaip_id,
-	// 		name: airport.name,
-	// 		icao_code: airport.icao_code,
-	// 		iata_code: airport.iata_code,
-	// 		alt_identifier: airport.alt_identifier,
-	// 		type: airport.type,
-	// 		country: airport.country,
-	// 		geometry: geometryToGeoJSON(airport.geometry),
-	// 		elevation: airport.elevation,
-	// 		traffic_type: airport.traffic_type,
-	// 		ppr: airport.ppr,
-	// 		private: airport.private,
-	// 		skydive_activity: airport.skydive_activity,
-	// 		winch_only: airport.winch_only,
-	// 		runways: airport.runways,
-	// 		frequencies: airport.frequencies,
-	// 		created_at: airport.created_at,
-	// 		aeronautical_data_object: airport.aeronautical_data_object
-	// 	})
-	// 	.from(airport)
-	// 	.where(
-	// 		sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(geometry)) < ${radiusNumber}`
-	// 	)
-	// 	.execute();
-
-	const airportRows = await db
-		.select({
-			id: airport.id,
-			openaip_id: airport.openaip_id,
-			name: airport.name,
-			icao_code: airport.icao_code,
-			iata_code: airport.iata_code,
-			alt_identifier: airport.alt_identifier,
-			type: airport.type,
-			country: airport.country,
-			geometry: geometryToGeoJSON(airport.geometry),
-			elevation: airport.elevation,
-			traffic_type: airport.traffic_type,
-			ppr: airport.ppr,
-			private: airport.private,
-			skydive_activity: airport.skydive_activity,
-			winch_only: airport.winch_only,
-			runways: airport.runways,
-			frequencies: airport.frequencies,
-			created_at: airport.created_at,
-			aeronautical_data_object: airport.aeronautical_data_object
-		})
-		.from(airport)
-		.execute();
+	if (radiusMode) {
+		airportRows = await db
+			.select({
+				id: airport.id,
+				openaip_id: airport.openaip_id,
+				name: airport.name,
+				icao_code: airport.icao_code,
+				iata_code: airport.iata_code,
+				alt_identifier: airport.alt_identifier,
+				type: airport.type,
+				country: airport.country,
+				geometry: geometryToGeoJSON(airport.geometry),
+				elevation: airport.elevation,
+				traffic_type: airport.traffic_type,
+				ppr: airport.ppr,
+				private: airport.private,
+				skydive_activity: airport.skydive_activity,
+				winch_only: airport.winch_only,
+				runways: airport.runways,
+				frequencies: airport.frequencies,
+				created_at: airport.created_at,
+				aeronautical_data_object: airport.aeronautical_data_object
+			})
+			.from(airport)
+			.where(
+				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(geometry)) < ${radiusNumber}`
+			)
+			.execute();
+	} else {
+		airportRows = await db
+			.select({
+				id: airport.id,
+				openaip_id: airport.openaip_id,
+				name: airport.name,
+				icao_code: airport.icao_code,
+				iata_code: airport.iata_code,
+				alt_identifier: airport.alt_identifier,
+				type: airport.type,
+				country: airport.country,
+				geometry: geometryToGeoJSON(airport.geometry),
+				elevation: airport.elevation,
+				traffic_type: airport.traffic_type,
+				ppr: airport.ppr,
+				private: airport.private,
+				skydive_activity: airport.skydive_activity,
+				winch_only: airport.winch_only,
+				runways: airport.runways,
+				frequencies: airport.frequencies,
+				created_at: airport.created_at,
+				aeronautical_data_object: airport.aeronautical_data_object
+			})
+			.from(airport)
+			.execute();
+	}
 
 	function geometryToGeoJSON(geometry: Column) {
 		return sql`ST_AsGeoJSON(ST_GeomFromText(${geometry}))`;
