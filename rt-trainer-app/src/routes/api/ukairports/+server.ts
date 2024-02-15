@@ -1,7 +1,7 @@
 import { db } from '$lib/db/db';
 import { airports } from '$lib/db/schema';
 import { json } from '@sveltejs/kit';
-import { Column, inArray, sql } from 'drizzle-orm';
+import { inArray, sql } from 'drizzle-orm';
 
 export async function GET({ setHeaders, url }) {
 	const lat: string | null = url.searchParams.get('lat');
@@ -57,64 +57,20 @@ export async function GET({ setHeaders, url }) {
 	if (radiusMode) {
 		// Get airports within radius and with the correct type
 		airportRows = await db
-			.select({
-				id: airports.id,
-				openaip_id: airports.openaipId,
-				name: airports.name,
-				icao_code: airports.icaoCode,
-				iata_code: airports.iataCode,
-				alt_identifier: airports.altIdentifier,
-				type: airports.type,
-				country: airports.country,
-				geometry: geometryToGeoJSON(airports.geometry),
-				elevation: airports.elevation,
-				traffic_type: airports.trafficType,
-				ppr: airports.ppr,
-				private: airports.private,
-				skydive_activity: airports.skydiveActivity,
-				winch_only: airports.winchOnly,
-				runways: airports.runways,
-				frequencies: airports.frequencies,
-				created_at: airports.createdAt
-			})
+			.select()
 			.from(airports)
 			.where(
 				sql`${
 					airports.type
-				} IN ${typesNumbers} AND ST_Distance_Sphere(ST_GeomFromText(${sql`'POINT(${longNumber} ${latNumber})'`}), ${
-					airports.geometry
-				}) < ${radiusNumber}`
+				} IN ${typesNumbers} AND ST_Distance_Sphere(ST_GeomFromText(${sql`'POINT(${longNumber} ${latNumber})'`}), (${sql`'POINT(${airports.longitude} ${airports.latitude})'`})) < ${radiusNumber}`
 			)
 			.execute();
 	} else {
 		airportRows = await db
-			.select({
-				id: airports.id,
-				openaip_id: airports.openaipId,
-				name: airports.name,
-				icao_code: airports.icaoCode,
-				iata_code: airports.iataCode,
-				alt_identifier: airports.altIdentifier,
-				type: airports.type,
-				country: airports.country,
-				geometry: geometryToGeoJSON(airports.geometry),
-				elevation: airports.elevation,
-				traffic_type: airports.trafficType,
-				ppr: airports.ppr,
-				private: airports.private,
-				skydive_activity: airports.skydiveActivity,
-				winch_only: airports.winchOnly,
-				runways: airports.runways,
-				frequencies: airports.frequencies,
-				created_at: airports.createdAt
-			})
+			.select()
 			.from(airports)
 			.where(inArray(airports.type, typesNumbers))
 			.execute();
-	}
-
-	function geometryToGeoJSON(geometry: Column) {
-		return sql`ST_AsGeoJSON(ST_GeomFromText(${geometry}))`;
 	}
 
 	const airportsAPIFormat = airportRows.map((row) => {
@@ -127,7 +83,8 @@ export async function GET({ setHeaders, url }) {
 			altIdentifier: row.alt_identifier,
 			type: row.type,
 			country: row.country,
-			geometry: row.geometry,
+			latitude: row.latitude,
+			longitude: row.longitude,
 			elevation: row.elevation,
 			trafficType: row.traffic_type,
 			ppr: row.ppr,

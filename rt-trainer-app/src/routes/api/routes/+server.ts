@@ -1,6 +1,6 @@
 import { db } from '$lib/db/db';
-import { routes, routePoints } from '$lib/db/schema';
-import type { Waypoint } from '$lib/ts/Waypoint';
+import { routes, waypoints } from '$lib/db/schema';
+import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
@@ -35,14 +35,14 @@ export async function POST({ request }) {
 
 	const routesTable = await db.insert(routes).values({ name: name, createdBy: createdBy });
 
-	await db.insert(routePoints).values(
+	await db.insert(waypoints).values(
 		waypointsObject.map((waypoint: Waypoint) => ({
 			index: waypoint.index,
 			type: waypoint.waypointType,
 			name: waypoint.name,
 			description: waypoint.description,
-			latitude: waypoint.geometry[0][1],
-			longitude: waypoint.geometry[0][0],
+			latitude: waypoint.lat,
+			longitude: waypoint.long,
 			routeId: routesTable.insertId
 		}))
 	);

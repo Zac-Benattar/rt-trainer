@@ -20,23 +20,26 @@ import { relations } from 'drizzle-orm';
 
 export const polygonPoints = mysqlTable('polygonPoint', {
 	id: int('id').autoincrement().primaryKey(),
+	polygonId: int('polygon_id').notNull(),
 	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
 	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow()
 });
 
 export const polygonPointsRelations = relations(polygonPoints, ({ one }) => ({
-	polygon: one(polygons, { fields: [polygonPoints.id], references: [polygons.id] })
+	polygon: one(polygons, { fields: [polygonPoints.polygonId], references: [polygons.id] })
 }));
 
 export const polygons = mysqlTable('polygon', {
 	id: int('id').autoincrement().primaryKey(),
-	airspace: int('airspace').notNull(),
+	airspaceId: int('airspace_id').notNull(),
+	centreLatitude: decimal('centre_latitude', { precision: 10, scale: 8 }).notNull(),
+	centreLongitude: decimal('centre_longitude', { precision: 10, scale: 8 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow()
 });
 
 export const polygonsRelations = relations(polygons, ({ one, many }) => ({
-	airspace: one(airspaces, { fields: [polygons.airspace], references: [airspaces.id] }),
+	airspace: one(airspaces, { fields: [polygons.airspaceId], references: [airspaces.id] }),
 	points: many(polygonPoints)
 }));
 
@@ -95,8 +98,8 @@ export const airports = mysqlTable('airport', {
 	id: int('id').autoincrement().primaryKey(),
 	openaipId: varchar('openaip_id', { length: 100 }).notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
-	icaoCode: varchar('icao_code', { length: 4 }).default('none'),
-	iataCode: varchar('iata_code', { length: 3 }).default('no'),
+	icaoCode: varchar('icao_code', { length: 4 }),
+	iataCode: varchar('iata_code', { length: 3 }),
 	altIdentifier: varchar('alt_identifier', { length: 100 }),
 	type: tinyint('type').notNull(),
 	country: varchar('country', { length: 2 }).notNull(),
@@ -108,8 +111,6 @@ export const airports = mysqlTable('airport', {
 	private: boolean('private'),
 	skydiveActivity: boolean('skydive_activity'),
 	winchOnly: boolean('winch_only'),
-	runways: json('runways'),
-	frequencies: json('frequencies'),
 	createdAt: timestamp('created_at').defaultNow()
 });
 
@@ -130,7 +131,6 @@ export const airspaces = mysqlTable('airspace', {
 	byNotam: boolean('byNotam').notNull(),
 	specialAgreement: boolean('special_agreement').notNull(),
 	requestCompliance: boolean('request_compliance').notNull(),
-	centre: varchar('centre', { length: 100 }).notNull(),
 	country: varchar('country', { length: 2 }).notNull(),
 	upperLimit: mediumint('upper_limit').notNull(),
 	lowerLimit: mediumint('lower_limit').notNull(),
@@ -161,7 +161,7 @@ export const airportReportingPoints = mysqlTable('reportingPoint', {
  * Route data schema
  */
 
-export const routePoints = mysqlTable('routePoint', {
+export const waypoints = mysqlTable('waypoint', {
 	id: int('id').autoincrement().primaryKey(),
 	index: smallint('index').notNull(), // Holds the position of the point in the route
 	type: tinyint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
@@ -174,8 +174,8 @@ export const routePoints = mysqlTable('routePoint', {
 	updatedAt: timestamp('updated_at').defaultNow()
 });
 
-export const routePointsRelations = relations(routePoints, ({ one }) => ({
-	route: one(routes, { fields: [routePoints.routeId], references: [routes.id] })
+export const waypointsRelations = relations(waypoints, ({ one }) => ({
+	route: one(routes, { fields: [waypoints.routeId], references: [routes.id] })
 }));
 
 export const routes = mysqlTable('route', {
@@ -188,8 +188,8 @@ export const routes = mysqlTable('route', {
 
 export const routesRelations = relations(routes, ({ one, many }) => ({
 	users: one(users, { fields: [routes.createdBy], references: [users.id] }),
-	routePoints: many(routePoints),
-	airspace: many(routesToAirspaces)
+	waypoints: many(waypoints),
+	airspaces: many(routesToAirspaces)
 }));
 
 export const routesToAirspaces = mysqlTable(

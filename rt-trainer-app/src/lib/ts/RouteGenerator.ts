@@ -12,7 +12,15 @@ import {
 	getAllUKAirspace
 } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
-import { airports, airportReportingPoints, airspaces } from '$lib/db/schema';
+import {
+	airports,
+	airportReportingPoints,
+	airspaces,
+	polygons,
+	polygonPoints,
+	runways,
+	frequencies
+} from '$lib/db/schema';
 import { plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
 import Route from './Route';
@@ -22,6 +30,10 @@ export default class RouteGenerator {
 	public static async checkOpenAIPDataUpToDate(): Promise<boolean> {
 		// Get from the database the age of the first entry to airports
 		const airport = await db.query.airports.findFirst();
+
+		console.log('airport: ', airport);
+
+		if (airport == undefined) return false;
 
 		const airportCreatedDate = airport?.createdAt?.getTime();
 		const currentDate = Date.now();
@@ -50,9 +62,11 @@ export default class RouteGenerator {
 		}
 
 		/**
-		 * Clear airports table
+		 * Clear airports table, runways table and frequency table
 		 */
 		await db.delete(airports);
+		await db.delete(runways);
+		await db.delete(frequencies);
 
 		/**
 		 * Fetch all UK airports
@@ -63,7 +77,7 @@ export default class RouteGenerator {
 		 * Add airports to database
 		 */
 		for (let i = 0; i < airportsData.length; i++) {
-			await db.insert(airports).values({
+			const airportsTable = await db.insert(airports).values({
 				openaipId: airportsData[i]._id,
 				name: airportsData[i].name,
 				icaoCode: airportsData[i].icaoCode,
@@ -71,16 +85,49 @@ export default class RouteGenerator {
 				altIdentifier: airportsData[i].altIdentifier,
 				type: airportsData[i].type,
 				country: airportsData[i].country,
-				geometry: `POINT(${airportsData[i].geometry.coordinates.join(' ')})`,
+				latitude: airportsData[i].geometry.coordinates[0],
+				longitude: airportsData[i].geometry.coordinates[1],
 				elevation: airportsData[i].elevation.value,
 				trafficType: airportsData[i].trafficType.join(', '),
 				ppr: airportsData[i].ppr,
 				private: airportsData[i].private,
 				skydiveActivity: airportsData[i].skydiveActivity,
-				winchOnly: airportsData[i].winchOnly,
-				runways: airportsData[i].runways,
-				frequencies: airportsData[i].frequencies
+				winchOnly: airportsData[i].winchOnly
 			});
+
+			// Insert runways for the current airport
+			await db.insert(runways).values(
+				airportsData[i].runways.map((runway) => ({
+					openaipId: runway._id,
+					airportId: parseInt(airportsTable.insertId),
+					designator: runway.designator,
+					trueHeading: runway.trueHeading,
+					alignedTrueNorth: runway.alignedTrueNorth,
+					operations: runway.operations,
+					mainRunway: runway.mainRunway,
+					turnDirection: runway.turnDirection,
+					landingOnly: runway.landingOnly,
+					takeOffOnly: runway.takeOffOnly,
+					lengthValue: runway.dimension.length.value,
+					lengthUnit: runway.dimension.length.unit,
+					widthValue: runway.dimension.width.value,
+					widthUnit: runway.dimension.width.unit,
+					toraValue: runway.tora.value,
+					toraUnit: runway.tora.unit,
+					todaValue: runway.toda.value,
+					todaUnit: runway.toda.unit,
+					asdaValue: runway.asda.value,
+					asdaUnit: runway.asda.unit,
+					ldaValue: runway.lda.value,
+					ldaUnit: runway.lda.unit,
+					thresholdCoordinates: runway.threshold.coordinates,
+					elevationValue: runway.elevation.value,
+					elevationUnit: runway.elevation.unit,
+					exclusiveAircraftTypes: runway.exclusiveAircraftTypes.join(', '),
+					pilotCtrlLighting: runway.pilotCtrlLighting,
+					lightingSystem: runway.lightingSystem
+				}))
+			);
 		}
 		console.log('Sucessfully inserted Airport data');
 
@@ -98,14 +145,9 @@ export default class RouteGenerator {
 		 * Add airspace to database
 		 */
 		for (let i = 0; i < airspaceData.length; i++) {
-			// Convert geometry to WKT
-			const geometryWKT = `POLYGON((${airspaceData[i].geometry.coordinates[0]
-				.map((x) => x.join(' '))
-				.join(', ')}))`;
 			const polygonCenter = getPolygonCenter(airspaceData[i].geometry.coordinates[0]);
-			const centerPointWKT = `POINT(${polygonCenter[1]} ${polygonCenter[0]})`;
 
-			await db.insert(airspaces).values({
+			const airspacesTable = await db.insert(airspaces).values({
 				openaipId: airspaceData[i]._id,
 				name: airspaceData[i].name,
 				type: airspaceData[i].type,
@@ -116,12 +158,24 @@ export default class RouteGenerator {
 				byNotam: airspaceData[i].byNotam,
 				specialAgreement: airspaceData[i].specialAgreement,
 				requestCompliance: airspaceData[i].requestCompliance,
-				geometry: geometryWKT,
-				centre: centerPointWKT,
 				country: airspaceData[i].country,
 				upperLimit: airspaceData[i].upperLimit.value,
 				lowerLimit: airspaceData[i].lowerLimit.value
 			});
+
+			const polygonsTable = await db.insert(polygons).values({
+				airspaceId: parseInt(airspacesTable.insertId),
+				centreLatitude: polygonCenter[0],
+				centreLongitude: polygonCenter[1]
+			});
+
+			await db.insert(polygonPoints).values(
+				airspaceData[i].geometry.coordinates[0].map((point) => ({
+					polygonId: parseInt(polygonsTable.insertId),
+					latitude: point[0].toString(),
+					longitude: point[1].toString()
+				}))
+			);
 		}
 		console.log('Sucessfully inserted Airspace data');
 
@@ -144,7 +198,8 @@ export default class RouteGenerator {
 				name: airportReportingPointsData[i].name,
 				compulsary: airportReportingPointsData[i].compulsory,
 				country: airportReportingPointsData[i].country,
-				geometry: `POINT(${airportReportingPointsData[i].geometry.coordinates.join(' ')})`,
+				latitude: airportReportingPointsData[i].geometry.coordinates[0],
+				longitude: airportReportingPointsData[i].geometry.coordinates[1],
 				elevation: airportReportingPointsData[i].elevation.value,
 				airports: airportReportingPointsData[i].airports.join(', ')
 			});
@@ -162,7 +217,10 @@ export default class RouteGenerator {
 
 		// Ensure database data is up to date - can be moved to somewhere it is run less for even faster responses
 		// Currently going to slow down all route gen methods a decent amount, please move
-		if (!this.checkOpenAIPDataUpToDate()) {
+		
+		const upToDate = await this.checkOpenAIPDataUpToDate();
+		if (!upToDate) {
+			console.log('OpenAIP data is not up to date');
 			await this.updateDatabaseWithNewOpenAIPData();
 		}
 
@@ -170,6 +228,10 @@ export default class RouteGenerator {
 		const airportsResponse = await axios.get(
 			'http://localhost:5173/api/ukairports?type=0&type=2&type=3&type=9'
 		);
+
+		if (airportsResponse.data.length == 0) {
+			throw new Error('No airports found');
+		}
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
@@ -181,6 +243,10 @@ export default class RouteGenerator {
 
 		// Fetch all airspaces from the database
 		const airspacesResponse = await axios.get('http://localhost:5173/api/ukairspace');
+
+		if (airspacesResponse.data.length == 0) {
+			throw new Error('No airspaces found');
+		}
 
 		// Add airspaces to list of valid airspaces for route
 		const allAirspaces: ATZ[] = [];
@@ -406,7 +472,7 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		new Route(
+		return new Route(
 			seed,
 			[],
 			[chosenMATZ, ...onRouteAirspace],

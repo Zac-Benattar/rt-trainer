@@ -1,5 +1,5 @@
 import { db } from '$lib/db/db';
-import { routes, routePoints } from '$lib/db/schema';
+import { routes, waypoints } from '$lib/db/schema';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
@@ -15,7 +15,7 @@ export async function GET({ params }) {
 	const routePointsRows = await db.query.routes.findFirst({
 		where: eq(routes.id, idNumber),
 		with: { routePoints: true },
-		orderBy: [routePoints.index]
+		orderBy: [waypoints.index]
 	});
 
 	return json(routePointsRows);

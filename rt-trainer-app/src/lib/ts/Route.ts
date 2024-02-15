@@ -15,6 +15,7 @@ import ATZ from './AeronauticalClasses/ATZ';
 import { Type } from 'class-transformer';
 import type { Airport } from './AeronauticalClasses/Airport';
 import Seed from './Seed';
+import 'reflect-metadata';
 
 /* Route generated for a scenario. */
 export default class Route {
