@@ -9,8 +9,8 @@ import type {
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 import type RouteElement from './ts/RouteElement';
-import { Waypoint } from './ts/Waypoint';
-import ATZ from './ts/ATZ';
+import { Waypoint } from './ts/AeronauticalClasses/Waypoint';
+import ATZ from './ts/AeronauticalClasses/ATZ';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {

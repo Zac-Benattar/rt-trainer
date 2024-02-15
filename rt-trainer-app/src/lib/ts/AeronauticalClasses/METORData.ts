@@ -1,6 +1,5 @@
-import type { AirportData, RunwayData } from './OpenAIPTypes';
-import type Seed from './Seed';
-import { numberToPhoneticString, seededNormalDistribution } from './utils';
+import type Seed from '../Seed';
+import { numberToPhoneticString, seededNormalDistribution } from '../utils';
 
 /* METORlogical data. */
 export class METORData {
@@ -148,99 +147,5 @@ export class METORDataSample {
 			return '-' + numberToPhoneticString(this.dewpoint, 0);
 		}
 		return '0';
-	}
-}
-
-/* Aerodrome data. */
-export class Airport {
-	seed: Seed;
-	data: AirportData;
-	metorData: METORData = new METORData(0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-	constructor(seed: Seed, airportData: AirportData) {
-		this.seed = seed;
-		this.data = airportData;
-	}
-
-	public getName(): string {
-		return this.data.name;
-	}
-
-	public getShortName(): string {
-		return this.data.name.split(' ')[0];
-	}
-
-	public getICAO(): string {
-		return this.data.icaoCode;
-	}
-
-	public getElevation(): number {
-		return this.data.elevation.value;
-	}
-
-	public getMETORData(): METORData {
-		return this.metorData;
-	}
-
-	public getMETORSample(): METORDataSample {
-		return this.metorData.getSample(this.seed);
-	}
-
-	public getTakeoffRunway(): RunwayData {
-		let index = this.seed.scenarioSeed % this.data.runways.length;
-		while (this.data.runways[index].landingOnly) {
-			index = (index + 1) % this.data.runways.length;
-		}
-
-		return this.data.runways[index];
-	}
-
-	// Needs to be implemented for each aerodrome depending on when pilots move to next frequency from takeoff
-	public getTakeoffTransitionAltitude(): number {
-		throw new Error('Not implemented');
-	}
-
-	public getLandingRunway(): RunwayData {
-		let index = this.seed.scenarioSeed % this.data.runways.length;
-		while (this.data.runways[index].takeOffOnly) {
-			index = (index + 1) % this.data.runways.length;
-		}
-
-		return this.data.runways[index];
-	}
-
-	public getStartTime(): number {
-		// (In minutes)
-		// 1pm + (0-4hours) - 2 hours -> 11am - 3pm
-		return 780 + (this.seed.scenarioSeed % 240) - 120;
-	}
-
-	public getTakeoffTime(): number {
-		return this.getStartTime() + 10;
-	}
-}
-
-export class ControlledAerodrome extends Airport {
-	constructor(seed: Seed, data: AirportData) {
-		super(seed, data);
-	}
-
-	public isControlled(): boolean {
-		return true;
-	}
-
-	public getATISLetter(): string {
-		const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-		return alphabet.charAt(this.seed.scenarioSeed % alphabet.length);
-	}
-}
-
-export class UncontrolledAerodrome extends Airport {
-	constructor(seed: Seed, data: AirportData) {
-		super(seed, data);
-	}
-
-	public isControlled(): boolean {
-		return false;
 	}
 }

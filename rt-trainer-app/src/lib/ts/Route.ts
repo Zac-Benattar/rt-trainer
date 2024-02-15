@@ -14,7 +14,7 @@ import {
 import axios from 'axios';
 import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
-import { Waypoint, WaypointType } from './Waypoint';
+import { Waypoint, WaypointType } from './AeronauticalClasses/Waypoint';
 
 const MAX_AERODROME_DISTANCE = 150000; // 150km
 const MAX_ROUTE_DISTANCE = 200000; // 200km

@@ -1,7 +1,7 @@
 import { db } from '$lib/db/db';
 import { airports } from '$lib/db/schema';
 import { json } from '@sveltejs/kit';
-import { Column, sql } from 'drizzle-orm';
+import { Column, inArray, sql } from 'drizzle-orm';
 
 export async function GET({ setHeaders, url }) {
 	const lat: string | null = url.searchParams.get('lat');
@@ -11,6 +11,14 @@ export async function GET({ setHeaders, url }) {
 	const radius: string | null = url.searchParams.get('radius');
 	let radiusNumber: number = 10000000;
 	const radiusMode: boolean = lat != null || long != null || radius != null;
+	const types: string[] = url.searchParams.getAll('types');
+	let typesNumbers: number[] = [];
+	if (types.length > 0) {
+		typesNumbers = types.map((type) => {
+			return parseInt(type);
+		});
+	}
+
 	let airportRows: any;
 
 	if (radiusMode) {
@@ -47,6 +55,7 @@ export async function GET({ setHeaders, url }) {
 	});
 
 	if (radiusMode) {
+		// Get airports within radius and with the correct type
 		airportRows = await db
 			.select({
 				id: airports.id,
@@ -66,11 +75,15 @@ export async function GET({ setHeaders, url }) {
 				winch_only: airports.winchOnly,
 				runways: airports.runways,
 				frequencies: airports.frequencies,
-				created_at: airports.createdAt,
+				created_at: airports.createdAt
 			})
 			.from(airports)
 			.where(
-				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(geometry)) < ${radiusNumber}`
+				sql`${
+					airports.type
+				} IN ${typesNumbers} AND ST_Distance_Sphere(ST_GeomFromText(${sql`'POINT(${longNumber} ${latNumber})'`}), ${
+					airports.geometry
+				}) < ${radiusNumber}`
 			)
 			.execute();
 	} else {
@@ -93,9 +106,10 @@ export async function GET({ setHeaders, url }) {
 				winch_only: airports.winchOnly,
 				runways: airports.runways,
 				frequencies: airports.frequencies,
-				created_at: airports.createdAt,
+				created_at: airports.createdAt
 			})
 			.from(airports)
+			.where(inArray(airports.type, typesNumbers))
 			.execute();
 	}
 
@@ -106,24 +120,23 @@ export async function GET({ setHeaders, url }) {
 	const airportsAPIFormat = airportRows.map((row) => {
 		return {
 			id: row.id,
-			openaip_id: row.openaip_id,
+			openaipId: row.openaip_id,
 			name: row.name,
-			icao_code: row.icao_code,
-			iata_code: row.iata_code,
-			alt_identifier: row.alt_identifier,
+			icaoCode: row.icao_code,
+			iataCode: row.iata_code,
+			altIdentifier: row.alt_identifier,
 			type: row.type,
 			country: row.country,
 			geometry: row.geometry,
 			elevation: row.elevation,
-			traffic_type: row.traffic_type,
+			trafficType: row.traffic_type,
 			ppr: row.ppr,
 			private: row.private,
-			skydive_activity: row.skydive_activity,
-			winch_only: row.winch_only,
+			skydiveActivity: row.skydive_activity,
+			winchOnly: row.winch_only,
 			runways: row.runways,
 			frequencies: row.frequencies,
-			created_at: row.created_at,
-			aeronautical_data_object: row.aeronautical_data_object
+			createdAt: row.created_at
 		};
 	});
 

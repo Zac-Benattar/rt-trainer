@@ -10,7 +10,7 @@
 	} from '$lib/stores';
 	import { initiateRouteV2 } from '$lib/ts/Route';
 	import Seed from '$lib/ts/Seed';
-	import type { Waypoint } from '$lib/ts/Waypoint';
+	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
 	import axios from 'axios';
 

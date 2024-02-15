@@ -16,7 +16,7 @@
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
-	import type ATZ from '$lib/ts/ATZ';
+	import type ATZ from '$lib/ts/AeronauticalClasses/ATZ';
 
 	type MapWaypoint = {
 		lat: number;
@@ -236,7 +236,7 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.getLeafletCoords(), { color: 'blue' }).bindPopup(atz.getName()).addTo(map);
+			L.polygon(atz.getLeafletCoords(), { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map);
 		}
 	}
 
@@ -245,7 +245,7 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.getLeafletCoords(), { color: 'red' }).bindPopup(atz.getName()).addTo(map);
+			L.polygon(atz.getLeafletCoords(), { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map);
 		}
 	}
 

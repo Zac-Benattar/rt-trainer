@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { OPENAIPKEY } from '$env/static/private';
-import type { AirportData, AirportReportingPointData, AirspaceData } from './OpenAIPTypes';
+import type { AirportData, AirportReportingPointData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 export async function checkSystemHealth(): Promise<string> {
 	try {

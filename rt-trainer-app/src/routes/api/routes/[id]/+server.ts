@@ -20,3 +20,16 @@ export async function GET({ params }) {
 
 	return json(routePointsRows);
 }
+
+export async function DELETE({ params }) {
+	const id: string = params.id;
+
+	const idNumber: number = parseInt(id);
+	if (isNaN(idNumber)) {
+		return json({ error: 'Invalid route id' });
+	}
+
+	await db.delete(routes).where(eq(routes.id, idNumber));
+
+	return json({ result: 'Success' });
+}

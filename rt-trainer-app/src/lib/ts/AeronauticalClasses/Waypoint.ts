@@ -1,25 +1,27 @@
-import RouteElement from './RouteElement';
-
-/* Point in space. */
-export class Waypoint extends RouteElement {
+/* Point in space along a route. */
+export class Waypoint {
 	waypointType: WaypointType;
+	lat: number;
+	long: number;
 	index: number;
 	name: string;
 	description: string = '';
 	arrivalTime: number = 0;
 
 	constructor(
+		name: string,
+		lat: number,
+		long: number,
 		waypointType: WaypointType,
 		index: number,
-        coords: [number, number],
-		name: string,
 		description?: string,
 		arrivalTime?: number
 	) {
-		super(name, [coords]);
+		this.name = name;
+		this.lat = lat;
+		this.long = long;
 		this.waypointType = waypointType;
 		this.index = index;
-		this.name = name;
 		if (description) {
 			this.description = description;
 		}
@@ -32,13 +34,17 @@ export class Waypoint extends RouteElement {
 		return this.name;
 	}
 
-	public getCoords(): [number, number][] {
-		return this.geometry;
+	public getLat(): number {
+		return this.lat;
 	}
 
-    public getWaypointCoords(): [number, number] {
-        return this.geometry[0];
-    }
+	public getLong(): number {
+		return this.long;
+	}
+
+	public getCoords(): [number, number] {
+		return [this.lat, this.long];
+	}
 }
 
 export enum WaypointType {

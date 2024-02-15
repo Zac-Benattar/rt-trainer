@@ -1,8 +1,8 @@
 import axios from 'axios';
 import type Seed from './Seed';
-import { WaypointType, Waypoint } from './Waypoint';
+import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 import type RouteElement from './RouteElement';
-import ATZ from './ATZ';
+import ATZ from './AeronauticalClasses/ATZ';
 import { getPolygonCenter, haversineDistance } from './utils';
 import { db } from '$lib/db/db';
 import {
@@ -13,6 +13,8 @@ import {
 } from './OpenAIPHandler';
 import { fail } from '@sveltejs/kit';
 import { airports, airportReportingPoints, airspaces } from '$lib/db/schema';
+import { plainToClass, plainToInstance } from 'class-transformer';
+import { Airport } from './AeronauticalClasses/Airport';
 
 // TODO
 export default class RouteGenerator {
@@ -160,24 +162,23 @@ export default class RouteGenerator {
 		}
 
 		// Fetch all airports from the database
-		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports');
+		const airportsResponse = await axios.get('http://localhost:5173/api/ukairports&type=0&type=2&type=3&type=9');
 
 		// Add valid (correct type) airports to list of valid airports for takeoff/landing
-		const validAirports = [];
+		const validAirports: Airport[] = [];
 		for (let i = 0; i < airportsResponse.data.length; i++) {
-			const airport = airportsResponse.data[i];
-			if (airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9)
-				validAirports.push(airport);
+			const airport: unknown = airportsResponse.data[i];
+			validAirports.push(plainToInstance(Airport, airport));
 		}
 
 		// Fetch all airspaces from the database
 		const airspacesResponse = await axios.get('http://localhost:5173/api/ukairspace');
 
 		// Add valid (correct type) airspaces to list of valid airspaces for route
-		const validAirspaces = [];
+		const validAirspaces: ATZ[] = [];
 		for (let i = 0; i < airspacesResponse.data.length; i++) {
-			const airspace = airspacesResponse.data[i];
-			validAirspaces.push(airspace);
+			const airspace: unknown = airspacesResponse.data[i];
+			validAirspaces.push(plainToInstance(ATZ, airspace));
 		}
 
 		console.log(validAirports.length, validAirspaces.length);
@@ -329,7 +330,7 @@ export default class RouteGenerator {
 			WaypointType.NewAirspace,
 			2,
 			chosenMATZ.getClosestPointOnEdge(startAirport.geometry.coordinates),
-			chosenMATZ.getName() + ' Entry',
+			chosenMATZ.getDisplayName() + ' Entry',
 			'',
 			0
 		);
@@ -338,7 +339,7 @@ export default class RouteGenerator {
 			WaypointType.NewAirspace,
 			3,
 			chosenMATZ.getClosestPointOnEdge(destinationAirport.geometry.coordinates),
-			chosenMATZ.getName() + ' Exit',
+			chosenMATZ.getDisplayName() + ' Exit',
 			'',
 			0
 		);
