@@ -18,6 +18,7 @@
 	import { inject } from '@vercel/analytics';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
+	import 'reflect-metadata';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();

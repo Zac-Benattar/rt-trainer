@@ -8,9 +8,9 @@ import type {
 	TransponderState
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
-import type RouteElement from './ts/RouteElement';
-import { Waypoint } from './ts/AeronauticalClasses/Waypoint';
-import ATZ from './ts/AeronauticalClasses/ATZ';
+import type { Waypoint } from './ts/AeronauticalClasses/Waypoint';
+import type ATZ from './ts/AeronauticalClasses/ATZ';
+import type Route from './ts/Route';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -76,43 +76,18 @@ export const ATCMessageStore = writable<string>('');
 export const KneeboardStore = writable<string>('');
 
 // Route stores
-export const RouteStore = writable<RoutePoint[]>([]);
+export const RouteStore = writable<Route | undefined>(undefined);
 
-export const RouteElementStore = writable<RouteElement[]>([]);
-
-export const WaypointsStore = derived(RouteElementStore, ($RouteElementStore) => {
-	const waypointsData = $RouteElementStore.filter(
-		(element) => (<Waypoint>element).waypointType != undefined
-	);
-
-	// waypoints data only holds the data, we need to turn them into actual waypoint objects
-	// so we can use the methods
-	const waypoints: Waypoint[] = [];
-	waypointsData.forEach((waypoint) => {
-		console.log(waypoint);
-		waypoints.push(
-			new Waypoint(waypoint.waypointType, waypoint.index, waypoint.geometry[0], waypoint.name, waypoint.description, waypoint.arrivalTime)
-		);
-	});
-
-	console.log(waypoints);
-
-	return waypoints;
+export const RoutePointStore = derived(RouteStore, ($RouteStore) => {
+	return $RouteStore.routePoints;
 });
 
-export const ATZsStore = derived(RouteElementStore, ($RouteElementStore) => {
-	const ATZData = $RouteElementStore.filter((element) => (<ATZ>element).height != undefined);
+export const WaypointsStore = derived(RouteStore, ($RouteStore) => {
+	return $RouteStore.waypoints;
+});
 
-	// ATZ data only holds the data, we need to turn them into actual ATZ objects
-	// so we can use the methods
-	const ATZs: ATZ[] = [];
-	ATZData.forEach((atz) => {
-		ATZs.push(new ATZ(atz.name, atz.geometry[0], atz.centre, atz.type, atz.height));
-	});
-
-	console.log(ATZs);
-
-	return ATZs;
+export const ATZsStore = derived(RouteStore, ($RouteStore) => {
+	return $RouteStore.atzs;
 });
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
@@ -148,8 +123,8 @@ export const EndPointIndexStore = createEndPointIndexStore();
 
 export const CurrentRoutePointStore = derived(
 	[RouteStore, CurrentRoutePointIndexStore],
-	([$RouteStore, $CurrentRoutePointIndexStore]) => {
-		return $RouteStore[$CurrentRoutePointIndexStore];
+	([$RouteStore]) => {
+		return $RouteStore.getCurrentPoint();
 	}
 );
 
@@ -188,8 +163,7 @@ export function ClearSimulationStores(): void {
 	ExpectedUserMessageStore.set('');
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
-	RouteStore.set([]);
-	RouteElementStore.set([]);
+	RouteStore.set(undefined);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

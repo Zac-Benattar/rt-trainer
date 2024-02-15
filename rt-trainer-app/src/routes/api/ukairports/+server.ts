@@ -11,7 +11,7 @@ export async function GET({ setHeaders, url }) {
 	const radius: string | null = url.searchParams.get('radius');
 	let radiusNumber: number = 10000000;
 	const radiusMode: boolean = lat != null || long != null || radius != null;
-	const types: string[] = url.searchParams.getAll('types');
+	const types: string[] = url.searchParams.getAll('type');
 	let typesNumbers: number[] = [];
 	if (types.length > 0) {
 		typesNumbers = types.map((type) => {
