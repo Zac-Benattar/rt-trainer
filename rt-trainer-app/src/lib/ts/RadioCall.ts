@@ -27,9 +27,9 @@ export default class RadioCall {
 	private userCallsignModified: boolean;
 	private squark: boolean;
 	private currentTarget: string;
-	private currentTargetFrequency: number;
-	private currentRadioFrequency: number;
-	private currentTransponderFrequency: number;
+	private currentTargetFrequency: string;
+	private currentRadioFrequency: string;
+	private currentTransponderFrequency: string;
 	private aircraftType: string;
 	private feedback: Feedback;
 	private closestVRP: Waypoint | undefined;
@@ -44,9 +44,9 @@ export default class RadioCall {
 		userCallsignModified: boolean,
 		squark: boolean,
 		currentTarget: string,
-		currentTargetFrequency: number,
-		currentRadioFrequency: number,
-		currentTransponderFrequency: number,
+		currentTargetFrequency: string,
+		currentRadioFrequency: string,
+		currentTransponderFrequency: string,
 		aircraftType: string
 	) {
 		this.message = message;
@@ -113,28 +113,28 @@ export default class RadioCall {
 		return this.currentTarget;
 	}
 
-	public getCurrentTargetFrequency(): number {
+	public getCurrentTargetFrequency(): string {
 		return this.currentTargetFrequency;
 	}
 
 	public getCurrentTargetFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentTargetFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentTargetFrequency);
 	}
 
-	public getCurrentRadioFrequency(): number {
+	public getCurrentRadioFrequency(): string {
 		return this.currentRadioFrequency;
 	}
 
 	public getCurrentRadioFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentRadioFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentRadioFrequency);
 	}
 
-	public getCurrentTransponderFrequency(): number {
+	public getCurrentTransponderFrequency(): string {
 		return this.currentTransponderFrequency;
 	}
 
 	public getCurrentTransponderFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentTransponderFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentTransponderFrequency);
 	}
 
 	public getAircraftType(): string {
@@ -185,11 +185,11 @@ export default class RadioCall {
 		return this.getRadioCallWords().findIndex((x) => x.includes('decimal'));
 	}
 
-	private getRadioFrequencyStated(): number {
+	private getRadioFrequencyStated(): string | undefined {
 		const radioCallWords = this.getRadioCallWords();
 		const decimalIndex = this.getRadioFrequencyDecimalIndex();
-		if (decimalIndex <= 2) return -1; // Not enough words before decimal to be a frequency
-		if (decimalIndex >= radioCallWords.length - 1) return -1; // Not enough words after decimal to be a frequency
+		if (decimalIndex <= 2) return undefined; // Not enough words before decimal to be a frequency
+		if (decimalIndex >= radioCallWords.length - 1) return undefined; // Not enough words after decimal to be a frequency
 
 		const beforeDecimal = radioCallWords.slice(decimalIndex - 3, decimalIndex);
 		const convertedBeforeDecimal = beforeDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
@@ -197,9 +197,9 @@ export default class RadioCall {
 
 		const afterDecimal = radioCallWords.slice(decimalIndex + 1, decimalIndex + 4);
 		const convertedAfterDecimal = afterDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
-		const afterDecimalDigits = '.' + convertedAfterDecimal.join('');
+		const afterDecimalDigits = convertedAfterDecimal.join('');
 
-		const freq = parseFloat(beforeDecimalDigits + afterDecimalDigits);
+		const freq = beforeDecimalDigits + '.' + afterDecimalDigits;
 
 		return freq;
 	}

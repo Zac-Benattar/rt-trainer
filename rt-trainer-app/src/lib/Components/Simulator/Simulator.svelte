@@ -42,7 +42,7 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
 	import { updated } from '$app/stores';
-	import Route, { checkRadioCallByServer, initiateScenario } from '$lib/ts/Route';
+	import Route, { checkRadioCallByServer, loadScenario } from '$lib/ts/Route';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -475,7 +475,7 @@
 	}
 
 	onMount(async () => {
-		initiateScenario();
+		loadScenario();
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;

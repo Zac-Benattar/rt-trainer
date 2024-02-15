@@ -69,7 +69,7 @@ export default class Route {
 	}
 
 	public getEndAirport(): Airport {
-		throw new Error('Unimplemented function')
+		throw new Error('Unimplemented function');
 	}
 }
 
@@ -89,71 +89,51 @@ let routeGenerated = false;
 NullRouteStore.subscribe((value) => {
 	routeGenerated = !value;
 });
+let currentRouteId: number = 2;
 
 export function ResetCurrentRoutePointIndex(): void {
 	CurrentRoutePointIndexStore.set(startPointIndex);
 }
 
 /**
- * Initiates the scenario
+ * Gets the scenario from the db and loads it into the store
  *
  * @remarks
- * This function initiates the scenario by getting the route and waypoints from the server.
+ * This function initiates the scenario by getting the route, waypoints and ATZs from the server.
+ * It then updates the stores with the route, waypoints and ATZs.
  *
- * @returns void
+ * @returns Promise<void>
  */
-export async function initiateScenario(): Promise<void> {
+export async function loadScenario(): Promise<void> {
 	// Get the state from the server
-	const serverRouteResponse = await getRouteFromServer();
-	const serverWaypointsResponse = await getWaypointsFromServer();
+	const response = await axios.get(`/scenario/${currentRouteId}/route`);
 
-	if (serverRouteResponse === undefined || serverWaypointsResponse === undefined) {
-		// Handle error
+	if (response.data === undefined || response.data.error != undefined) {
 		NullRouteStore.set(true);
-
-		return;
 	} else {
-		console.log(serverRouteResponse);
-		console.log(serverWaypointsResponse);
+		console.log(response);
 
 		// Update stores with the route
 		ResetCurrentRoutePointIndex();
-		RouteStore.set(serverRouteResponse);
+		RouteStore.set(response.data);
 
 		// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 		// So we need to set it to the last point in the route if it has not been set
 		if (endPointIndex == -1) {
-			EndPointIndexStore.set(serverRouteResponse.routePoints.length - 1);
+			EndPointIndexStore.set(response.data.routePoints.length - 1);
 		}
 	}
 }
 
 /**
- * Gets the route from the server
+ * Generates a route from the server
  *
  * @remarks
- * This function gets the route from the server.
+ * This function generates a route from the server and updates the store with the route.
  *
- * @returns Promise<RoutePoint[] | undefined>
+ * @returns Promise<void>
  */
-export async function getRouteFromServer(): Promise<Route | undefined> {
-	try {
-		const response = await axios.get(
-			`/scenario/seed=${generationParameters.seed.seedString}/route?airborneWaypoints=${generationParameters.airborneWaypoints}&hasEmergency=${generationParameters.hasEmergency}`
-		);
-
-		return response.data;
-	} catch (error: unknown) {
-		if (error.message === 'Network Error') {
-			NullRouteStore.set(true);
-		} else {
-			console.log('Error: ', error);
-		}
-	}
-}
-
-// For testing
-export async function initiateRouteV2(): Promise<void> {
+export async function generateRoute(): Promise<void> {
 	try {
 		const response = await axios.get(
 			`/routegentest/seed=${generationParameters.seed.seedString}?hasEmergency=${generationParameters.hasEmergency}`
@@ -164,7 +144,7 @@ export async function initiateRouteV2(): Promise<void> {
 		} else {
 			ResetCurrentRoutePointIndex();
 			RouteStore.set(response.data);
-	
+
 			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 			// So we need to set it to the last point in the route if it has not been set
 			if (endPointIndex == -1) {

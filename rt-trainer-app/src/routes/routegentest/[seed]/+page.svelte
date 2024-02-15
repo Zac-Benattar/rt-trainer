@@ -8,7 +8,7 @@
 		OpenAIPHealthStore,
 		WaypointsStore
 	} from '$lib/stores';
-	import { initiateRouteV2 } from '$lib/ts/Route';
+	import { generateRoute } from '$lib/ts/Route';
 	import Seed from '$lib/ts/Seed';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { generateRandomURLValidString } from '$lib/ts/utils';
@@ -47,12 +47,12 @@
 	let hasEmergency: boolean = false;
 	const emergenciesString: string | null = $page.url.searchParams.get('emergencies');
 	if (emergenciesString != null) {
-		hasEmergency = emergenciesString === 'True';
+		hasEmergency = (emergenciesString === 'True' || emergenciesString === 'true') ? true : false;
 	}
 
 	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
 
-	initiateRouteV2();
+	generateRoute();
 
 	let openAIPHealth: string = 'Unknown';
 
@@ -76,7 +76,7 @@
 				OpenAIPHealthStore.set(response.data);
 			}
 		} catch (error: unknown) {
-			if (error.message === 'Network Error') {
+			if (error.message == 'Network Error') {
 				NullRouteStore.set(true);
 			} else {
 				console.error('Error: ', error);
