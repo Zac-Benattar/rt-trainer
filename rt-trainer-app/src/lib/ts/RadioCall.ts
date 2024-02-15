@@ -1,4 +1,4 @@
-import Route, { getWaypointsFromVRPsJSON } from './Route';
+import type Route from './Route';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
@@ -10,24 +10,17 @@ import {
 	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet
 } from './utils';
-import type {
-	ControlledAerodrome,
-	AerodromeStartPoint,
-	METORDataSample,
-	Runway,
-	RunwayHoldingPoint,
-	Taxiway,
-	UncontrolledAerodrome
-} from './AeronauticalClasses/Airport';
 import { Feedback } from './Feedback';
-import type { Waypoint } from './RouteTypes';
 import type RoutePoint from './RoutePoints';
+import type { Waypoint } from './AeronauticalClasses/Waypoint';
+import type { Runway } from './AeronauticalClasses/Runway';
+import type { METORDataSample } from './AeronauticalClasses/METORData';
+import type { Airport } from './AeronauticalClasses/Airport';
 
 export default class RadioCall {
 	private message: string;
 	private seed: Seed;
-	private numAirborneWaypoints: number;
-	private route: RoutePoint[];
+	private route: Route;
 	private currentPointIndex: number;
 	private prefix: string;
 	private userCallsign: string;
@@ -44,8 +37,7 @@ export default class RadioCall {
 	constructor(
 		message: string,
 		seed: Seed,
-		numAirborneWaypoints: number,
-		route: RoutePoint[],
+		route: Route,
 		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,
@@ -59,7 +51,6 @@ export default class RadioCall {
 	) {
 		this.message = message;
 		this.seed = seed;
-		this.numAirborneWaypoints = numAirborneWaypoints;
 		this.route = route;
 		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
@@ -74,6 +65,14 @@ export default class RadioCall {
 		this.feedback = new Feedback();
 	}
 
+	public getStartAirport(): Airport {
+		return this.route.getStartAirport();
+	}
+
+	public getEndAirport(): Airport {
+		return this.route.getEndAirport();
+	}
+
 	public getRadioCall(): string {
 		return processString(this.message.trim().toLowerCase());
 	}
@@ -83,7 +82,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentRoutePoint(): RoutePoint {
-		return this.route[this.currentPointIndex];
+		return this.route.getCurrentPoint();
 	}
 
 	public getPrefix(): string {
@@ -178,7 +177,7 @@ export default class RadioCall {
 	}
 
 	public isTakeoffAerodromeControlled(): boolean {
-		return this.getStartAerodrome().isControlled();
+		return this.getStartAirport().isControlled();
 	}
 
 	public getUnmodifiedRadioCall(): string {
@@ -435,50 +434,50 @@ export default class RadioCall {
 		return [callsigns[0]];
 	}
 
-	public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-		return Route.getStartAerodrome(this.seed);
-	}
+	// public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
+	// 	return Route.getStartAerodrome(this.seed);
+	// }
 
-	public getEndAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-		return Route.getEndAerodrome(this.seed);
-	}
+	// public getEndAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
+	// 	return Route.getEndAerodrome(this.seed);
+	// }
 
-	public getStartAerodromeStartingPoint(): AerodromeStartPoint {
-		const startPoints = this.getStartAerodrome().getStartPoints();
-		return startPoints[this.seed.scenarioSeed % startPoints.length];
-	}
+	// public getStartAerodromeStartingPoint(): AerodromeStartPoint {
+	// 	const startPoints = this.getStartAerodrome().getStartPoints();
+	// 	return startPoints[this.seed.scenarioSeed % startPoints.length];
+	// }
 
 	public getStartAerodromeMETORSample(): METORDataSample {
-		return this.getStartAerodrome().getMETORSample();
+		return this.getStartAirport().getMETORSample(this.seed);
 	}
 
 	public getEndAerodromeMETORSample(): METORDataSample {
-		return this.getEndAerodrome().getMETORSample();
+		return this.getEndAirport().getMETORSample(this.seed);
 	}
 
 	public getTakeoffRunway(): Runway {
-		return this.getStartAerodrome().getTakeoffRunway();
+		return this.getStartAirport().getTakeoffRunway(this.seed);
 	}
 
 	public getTakeoffRunwayName(): string {
-		return this.getStartAerodrome().getTakeoffRunway().name;
+		return this.getStartAirport().getTakeoffRunway(this.seed).designator;
 	}
 
 	public getLandingRunway(): Runway {
-		return this.getEndAerodrome().getLandingRunway();
+		return this.getEndAirport().getLandingRunway(this.seed);
 	}
 
 	public getLandingRunwayName(): string {
-		return this.getEndAerodrome().getLandingRunway().name;
+		return this.getEndAirport().getLandingRunway(this.seed).designator;
 	}
 
 	public assertCallContainsTakeOffRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().designator])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are taking off from."
 			);
 			return false;
-		} else if (!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])) {
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().designator])) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
 			);
@@ -498,21 +497,11 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsScenarioStartPoint(): boolean {
-		if (
-			!this.callContainsConsecutiveWords(
-				this.getStartAerodromeStartingPoint().name.toLowerCase().split(' ')
-			)
-		) {
-			this.feedback.pushSevereMistake(
-				"Your call didn't contain your location: " + this.getStartAerodromeStartingPoint().name
-			);
-			return false;
-		}
-		return true;
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsStartAerodromeName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().getShortName()])) {
+		if (!this.callContainsConsecutiveWords([this.getStartAirport().getShortName()])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the starting aerodrome."
 			);
@@ -522,7 +511,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsEndAerodromeName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().getShortName()])) {
+		if (!this.callContainsConsecutiveWords([this.getEndAirport().getShortName()])) {
 			this.feedback.pushSevereMistake("Your call didn't contain the name of the ending aerodrome.");
 			return false;
 		}
@@ -590,7 +579,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsTakeOffRunwayHoldingPoint(): boolean {
-		if (!this.getTakeoffRunwayTaxiway().holdingPoints[0].name.split(' ')) {
+		if (!this.callContainsWord(this.getTakeoffRunwayTaxiwayHoldingPoint())) {
 			this.feedback.pushSevereMistake("Your call didn't contain your holding point.");
 			return false;
 		}
@@ -695,22 +684,20 @@ export default class RadioCall {
 		return true;
 	}
 
-	public getTakeoffRunwayTaxiway(): Taxiway {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiway();
+	public getTakeoffRunwayTaxiway(): string {
+		throw new Error('Unimplemented function');
 	}
 
-	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint();
+	public getTakeoffRunwayTaxiwayHoldingPoint(): string {
+		throw new Error('Unimplemented function');
 	}
 
 	public getTakeoffTurnoutHeading(): number {
-		const routeWaypoints = Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints);
-
 		const headingToFirstWaypoint = getHeadingBetween(
-			routeWaypoints[0].lat,
-			routeWaypoints[0].long,
-			routeWaypoints[1].lat,
-			routeWaypoints[1].long
+			this.route.waypoints[0].lat,
+			this.route.waypoints[0].long,
+			this.route.waypoints[1].lat,
+			this.route.waypoints[1].long
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -730,7 +717,7 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTransitionAltitude(): number {
-		return this.getStartAerodrome().getTakeoffTransitionAltitude();
+		return this.getStartAirport().getTakeoffTransitionAltitude();
 	}
 
 	public assertCallContainsNotAboveTransitionAltitude(): boolean {
@@ -751,7 +738,7 @@ export default class RadioCall {
 	}
 
 	public getLandingTraffic(): string {
-		if (this.getEndAerodrome().isControlled()) {
+		if (this.getEndAirport().isControlled()) {
 			if (this.seed.scenarioSeed % 5 == 0) return 'Vehicle crossing';
 			else return '';
 		} else {
@@ -781,12 +768,12 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsLandingRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getLandingRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getLandingRunway().designator])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are landing on."
 			);
 			return false;
-		} else if (!this.callContainsConsecutiveWords(['runway', this.getLandingRunway().name])) {
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getLandingRunway().designator])) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
 			);
@@ -811,9 +798,7 @@ export default class RadioCall {
 	}
 
 	public getPreviousWaypoint(): Waypoint {
-		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
-			this.getCurrentRoutePoint().nextWaypointIndex
-		];
+		return this.route.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
 	}
 
 	public getPreviousWaypointName(): string {
@@ -861,7 +846,7 @@ export default class RadioCall {
 	}
 
 	public getLandingParkingSpot(): string {
-		return this.getEndAerodrome().getLandingParkingSpot();
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsLandingParkingSpot(): boolean {
@@ -885,32 +870,7 @@ export default class RadioCall {
 	}
 
 	private getClosestVRP(): Waypoint {
-		// If already calculated then return known value
-		if (this.closestVRP != undefined) return this.closestVRP;
-
-		const currentLat = this.getCurrentRoutePoint().pose.lat;
-		const currentLong = this.getCurrentRoutePoint().pose.long;
-
-		const vRPs = getWaypointsFromVRPsJSON();
-		let closestVRP = vRPs[0];
-		let closestVRPDistance = haversineDistance(
-			currentLat,
-			currentLong,
-			closestVRP.lat,
-			closestVRP.long
-		);
-
-		for (let i = 1; i < vRPs.length; i++) {
-			const distance = haversineDistance(currentLat, currentLong, vRPs[i].lat, vRPs[i].long);
-			if (distance < closestVRPDistance) {
-				closestVRP = vRPs[i];
-				closestVRPDistance = distance;
-			}
-		}
-
-		this.closestVRP = closestVRP;
-
-		return this.closestVRP;
+		throw new Error('Unimplemented function');
 	}
 
 	public getClosestVRPName(): string {
@@ -926,9 +886,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypoint(): Waypoint {
-		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
-			this.getCurrentRoutePoint().nextWaypointIndex
-		];
+		return this.route.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
 	}
 
 	public getNextWaypointName(): string {
@@ -991,8 +949,8 @@ export default class RadioCall {
 	}
 
 	public getCurrentATISLetter(): string {
-		if (this.getEndAerodrome().isControlled()) {
-			return (this.getEndAerodrome() as ControlledAerodrome).getATISLetter();
+		if (this.getEndAirport().isControlled()) {
+			return this.getEndAirport().getATISLetter(this.seed);
 		} else {
 			throw new Error('No ATIS letter for uncontrolled aerodrome.');
 		}

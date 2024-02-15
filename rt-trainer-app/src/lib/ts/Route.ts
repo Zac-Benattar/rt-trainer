@@ -13,9 +13,14 @@ import { Waypoint } from './AeronauticalClasses/Waypoint';
 import RoutePoint from './RoutePoints';
 import ATZ from './AeronauticalClasses/ATZ';
 import { Type } from 'class-transformer';
+import type { Airport } from './AeronauticalClasses/Airport';
+import Seed from './Seed';
 
 /* Route generated for a scenario. */
 export default class Route {
+	@Type(() => Seed)
+	seed: Seed;
+
 	@Type(() => RoutePoint)
 	routePoints: RoutePoint[] = [];
 
@@ -27,11 +32,13 @@ export default class Route {
 	currentPointIndex: number = 0;
 
 	constructor(
+		seed: Seed,
 		points: RoutePoint[],
 		atzs: ATZ[],
 		waypoints: Waypoint[],
 		currentPointIndex?: number
 	) {
+		this.seed = seed;
 		this.routePoints = points;
 		this.atzs = atzs;
 		this.waypoints = waypoints;
@@ -54,6 +61,14 @@ export default class Route {
 
 	public getEndPoint(): RoutePoint {
 		return this.routePoints[this.routePoints.length - 1];
+	}
+
+	public getStartAirport(): Airport {
+		throw new Error('Unimplemented function');
+	}
+
+	public getEndAirport(): Airport {
+		throw new Error('Unimplemented function')
 	}
 }
 
@@ -107,7 +122,7 @@ export async function initiateScenario(): Promise<void> {
 		// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 		// So we need to set it to the last point in the route if it has not been set
 		if (endPointIndex == -1) {
-			EndPointIndexStore.set(serverRouteResponse.length - 1);
+			EndPointIndexStore.set(serverRouteResponse.routePoints.length - 1);
 		}
 	}
 }
@@ -140,7 +155,7 @@ export async function getRouteFromServer(): Promise<Route | undefined> {
 export async function initiateRouteV2(): Promise<void> {
 	try {
 		const response = await axios.get(
-			`/routetest/seed=${generationParameters.seed.seedString}?hasEmergency=${generationParameters.hasEmergency}`
+			`/routegentest/seed=${generationParameters.seed.seedString}?hasEmergency=${generationParameters.hasEmergency}`
 		);
 
 		if (response.data === undefined) {

@@ -33,8 +33,8 @@ export type SimulatorUpdateData = {
 	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: string;
-	currentTargetFrequency: number;
-	currentTransponderFrequency: number;
+	currentTargetFrequency: string;
+	currentTransponderFrequency: string;
 	currentPressure: number;
 	emergency: EmergencyType;
 };

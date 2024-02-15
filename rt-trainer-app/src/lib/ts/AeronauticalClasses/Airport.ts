@@ -3,6 +3,7 @@ import { Frequency } from '../Frequency';
 import type Seed from '../Seed';
 import { Runway } from './Runway';
 import { METORData, METORDataSample } from './METORData';
+import { error } from 'console';
 
 /* Aerodrome data. */
 export class Airport {
@@ -120,5 +121,13 @@ export class Airport {
 
 	public isControlled(): boolean {
 		return this.type == 3 || this.type == 9;
+	}
+
+	public getGroundFrequency(): string {
+		throw new Error('Not implemented yet');
+	}
+
+	public getATISLetter(seed: Seed): string {
+		return String.fromCharCode(65 + (seed.scenarioSeed % 26));
 	}
 }

@@ -9,7 +9,6 @@
 	import {
 		ATZsStore,
 		CurrentRoutePointStore,
-		RouteElementStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import { onMount } from 'svelte';
@@ -73,8 +72,8 @@
 				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 			}
 			mapWaypoints.push({
-				lat: waypoints[i].getWaypointCoords()[1],
-				long: waypoints[i].getWaypointCoords()[0],
+				lat: waypoints[i].getCoords()[1],
+				long: waypoints[i].getCoords()[0],
 				name: name
 			});
 		}
@@ -236,7 +235,7 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.getLeafletCoords(), { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map);
+			L.polygon(atz.coordinates, { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map);
 		}
 	}
 
@@ -245,7 +244,7 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.getLeafletCoords(), { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map);
+			L.polygon(atz.coordinates, { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map);
 		}
 	}
 

@@ -1,7 +1,6 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
 import type Seed from './Seed';
-import { EmergencyType, type Pose, type Waypoint } from './RouteTypes';
-import { ControlledAerodrome, type UncontrolledAerodrome } from './AeronauticalClasses/Airport';
+import { EmergencyType, type Pose } from './RouteTypes';
 import {
 	ChangeZoneStage,
 	CircuitAndLandingStage,
@@ -15,6 +14,8 @@ import {
 } from './RouteStages';
 import Route from './Route';
 import { lerp, lerpLocation } from './utils';
+import type { Airport } from './AeronauticalClasses/Airport';
+import type { Waypoint } from './AeronauticalClasses/Waypoint';
 
 /* A point on the route used in generation. Not necissarily visible to the user */
 export default class RoutePoint {
@@ -41,14 +42,14 @@ export default class RoutePoint {
 
 export function getParkedInitialControlledUpdateData(
 	seed: Seed,
-	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
+	airport: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + ' Ground',
-		currentTargetFrequency: startAerodrome.getGroundFrequency(),
-		currentTransponderFrequency: 7000,
+		currentTarget: airport.getShortName() + ' Ground',
+		currentTargetFrequency: airport.getGroundFrequency(),
+		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
@@ -56,14 +57,14 @@ export function getParkedInitialControlledUpdateData(
 
 export function getParkedMadeContactControlledUpdateData(
 	seed: Seed,
-	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
+	startAerodrome: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Ground',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
-		currentTransponderFrequency: 7000,
+		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
@@ -71,14 +72,14 @@ export function getParkedMadeContactControlledUpdateData(
 
 export function getParkedInitialUncontrolledUpdateData(
 	seed: Seed,
-	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
+	startAerodrome: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
-		currentTransponderFrequency: 7000,
+		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
@@ -86,14 +87,14 @@ export function getParkedInitialUncontrolledUpdateData(
 
 export function getParkedMadeContactUncontrolledUpdateData(
 	seed: Seed,
-	startAerodrome: ControlledAerodrome | UncontrolledAerodrome
+	startAerodrome: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Information',
 		currentTargetFrequency: startAerodrome.getGroundFrequency(),
-		currentTransponderFrequency: 7000,
+		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
 	};
@@ -105,9 +106,9 @@ export function getParkedMadeContactUncontrolledUpdateData(
     TakeOff,
 	Climb Out of the start aerodrome's airspace.
 	 */
-export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
+export function getStartAerodromeRoutePoints(seed: Seed, route: Route): RoutePoint[] {
 	const stages: RoutePoint[] = [];
-	const startAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getStartAerodrome(seed);
+	const startAerodrome: Airport = route.getStartAirport();
 	const startAerodromeTime: number = startAerodrome.getStartTime();
 	const startPoints = startAerodrome.getStartPoints();
 	const startPointIndex = seed.scenarioSeed % startPoints.length;
@@ -151,7 +152,7 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 		airSpeed: 70.0
 	};
 
-	if (startAerodrome instanceof ControlledAerodrome) {
+	if (startAerodrome.isControlled()) {
 		const radioCheck = new RoutePoint(
 			StartUpStage.RadioCheck,
 			parkedPose,
@@ -327,29 +328,27 @@ export function getStartAerodromeRoutePoints(seed: Seed): RoutePoint[] {
 	return stages;
 }
 
-export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: number): RoutePoint[] {
+export function getEndAerodromeRoutePoints(seed: Seed, route: Route): RoutePoint[] {
 	const stages: RoutePoint[] = [];
-	const endAerodrome: ControlledAerodrome | UncontrolledAerodrome = Route.getEndAerodrome(seed);
-	const waypoints: Waypoint[] = Route.getRouteWaypoints(seed, numAirborneWaypoints);
+	const endAerodrome: Airport = route.getEndAirport();
+	const waypoints: Waypoint[] = []
 	const landingTime = waypoints[waypoints.length - 1].arrivalTime;
-	const parkingPoints = endAerodrome.getStartPoints();
-	const parkingPointIndex = seed.scenarioSeed % parkingPoints.length;
-	const landingRunway = endAerodrome.getLandingRunway();
+	const landingRunway = endAerodrome.getLandingRunway(seed);
 
 	const parkedPose: Pose = {
-		lat: parkingPoints[parkingPointIndex].lat,
-		long: parkingPoints[parkingPointIndex].long,
-		magneticHeading: parkingPoints[parkingPointIndex].heading,
-		trueHeading: parkingPoints[parkingPointIndex].heading,
+		lat: endAerodrome.coordinates[0],
+		long: endAerodrome.coordinates[1],
+		magneticHeading: 0,
+		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0.0
 	};
 
 	const followTrafficLocation = landingRunway.getPointAlongVector(-4.5);
 	const followTrafficPose: Pose = {
-		lat: followTrafficLocation.lat,
-		long: followTrafficLocation.long,
-		magneticHeading: landingRunway.magneticHeading,
+		lat: followTrafficLocation[0],
+		long: followTrafficLocation[1],
+		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 1200,
 		airSpeed: 84.0
@@ -357,34 +356,33 @@ export function getEndAerodromeRoutePoints(seed: Seed, numAirborneWaypoints: num
 
 	const reportFinalLocation = landingRunway.getPointAlongVector(-3.6);
 	const reportFinalPose: Pose = {
-		lat: reportFinalLocation.lat,
-		long: reportFinalLocation.long,
-		magneticHeading: landingRunway.magneticHeading,
+		lat: reportFinalLocation[0],
+		long: reportFinalLocation[1],
+		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 750,
 		airSpeed: 55.0
 	};
 
 	const onRunwayPose: Pose = {
-		lat: landingRunway.startLat,
-		long: landingRunway.startLong,
-		magneticHeading: landingRunway.magneticHeading,
+		lat: landingRunway.getPointAlongVector(0)[0],
+		long: landingRunway.getPointAlongVector(0)[1],
+		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 0.0,
 		airSpeed: 0.0
 	};
 
-	const holdingPoint = endAerodrome.getLandingRunwayTaxiwayHoldingPoint();
 	const runwayVacatedPose: Pose = {
-		lat: holdingPoint.lat,
-		long: holdingPoint.long,
-		magneticHeading: holdingPoint.heading,
-		trueHeading: holdingPoint.heading,
+		lat: endAerodrome.coordinates[0],
+		long: endAerodrome.coordinates[1],
+		magneticHeading: 0,
+		trueHeading: 0,
 		altitude: 0.0,
 		airSpeed: 0.0
 	};
 
-	if (endAerodrome instanceof ControlledAerodrome) {
+	if (endAerodrome.isControlled()) {
 		const requestJoin = new RoutePoint(
 			InboundForJoinStage.RequestJoin,
 			parkedPose,
@@ -619,7 +617,7 @@ export function getAirborneRoutePoints(
 	numAirborneWaypoints: number,
 	hasEmergency: boolean
 ): RoutePoint[] {
-	const waypoints: Waypoint[] = Route.getAirborneWaypoints(seed, numAirborneWaypoints);
+	const waypoints: Waypoint[] = [];
 
 	// Add events at each point
 	const routePoints: RoutePoint[] = [];
@@ -642,8 +640,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -659,8 +657,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -676,8 +674,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -693,8 +691,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -710,8 +708,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -727,8 +725,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: EmergencyType.None
 			},
@@ -787,8 +785,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: emergencyType
 			},
@@ -804,8 +802,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: emergencyType
 			},
@@ -821,8 +819,8 @@ export function getAirborneRoutePoints(
 				callsignModified: false,
 				squark: false,
 				currentTarget: '',
-				currentTargetFrequency: 0,
-				currentTransponderFrequency: 0,
+				currentTargetFrequency: '000.000',
+				currentTransponderFrequency: '0000',
 				currentPressure: 1013,
 				emergency: emergencyType
 			},

@@ -15,7 +15,7 @@ import { fail } from '@sveltejs/kit';
 import { airports, airportReportingPoints, airspaces } from '$lib/db/schema';
 import { plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
-import type Route from './Route';
+import Route from './Route';
 
 // TODO
 export default class RouteGenerator {
@@ -406,13 +406,11 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		new Route()
-			startWaypoint,
-			enterMATZWaypoint,
-			exitMATZWaypoint,
-			endWaypoint,
-			chosenMATZ,
-			...onRouteAirspace
-		];
+		new Route(
+			seed,
+			[],
+			[chosenMATZ, ...onRouteAirspace],
+			[startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint]
+		);
 	}
 }

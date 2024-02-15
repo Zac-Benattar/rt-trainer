@@ -1,6 +1,5 @@
 import { derived, writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
-import type RoutePoint from './ts/RoutePoints';
 import type {
 	AircraftDetails,
 	AltimeterState,
@@ -8,8 +7,6 @@ import type {
 	TransponderState
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
-import type { Waypoint } from './ts/AeronauticalClasses/Waypoint';
-import type ATZ from './ts/AeronauticalClasses/ATZ';
 import type Route from './ts/Route';
 
 const initialGenerationParameters: GenerationParameters = {
@@ -79,15 +76,27 @@ export const KneeboardStore = writable<string>('');
 export const RouteStore = writable<Route | undefined>(undefined);
 
 export const RoutePointStore = derived(RouteStore, ($RouteStore) => {
-	return $RouteStore.routePoints;
+	if ($RouteStore) {
+		return $RouteStore.routePoints;
+	} else {
+		return [];
+	}
 });
 
 export const WaypointsStore = derived(RouteStore, ($RouteStore) => {
-	return $RouteStore.waypoints;
+	if ($RouteStore) {
+		return $RouteStore.waypoints;
+	} else {
+		return [];
+	}
 });
 
 export const ATZsStore = derived(RouteStore, ($RouteStore) => {
-	return $RouteStore.atzs;
+	if ($RouteStore) {
+		return $RouteStore.atzs;
+	} else {
+		return [];
+	}
 });
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
@@ -124,7 +133,9 @@ export const EndPointIndexStore = createEndPointIndexStore();
 export const CurrentRoutePointStore = derived(
 	[RouteStore, CurrentRoutePointIndexStore],
 	([$RouteStore]) => {
-		return $RouteStore.getCurrentPoint();
+		if ($RouteStore) {
+			return $RouteStore.getCurrentPoint();
+		}
 	}
 );
 
