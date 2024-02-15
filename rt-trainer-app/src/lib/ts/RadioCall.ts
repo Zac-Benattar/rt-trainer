@@ -153,25 +153,6 @@ export default class RadioCall {
 		return this.feedback.isFlawless();
 	}
 
-	public getJSONData(): string {
-		return JSON.stringify({
-			message: this.message,
-			seed: this.seed,
-			route: this.route,
-			currentPointIndex: this.currentPointIndex,
-			prefix: this.prefix,
-			userCallsign: this.userCallsign,
-			userCallsignModified: this.userCallsignModified,
-			squark: this.squark,
-			currentTarget: this.currentTarget,
-			currentTargetFrequency: this.currentTargetFrequency,
-			currentRadioFrequency: this.currentRadioFrequency,
-			currentTransponderFrequency: this.currentTransponderFrequency,
-			aircraftType: this.aircraftType,
-			feedback: this.feedback
-		});
-	}
-
 	public setFeedback(feedback: Feedback): void {
 		this.feedback = feedback;
 	}

@@ -146,7 +146,7 @@ export async function getRouteFromServer(): Promise<Route | undefined> {
 		if (error.message === 'Network Error') {
 			NullRouteStore.set(true);
 		} else {
-			console.error('Error: ', error);
+			console.log('Error: ', error);
 		}
 	}
 }
@@ -161,38 +161,20 @@ export async function initiateRouteV2(): Promise<void> {
 		if (response.data === undefined) {
 			NullRouteStore.set(true);
 		} else {
-			console.log(response.data);
+			ResetCurrentRoutePointIndex();
 			RouteStore.set(response.data);
+	
+			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
+			// So we need to set it to the last point in the route if it has not been set
+			if (endPointIndex == -1) {
+				EndPointIndexStore.set(response.data.routePoints.length - 1);
+			}
 		}
 	} catch (error: unknown) {
 		if (error.message === 'Network Error') {
 			NullRouteStore.set(true);
 		} else {
-			console.error('Error: ', error);
-		}
-	}
-}
-
-/**
- * Gets the waypoints from the server
- *
- * @remarks
- * This function gets the waypoints from the server.
- *
- * @returns Promise<Waypoint[] | undefined>
- */
-export async function getWaypointsFromServer(): Promise<Waypoint[] | undefined> {
-	try {
-		const response = await axios.get(
-			`/scenario/seed=${generationParameters.seed.seedString}/waypoints?airborneWaypoints=${generationParameters.airborneWaypoints}&hasEmergency=${generationParameters.hasEmergency}`
-		);
-
-		return response.data;
-	} catch (error: unknown) {
-		if (error.message === 'Network Error') {
-			NullRouteStore.set(true);
-		} else {
-			console.error('Error: ', error);
+			console.log('Error: ', error);
 		}
 	}
 }
@@ -216,7 +198,7 @@ export async function checkRadioCallByServer(
 		const response = await axios.post(
 			`/scenario/seed=${generationParameters.seed.scenarioSeed}/parse`,
 			{
-				data: radioCall.getJSONData()
+				data: radioCall
 			}
 		);
 
