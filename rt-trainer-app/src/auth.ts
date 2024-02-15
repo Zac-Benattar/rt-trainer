@@ -16,12 +16,10 @@ export const { handle, signIn, signOut } = SvelteKitAuth({
 		Google({
 			clientId: GOOGLE_CLIENT_ID,
 			clientSecret: GOOGLE_CLIENT_SECRET,
-			allowDangerousEmailAccountLinking: true
 		}),
 		GitHub({
 			clientId: GITHUB_CLIENT_ID,
 			clientSecret: GITHUB_CLIENT_SECRET,
-			allowDangerousEmailAccountLinking: true
 		})
 	],
 	pages: {
