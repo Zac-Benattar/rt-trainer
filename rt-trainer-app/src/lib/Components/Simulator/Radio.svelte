@@ -21,10 +21,14 @@
 	let radioState: RadioState = {
 		mode: 'OFF',
 		dialMode: 'OFF',
-		activeFrequency: 121.8,
-		standbyFrequency: 124.03,
-		tertiaryFrequency: 177.2
+		activeFrequency: '121.800',
+		standbyFrequency: '124.030',
+		tertiaryFrequency: '177.200'
 	};
+	let activeFrequency: number = 121.8;
+	let standbyFrequency: number = 124.03;
+	let tertiaryFrequency: number = 177.2;
+
 	let displayOn: boolean = false;
 	let frequencyDialEnabled: boolean = false;
 	let transmitButtonEnabled: boolean = false;
@@ -108,20 +112,24 @@
 	}
 
 	function onRadioFrequencyIncreaseLarge() {
-		radioState.standbyFrequency += 1;
+		standbyFrequency += 1;
+		radioState.standbyFrequency = standbyFrequency.toFixed(3);
 	}
 
 	function onRadioFrequencyReduceLarge() {
-		radioState.standbyFrequency -= 1;
+		standbyFrequency -= 1;
+		radioState.standbyFrequency = standbyFrequency.toFixed(3);
 	}
 
 	// Precision errors are a problem here
 	function onRadioFrequencyIncreaseSmall() {
-		radioState.standbyFrequency = parseFloat((radioState.standbyFrequency + 0.005).toPrecision(6));
+		standbyFrequency = parseFloat((standbyFrequency + 0.005).toPrecision(6));
+		radioState.standbyFrequency = standbyFrequency.toFixed(3);
 	}
 
 	function onRadioFrequencyReduceSmall() {
-		radioState.standbyFrequency = parseFloat((radioState.standbyFrequency - 0.005).toPrecision(6));
+		standbyFrequency = parseFloat((standbyFrequency - 0.005).toPrecision(6));
+		radioState.standbyFrequency = standbyFrequency.toFixed(3);
 	}
 </script>
 
@@ -145,9 +153,9 @@
 		<RadioDisplay
 			DisplayOn={displayOn}
 			bind:mode={radioState.mode}
-			bind:activeFrequency={radioState.activeFrequency}
-			bind:standbyFrequency={radioState.standbyFrequency}
-			bind:tertiaryFrequency={radioState.tertiaryFrequency}
+			bind:activeFrequency
+			bind:standbyFrequency
+			bind:tertiaryFrequency
 		/>
 		<div class="display-buttons-container flex flex-row grow place-content-center">
 			<button class="button" id="button-com" on:click={handleCOMButtonClick}>COM</button>

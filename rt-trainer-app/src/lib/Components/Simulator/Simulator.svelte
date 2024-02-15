@@ -42,7 +42,7 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
 	import { updated } from '$app/stores';
-	import { checkRadioCallByServer, initiateScenario } from '$lib/ts/Route';
+	import Route, { checkRadioCallByServer, initiateScenario } from '$lib/ts/Route';
 
 	// Simulator state and settings
 	let seed: Seed;
@@ -55,10 +55,9 @@
 	let atcMessage: string;
 	let userMessage: string;
 	let currentTarget: string;
-	let currentTargetFrequency: number;
-	let route: RoutePoint[] = [];
+	let currentTargetFrequency: string;
+	let route: Route | undefined = undefined;
 	let currentRoutePointIndex: number = 0;
-	let currentRoutePoint: RoutePoint;
 	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
@@ -105,8 +104,8 @@
 
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
 	$: tutorialStep3 =
-		radioState?.activeFrequency.toFixed(3) ==
-		currentRoutePoint?.updateData.currentTargetFrequency.toFixed(3);
+		radioState?.activeFrequency ==
+		route?.getCurrentPoint().updateData.currentTargetFrequency;
 
 	RouteStore.subscribe((value) => {
 		route = value;
@@ -154,10 +153,6 @@
 		currentRoutePointIndex = value;
 	});
 
-	CurrentRoutePointStore.subscribe((value) => {
-		currentRoutePoint = value;
-	});
-
 	CurrentTargetStore.subscribe((value) => {
 		currentTarget = value;
 	});
@@ -167,8 +162,8 @@
 	});
 
 	EndPointIndexStore.subscribe((value) => {
-		if (route && value >= route.length) {
-			value = route.length - 1;
+		if (route && value >= route.routePoints.length) {
+			value = route.routePoints.length - 1;
 		}
 
 		endPointIndex = value;
@@ -226,8 +221,8 @@
 			});
 			return false;
 		} else if (
-			radioState.activeFrequency.toFixed(3) !=
-			currentRoutePoint.updateData.currentTargetFrequency.toFixed(3)
+			radioState.activeFrequency !=
+			route?.getCurrentPoint().updateData.currentTargetFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -236,7 +231,7 @@
 			});
 			return false;
 		} else if (
-			transponderState.frequency != currentRoutePoint.updateData.currentTransponderFrequency
+			transponderState.frequency != route?.getCurrentPoint().updateData.currentTransponderFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -244,7 +239,7 @@
 				body: 'Transponder frequency incorrect'
 			});
 			return false;
-		} else if (altimeterState.pressure != currentRoutePoint.updateData.currentPressure) {
+		} else if (altimeterState.pressure != route?.getCurrentPoint().updateData.currentPressure) {
 			// modalStore.trigger({
 			// 	type: 'alert',
 			// 	title: 'Error',
@@ -391,7 +386,7 @@
 		}
 
 		// Check state matches expected state
-		if (route.length == 0) {
+		if (route == undefined) {
 			console.log('Error: No route');
 			modalStore.trigger({
 				type: 'alert',
@@ -411,12 +406,11 @@
 		currentRadioCall = new RadioCall(
 			userMessage,
 			seed,
-			airborneWaypoints,
 			route,
 			currentRoutePointIndex,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,
-			currentRoutePoint.updateData.callsignModified,
+			route.getCurrentPoint().updateData.callsignModified,
 			transponderState.vfrHasExecuted,
 			currentTarget,
 			currentTargetFrequency,

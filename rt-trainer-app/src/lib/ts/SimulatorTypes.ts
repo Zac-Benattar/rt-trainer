@@ -8,15 +8,15 @@ export type RadioDialMode = 'OFF' | 'SBY';
 export type RadioState = {
 	mode: RadioMode;
 	dialMode: RadioDialMode;
-	activeFrequency: number;
-	standbyFrequency: number;
-	tertiaryFrequency: number;
+	activeFrequency: string;
+	standbyFrequency: string;
+	tertiaryFrequency: string;
 };
 
 /* The state of the transponder. */
 export type TransponderState = {
 	dialMode: TransponderDialMode;
-	frequency: number;
+	frequency: string;
 	identEnabled: boolean;
 	vfrHasExecuted: boolean;
 };

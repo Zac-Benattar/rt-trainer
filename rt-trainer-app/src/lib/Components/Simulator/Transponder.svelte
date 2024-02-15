@@ -28,14 +28,14 @@
 	// Holds current transponder state
 	let transponderState: TransponderState = {
 		dialMode: 'OFF',
-		frequency: 7000,
+		frequency: '7000',
 		identEnabled: false,
 		vfrHasExecuted: false
 	};
 	let dialModeIndex: number = 0;
 	let displayOn: boolean = false;
 	let digitArr = [7, 0, 0, 0];
-	let frequency: number = 7000;
+	let frequency: string = '7000';
 	let frequencyDialEnabled: boolean = false;
 	let displayDigitSelected: number = 0;
 	let mounted: boolean = false;
@@ -43,7 +43,8 @@
 	$: TransponderStateStore.set(transponderState);
 
 	$: if (mounted) {
-		frequency = parseInt(digitArr.join(''));
+		frequency = digitArr.join('');
+		transponderState.frequency = frequency;
 	}
 
 	// Trigger onTransponderDialModeChange when transponderDialMode changes

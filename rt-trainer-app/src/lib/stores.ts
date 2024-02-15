@@ -28,14 +28,14 @@ const initialAircraftDetails: AircraftDetails = {
 const initialRadioState: RadioState = {
 	mode: 'OFF',
 	dialMode: 'OFF',
-	activeFrequency: 0,
-	standbyFrequency: 0,
-	tertiaryFrequency: 0
+	activeFrequency: '000.000',
+	standbyFrequency: '000.000',
+	tertiaryFrequency: '000.000'
 };
 
 const initialTransponderState: TransponderState = {
 	dialMode: 'OFF',
-	frequency: 0,
+	frequency: '0000',
 	identEnabled: false,
 	vfrHasExecuted: false
 };
@@ -146,7 +146,7 @@ export const CurrentTargetStore = derived(CurrentRoutePointStore, ($CurrentRoute
 export const CurrentTargetFrequencyStore = derived(
 	CurrentRoutePointStore,
 	($CurrentRoutePointStore) => {
-		return $CurrentRoutePointStore?.updateData.currentTargetFrequency || 0;
+		return $CurrentRoutePointStore?.updateData.currentTargetFrequency || '000.000';
 	}
 );
 
