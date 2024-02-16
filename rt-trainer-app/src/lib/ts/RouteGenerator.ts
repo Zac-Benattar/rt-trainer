@@ -3,51 +3,17 @@ import type Seed from './Seed';
 import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 
 import ATZ from './AeronauticalClasses/ATZ';
-import { getPolygonCenter, haversineDistance } from './utils';
+import { haversineDistance } from './utils';
 import { db } from '$lib/db/db';
-import {
-	checkSystemHealth,
-	getAllUKAirportReportingPoints,
-	getAllUKAirports,
-	getAllUKAirspace,
-	updateDatabaseWithNewOpenAIPData
-} from './OpenAIPHandler';
-import { fail } from '@sveltejs/kit';
-import {
-	airports,
-	airportReportingPoints,
-	airspaces,
-	polygons,
-	polygonPoints,
-	runways,
-	frequencies
-} from '$lib/db/schema';
+import { checkOpenAIPDataUpToDate, updateDatabaseWithNewOpenAIPData } from './OpenAIPHandler';
+import { polygonPoints } from '$lib/db/schema';
 import { plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
 import Route from './Route';
+import { lt } from 'drizzle-orm';
 
 // TODO
 export default class RouteGenerator {
-	public static async checkOpenAIPDataUpToDate(): Promise<boolean> {
-		// Get from the database the age of the first entry to airports
-		const airport = await db.query.airports.findFirst();
-
-		console.log('airport: ', airport);
-
-		if (airport == undefined) return false;
-
-		const airportCreatedDate = airport?.createdAt?.getTime();
-		const currentDate = Date.now();
-
-		if (airportCreatedDate == undefined) return true;
-
-		if (currentDate - airportCreatedDate > 86400000) {
-			return false;
-		}
-
-		return true;
-	}
-
 	public static async getRoute(seed: Seed): Promise<Route> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
@@ -56,11 +22,13 @@ export default class RouteGenerator {
 		// Ensure database data is up to date - can be moved to somewhere it is run less for even faster responses
 		// Currently going to slow down all route gen methods a decent amount, please move
 
-		const upToDate = await this.checkOpenAIPDataUpToDate();
-		if (upToDate) {
+		const upToDate = await checkOpenAIPDataUpToDate();
+		if (!upToDate) {
 			console.log('OpenAIP data is not up to date');
 			await updateDatabaseWithNewOpenAIPData();
 		}
+
+		await db.delete(polygonPoints).where(lt(polygonPoints.id, 399000));
 
 		// Fetch all airports from the database
 		const airportsResponse = await axios.get(
@@ -77,7 +45,6 @@ export default class RouteGenerator {
 			const airport: unknown = airportsResponse.data[i];
 			allAirports.push(plainToInstance(Airport, airport));
 		}
-		console.log(allAirports[0]);
 
 		// Fetch all airspaces from the database
 		const airspacesResponse = await axios.get('http://localhost:5173/api/ukairspace');
@@ -90,6 +57,7 @@ export default class RouteGenerator {
 		const allAirspaces: ATZ[] = [];
 		for (let i = 0; i < airspacesResponse.data.length; i++) {
 			const airspace: unknown = airspacesResponse.data[i];
+			console.log(airspace);
 			allAirspaces.push(plainToInstance(ATZ, airspace));
 		}
 

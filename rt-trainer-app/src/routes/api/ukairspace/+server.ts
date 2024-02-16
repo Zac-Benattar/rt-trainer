@@ -47,18 +47,14 @@ export async function GET({ url, setHeaders }) {
 	});
 
 	if (radiusMode) {
-		airspaceRows = await db
-			.select()
-			.from(airspaces)
-			.where(
-				sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(centre)) < ${radiusNumber}`
-			)
-			.execute();
+		airspaceRows = await db.query.airspaces.findMany({
+			where: sql`ST_Distance_Sphere(ST_GeomFromText('POINT(${latNumber} ${longNumber})'), ST_GeomFromText(centre)) < ${radiusNumber}`,
+			with: { polygons: true }
+		});
 	} else {
-		airspaceRows = await db
-			.select()
-			.from(airspaces)
-			.execute();
+		airspaceRows = await db.query.airspaces.findMany({
+			with: { polygons: true }
+		});
 	}
 
 	const airspacesAPIFormat = airspaceRows.map((row) => {
@@ -74,7 +70,7 @@ export async function GET({ url, setHeaders }) {
 			byNotam: row.by_notam,
 			specialAgreement: row.special_agreement,
 			requestCompliance: row.request_compliance,
-			centre: row.centre,
+			centre: [row.polygons[0].centreLatitude, row.polygons[0].centreLongitude],
 			country: row.country,
 			upperLimit: row.upper_limit,
 			lowerLimit: row.lower_limit,

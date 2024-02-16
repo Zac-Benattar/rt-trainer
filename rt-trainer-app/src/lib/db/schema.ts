@@ -84,15 +84,18 @@ export const runwaysRelations = relations(runways, ({ one }) => ({
 export const frequencies = mysqlTable('frequency', {
 	id: int('id').autoincrement().primaryKey(),
 	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
-	frequencyFor: varchar('frequency_for', { length: 100 }).notNull(),
+	frequencyFor: int('frequency_for').notNull(),
 	value: varchar('value', { length: 10 }).notNull(),
-	name: varchar('name', { length: 100 }).notNull(),
-	primary: boolean('primary').notNull(),
+	unit: tinyint('unit').notNull(),
+	type: tinyint('type').notNull(),
+	name: varchar('name', { length: 100 }),
+	primary: boolean('primary'),
+	publicUse: boolean('public_use'),
 	createdAt: timestamp('created_at').defaultNow()
 });
 
 export const frequenciesRelations = relations(frequencies, ({ one }) => ({
-	airports: one(airports, { fields: [frequencies.frequencyFor], references: [airports.openaipId] })
+	airports: one(airports, { fields: [frequencies.frequencyFor], references: [airports.id] })
 }));
 
 export const airports = mysqlTable('airport', {

@@ -52,12 +52,25 @@ export async function getAllUKAirports(): Promise<AirportData[]> {
 
 export async function getAllUKAirspace(): Promise<AirspaceData[]> {
 	try {
-		const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+		const response1 = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
 			headers: {
 				'Content-Type': 'application/json',
 				'x-openaip-client-id': OPENAIPKEY
 			},
 			params: {
+				page: 1,
+				country: 'GB',
+				sortBy: 'geometry.coordinates[0][0][0]'
+			}
+		});
+
+		const response2 = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'x-openaip-client-id': OPENAIPKEY
+			},
+			params: {
+				page: 2,
 				country: 'GB',
 				sortBy: 'geometry.coordinates[0][0][0]'
 			}
@@ -65,7 +78,7 @@ export async function getAllUKAirspace(): Promise<AirspaceData[]> {
 
 		console.log('Fetched all airspace from OpenAIP');
 
-		return response.data.items as AirspaceData[];
+		return [...response1.data.items, ...response2.data.items] as AirspaceData[];
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 	}
@@ -94,6 +107,24 @@ export async function getAllUKAirportReportingPoints(): Promise<AirportReporting
 	return [];
 }
 
+export async function checkOpenAIPDataUpToDate(): Promise<boolean> {
+	// Get from the database the age of the first entry to airports
+	const airport = await db.query.airports.findFirst();
+
+	if (airport == undefined) return false;
+
+	const airportCreatedDate = airport?.createdAt?.getTime();
+	const currentDate = Date.now();
+
+	if (airportCreatedDate == undefined) return true;
+
+	if (currentDate - airportCreatedDate > 86400000) {
+		return false;
+	}
+
+	return true;
+}
+
 export async function updateDatabaseWithNewOpenAIPData(): Promise<
 	true | import('@sveltejs/kit').ActionFailure<{ message: string }>
 > {
@@ -119,6 +150,8 @@ export async function updateDatabaseWithNewOpenAIPData(): Promise<
 	 * Fetch all UK airports
 	 */
 	const airportsData = await getAllUKAirports();
+	
+	console.log(`Fetched ${airportsData.length} airports from OpenAIP`);
 
 	/**
 	 * Add airports to database
@@ -174,21 +207,38 @@ export async function updateDatabaseWithNewOpenAIPData(): Promise<
 			pilotCtrlLighting: runway.pilotCtrlLighting,
 			lightingSystem: runway.lightingSystem?.join(', ')
 		}));
-		console.log(runwaysToInsert)
-		if (runwaysToInsert)
-		await db.insert(runways).values(runwaysToInsert);
+
+		if (runwaysToInsert) await db.insert(runways).values(runwaysToInsert);
+
+		// Insert frequencies for the current airport
+		const frequenciesToInsert = airportsData[i].frequencies?.map((frequency) => ({
+			openaipId: frequency._id,
+			frequencyFor: parseInt(airportsTable.insertId),
+			value: frequency.value,
+			unit: frequency.unit,
+			type: frequency.type,
+			name: frequency.name,
+			primary: frequency.primary,
+			publicUse: frequency.publicUse
+		}));
+		if (frequenciesToInsert) await db.insert(frequencies).values(frequenciesToInsert);
 	}
+
 	console.log('Sucessfully inserted Airport data');
 
 	/**
-	 * Clear airspace table
+	 * Clear airspaces, polygon table and polygon points table
 	 */
 	await db.delete(airspaces);
+	await db.delete(polygons);
+	await db.delete(polygonPoints);
 
 	/**
 	 * Fetch all UK airspace
 	 */
 	const airspaceData = await getAllUKAirspace();
+
+	console.log(`Fetched ${airspaceData.length} airspaces from OpenAIP`);
 
 	/**
 	 * Add airspace to database
@@ -237,6 +287,8 @@ export async function updateDatabaseWithNewOpenAIPData(): Promise<
 	 * Fetch all UK airspace
 	 */
 	const airportReportingPointsData = await getAllUKAirportReportingPoints();
+
+	console.log(`Fetched ${airportReportingPointsData.length} airport reporting points from OpenAIP`);
 
 	/**
 	 * Add airspace to database
