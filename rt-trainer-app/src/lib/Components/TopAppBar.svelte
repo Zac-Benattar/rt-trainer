@@ -58,8 +58,8 @@
 				<a class="btn-icon variant-ghost-surface" href="/profile"
 					><Avatar
 						src={userImage}
-						fallback={userInitials}
-						initials="ZB"
+						fallback='/images/user.png'
+						initials={userInitials}
 						border="border-4 border-surface-300-600-token hover:!border-primary-500"
 						cursor="cursor-pointer"
 						data-sveltekit-preload-data="hover"
