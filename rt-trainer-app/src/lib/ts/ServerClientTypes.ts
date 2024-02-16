@@ -4,7 +4,6 @@ import type Seed from './Seed';
 
 export type GenerationParameters = {
 	seed: Seed;
-	airborneWaypoints: number;
 	hasEmergency: boolean;
 };
 

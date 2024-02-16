@@ -1,165 +1,15 @@
 import {
 	primaryKey,
 	mysqlTable,
-	json,
 	int,
 	timestamp,
 	varchar,
-	boolean,
 	tinyint,
 	smallint,
-	mediumint,
 	decimal
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
-
-/**
- * Aeronautical data schema (For data from OpenAIP)
- */
-
-export const polygonPoints = mysqlTable('polygonPoint', {
-	id: int('id').autoincrement().primaryKey(),
-	polygonId: int('polygon_id').notNull(),
-	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
-	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const polygonPointsRelations = relations(polygonPoints, ({ one }) => ({
-	polygon: one(polygons, { fields: [polygonPoints.polygonId], references: [polygons.id] })
-}));
-
-export const polygons = mysqlTable('polygon', {
-	id: int('id').autoincrement().primaryKey(),
-	airspaceId: int('airspace_id').notNull(),
-	centreLatitude: decimal('centre_latitude', { precision: 10, scale: 8 }).notNull(),
-	centreLongitude: decimal('centre_longitude', { precision: 10, scale: 8 }).notNull(),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const polygonsRelations = relations(polygons, ({ one, many }) => ({
-	airspace: one(airspaces, { fields: [polygons.airspaceId], references: [airspaces.id] }),
-	points: many(polygonPoints)
-}));
-
-export const runways = mysqlTable('runway', {
-	id: int('id').autoincrement().primaryKey(),
-	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
-	airportId: int('airport_id').notNull(),
-	designator: varchar('designator', { length: 100 }).notNull(),
-	trueHeading: smallint('true_heading').notNull(),
-	alignedTrueNorth: boolean('aligned_true_north').notNull(),
-	operations: tinyint('operations').notNull(),
-	mainRunway: boolean('main_runway').notNull(),
-	turnDirection: tinyint('turn_direction').notNull(),
-	landingOnly: boolean('landing_only').notNull(),
-	takeOffOnly: boolean('take_off_only').notNull(),
-	lengthValue: smallint('length_value').notNull(),
-	lengthUnit: tinyint('length_unit').notNull(),
-	widthValue: smallint('width_value').notNull(),
-	widthUnit: tinyint('width_unit').notNull(),
-	toraValue: smallint('tora_value').notNull(),
-	toraUnit: tinyint('tora_unit').notNull(),
-	todaValue: smallint('toda_value'),
-	todaUnit: tinyint('toda_unit'),
-	asdaValue: smallint('asda_value'),
-	asdaUnit: tinyint('asda_unit'),
-	ldaValue: smallint('lda_value').notNull(),
-	ldaUnit: tinyint('lda_unit').notNull(),
-	thresholdLat: decimal('threshold_lat', { precision: 10, scale: 8 }),
-	thresholdLon: decimal('threshold_long', { precision: 10, scale: 8 }),
-	thresholdElevationValue: smallint('threshold_elevation_value'),
-	thresholdElevationUnit: tinyint('threshold_elevation_unit'),
-	exclusiveAircraftType: varchar('exclusive_aircraft_type', { length: 20 }),
-	pilotCtrlLighting: boolean('pilot_ctrl_lighting'),
-	lightingSystem: varchar('lighting_system', { length: 20 }),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const runwaysRelations = relations(runways, ({ one }) => ({
-	airport: one(airports, { fields: [runways.airportId], references: [airports.id] })
-}));
-
-export const frequencies = mysqlTable('frequency', {
-	id: int('id').autoincrement().primaryKey(),
-	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
-	frequencyFor: int('frequency_for').notNull(),
-	value: varchar('value', { length: 10 }).notNull(),
-	unit: tinyint('unit').notNull(),
-	type: tinyint('type').notNull(),
-	name: varchar('name', { length: 100 }),
-	primary: boolean('primary'),
-	publicUse: boolean('public_use'),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const frequenciesRelations = relations(frequencies, ({ one }) => ({
-	airports: one(airports, { fields: [frequencies.frequencyFor], references: [airports.id] })
-}));
-
-export const airports = mysqlTable('airport', {
-	id: int('id').autoincrement().primaryKey(),
-	openaipId: varchar('openaip_id', { length: 100 }).notNull(),
-	name: varchar('name', { length: 100 }).notNull(),
-	icaoCode: varchar('icao_code', { length: 4 }),
-	iataCode: varchar('iata_code', { length: 3 }),
-	altIdentifier: varchar('alt_identifier', { length: 100 }),
-	type: tinyint('type').notNull(),
-	country: varchar('country', { length: 2 }).notNull(),
-	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
-	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
-	elevation: smallint('elevation').notNull(),
-	trafficType: varchar('traffic_type', { length: 20 }).notNull(),
-	ppr: boolean('ppr'),
-	private: boolean('private'),
-	skydiveActivity: boolean('skydive_activity'),
-	winchOnly: boolean('winch_only'),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const airportsRelations = relations(airports, ({ many }) => ({
-	runways: many(runways),
-	frequencies: many(frequencies)
-}));
-
-export const airspaces = mysqlTable('airspace', {
-	id: int('id').autoincrement().primaryKey(),
-	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
-	name: varchar('name', { length: 100 }).notNull(),
-	type: tinyint('type').notNull(),
-	icaoClass: tinyint('icao_class').notNull(),
-	activity: tinyint('activity').notNull(),
-	onDemand: boolean('on_demand').notNull(),
-	onRequest: boolean('on_request').notNull(),
-	byNotam: boolean('byNotam').notNull(),
-	specialAgreement: boolean('special_agreement').notNull(),
-	requestCompliance: boolean('request_compliance').notNull(),
-	country: varchar('country', { length: 2 }).notNull(),
-	upperLimit: mediumint('upper_limit').notNull(),
-	lowerLimit: mediumint('lower_limit').notNull(),
-	upperLimitMax: mediumint('upper_limit_max'),
-	lowerLimit_Min: mediumint('lower_limit_min'),
-	createdAt: timestamp('created_at').defaultNow()
-});
-
-export const airspacesRelations = relations(airspaces, ({ many }) => ({
-	polygons: many(polygons)
-}));
-
-export const airportReportingPoints = mysqlTable('reportingPoint', {
-	id: int('id').autoincrement().primaryKey(),
-	openaipId: varchar('openaip_id', { length: 100 }).notNull().unique(),
-	name: varchar('name', { length: 100 }).notNull(),
-	compulsary: boolean('compulsary').notNull(),
-	country: varchar('country', { length: 2 }).notNull(),
-	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
-	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
-	elevation: smallint('elevation').notNull(),
-	// currently comma separated list of
-	airports: varchar('airports', { length: 100 }).notNull(),
-	createdAt: timestamp('created_at').defaultNow()
-});
 
 /**
  * Route data schema
@@ -192,32 +42,7 @@ export const routes = mysqlTable('route', {
 
 export const routesRelations = relations(routes, ({ one, many }) => ({
 	users: one(users, { fields: [routes.createdBy], references: [users.id] }),
-	waypoints: many(waypoints),
-	airspaces: many(routesToAirspaces)
-}));
-
-export const routesToAirspaces = mysqlTable(
-	'routes_to_airspaces',
-	{
-		routeId: int('route_id').notNull(),
-		airspaceId: int('airspace_id').notNull()
-	},
-	(t) => ({
-		compoundKey: primaryKey({
-			columns: [t.routeId, t.airspaceId]
-		})
-	})
-);
-
-export const routesToAirspacesRelations = relations(routesToAirspaces, ({ one }) => ({
-	routes: one(routes, {
-		fields: [routesToAirspaces.routeId],
-		references: [routes.id]
-	}),
-	airspaces: one(airspaces, {
-		fields: [routesToAirspaces.airspaceId],
-		references: [airspaces.id]
-	})
+	waypoints: many(waypoints)
 }));
 
 /**

@@ -3,7 +3,6 @@ import { Frequency } from '../Frequency';
 import type Seed from '../Seed';
 import { Runway } from './Runway';
 import { METORData, METORDataSample } from './METORData';
-import { error } from 'console';
 
 /* Aerodrome data. */
 export class Airport {

@@ -1,16 +1,11 @@
-import axios from 'axios';
 import type Seed from './Seed';
 import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 
 import ATZ from './AeronauticalClasses/ATZ';
 import { haversineDistance } from './utils';
-import { db } from '$lib/db/db';
-import { checkOpenAIPDataUpToDate, updateDatabaseWithNewOpenAIPData } from './OpenAIPHandler';
-import { polygonPoints } from '$lib/db/schema';
 import { plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
 import Route from './Route';
-import { lt } from 'drizzle-orm';
 
 // TODO
 export default class RouteGenerator {
@@ -19,25 +14,7 @@ export default class RouteGenerator {
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
 
-		// Ensure database data is up to date - can be moved to somewhere it is run less for even faster responses
-		// Currently going to slow down all route gen methods a decent amount, please move
-
-		const upToDate = await checkOpenAIPDataUpToDate();
-		if (!upToDate) {
-			console.log('OpenAIP data is not up to date');
-			await updateDatabaseWithNewOpenAIPData();
-		}
-
-		await db.delete(polygonPoints).where(lt(polygonPoints.id, 399000));
-
-		// Fetch all airports from the database
-		const airportsResponse = await axios.get(
-			'http://localhost:5173/api/ukairports?type=0&type=2&type=3&type=9'
-		);
-
-		if (airportsResponse.data.length == 0) {
-			throw new Error('No airports found');
-		}
+		// Load airports from json file
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
@@ -46,18 +23,12 @@ export default class RouteGenerator {
 			allAirports.push(plainToInstance(Airport, airport));
 		}
 
-		// Fetch all airspaces from the database
-		const airspacesResponse = await axios.get('http://localhost:5173/api/ukairspace');
-
-		if (airspacesResponse.data.length == 0) {
-			throw new Error('No airspaces found');
-		}
+		// Load airspaces from json file
 
 		// Add airspaces to list of valid airspaces for route
 		const allAirspaces: ATZ[] = [];
 		for (let i = 0; i < airspacesResponse.data.length; i++) {
 			const airspace: unknown = airspacesResponse.data[i];
-			console.log(airspace);
 			allAirspaces.push(plainToInstance(ATZ, airspace));
 		}
 
@@ -92,8 +63,8 @@ export default class RouteGenerator {
 			const nearbyATZs: ATZ[] = [];
 			for (let i = 0; i < allAirspaces.length; i++) {
 				const distance = haversineDistance(
-					startAirport.coordinates[1],
 					startAirport.coordinates[0],
+					startAirport.coordinates[1],
 					allAirspaces[i].centre[0],
 					allAirspaces[i].centre[1]
 				);

@@ -15,7 +15,6 @@ const initialGenerationParameters: GenerationParameters = {
 		scenarioSeed: 0,
 		weatherSeed: 0
 	},
-	airborneWaypoints: 2,
 	hasEmergency: false
 };
 
@@ -158,8 +157,6 @@ export const TutorialStore = writable<boolean>(false);
 
 // System status stores
 export const NullRouteStore = writable<boolean>(false);
-
-export const OpenAIPHealthStore = writable<string>('');
 
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);

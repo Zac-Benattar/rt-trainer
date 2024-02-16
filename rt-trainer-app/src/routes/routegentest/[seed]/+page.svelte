@@ -4,8 +4,6 @@
 	import {
 		ClearSimulationStores,
 		GenerationParametersStore,
-		NullRouteStore,
-		OpenAIPHealthStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Route';
@@ -15,8 +13,6 @@
 	import axios from 'axios';
 
 	ClearSimulationStores();
-
-	checkOpenAIPHealth();
 
 	let user: number = $page.data.session?.user?.id ? parseInt($page.data.session.user.id) : -1;
 
@@ -50,39 +46,14 @@
 		hasEmergency = (emergenciesString === 'True' || emergenciesString === 'true') ? true : false;
 	}
 
-	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
+	GenerationParametersStore.set({ seed, hasEmergency });
 
 	generateRoute();
-
-	let openAIPHealth: string = 'Unknown';
-
-	OpenAIPHealthStore.subscribe((health) => {
-		openAIPHealth = health;
-	});
 
 	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((route) => {
 		waypoints = route;
 	});
-
-	// For testing
-	async function checkOpenAIPHealth(): Promise<void> {
-		try {
-			const response = await axios.get(`/api/openaiphealth`);
-
-			if (response === undefined) {
-				NullRouteStore.set(true);
-			} else {
-				OpenAIPHealthStore.set(response.data);
-			}
-		} catch (error: unknown) {
-			if (error.message == 'Network Error') {
-				NullRouteStore.set(true);
-			} else {
-				console.error('Error: ', error);
-			}
-		}
-	}
 
 	async function pushRouteToDB(): Promise<void> {
 		try {
@@ -113,7 +84,6 @@
 
 <div class="flex flex-col gap-5 p-5">
 	<div class="flex flex-col gap-1 card p-5 max-w-lg">
-		<div>OpenAIP Status: {openAIPHealth}</div>
 		<div>Route Length: {waypoints.length}</div>
 		<button class="btn-md rounded-md variant-filled w-48" on:click={pushRouteToDB}
 			>Push to route table</button
