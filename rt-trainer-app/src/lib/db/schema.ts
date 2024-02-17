@@ -37,7 +37,7 @@ export const routes = mysqlTable('route', {
 	name: varchar('name', { length: 100 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
-	createdBy: int('created_by').notNull()
+	createdBy: varchar('created_by', { length: 255 }).notNull()
 });
 
 export const routesRelations = relations(routes, ({ one, many }) => ({

@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Map from '$lib/Components/Simulator/Map.svelte';
-	import {
-		ClearSimulationStores,
-		GenerationParametersStore,
-		WaypointsStore
-	} from '$lib/stores';
+	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Route';
 	import Seed from '$lib/ts/Seed';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -13,8 +9,6 @@
 	import axios from 'axios';
 
 	ClearSimulationStores();
-
-	let user: number = $page.data.session?.user?.id ? parseInt($page.data.session.user.id) : -1;
 
 	// Get the seed
 	let seedString = $page.params.seed;
@@ -43,7 +37,7 @@
 	let hasEmergency: boolean = false;
 	const emergenciesString: string | null = $page.url.searchParams.get('emergencies');
 	if (emergenciesString != null) {
-		hasEmergency = (emergenciesString === 'True' || emergenciesString === 'true') ? true : false;
+		hasEmergency = emergenciesString === 'True' || emergenciesString === 'true' ? true : false;
 	}
 
 	GenerationParametersStore.set({ seed, hasEmergency });
@@ -59,7 +53,7 @@
 		try {
 			const response = await axios.post(`/api/routes`, {
 				name: 'test',
-				createdBy: user,
+				createdBy: $page.data.userId,
 				waypointsObject: waypoints
 			});
 
