@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
+	import type { PageData } from './$types';
+	
+	export let data: PageData;
 
 	const radioCallData = {
 		title: 'Radio Calls Made',
@@ -54,6 +57,23 @@
 					>
 						{(radioCallData.correctPercentageLast30Days * 100).toFixed(0)}%
 					</ProgressRadial>
+				</div>
+				<div>
+					<div class="h3">Recently Created Routes</div>
+					<div class="flex flex-col gap-3">
+						{#each data.recentRoutes as route}
+							<div class="card p-3 flex flex-row justify-between">
+								<div class="flex flex-col gap-1">
+									<a class="h4" href='/routes/{route.id}'>{route.name}</a>
+									<div class="text-sm opacity-70">{route.createdAt}</div>
+								</div>
+								<!-- <div class="flex flex-col gap-1">
+									<div class="h4">{flight.departure}</div>
+									<div class="h4">{flight.arrival}</div>
+								</div> -->
+							</div>
+						{/each}
+					</div>
 				</div>
 			</div>
 		{/if}

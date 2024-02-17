@@ -10,13 +10,19 @@ import {
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
+import { init } from '@paralleldrive/cuid2';
+
+const shortCUID = init({ length: 12 });
 
 /**
  * Route data schema
  */
 
 export const waypoints = mysqlTable('waypoint', {
-	id: int('id').autoincrement().primaryKey(),
+	id: varchar('id', { length: 12 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => shortCUID()),
 	index: smallint('index').notNull(), // Holds the position of the point in the route
 	type: tinyint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
 	name: varchar('name', { length: 100 }).notNull(),
@@ -33,7 +39,10 @@ export const waypointsRelations = relations(waypoints, ({ one }) => ({
 }));
 
 export const routes = mysqlTable('route', {
-	id: int('id').autoincrement().primaryKey(),
+	id: varchar('id', { length: 12 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => shortCUID()),
 	name: varchar('name', { length: 100 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
