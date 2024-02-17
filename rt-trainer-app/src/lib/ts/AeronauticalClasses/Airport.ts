@@ -14,7 +14,7 @@ export class Airport {
 	country: string;
 	coordinates: [number, number];
 	elevation: number;
-	trafficType: string;
+	trafficType: number[];
 	ppr: boolean;
 	private: boolean;
 	skydiveActivity: boolean;
@@ -36,7 +36,7 @@ export class Airport {
 		country: string,
 		coordinates: [number, number],
 		elevation: number,
-		trafficType: string,
+		trafficType: number[],
 		ppr: boolean,
 		privateAerodrome: boolean,
 		skydiveActivity: boolean,

@@ -1,11 +1,13 @@
 import type Seed from './Seed';
 import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 
-import ATZ from './AeronauticalClasses/ATZ';
+import Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
 import { plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
 import Route from './Route';
+import { checkDataUpToDate, readDataFromJSON, writeDataToJSON } from './OpenAIPHandler';
+import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 // TODO
 export default class RouteGenerator {
@@ -13,23 +15,26 @@ export default class RouteGenerator {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
+		let airportsData: AirportData[] = [];
+		let airspacesData: AirspaceData[] = [];
 
-		// Load airports from json file
+		// // Remove for production
+		// writeDataToJSON();
+
+		// Load data
+		[airportsData, airspacesData] = await readDataFromJSON();
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
-		for (let i = 0; i < airportsResponse.data.length; i++) {
-			const airport: unknown = airportsResponse.data[i];
+		for (let i = 0; i < airportsData.length; i++) {
+			const airport: unknown = airportsData[i];
 			allAirports.push(plainToInstance(Airport, airport));
 		}
-
-		// Load airspaces from json file
-
 		// Add airspaces to list of valid airspaces for route
-		const allAirspaces: ATZ[] = [];
-		for (let i = 0; i < airspacesResponse.data.length; i++) {
-			const airspace: unknown = airspacesResponse.data[i];
-			allAirspaces.push(plainToInstance(ATZ, airspace));
+		const allAirspaces: Airspace[] = [];
+		for (let i = 0; i < airspacesData.length; i++) {
+			const airspace: unknown = airspacesData[i];
+			allAirspaces.push(plainToInstance(Airspace, airspace));
 		}
 
 		console.log(`Total Airports: ${allAirports.length} \n Total Airspaces: ${allAirspaces.length}`);
@@ -39,10 +44,10 @@ export default class RouteGenerator {
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
-		let chosenMATZ: ATZ;
+		let chosenMATZ: Airspace;
 		let matzEntry: [number, number] | undefined | null;
 		let matzExit: [number, number] | undefined | null;
-		let onRouteAirspace: ATZ[] = [];
+		let onRouteAirspace: Airspace[] = [];
 
 		let validRoute = false;
 		let iterations = 0;
@@ -60,7 +65,7 @@ export default class RouteGenerator {
 			}
 
 			// Get all ATZ within 30km of the start airport
-			const nearbyATZs: ATZ[] = [];
+			const nearbyATZs: Airspace[] = [];
 			for (let i = 0; i < allAirspaces.length; i++) {
 				const distance = haversineDistance(
 					startAirport.coordinates[0],
@@ -72,7 +77,7 @@ export default class RouteGenerator {
 			}
 
 			// Get all valid MATZ from nearby ATZs
-			const nearbyMATZs: ATZ[] = nearbyATZs.filter(
+			const nearbyMATZs: Airspace[] = nearbyATZs.filter(
 				(x) => x.type == 14 && !x.pointInsideATZ(startAirport.coordinates)
 			);
 			if (nearbyMATZs.length == 0) {

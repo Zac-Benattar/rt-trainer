@@ -15,7 +15,7 @@
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
-	import type ATZ from '$lib/ts/AeronauticalClasses/ATZ';
+	import type Airspace from '$lib/ts/AeronauticalClasses/ATZ';
 
 	type MapWaypoint = {
 		lat: number;
@@ -230,7 +230,7 @@
 		}
 	}
 
-	async function drawATZ(atz: ATZ) {
+	async function drawATZ(atz: Airspace) {
 		if (mounted) {
 			await map;
 
@@ -239,7 +239,7 @@
 		}
 	}
 
-	async function drawMATZ(atz: ATZ) {
+	async function drawMATZ(atz: Airspace) {
 		if (mounted) {
 			await map;
 

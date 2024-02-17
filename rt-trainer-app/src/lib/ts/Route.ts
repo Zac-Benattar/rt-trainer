@@ -11,7 +11,7 @@ import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import { Waypoint } from './AeronauticalClasses/Waypoint';
 import RoutePoint from './RoutePoints';
-import ATZ from './AeronauticalClasses/ATZ';
+import Airspace from './AeronauticalClasses/Airspace';
 import { Type } from 'class-transformer';
 import type { Airport } from './AeronauticalClasses/Airport';
 import Seed from './Seed';
@@ -25,8 +25,8 @@ export default class Route {
 	@Type(() => RoutePoint)
 	routePoints: RoutePoint[] = [];
 
-	@Type(() => ATZ)
-	atzs: ATZ[] = [];
+	@Type(() => Airspace)
+	atzs: Airspace[] = [];
 
 	@Type(() => Waypoint)
 	waypoints: Waypoint[] = [];
@@ -35,7 +35,7 @@ export default class Route {
 	constructor(
 		seed: Seed,
 		points: RoutePoint[],
-		atzs: ATZ[],
+		atzs: Airspace[],
 		waypoints: Waypoint[],
 		currentPointIndex?: number
 	) {

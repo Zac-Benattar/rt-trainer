@@ -67,6 +67,7 @@ export type AirspaceData = {
 	byNotam: boolean;
 	specialAgreement: boolean;
 	requestCompliance: boolean;
+	centrePoint: [number, number];
 	geometry: {
 		type: 'Polygon';
 		coordinates: [[number, number][]];
