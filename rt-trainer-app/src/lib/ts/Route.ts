@@ -12,7 +12,7 @@ import type RadioCall from './RadioCall';
 import { Waypoint } from './AeronauticalClasses/Waypoint';
 import RoutePoint from './RoutePoints';
 import Airspace from './AeronauticalClasses/Airspace';
-import { Type } from 'class-transformer';
+import { Type, plainToInstance } from 'class-transformer';
 import type { Airport } from './AeronauticalClasses/Airport';
 import Seed from './Seed';
 import 'reflect-metadata';
@@ -143,7 +143,7 @@ export async function generateRoute(): Promise<void> {
 			NullRouteStore.set(true);
 		} else {
 			ResetCurrentRoutePointIndex();
-			RouteStore.set(response.data);
+			RouteStore.set(plainToInstance(Route, response.data));
 
 			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 			// So we need to set it to the last point in the route if it has not been set

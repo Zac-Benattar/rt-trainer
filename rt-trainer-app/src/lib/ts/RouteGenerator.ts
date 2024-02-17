@@ -1,12 +1,16 @@
 import type Seed from './Seed';
 import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 
-import Airspace from './AeronauticalClasses/Airspace';
+import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
-import { plainToInstance } from 'class-transformer';
-import { Airport } from './AeronauticalClasses/Airport';
+import type { Airport } from './AeronauticalClasses/Airport';
 import Route from './Route';
-import { checkDataUpToDate, readDataFromJSON, writeDataToJSON } from './OpenAIPHandler';
+import {
+	airportDataToAirport,
+	airspaceDataToAirspace,
+	readDataFromJSON,
+	writeDataToJSON
+} from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 // TODO
@@ -19,7 +23,7 @@ export default class RouteGenerator {
 		let airspacesData: AirspaceData[] = [];
 
 		// // Remove for production
-		// writeDataToJSON();
+		// await writeDataToJSON();
 
 		// Load data
 		[airportsData, airspacesData] = await readDataFromJSON();
@@ -27,19 +31,20 @@ export default class RouteGenerator {
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
 		for (let i = 0; i < airportsData.length; i++) {
-			const airport: unknown = airportsData[i];
-			allAirports.push(plainToInstance(Airport, airport));
+			const airport: Airport = airportDataToAirport(airportsData[i]);
+			allAirports.push(airport);
 		}
+
 		// Add airspaces to list of valid airspaces for route
 		const allAirspaces: Airspace[] = [];
 		for (let i = 0; i < airspacesData.length; i++) {
-			const airspace: unknown = airspacesData[i];
-			allAirspaces.push(plainToInstance(Airspace, airspace));
+			const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
+			allAirspaces.push(airspace);
 		}
 
 		console.log(`Total Airports: ${allAirports.length} \n Total Airspaces: ${allAirspaces.length}`);
 
-		const maxIterations = 20;
+		const maxIterations = 200;
 		const numberOfValidAirports = allAirports.length;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
@@ -70,8 +75,8 @@ export default class RouteGenerator {
 				const distance = haversineDistance(
 					startAirport.coordinates[0],
 					startAirport.coordinates[1],
-					allAirspaces[i].centre[0],
-					allAirspaces[i].centre[1]
+					allAirspaces[i].centrePoint[0],
+					allAirspaces[i].centrePoint[1]
 				);
 				if (distance < 30000) nearbyATZs.push(allAirspaces[i]);
 			}
@@ -89,17 +94,23 @@ export default class RouteGenerator {
 			const numberOfMATZs = nearbyMATZs.length;
 			chosenMATZ = nearbyMATZs[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfMATZs];
 
+			// This doesn't work - seed 4324 has an issue
+			if (chosenMATZ.pointInsideATZ(startAirport.coordinates)) {
+				validRoute = false;
+				continue;
+			}
+
 			// Get airports within 50km of the chosen MATZ
 			const possibleDestinations = [];
-			const matzCenter = chosenMATZ.centre;
+			const matzCenter = chosenMATZ.centrePoint;
 
 			for (let i = 0; i < allAirports.length; i++) {
 				const airport = allAirports[i];
 				const distance = haversineDistance(
 					matzCenter[0],
 					matzCenter[1],
-					airport.coordinates[1],
-					airport.coordinates[0]
+					airport.coordinates[0],
+					airport.coordinates[1]
 				);
 
 				if (
@@ -123,7 +134,7 @@ export default class RouteGenerator {
 					possibleDestinations[
 						(seed.scenarioSeed * (destIterations + 1)) % possibleDestinations.length
 					];
-				console.log(destinationAirport);
+				// console.log(destinationAirport);
 
 				if (startAirportIsControlled && destinationAirport.type != 3) {
 					validDestinationAirport = true;
@@ -145,7 +156,7 @@ export default class RouteGenerator {
 
 			matzEntry = chosenMATZ.getClosestPointOnEdge(startAirport.coordinates);
 			matzExit = chosenMATZ.getClosestPointOnEdge(destinationAirport.coordinates);
-			if (matzEntry == undefined || matzExit == undefined) {
+			if (matzEntry == undefined || matzExit == undefined || matzEntry == matzExit) {
 				validRoute = false;
 				continue;
 			}
@@ -160,8 +171,8 @@ export default class RouteGenerator {
 			onRouteAirspace = [];
 			for (let i = 0; i < nearbyATZs.length; i++) {
 				const atz = nearbyATZs[i];
-				if (atz.isIncludedInRoute(route) && onRouteAirspace.indexOf(atz) == -1) {
-					if (atz.type == 14) {
+				if (atz.isIncludedInRoute(route)) {
+					if (atz.type == 1 || atz.type == 14 && atz != chosenMATZ) {
 						validRoute = false;
 						break;
 					}

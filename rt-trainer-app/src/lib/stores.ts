@@ -133,7 +133,9 @@ export const CurrentRoutePointStore = derived(
 	[RouteStore, CurrentRoutePointIndexStore],
 	([$RouteStore]) => {
 		if ($RouteStore) {
-			return $RouteStore.getCurrentPoint();
+			if ($RouteStore.routePoints.length > 0) {
+				return $RouteStore.getCurrentPoint();
+			}
 		}
 	}
 );

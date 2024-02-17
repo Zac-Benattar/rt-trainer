@@ -26,15 +26,19 @@ export async function writeDataToJSON(): Promise<void> {
 
 	for (let i = 0; i < airspaces.length; i++) {
 		const centrePoint = getPolygonCenter(airspaces[i].geometry.coordinates[0]);
-		airspaces[i].centrePoint = [centrePoint[1], centrePoint[0]];
+		airspaces[i].centrePoint = [centrePoint[0], centrePoint[1]];
 	}
 
 	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaces, null, 2));
 }
 
 export async function readDataFromJSON(): Promise<[AirportData[], AirspaceData[]]> {
-	const airportsData = JSON.parse(readFileSync('src/lib/data/airports.json', 'utf8')) as AirportData[];
-	const airspacesData = JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
+	const airportsData = JSON.parse(
+		readFileSync('src/lib/data/airports.json', 'utf8')
+	) as AirportData[];
+	const airspacesData = JSON.parse(
+		readFileSync('src/lib/data/airspaces.json', 'utf8')
+	) as AirspaceData[];
 
 	return [airportsData, airspacesData];
 }
@@ -54,7 +58,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 		airportData.private,
 		airportData.skydiveActivity,
 		airportData.winchOnly,
-		airportData.runways.map((runway) => {
+		airportData.runways?.map((runway) => {
 			return new Runway(
 				runway.designator,
 				runway.trueHeading,
@@ -70,25 +74,25 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 				runway.dimension.width.unit,
 				runway.declaredDistance.tora.value,
 				runway.declaredDistance.tora.unit,
-				runway.declaredDistance.toda.value,
-				runway.declaredDistance.toda.unit,
-				runway.declaredDistance.asda.value,
-				runway.declaredDistance.asda.unit,
+				runway.declaredDistance.toda?.value,
+				runway.declaredDistance.toda?.unit,
+				runway.declaredDistance.asda?.value,
+				runway.declaredDistance.asda?.unit,
 				runway.declaredDistance.lda.value,
 				runway.declaredDistance.lda.unit,
 				[
-					runway.thresholdLocation.geometry.coordinates[1],
-					runway.thresholdLocation.geometry.coordinates[0]
+					runway.thresholdLocation?.geometry.coordinates[1],
+					runway.thresholdLocation?.geometry.coordinates[0]
 				],
-				runway.thresholdLocation.elevation.value,
-				runway.thresholdLocation.elevation.unit,
+				runway.thresholdLocation?.elevation.value,
+				runway.thresholdLocation?.elevation.unit,
 				runway.exclusiveAircraftType,
 				runway.pilotCtrlLighting,
 				runway.lightingSystem,
 				runway.visualApproachAids
 			);
 		}),
-		airportData.frequencies.map((frequency) => {
+		airportData.frequencies?.map((frequency) => {
 			return new Frequency(frequency.value, frequency.unit, frequency.name, frequency.primary);
 		})
 	);
@@ -105,13 +109,15 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 		airspaceData.byNotam,
 		airspaceData.specialAgreement,
 		airspaceData.requestCompliance,
-		airspaceData.centrePoint,
-		airspaceData.geometry.coordinates[0],
+		[airspaceData.centrePoint[1], airspaceData.centrePoint[0]],
+		airspaceData.geometry.coordinates[0].map((coordinate) => {
+			return [coordinate[1], coordinate[0]];
+		}),
 		airspaceData.country,
 		airspaceData.upperLimit.value,
 		airspaceData.lowerLimit.value,
-		airspaceData.upperLimitMax.value,
-		airspaceData.lowerLimitMin.value
+		airspaceData.upperLimitMax?.value,
+		airspaceData.lowerLimitMin?.value
 	);
 }
 

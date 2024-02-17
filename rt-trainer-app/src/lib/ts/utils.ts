@@ -4,7 +4,7 @@ import type Seed from './Seed';
 export function simpleHash(str: string): number {
 	let hash = 0;
 
-	if (str.length === 0) {
+	if (str === undefined || str.length === 0) {
 		return hash;
 	}
 

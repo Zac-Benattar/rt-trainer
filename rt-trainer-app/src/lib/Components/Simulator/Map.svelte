@@ -15,7 +15,7 @@
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
-	import type Airspace from '$lib/ts/AeronauticalClasses/ATZ';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	type MapWaypoint = {
 		lat: number;
@@ -64,6 +64,12 @@
 	});
 
 	WaypointsStore.subscribe((waypoints) => {
+		if (waypoints.length == 0) {
+			return;
+		}
+
+		console.log(waypoints)
+
 		// Get all waypoints from the route
 		mapWaypoints = [];
 		for (let i = 0; i < waypoints.length; i++) {
@@ -72,8 +78,8 @@
 				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 			}
 			mapWaypoints.push({
-				lat: waypoints[i].getCoords()[1],
-				long: waypoints[i].getCoords()[0],
+				lat: waypoints[i].lat,
+				long: waypoints[i].long,
 				name: name
 			});
 		}
