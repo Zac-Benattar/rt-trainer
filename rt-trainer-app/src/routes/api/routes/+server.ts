@@ -24,10 +24,10 @@ export async function POST({ request }) {
 			if (waypointsObject[i].waypointType == null || waypointsObject[i].waypointType == undefined) {
 				return json({ error: `No type provided for waypoint point ${i}` });
 			}
-			if (!waypointsObject[i].geometry[0][1]) {
+			if (!waypointsObject[i].lat) {
 				return json({ error: `No lat provided for waypoint point ${i}` });
 			}
-			if (!waypointsObject[i].geometry[0][0]) {
+			if (!waypointsObject[i].long) {
 				return json({ error: `No long provided for waypoint point ${i}` });
 			}
 		}
