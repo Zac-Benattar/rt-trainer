@@ -2,7 +2,8 @@
 	import { page } from '$app/stores';
 	import { ProgressRadial } from '@skeletonlabs/skeleton';
 	import type { PageData } from './$types';
-	
+	import { goto } from '$app/navigation';
+
 	export let data: PageData;
 
 	const radioCallData = {
@@ -58,19 +59,24 @@
 						{(radioCallData.correctPercentageLast30Days * 100).toFixed(0)}%
 					</ProgressRadial>
 				</div>
-				<div>
-					<div class="h3">Recently Created Routes</div>
+				<div class="flex flex-col gap-3">
+					<div class="h3">Recently Created Scenarios</div>
 					<div class="flex flex-col gap-3">
-						{#each data.recentRoutes as route}
+						{#if data.recentScenarios.length === 0}
+							<div class="card p-3 flex flex-col gap-3">
+								You havent made any scenarios yet. <button
+									type="button"
+									class="btn variant-filled"
+									on:click={() => goto('/createscenario')}>Create One</button
+								>
+							</div>
+						{/if}
+						{#each data.recentScenarios as scenario}
 							<div class="card p-3 flex flex-row justify-between">
 								<div class="flex flex-col gap-1">
-									<a class="h4" href='/routes/{route.id}'>{route.name}</a>
-									<div class="text-sm opacity-70">{route.createdAt}</div>
+									<a class="h4" href="/scenario/{scenario.id}">{scenario.name}</a>
+									<div class="text-sm opacity-70">{scenario.createdAt}</div>
 								</div>
-								<!-- <div class="flex flex-col gap-1">
-									<div class="h4">{flight.departure}</div>
-									<div class="h4">{flight.arrival}</div>
-								</div> -->
 							</div>
 						{/each}
 					</div>

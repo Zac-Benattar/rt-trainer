@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { desc, eq } from 'drizzle-orm';
-import { scenarios, users } from '$lib/db/schema';
+import { routes, users } from '$lib/db/schema';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
@@ -24,15 +24,16 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		recentScenarios: await db.query.scenarios.findMany({
+		userRecentRoutes: await db.query.routes.findMany({
 			columns: {
 				id: true,
 				name: true,
+                description: true,
 				createdAt: true
 			},
-			where: eq(scenarios.createdBy, userId),
-			orderBy: [desc(scenarios.createdAt)],
-			limit: 5
+			where: eq(routes.createdBy, userId),
+			orderBy: [desc(routes.createdAt)],
+			limit: 20
 		})
 	};
 };
