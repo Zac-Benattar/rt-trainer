@@ -44,6 +44,7 @@ export const routes = mysqlTable('route', {
 		.primaryKey()
 		.$defaultFn(() => shortCUID()),
 	name: varchar('name', { length: 100 }).notNull(),
+	description: varchar('description', { length: 2000 }),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
 	createdBy: varchar('created_by', { length: 255 }).notNull()
@@ -51,7 +52,29 @@ export const routes = mysqlTable('route', {
 
 export const routesRelations = relations(routes, ({ one, many }) => ({
 	users: one(users, { fields: [routes.createdBy], references: [users.id] }),
+	scenarios: many(scenarios),
 	waypoints: many(waypoints)
+}));
+
+export const scenarios = mysqlTable('scenario', {
+	id: varchar('id', { length: 12 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => shortCUID()),
+	name: varchar('name', { length: 100 }).notNull(),
+	description: varchar('description', { length: 2000 }),
+	route: varchar('route', { length: 12 }).notNull(),
+	weatherSeed: varchar('weather_seed', { length: 20 })
+		.notNull()
+		.$defaultFn(() => shortCUID()),
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow(),
+	createdBy: varchar('created_by', { length: 255 }).notNull()
+});
+
+export const scenariosRelations = relations(scenarios, ({ one }) => ({
+	users: one(users, { fields: [scenarios.createdBy], references: [users.id] }),
+	routes: one(routes, { fields: [scenarios.route], references: [routes.id] })
 }));
 
 /**
