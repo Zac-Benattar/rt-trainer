@@ -89,9 +89,15 @@ export const users = mysqlTable('user', {
 	email: varchar('email', { length: 255 }).notNull(),
 	emailVerified: timestamp('emailVerified', { mode: 'date', fsp: 3 }).defaultNow(),
 	image: varchar('image', { length: 255 }),
-	prefix: varchar('prefix', { length: 20 }),
-	callsign: varchar('callsign', { length: 20 }),
+	prefix: varchar('prefix', { length: 20 })
+		.notNull()
+		.default('STUDENT'),
+	callsign: varchar('callsign', { length: 20 })
+		.notNull()
+		.default('G-OFLY'),
 	aircraftType: varchar('aircraftType', { length: 30 })
+		.notNull()
+		.default('Cessna 172'),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
