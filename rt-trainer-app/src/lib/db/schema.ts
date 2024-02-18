@@ -6,7 +6,8 @@ import {
 	varchar,
 	tinyint,
 	smallint,
-	decimal
+	decimal,
+	boolean
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
@@ -67,6 +68,7 @@ export const scenarios = mysqlTable('scenario', {
 	weatherSeed: varchar('weather_seed', { length: 20 })
 		.notNull()
 		.$defaultFn(() => shortCUID()),
+	hasEmergency: boolean('has_emergency').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
 	createdBy: varchar('created_by', { length: 255 }).notNull()
@@ -86,7 +88,10 @@ export const users = mysqlTable('user', {
 	name: varchar('name', { length: 255 }),
 	email: varchar('email', { length: 255 }).notNull(),
 	emailVerified: timestamp('emailVerified', { mode: 'date', fsp: 3 }).defaultNow(),
-	image: varchar('image', { length: 255 })
+	image: varchar('image', { length: 255 }),
+	prefix: varchar('prefix', { length: 20 }),
+	callsign: varchar('callsign', { length: 20 }),
+	aircraftType: varchar('aircraftType', { length: 30 })
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
