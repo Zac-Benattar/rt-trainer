@@ -613,8 +613,20 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 	const latMargin = (bounds[1][0] - bounds[0][0]) * 0.1;
 	const longMargin = (bounds[1][1] - bounds[0][1]) * 0.1;
 
-	return [
+	if (latMargin === 0 || longMargin === 0) {
+		return bounds;
+	}
+
+	if (Number.isNaN(bounds[0][0]) || Number.isNaN(bounds[0][1]) || Number.isNaN(bounds[1][0]) || Number.isNaN(bounds[1][1]))
+		return [
+			[0, 0],
+			[0, 0]
+		];
+
+	const newBounds = [
 		[bounds[0][0] - latMargin, bounds[0][1] - longMargin],
 		[bounds[1][0] + latMargin, bounds[1][1] + longMargin]
 	];
+
+	return newBounds;
 }

@@ -32,6 +32,8 @@
 	let currentLocationMarker: any;
 	let waypoints: Waypoint[] = [];
 	let markers: any[] = [];
+	let polygons: any[] = [];
+	let lines: any[] = [];
 	let needsToBeUpdated: boolean = false;
 	let initialZoomLevel: number = 13;
 	let map: any;
@@ -107,17 +109,9 @@
 
 		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
 
-		if (mode == MapMode.RoutePlan || (mode == MapMode.ScenarioPlan && waypoints.length > 0)) {
+		if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
 			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 		}
-
-		planeIcon = L.icon({
-			iconUrl: '/images/plane.png',
-
-			iconSize: [40, 40], // size of the icon
-			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
-		});
 
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 17,
@@ -132,6 +126,14 @@
 		connectMarkers();
 
 		if (mode == MapMode.Scenario) {
+			planeIcon = L.icon({
+				iconUrl: '/images/plane.png',
+
+				iconSize: [40, 40], // size of the icon
+				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+				popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+			});
+
 			// Sets the current location marker, done last to make sure it is on top
 			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
 				icon: planeIcon,
@@ -170,11 +172,11 @@
 
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
-			if (mode == MapMode.RoutePlan || (mode == MapMode.ScenarioPlan && waypoints.length > 0)) {
+			if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
 				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 			}
 
-			removeMarkers();
+			removeGeometry();
 
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
@@ -210,22 +212,32 @@
 		markers.push(L.marker([lat, long]).bindPopup(name).addTo(map));
 	}
 
-	async function removeMarkers() {
+	async function removeGeometry() {
 		markers.forEach((marker) => {
 			map.removeLayer(marker);
 		});
 		markers = [];
+		lines.forEach((line) => {
+			map.removeLayer(line);
+		});
+		lines = [];
+		polygons.forEach((polygon) => {
+			map.removeLayer(polygon);
+		});
+		polygons = [];
 	}
 
 	async function connectMarkers() {
 		if (markers.length > 1) {
 			for (let i = 0; i < markers.length - 1; i++) {
-				L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
-					color: 'red',
-					weight: 3,
-					opacity: 0.5,
-					smoothFactor: 1
-				}).addTo(map);
+				lines.push(
+					L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
+						color: 'red',
+						weight: 3,
+						opacity: 0.5,
+						smoothFactor: 1
+					}).addTo(map)
+				);
 			}
 		}
 	}
@@ -235,7 +247,9 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.coordinates, { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map);
+			polygons.push(
+				L.polygon(atz.coordinates, { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map)
+			);
 		}
 	}
 
@@ -244,7 +258,9 @@
 			await map;
 
 			// Draw the ATZ
-			L.polygon(atz.coordinates, { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map);
+			polygons.push(
+				L.polygon(atz.coordinates, { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map)
+			);
 		}
 	}
 
