@@ -8,14 +8,11 @@ import type {
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
-import { Waypoint } from './ts/AeronauticalClasses/Waypoint';
+import type Airspace from './ts/AeronauticalClasses/Airspace';
+import type { Waypoint } from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
-	seed: {
-		seedString: '0',
-		scenarioSeed: 0,
-		weatherSeed: 0
-	},
+	seed: '0',
 	hasEmergency: false
 };
 
@@ -85,13 +82,7 @@ export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 
 export const WaypointsStore = writable<Waypoint[]>([]);
 
-export const AirspacesStore = derived(ScenarioStore, ($RouteStore) => {
-	if ($RouteStore) {
-		return $RouteStore.airspaces;
-	} else {
-		return [];
-	}
-});
+export const AirspacesStore = writable<Airspace[]>([]);
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
 

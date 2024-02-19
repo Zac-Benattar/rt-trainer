@@ -1,4 +1,5 @@
 import {
+	AirspacesStore,
 	CurrentRoutePointIndexStore,
 	EndPointIndexStore,
 	GenerationParametersStore,
@@ -139,7 +140,10 @@ export async function generateRoute(routeSeed: string): Promise<void> {
 			NullRouteStore.set(true);
 		} else {
 			WaypointsStore.set(
-				response.data.map((waypoint: Waypoint) => plainToInstance(Waypoint, waypoint))
+				response.data.waypoints.map((waypoint: Waypoint) => plainToInstance(Waypoint, waypoint))
+			);
+			AirspacesStore.set( 
+				response.data.airspaces.map((airspace: Airspace) => plainToInstance(Airspace, airspace))
 			);
 		}
 	} catch (error: unknown) {

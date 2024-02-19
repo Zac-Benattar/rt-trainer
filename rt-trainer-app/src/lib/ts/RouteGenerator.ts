@@ -4,9 +4,10 @@ import { haversineDistance } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
 import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
+import type { Route } from './AeronauticalClasses/Route';
 
 export default class RouteGenerator {
-	public static async generateFRTOLRouteFromSeed(seed: number): Promise<Waypoint[]> {
+	public static async generateFRTOLRouteFromSeed(seed: number): Promise<Route> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
@@ -252,6 +253,10 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		return [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint];
+		return {
+			waypoints: [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint],
+			airspaces: onRouteAirspace,
+			airports: [startAirport, destinationAirport],
+		}
 	}
 }

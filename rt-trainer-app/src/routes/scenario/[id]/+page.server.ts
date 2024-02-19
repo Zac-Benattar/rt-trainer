@@ -55,6 +55,7 @@ export const load: PageServerLoad = async (event) => {
 			waypoint.index
 		);
 	});
+	waypoints.sort((a, b) => a.index - b.index);
 
 	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypoints);
 
