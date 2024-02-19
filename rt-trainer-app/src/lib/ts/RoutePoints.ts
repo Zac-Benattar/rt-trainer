@@ -1,5 +1,4 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
-import type Seed from './Seed';
 import { EmergencyType, type Pose } from './RouteTypes';
 import {
 	ChangeZoneStage,
@@ -12,7 +11,6 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './RouteStages';
-import Scenario from './Scenario';
 import { lerp, lerpLocation } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
 import type { Waypoint } from './AeronauticalClasses/Waypoint';
@@ -41,7 +39,7 @@ export default class RoutePoint {
 }
 
 export function getParkedInitialControlledUpdateData(
-	seed: Seed,
+	seed: string,
 	airport: Airport
 ): SimulatorUpdateData {
 	return {
@@ -328,7 +326,7 @@ export function getStartAerodromeRoutePoints(seed: Seed, route: Scenario): Route
 	return stages;
 }
 
-export function getEndAerodromeRoutePoints(seed: Seed, route: Scenario): RoutePoint[] {
+export function getEndAerodromeRoutePoints(seed: number, route: Scenario): RoutePoint[] {
 	const stages: RoutePoint[] = [];
 	const endAerodrome: Airport = route.getEndAirport();
 	const waypoints: Waypoint[] = []

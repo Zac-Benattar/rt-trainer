@@ -37,17 +37,17 @@
 		MapMode
 
 	} from '$lib/ts/SimulatorTypes';
-	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import { Feedback } from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
-	import { updated } from '$app/stores';
+	import { page, updated } from '$app/stores';
 	import Scenario, { checkRadioCallByServer, loadScenario } from '$lib/ts/Scenario';
 
 	// Simulator state and settings
-	let seed: Seed;
+	export let scenarioId: string;
+	let seed: string;
 	let hasEmergency: boolean;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
@@ -162,7 +162,7 @@
 	});
 
 	EndPointIndexStore.subscribe((value) => {
-		if (scenario && value >= scenario.routePoints.length) {
+		if (scenario && scenario.routePoints && value >= scenario.routePoints.length) {
 			value = scenario.routePoints.length - 1;
 		}
 
@@ -405,7 +405,7 @@
 		awaitingRadioCallCheck = true;
 		currentRadioCall = new RadioCall(
 			userMessage,
-			weatherSeed,
+			seed,
 			scenario,
 			currentRoutePointIndex,
 			aircraftDetails.prefix,
@@ -443,7 +443,7 @@
 				body: 'Do you want view your feedback?',
 				response: (r: boolean) => {
 					if (r) {
-						goto('/scenario/' + weatherSeed.seedString + '/results/');
+						goto('/scenario/' + scenarioId + '/results/');
 					}
 				}
 			};
@@ -475,7 +475,7 @@
 	}
 
 	onMount(async () => {
-		loadScenario();
+		loadScenario(scenario);
 
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;

@@ -65,7 +65,7 @@ export const scenarios = mysqlTable('scenario', {
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
 	route: varchar('route', { length: 12 }).notNull(),
-	weatherSeed: varchar('weather_seed', { length: 20 })
+	seed: varchar('seed', { length: 20 })
 		.notNull()
 		.$defaultFn(() => shortCUID()),
 	hasEmergency: boolean('has_emergency').notNull(),

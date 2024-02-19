@@ -11,41 +11,33 @@ import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import { Waypoint } from './AeronauticalClasses/Waypoint';
 import RoutePoint from './RoutePoints';
-import Airspace from './AeronauticalClasses/Airspace';
 import { Type, plainToInstance } from 'class-transformer';
-import type { Airport } from './AeronauticalClasses/Airport';
-import Seed from './Seed';
+import { Airport } from './AeronauticalClasses/Airport';
 import 'reflect-metadata';
+import Airspace from './AeronauticalClasses/Airspace';
 
 /* Route generated for a scenario. */
 export default class Scenario {
-	@Type(() => Seed)
-	seed: Seed;
+	seed: string;
 
 	@Type(() => RoutePoint)
 	routePoints: RoutePoint[] = [];
 
+	@Type(() => Airport)
+	airports: Airport[] = [];
+
 	@Type(() => Airspace)
-	atzs: Airspace[] = [];
+	airspaces: Airspace[] = [];
 
 	@Type(() => Waypoint)
 	waypoints: Waypoint[] = [];
 	currentPointIndex: number = 0;
 
-	constructor(
-		seed: Seed,
-		points: RoutePoint[],
-		atzs: Airspace[],
-		waypoints: Waypoint[],
-		currentPointIndex?: number
-	) {
+	constructor(seed: string, waypoints: Waypoint[]) {
 		this.seed = seed;
-		this.routePoints = points;
-		this.atzs = atzs;
 		this.waypoints = waypoints;
-		if (currentPointIndex !== undefined) {
-			this.currentPointIndex = currentPointIndex;
-		}
+
+		this.generateScenario();
 	}
 
 	public getCurrentPoint(): RoutePoint {
@@ -65,11 +57,11 @@ export default class Scenario {
 	}
 
 	public getStartAirport(): Airport {
-		throw new Error('Unimplemented function');
+		return this.airports[0];
 	}
 
 	public getEndAirport(): Airport {
-		throw new Error('Unimplemented function');
+		return this.airports[this.airports.length - 1];
 	}
 }
 
@@ -92,36 +84,6 @@ NullRouteStore.subscribe((value) => {
 
 export function ResetCurrentRoutePointIndex(): void {
 	CurrentRoutePointIndexStore.set(startPointIndex);
-}
-
-/**
- * Gets the scenario from the db and loads it into the store
- *
- * @remarks
- * This function initiates the scenario by getting the route, waypoints and ATZs from the server.
- * It then updates the stores with the route, waypoints and ATZs.
- *
- * @returns Promise<void>
- */
-export async function loadScenario(scenarioId: string): Promise<void> {
-	// Get the state from the server
-	const response = await axios.get(`/scenario/${scenarioId}/scenario`);
-
-	if (response.data === undefined || response.data.error != undefined) {
-		NullRouteStore.set(true);
-	} else {
-		console.log(response);
-
-		// Update stores with the route
-		ResetCurrentRoutePointIndex();
-		ScenarioStore.set(response.data);
-
-		// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
-		// So we need to set it to the last point in the route if it has not been set
-		if (endPointIndex == -1) {
-			EndPointIndexStore.set(response.data.routePoints.length - 1);
-		}
-	}
 }
 
 /**

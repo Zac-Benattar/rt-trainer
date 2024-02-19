@@ -7,7 +7,7 @@ import { plainToInstance } from 'class-transformer';
 export async function POST({ request }) {
 	const { data } = await request.json();
 
-	const radioCall: RadioCall = plainToInstance(RadioCall, data)
+	const radioCall: RadioCall = plainToInstance(RadioCall, data as RadioCall)
 
 	const result: ServerResponse = Parser.parseCall(radioCall);
 

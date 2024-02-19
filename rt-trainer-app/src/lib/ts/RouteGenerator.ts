@@ -1,21 +1,17 @@
-import type Seed from './Seed';
 import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
-
 import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
-import Scenario from './Scenario';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
 	readDataFromJSON,
-	writeDataToJSON
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 // TODO
 export default class RouteGenerator {
-	public static async getRoute(seed: Seed): Promise<Scenario> {
+	public static async getRoute(seed: number): Promise<Waypoint[]> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
@@ -64,7 +60,7 @@ export default class RouteGenerator {
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
 			startAirport =
-				allAirports[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfValidAirports];
+				allAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
 			if (startAirport.type == 3 || startAirport.type == 9) {
 				startAirportIsControlled = true;
 			}
@@ -92,7 +88,7 @@ export default class RouteGenerator {
 
 			// Choose a MATZ to fly through
 			const numberOfMATZs = nearbyMATZs.length;
-			chosenMATZ = nearbyMATZs[(seed.scenarioSeed * 7919 * (iterations + 1)) % numberOfMATZs];
+			chosenMATZ = nearbyMATZs[(seed * 7919 * (iterations + 1)) % numberOfMATZs];
 
 			// This doesn't work - seed 4324 has an issue
 			if (chosenMATZ.pointInsideATZ(startAirport.coordinates)) {
@@ -132,9 +128,8 @@ export default class RouteGenerator {
 				destIterations++;
 				destinationAirport =
 					possibleDestinations[
-						(seed.scenarioSeed * (destIterations + 1)) % possibleDestinations.length
+						(seed * (destIterations + 1)) % possibleDestinations.length
 					];
-				// console.log(destinationAirport);
 
 				if (startAirportIsControlled && destinationAirport.type != 3) {
 					validDestinationAirport = true;
@@ -172,7 +167,7 @@ export default class RouteGenerator {
 			for (let i = 0; i < nearbyATZs.length; i++) {
 				const atz = nearbyATZs[i];
 				if (atz.isIncludedInRoute(route)) {
-					if (atz.type == 1 || atz.type == 14 && atz != chosenMATZ) {
+					if (atz.type == 1 || (atz.type == 14 && atz != chosenMATZ)) {
 						validRoute = false;
 						break;
 					}
@@ -265,11 +260,6 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		return new Scenario(
-			seed,
-			[],
-			[chosenMATZ, ...onRouteAirspace],
-			[startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint]
-		);
+		return [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint];	
 	}
 }

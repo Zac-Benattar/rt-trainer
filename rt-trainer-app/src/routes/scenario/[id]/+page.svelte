@@ -2,25 +2,20 @@
 	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
 	import {
-		AircraftDetailsStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
-		GenerationParametersStore,
+		ScenarioStore,
 		StartPointIndexStore,
 		TutorialStore
 	} from '$lib/stores';
-	import Seed from '$lib/ts/Seed';
-	import { generateRandomURLValidString } from '$lib/ts/utils';
+	import type { PageData } from './$types';
+	import Scenario from '$lib/ts/Scenario';
+	import { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 
-	/* Read in generation parameters from the URL. Using stores would not be sufficent 
-	given that this would prevent users from pasting in a URL and getting the correct parameters. */
+	export let data: PageData;
 
-	// Get the seed
-	let seedString = $page.params.seed;
-	if (seedString == null) {
-		seedString = generateRandomURLValidString(8);
-	}
-	let seed: Seed = new Seed(seedString);
+	// Get the slug
+	const { id } = $page.params;
 
 	// Check whether the callsign is specified
 	const callsignString: string | null = $page.url.searchParams.get('callsign');
@@ -61,22 +56,6 @@
 		}
 	}
 
-	// Check whether the number of airborne waypoints are specified
-	const airborneWaypointsString: string | null = $page.url.searchParams.get('airborneWaypoints');
-	let airborneWaypoints: number = 2;
-	if (
-		airborneWaypointsString == null ||
-		airborneWaypointsString == undefined ||
-		airborneWaypointsString == ''
-	) {
-		airborneWaypoints = 2;
-	} else {
-		airborneWaypoints = parseInt(airborneWaypointsString);
-		if (airborneWaypoints < 0 || airborneWaypoints > 5) {
-			airborneWaypoints = 2;
-		}
-	}
-
 	// Check whether emergencies are enabled
 	let hasEmergency: boolean = false;
 	const emergenciesString: string | null = $page.url.searchParams.get('emergencies');
@@ -111,14 +90,33 @@
 		tutorial = tutorialString === 'True';
 	}
 
-	GenerationParametersStore.set({ seed, airborneWaypoints, hasEmergency });
-	AircraftDetailsStore.set({ callsign, prefix, aircraftType });
+	if (data.scenario == null) {
+		throw new Error('Scenario data is not available');
+	}
+
+	const waypoints: Waypoint[] = data.scenario?.routes.waypoints.map(
+		(waypoint) =>
+			new Waypoint(
+				waypoint.name,
+				parseFloat(waypoint.latitude),
+				parseFloat(waypoint.longitude),
+				waypoint.type,
+				waypoint.index,
+				waypoint.description?.toString()
+			)
+	);
+
+	ScenarioStore.set(new Scenario(data.scenario?.seed, waypoints));
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);
-	EndPointIndexStore.set(endPointIndex);
+	if (endPointIndex == -1) {
+		EndPointIndexStore.set(routePoints.length - 1);
+	} else {
+		EndPointIndexStore.set(endPointIndex);
+	}
 	TutorialStore.set(tutorial);
 </script>
 
 <div class="flex" style="justify-content: center;">
-	<Simulator />
+	<Simulator scenarioId={id}/>
 </div>
