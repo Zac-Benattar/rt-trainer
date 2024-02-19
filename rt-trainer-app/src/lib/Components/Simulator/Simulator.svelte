@@ -14,10 +14,9 @@
 		UserMessageStore,
 		ATCMessageStore,
 		CurrentTargetStore,
-		RouteStore,
+		ScenarioStore,
 		AircraftDetailsStore,
 		GenerationParametersStore,
-		CurrentRoutePointStore,
 		SpeechOutputEnabledStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
@@ -29,11 +28,14 @@
 		AltimeterStateStore
 	} from '$lib/stores';
 	import type RoutePoint from '$lib/ts/RoutePoints';
-	import type {
-		TransponderState,
-		AircraftDetails,
-		RadioState,
-		AltimeterState
+	import {
+		type TransponderState,
+		type AircraftDetails,
+		type RadioState,
+		type AltimeterState,
+
+		MapMode
+
 	} from '$lib/ts/SimulatorTypes';
 	import type Seed from '$lib/ts/Seed';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
@@ -42,11 +44,10 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
 	import { updated } from '$app/stores';
-	import Route, { checkRadioCallByServer, loadScenario } from '$lib/ts/Route';
+	import Scenario, { checkRadioCallByServer, loadScenario } from '$lib/ts/Scenario';
 
 	// Simulator state and settings
 	let seed: Seed;
-	let airborneWaypoints: number = 2;
 	let hasEmergency: boolean;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
@@ -56,7 +57,7 @@
 	let userMessage: string;
 	let currentTarget: string;
 	let currentTargetFrequency: string;
-	let route: Route | undefined = undefined;
+	let scenario: Scenario | undefined = undefined;
 	let currentRoutePointIndex: number = 0;
 	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
@@ -105,10 +106,10 @@
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
 	$: tutorialStep3 =
 		radioState?.activeFrequency ==
-		route?.getCurrentPoint().updateData.currentTargetFrequency;
+		scenario?.getCurrentPoint().updateData.currentTargetFrequency;
 
-	RouteStore.subscribe((value) => {
-		route = value;
+	ScenarioStore.subscribe((value) => {
+		scenario = value;
 	});
 
 	SpeechOutputEnabledStore.subscribe((value) => {
@@ -121,7 +122,6 @@
 
 	GenerationParametersStore.subscribe((value) => {
 		seed = value.seed;
-		airborneWaypoints = value.airborneWaypoints;
 		hasEmergency = value.hasEmergency;
 	});
 
@@ -162,8 +162,8 @@
 	});
 
 	EndPointIndexStore.subscribe((value) => {
-		if (route && value >= route.routePoints.length) {
-			value = route.routePoints.length - 1;
+		if (scenario && value >= scenario.routePoints.length) {
+			value = scenario.routePoints.length - 1;
 		}
 
 		endPointIndex = value;
@@ -222,7 +222,7 @@
 			return false;
 		} else if (
 			radioState.activeFrequency !=
-			route?.getCurrentPoint().updateData.currentTargetFrequency
+			scenario?.getCurrentPoint().updateData.currentTargetFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -231,7 +231,7 @@
 			});
 			return false;
 		} else if (
-			transponderState.frequency != route?.getCurrentPoint().updateData.currentTransponderFrequency
+			transponderState.frequency != scenario?.getCurrentPoint().updateData.currentTransponderFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -239,7 +239,7 @@
 				body: 'Transponder frequency incorrect'
 			});
 			return false;
-		} else if (altimeterState.pressure != route?.getCurrentPoint().updateData.currentPressure) {
+		} else if (altimeterState.pressure != scenario?.getCurrentPoint().updateData.currentPressure) {
 			// modalStore.trigger({
 			// 	type: 'alert',
 			// 	title: 'Error',
@@ -386,7 +386,7 @@
 		}
 
 		// Check state matches expected state
-		if (route == undefined) {
+		if (scenario == undefined) {
 			console.log('Error: No route');
 			modalStore.trigger({
 				type: 'alert',
@@ -405,12 +405,12 @@
 		awaitingRadioCallCheck = true;
 		currentRadioCall = new RadioCall(
 			userMessage,
-			seed,
-			route,
+			weatherSeed,
+			scenario,
 			currentRoutePointIndex,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,
-			route.getCurrentPoint().updateData.callsignModified,
+			scenario.getCurrentPoint().updateData.callsignModified,
 			transponderState.vfrHasExecuted,
 			currentTarget,
 			currentTargetFrequency,
@@ -443,7 +443,7 @@
 				body: 'Do you want view your feedback?',
 				response: (r: boolean) => {
 					if (r) {
-						goto('/scenario/' + seed.seedString + '/results/');
+						goto('/scenario/' + weatherSeed.seedString + '/results/');
 					}
 				}
 			};
@@ -546,12 +546,8 @@
 
 		<Transponder />
 
-		<Map enabled={mapEnabled} flightInfoOverlayEnabled={true}/>
+		<Map enabled={mapEnabled} mode={MapMode.Scenario}/>
 
 		<Altimeter />
-
-		<!-- <Kneeboard /> -->
-
-		<!-- <ScenarioLink /> -->
 	</div>
 </div>

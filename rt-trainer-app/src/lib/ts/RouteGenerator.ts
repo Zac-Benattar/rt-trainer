@@ -4,7 +4,7 @@ import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
-import Route from './Route';
+import Scenario from './Scenario';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
@@ -15,7 +15,7 @@ import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTyp
 
 // TODO
 export default class RouteGenerator {
-	public static async getRoute(seed: Seed): Promise<Route> {
+	public static async getRoute(seed: Seed): Promise<Scenario> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
@@ -265,7 +265,7 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		return new Route(
+		return new Scenario(
 			seed,
 			[],
 			[chosenMATZ, ...onRouteAirspace],

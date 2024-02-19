@@ -7,7 +7,7 @@ import type {
 	TransponderState
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
-import type Route from './ts/Route';
+import type Scenario from './ts/Scenario';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -71,10 +71,10 @@ export const ATCMessageStore = writable<string>('');
 
 export const KneeboardStore = writable<string>('');
 
-// Route stores
-export const RouteStore = writable<Route | undefined>(undefined);
+// Scenario stores
+export const ScenarioStore = writable<Scenario | undefined>(undefined);
 
-export const RoutePointStore = derived(RouteStore, ($RouteStore) => {
+export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 	if ($RouteStore) {
 		return $RouteStore.routePoints;
 	} else {
@@ -82,7 +82,7 @@ export const RoutePointStore = derived(RouteStore, ($RouteStore) => {
 	}
 });
 
-export const WaypointsStore = derived(RouteStore, ($RouteStore) => {
+export const WaypointsStore = derived(ScenarioStore, ($RouteStore) => {
 	if ($RouteStore) {
 		return $RouteStore.waypoints;
 	} else {
@@ -90,7 +90,7 @@ export const WaypointsStore = derived(RouteStore, ($RouteStore) => {
 	}
 });
 
-export const AirspacesStore = derived(RouteStore, ($RouteStore) => {
+export const AirspacesStore = derived(ScenarioStore, ($RouteStore) => {
 	if ($RouteStore) {
 		return $RouteStore.atzs;
 	} else {
@@ -130,7 +130,7 @@ function createEndPointIndexStore() {
 export const EndPointIndexStore = createEndPointIndexStore();
 
 export const CurrentRoutePointStore = derived(
-	[RouteStore, CurrentRoutePointIndexStore],
+	[ScenarioStore, CurrentRoutePointIndexStore],
 	([$RouteStore]) => {
 		if ($RouteStore) {
 			if ($RouteStore.routePoints.length > 0) {
@@ -173,7 +173,7 @@ export function ClearSimulationStores(): void {
 	ExpectedUserMessageStore.set('');
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
-	RouteStore.set(undefined);
+	ScenarioStore.set(undefined);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

@@ -1,4 +1,4 @@
-import type Route from './Route';
+import type Scenario from './Scenario';
 import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
@@ -20,7 +20,7 @@ import type { Airport } from './AeronauticalClasses/Airport';
 export default class RadioCall {
 	private message: string;
 	private seed: Seed;
-	private route: Route;
+	private route: Scenario;
 	private currentPointIndex: number;
 	private prefix: string;
 	private userCallsign: string;
@@ -37,7 +37,7 @@ export default class RadioCall {
 	constructor(
 		message: string,
 		seed: Seed,
-		route: Route,
+		route: Scenario,
 		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,

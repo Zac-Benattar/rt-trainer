@@ -12,7 +12,7 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './RouteStages';
-import Route from './Route';
+import Scenario from './Scenario';
 import { lerp, lerpLocation } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
 import type { Waypoint } from './AeronauticalClasses/Waypoint';
@@ -106,7 +106,7 @@ export function getParkedMadeContactUncontrolledUpdateData(
     TakeOff,
 	Climb Out of the start aerodrome's airspace.
 	 */
-export function getStartAerodromeRoutePoints(seed: Seed, route: Route): RoutePoint[] {
+export function getStartAerodromeRoutePoints(seed: Seed, route: Scenario): RoutePoint[] {
 	const stages: RoutePoint[] = [];
 	const startAerodrome: Airport = route.getStartAirport();
 	const startAerodromeTime: number = startAerodrome.getStartTime();
@@ -328,7 +328,7 @@ export function getStartAerodromeRoutePoints(seed: Seed, route: Route): RoutePoi
 	return stages;
 }
 
-export function getEndAerodromeRoutePoints(seed: Seed, route: Route): RoutePoint[] {
+export function getEndAerodromeRoutePoints(seed: Seed, route: Scenario): RoutePoint[] {
 	const stages: RoutePoint[] = [];
 	const endAerodrome: Airport = route.getEndAirport();
 	const waypoints: Waypoint[] = []

@@ -3,8 +3,8 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	const seed = event.params.seed;
+	const routeId = event.params.id;
 
-	if (!session?.user && seed != 'demo') throw redirect(303, '/login');
+	if (!session?.user && routeId != 'demo') throw redirect(303, '/login');
 	return {};
 };

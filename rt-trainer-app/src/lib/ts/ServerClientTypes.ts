@@ -24,7 +24,6 @@ export class ServerResponse {
 export type CallParsingContext = {
 	radioCall: string;
 	seed: Seed;
-
 };
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */

@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
-	import { generateRoute } from '$lib/ts/Route';
+	import { generateRoute } from '$lib/ts/Scenario';
 	import Seed from '$lib/ts/Seed';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { generateRandomURLValidString } from '$lib/ts/utils';

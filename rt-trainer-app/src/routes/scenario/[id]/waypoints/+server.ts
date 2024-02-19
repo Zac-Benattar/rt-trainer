@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import Route from '$lib/ts/Route';
+import Scenario from '$lib/ts/Scenario';
 import Seed from '$lib/ts/Seed';
 
 export async function GET({ params, url, setHeaders }) {
@@ -25,5 +25,5 @@ export async function GET({ params, url, setHeaders }) {
 		'cache-control': 'max-age=60'
 	});
 
-	return json(Route.getRouteWaypoints(seed, airborneWaypoints));
+	return json(Scenario.getRouteWaypoints(seed, airborneWaypoints));
 }

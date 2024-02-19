@@ -3,7 +3,7 @@ import {
 	EndPointIndexStore,
 	GenerationParametersStore,
 	NullRouteStore,
-	RouteStore,
+	ScenarioStore,
 	StartPointIndexStore
 } from '$lib/stores';
 import axios from 'axios';
@@ -18,7 +18,7 @@ import Seed from './Seed';
 import 'reflect-metadata';
 
 /* Route generated for a scenario. */
-export default class Route {
+export default class Scenario {
 	@Type(() => Seed)
 	seed: Seed;
 
@@ -89,7 +89,6 @@ let routeGenerated = false;
 NullRouteStore.subscribe((value) => {
 	routeGenerated = !value;
 });
-let currentRouteId: number = 2;
 
 export function ResetCurrentRoutePointIndex(): void {
 	CurrentRoutePointIndexStore.set(startPointIndex);
@@ -104,9 +103,9 @@ export function ResetCurrentRoutePointIndex(): void {
  *
  * @returns Promise<void>
  */
-export async function loadScenario(): Promise<void> {
+export async function loadScenario(scenarioId: string): Promise<void> {
 	// Get the state from the server
-	const response = await axios.get(`/scenario/${currentRouteId}/route`);
+	const response = await axios.get(`/scenario/${scenarioId}/scenario`);
 
 	if (response.data === undefined || response.data.error != undefined) {
 		NullRouteStore.set(true);
@@ -115,7 +114,7 @@ export async function loadScenario(): Promise<void> {
 
 		// Update stores with the route
 		ResetCurrentRoutePointIndex();
-		RouteStore.set(response.data);
+		ScenarioStore.set(response.data);
 
 		// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 		// So we need to set it to the last point in the route if it has not been set
@@ -143,7 +142,7 @@ export async function generateRoute(): Promise<void> {
 			NullRouteStore.set(true);
 		} else {
 			ResetCurrentRoutePointIndex();
-			RouteStore.set(plainToInstance(Route, response.data));
+			ScenarioStore.set(plainToInstance(Scenario, response.data as Scenario));
 
 			// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
 			// So we need to set it to the last point in the route if it has not been set
