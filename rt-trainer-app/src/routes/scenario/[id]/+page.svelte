@@ -11,6 +11,7 @@
 	import type { PageData } from './$types';
 	import Scenario from '$lib/ts/Scenario';
 	import { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+	import { plainToInstance } from 'class-transformer';
 
 	export let data: PageData;
 
@@ -106,7 +107,7 @@
 			)
 	);
 
-	const scenario = new Scenario(data.scenario?.seed, waypoints);
+	const scenario = plainToInstance(Scenario, data.scenario);
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);

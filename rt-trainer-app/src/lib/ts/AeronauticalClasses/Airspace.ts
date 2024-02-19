@@ -2,7 +2,6 @@ import {
 	lineIntersectsPolygon,
 	pointInPolygon,
 	getClosestPointFromCollection,
-	getIntersectionPoints
 } from '../utils';
 
 export default class Airspace {
@@ -90,13 +89,5 @@ export default class Airspace {
 			}
 		}
 		return false;
-	}
-
-	public getRouteIntersectionPoints(route: [number, number][]): [number, number][] {
-		const intersectionPoints: [number, number][] = [];
-		for (let i = 0; i < route.length - 1; i++) {
-			intersectionPoints.push(...getIntersectionPoints(route[i], route[i + 1], this.coordinates));
-		}
-		return intersectionPoints;
 	}
 }

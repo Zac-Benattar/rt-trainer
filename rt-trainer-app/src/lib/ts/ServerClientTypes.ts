@@ -1,9 +1,8 @@
 import type { Feedback } from './Feedback';
 import type { EmergencyType } from './ScenarioTypes';
-import type Seed from './Seed';
 
 export type GenerationParameters = {
-	seed: Seed;
+	seed: string;
 	hasEmergency: boolean;
 };
 
@@ -23,7 +22,7 @@ export class ServerResponse {
 /* Context which must be sent to the server for use in parsing. */
 export type CallParsingContext = {
 	radioCall: string;
-	seed: Seed;
+	seed: string;
 };
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */

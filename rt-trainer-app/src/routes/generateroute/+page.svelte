@@ -16,8 +16,7 @@
 
 	$: {
 		ClearSimulationStores();
-		GenerationParametersStore.set({ seed: routeSeed, hasEmergency: true });
-		generateRoute();
+		generateRoute(routeSeed);
 	}
 
 	let waypoints: Waypoint[] = [];

@@ -8,6 +8,7 @@ import type {
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
+import { Waypoint } from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: {
@@ -82,13 +83,7 @@ export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 	}
 });
 
-export const WaypointsStore = derived(ScenarioStore, ($RouteStore) => {
-	if ($RouteStore) {
-		return $RouteStore.waypoints;
-	} else {
-		return [];
-	}
-});
+export const WaypointsStore = writable<Waypoint[]>([]);
 
 export const AirspacesStore = derived(ScenarioStore, ($RouteStore) => {
 	if ($RouteStore) {

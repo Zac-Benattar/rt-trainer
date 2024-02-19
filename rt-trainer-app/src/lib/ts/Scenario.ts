@@ -4,7 +4,8 @@ import {
 	GenerationParametersStore,
 	NullRouteStore,
 	ScenarioStore,
-	StartPointIndexStore
+	StartPointIndexStore,
+	WaypointsStore
 } from '$lib/stores';
 import axios from 'axios';
 import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
@@ -33,7 +34,13 @@ export default class Scenario {
 	waypoints: Waypoint[] = [];
 	currentPointIndex: number = 0;
 
-	constructor(seed: string, waypoints: Waypoint[], airspace: Airspace[], airports: Airport[], scenarioPoints: ScenarioPoint[]) {
+	constructor(
+		seed: string,
+		waypoints: Waypoint[],
+		airspace: Airspace[],
+		airports: Airport[],
+		scenarioPoints: ScenarioPoint[]
+	) {
 		this.seed = seed;
 		this.waypoints = waypoints;
 		this.airspaces = airspace;
@@ -74,10 +81,6 @@ let endPointIndex = 0;
 EndPointIndexStore.subscribe((value) => {
 	endPointIndex = value;
 });
-let generationParameters: GenerationParameters;
-GenerationParametersStore.subscribe((value) => {
-	generationParameters = value;
-});
 let routeGenerated = false;
 NullRouteStore.subscribe((value) => {
 	routeGenerated = !value;
@@ -88,18 +91,16 @@ export function ResetCurrentRoutePointIndex(): void {
 }
 
 /**
- * Generates a route from the server
+ * Fetches the scenario info from the server where it is generated
  *
  * @remarks
- * This function generates a route from the server and updates the store with the route.
+ * This function generates a scenario from the server and updates the stores with the scenario details.
  *
  * @returns Promise<void>
  */
-export async function generateRoute(): Promise<void> {
+export async function generateScenario(routeSeed: string): Promise<void> {
 	try {
-		const response = await axios.get(
-			`/routegentest/seed=${generationParameters.seed.seedString}?hasEmergency=${generationParameters.hasEmergency}`
-		);
+		const response = await axios.get(`/scenario/?seed=${routeSeed}`);
 
 		if (response.data === undefined) {
 			NullRouteStore.set(true);
@@ -123,6 +124,34 @@ export async function generateRoute(): Promise<void> {
 }
 
 /**
+ * Gets a generated route from the server
+ *
+ * @remarks
+ * This function fetches a route from the server and updates the route store with its details.
+ *
+ * @returns Promise<void>
+ */
+export async function generateRoute(routeSeed: string): Promise<void> {
+	try {
+		const response = await axios.get(`/generateroute/?seed=${routeSeed}`);
+
+		if (response.data === undefined) {
+			NullRouteStore.set(true);
+		} else {
+			WaypointsStore.set(
+				response.data.map((waypoint: Waypoint) => plainToInstance(Waypoint, waypoint))
+			);
+		}
+	} catch (error: unknown) {
+		if (error.message === 'Network Error') {
+			NullRouteStore.set(true);
+		} else {
+			console.log('Error: ', error);
+		}
+	}
+}
+
+/**
  * Checks the radio call by the server
  *
  * @remarks
@@ -131,19 +160,17 @@ export async function generateRoute(): Promise<void> {
  * @returns Promise<ServerResponse | undefined>
  */
 export async function checkRadioCallByServer(
-	radioCall: RadioCall
+	radioCall: RadioCall,
+	scenarioId: string
 ): Promise<ServerResponse | undefined> {
 	if (!routeGenerated) {
 		console.log('Error: No route');
 		return;
 	}
 	try {
-		const response = await axios.post(
-			`/scenario/seed=${generationParameters.seed.scenarioSeed}/parse`,
-			{
-				data: radioCall
-			}
-		);
+		const response = await axios.post(`/scenario/${scenarioId}/parse`, {
+			data: radioCall
+		});
 
 		return response.data;
 	} catch (error) {
