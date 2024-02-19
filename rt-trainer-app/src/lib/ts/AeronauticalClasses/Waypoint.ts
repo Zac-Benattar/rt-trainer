@@ -1,6 +1,6 @@
 /* Point in space along a route. */
 export class Waypoint {
-	waypointType: WaypointType;
+	type: WaypointType;
 	lat: number;
 	long: number;
 	index: number;
@@ -20,7 +20,7 @@ export class Waypoint {
 		this.name = name;
 		this.lat = lat;
 		this.long = long;
-		this.waypointType = waypointType;
+		this.type = waypointType;
 		this.index = index;
 		if (description) {
 			this.description = description;

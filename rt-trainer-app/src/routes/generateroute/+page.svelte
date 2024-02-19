@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Map from '$lib/Components/Map.svelte';
-	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
+	import { ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Scenario';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';

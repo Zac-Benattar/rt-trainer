@@ -15,7 +15,7 @@ export function simpleHash(str: string): number {
 		hash = (hash << 5) - hash + char;
 	}
 
-	return hash;
+	return Math.abs(hash);
 }
 
 // Splits a number into two halves and pads them with zeros to make sure they are the same length

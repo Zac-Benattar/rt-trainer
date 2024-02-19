@@ -95,18 +95,6 @@
 		throw new Error('Scenario data is not available');
 	}
 
-	const waypoints: Waypoint[] = data.scenario?.routes.waypoints.map(
-		(waypoint) =>
-			new Waypoint(
-				waypoint.name,
-				parseFloat(waypoint.latitude),
-				parseFloat(waypoint.longitude),
-				waypoint.type,
-				waypoint.index,
-				waypoint.description?.toString()
-			)
-	);
-
 	const scenario = plainToInstance(Scenario, data.scenario);
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);

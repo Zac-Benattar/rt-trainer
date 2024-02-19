@@ -4,7 +4,7 @@ import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 import { json } from '@sveltejs/kit';
 
 export async function POST({ request }) {
-	const { name, createdBy, waypointsObject } = await request.json();
+	const { name, createdBy, waypointsObject, type } = await request.json();
 
 	console.log(name, createdBy, waypointsObject);
 
@@ -21,7 +21,7 @@ export async function POST({ request }) {
 			if (!waypointsObject[i].name) {
 				return json({ error: `No name provided for waypoint point ${i}` });
 			}
-			if (waypointsObject[i].waypointType == null || waypointsObject[i].waypointType == undefined) {
+			if (waypointsObject[i].type == null || waypointsObject[i].type == undefined) {
 				return json({ error: `No type provided for waypoint point ${i}` });
 			}
 			if (!waypointsObject[i].lat) {
@@ -33,12 +33,14 @@ export async function POST({ request }) {
 		}
 	}
 
-	const routesTable = await db.insert(routes).values({ name: name, createdBy: createdBy });
+	const routesTable = await db
+		.insert(routes)
+		.values({ name: name, createdBy: createdBy, type: type });
 
 	await db.insert(waypoints).values(
 		waypointsObject.map((waypoint: Waypoint) => ({
 			index: waypoint.index,
-			type: waypoint.waypointType,
+			type: waypoint.type,
 			name: waypoint.name,
 			description: waypoint.description,
 			latitude: waypoint.lat,

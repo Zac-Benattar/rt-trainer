@@ -2,11 +2,7 @@ import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
 import type { Airport } from './AeronauticalClasses/Airport';
-import {
-	airportDataToAirport,
-	airspaceDataToAirspace,
-	readDataFromJSON,
-} from './OpenAIPHandler';
+import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 export default class RouteGenerator {
@@ -58,8 +54,7 @@ export default class RouteGenerator {
 			validRoute = true;
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
-			startAirport =
-				allAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
+			startAirport = allAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
 			if (startAirport.type == 3 || startAirport.type == 9) {
 				startAirportIsControlled = true;
 			}
@@ -126,9 +121,7 @@ export default class RouteGenerator {
 			while (!validDestinationAirport && destIterations < possibleDestinations.length) {
 				destIterations++;
 				destinationAirport =
-					possibleDestinations[
-						(seed * (destIterations + 1)) % possibleDestinations.length
-					];
+					possibleDestinations[(seed * (destIterations + 1)) % possibleDestinations.length];
 
 				if (startAirportIsControlled && destinationAirport.type != 3) {
 					validDestinationAirport = true;
@@ -259,6 +252,6 @@ export default class RouteGenerator {
 			arrivalTimes[2]
 		);
 
-		return [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint];	
+		return [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint];
 	}
 }
