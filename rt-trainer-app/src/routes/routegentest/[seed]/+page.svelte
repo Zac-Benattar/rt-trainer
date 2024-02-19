@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import Map from '$lib/Components/Simulator/Map.svelte';
+	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Route';
 	import Seed from '$lib/ts/Seed';

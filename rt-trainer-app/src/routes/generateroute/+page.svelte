@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import Map from '$lib/Components/Simulator/Map.svelte';
+	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Route';
 	import Seed from '$lib/ts/Seed';
@@ -8,6 +8,7 @@
 	import axios from 'axios';
 
 	import { init } from '@paralleldrive/cuid2';
+	import { MapMode } from '$lib/ts/SimulatorTypes';
 
 	const routeCUID = init({ length: 8 });
 
@@ -19,7 +20,6 @@
 	$: {
 		seed = new Seed(routeSeed);
 		ClearSimulationStores();
-		console.log('Seed: ', seed);
 		GenerationParametersStore.set({ seed, hasEmergency: true });
 		generateRoute();
 	}
@@ -102,6 +102,6 @@
 			<button class="btn variant-filled" on:click={pushRouteToDB}>Save Route</button>
 		</div>
 
-		<Map enabled={true} widthSmScreen={'600px'} heightSmScreen={'500px'} initialZoomLevel={9} />
+		<Map enabled={true} widthSmScreen={'600px'} heightSmScreen={'500px'} mode={MapMode.RoutePlan} />
 	</div>
 </div>

@@ -5,23 +5,13 @@
 	top of the file. Read more here about the issue and solution in the blog post by 
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
-
-	import {
-		ATZsStore,
-		CurrentRoutePointStore,
-		WaypointsStore
-	} from '$lib/stores';
+	import { AirspacesStore, CurrentRoutePointStore, WaypointsStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
-
-	type MapWaypoint = {
-		lat: number;
-		long: number;
-		name: string;
-	};
+	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -39,7 +29,7 @@
 	let currentTime: string = '00:00';
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
-	let mapWaypoints: MapWaypoint[] = [];
+	let waypoints: Waypoint[] = [];
 	let markers: any[] = [];
 	let needsToBeUpdated: boolean = false;
 	export let initialZoomLevel: number = 13;
@@ -53,7 +43,7 @@
 		needsToBeUpdated = false;
 	}
 
-	ATZsStore.subscribe((atzs) => {
+	AirspacesStore.subscribe((atzs) => {
 		atzs.forEach((atz) => {
 			if (atz.type != 14) {
 				drawATZ(atz);
@@ -63,35 +53,18 @@
 		});
 	});
 
-	WaypointsStore.subscribe((waypoints) => {
-		if (waypoints.length == 0) {
-			return;
-		}
-
-		console.log(waypoints)
-
-		// Get all waypoints from the route
-		mapWaypoints = [];
-		for (let i = 0; i < waypoints.length; i++) {
-			let name = waypoints[i].name;
-			if (i != 0) {
-				name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
-			}
-			mapWaypoints.push({
-				lat: waypoints[i].lat,
-				long: waypoints[i].long,
-				name: name
-			});
-		}
+	WaypointsStore.subscribe((_waypoints) => {
+		waypoints = _waypoints;
+		// name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 
 		// If no current route point data, set the targetPose to the first waypoint
 		if (
 			(targetPose == null || (targetPose.lat == 0 && targetPose.long == 0)) &&
-			mapWaypoints.length > 0
+			waypoints.length > 0
 		) {
 			targetPose = {
-				lat: mapWaypoints[0].lat,
-				long: mapWaypoints[0].long,
+				lat: waypoints[0].lat,
+				long: waypoints[0].long,
 				magneticHeading: 0,
 				trueHeading: 0,
 				altitude: 0,
@@ -164,8 +137,8 @@
 		}).addTo(map);
 
 		// Adds all waypoints to the map
-		mapWaypoints.forEach((mapWaypoint) => {
-			addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
+		waypoints.forEach((waypoint) => {
+			addMarker(waypoint.lat, waypoint.long, waypoint.name);
 		});
 
 		connectMarkers();
@@ -189,8 +162,8 @@
 			removeMarkers();
 
 			// Adds all waypoints to the map
-			mapWaypoints.forEach((mapWaypoint) => {
-				addMarker(mapWaypoint.lat, mapWaypoint.long, mapWaypoint.name);
+			waypoints.forEach((waypoint) => {
+				addMarker(waypoint.lat, waypoint.long, waypoint.name);
 			});
 
 			connectMarkers();

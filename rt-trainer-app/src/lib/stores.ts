@@ -90,7 +90,7 @@ export const WaypointsStore = derived(RouteStore, ($RouteStore) => {
 	}
 });
 
-export const ATZsStore = derived(RouteStore, ($RouteStore) => {
+export const AirspacesStore = derived(RouteStore, ($RouteStore) => {
 	if ($RouteStore) {
 		return $RouteStore.atzs;
 	} else {

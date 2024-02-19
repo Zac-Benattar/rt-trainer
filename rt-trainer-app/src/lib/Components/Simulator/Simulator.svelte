@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
-	import Map from './Map.svelte';
+	import Map from '../Map.svelte';
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
@@ -546,7 +546,7 @@
 
 		<Transponder />
 
-		<Map enabled={mapEnabled} />
+		<Map enabled={mapEnabled} flightInfoOverlayEnabled={true}/>
 
 		<Altimeter />
 

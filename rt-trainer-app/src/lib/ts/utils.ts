@@ -1,3 +1,4 @@
+import type { Waypoint } from './AeronauticalClasses/Waypoint';
 import type Seed from './Seed';
 
 // Simple hash function: hash * 31 + char
@@ -577,4 +578,34 @@ export function getClosestPointFromCollection(
 	}
 
 	return closestPoint;
+}
+
+// Return the two corners with the smallest and largest x and y coordinates
+export function getBounds(waypoints: Waypoint[]): [number, number][] {
+	let minLat = Infinity;
+	let maxLat = -Infinity;
+	let minLong = Infinity;
+	let maxLong = -Infinity;
+
+	for (const waypoint of waypoints) {
+		if (waypoint.lat < minLat) {
+			minLat = waypoint.lat;
+		}
+		if (waypoint.lat > maxLat) {
+			maxLat = waypoint.lat;
+		}
+		if (waypoint.long < minLong) {
+			minLong = waypoint.long;
+		}
+		if (waypoint.long > maxLong) {
+			maxLong = waypoint.long;
+		}
+	}
+
+	console.log(minLat, minLong, maxLat, maxLong);
+
+	return [
+		[minLat, minLong],
+		[maxLat, maxLong]
+	];
 }
