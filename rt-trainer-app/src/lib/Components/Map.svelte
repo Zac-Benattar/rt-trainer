@@ -9,9 +9,10 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/RouteTypes';
-	import { convertMinutesToTimeString } from '$lib/ts/utils';
+	import { convertMinutesToTimeString, getBoundsWith10PercentMargins } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+	import { MapMode } from '$lib/ts/SimulatorTypes';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -32,11 +33,13 @@
 	let waypoints: Waypoint[] = [];
 	let markers: any[] = [];
 	let needsToBeUpdated: boolean = false;
-	export let initialZoomLevel: number = 13;
+	let initialZoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
+
+	export let mode: MapMode = MapMode.RoutePlan;
 
 	$: if (needsToBeUpdated && mounted) {
 		updateMap();
@@ -102,26 +105,11 @@
 			map.remove();
 		}
 
-		FlightInformationTextBox = L.Control.extend({
-			onAdd: function () {
-				var text = L.DomUtil.create('div');
-				text.id = 'heading_text';
-				text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
-				text.style.color = 'black';
-				text.style.backgroundColor = 'white';
-				text.innerHTML =
-					'<p> Heading: ' +
-					targetPose.magneticHeading +
-					'<br> Airspeed: ' +
-					targetPose.airSpeed +
-					'<br> Time: ' +
-					currentTime +
-					'</p>';
-				return text;
-			}
-		});
-
 		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
+
+		if (mode == MapMode.RoutePlan || (mode == MapMode.ScenarioPlan && waypoints.length > 0)) {
+			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+		}
 
 		planeIcon = L.icon({
 			iconUrl: '/images/plane.png',
@@ -143,14 +131,37 @@
 
 		connectMarkers();
 
-		// Sets the current location marker, done last to make sure it is on top
-		currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
-			icon: planeIcon,
-			rotationAngle: targetPose.trueHeading,
-			rotationOrigin: 'center'
-		}).addTo(map);
+		if (mode == MapMode.Scenario) {
+			// Sets the current location marker, done last to make sure it is on top
+			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
+				icon: planeIcon,
+				rotationAngle: targetPose.trueHeading,
+				rotationOrigin: 'center'
+			}).addTo(map);
+		}
 
-		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
+		if (mode == MapMode.Scenario) {
+			FlightInformationTextBox = L.Control.extend({
+				onAdd: function () {
+					var text = L.DomUtil.create('div');
+					text.id = 'heading_text';
+					text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+					text.style.color = 'black';
+					text.style.backgroundColor = 'white';
+					text.innerHTML =
+						'<p> Heading: ' +
+						targetPose.magneticHeading +
+						'<br> Airspeed: ' +
+						targetPose.airSpeed +
+						'<br> Time: ' +
+						currentTime +
+						'</p>';
+					return text;
+				}
+			});
+
+			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
+		}
 	}
 
 	async function updateMap() {
@@ -158,6 +169,10 @@
 			await map;
 
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
+
+			if (mode == MapMode.RoutePlan || (mode == MapMode.ScenarioPlan && waypoints.length > 0)) {
+				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+			}
 
 			removeMarkers();
 
@@ -168,18 +183,24 @@
 
 			connectMarkers();
 
-			currentLocationMarker.remove();
+			if (mode == MapMode.Scenario) {
+				currentLocationMarker.remove();
 
-			// Updates the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
-				icon: planeIcon,
-				rotationAngle: targetPose.trueHeading,
-				rotationOrigin: 'center'
-			}).addTo(map);
+				// Updates the current location marker, done last to make sure it is on top
+				currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
+					icon: planeIcon,
+					rotationAngle: targetPose.trueHeading,
+					rotationOrigin: 'center'
+				}).addTo(map);
+			}
 
-			flightInformationOverlay.remove();
+			if (mode == MapMode.Scenario) {
+				flightInformationOverlay.remove();
 
-			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
+				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
+					map
+				);
+			}
 		} else {
 			console.log('Map not mounted');
 		}

@@ -602,10 +602,19 @@ export function getBounds(waypoints: Waypoint[]): [number, number][] {
 		}
 	}
 
-	console.log(minLat, minLong, maxLat, maxLong);
-
 	return [
 		[minLat, minLong],
 		[maxLat, maxLong]
+	];
+}
+
+export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
+	const bounds = getBounds(waypoints);
+	const latMargin = (bounds[1][0] - bounds[0][0]) * 0.1;
+	const longMargin = (bounds[1][1] - bounds[0][1]) * 0.1;
+
+	return [
+		[bounds[0][0] - latMargin, bounds[0][1] - longMargin],
+		[bounds[1][0] + latMargin, bounds[1][1] + longMargin]
 	];
 }
