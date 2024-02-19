@@ -10,8 +10,9 @@
 
 <nav class="list-nav p-4">
 	<ul>
-		<li><a href="/home"  on:click={drawerClose}>Home</a></li>
-		<li><a href="/about"  on:click={drawerClose}>About</a></li>
+		<li><a href="/home" on:click={drawerClose}>Home</a></li>
+		<li><a href="/myscenarios" on:click={drawerClose}>My Scenarios</a></li>
+		<li><a href="/myroutes" on:click={drawerClose}>My Routes</a></li>
 	</ul>
 </nav>
 

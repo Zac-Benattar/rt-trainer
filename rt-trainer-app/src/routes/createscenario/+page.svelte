@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import type { ActionData, PageData } from './$types';
 	import { GlobeOutline, EditOutline } from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
