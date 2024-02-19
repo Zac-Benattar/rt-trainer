@@ -1,14 +1,22 @@
 import type { Airport } from './AeronauticalClasses/Airport';
 import type Airspace from './AeronauticalClasses/Airspace';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
+import type { Waypoint } from './AeronauticalClasses/Waypoint';
 import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
+import Scenario from './Scenario';
+import type ScenarioPoint from './ScenarioPoints';
 import type { FrequencyChangePoint } from './ScenarioTypes';
 import { findAirspaceChangePoints } from './utils';
 
-export function generateScenario() {
+export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario {
+	const airports: Airport[] = [];
+	const airspaces: Airspace[] = [];
+	const scenarioPoints: ScenarioPoint[] = [];
+
 	const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 	const NAUTICAL_MILE = 1852;
 	const FLIGHT_TIME_MULTIPLIER = 1.3;
+
 	let airportsData: AirportData[] = [];
 	let airspacesData: AirspaceData[] = [];
 
@@ -32,27 +40,25 @@ export function generateScenario() {
 		allAirspaces.push(airspace);
 	}
 
-	const startAirport = allAirports.find((x) => x.name == this.waypoints[0].name);
+	const startAirport = allAirports.find((x) => x.name == waypoints[0].name);
 	if (startAirport == undefined) {
 		throw new Error('Start airport not found');
 	}
 
-	this.airports.push(startAirport);
+	airports.push(startAirport);
 
-	const endAirport = allAirports.find(
-		(x) => x.name == this.waypoints[this.waypoints.length - 1].name
-	);
+	const endAirport = allAirports.find((x) => x.name == waypoints[waypoints.length - 1].name);
 	if (endAirport == undefined) {
 		throw new Error('End airport not found');
 	}
 
-	this.airports.push(endAirport);
+	airports.push(endAirport);
 
 	// Get all airspace along the route
 	const route: [number, number][] = [
 		startAirport.coordinates,
-		this.waypoints[1].getCoords(),
-		this.waypoints[2].getCoords(),
+		waypoints[1].getCoords(),
+		waypoints[2].getCoords(),
 		endAirport.coordinates
 	];
 
@@ -60,11 +66,14 @@ export function generateScenario() {
 	const frequencyChangePoints: FrequencyChangePoint[] = [];
 	const intersectionPoints: { airspace: Airspace; coordinates: [number, number] }[] =
 		findAirspaceChangePoints(route, allAirspaces);
-	const onRouteAirspace: Airspace[] = [];
 	for (let i = 0; i < intersectionPoints.length; i++) {
-		if (onRouteAirspace.indexOf(intersectionPoints[i].airspace) == -1)
-			onRouteAirspace.push(intersectionPoints[i].airspace);
+		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
+			airspaces.push(intersectionPoints[i].airspace);
 	}
 
-	this.airspaces = onRouteAirspace;
+	// Calculate the frequency change points
+
+	// Generate the scenario points
+
+	return new Scenario(seed.toString(), waypoints, airspaces, airports, scenarioPoints);
 }
