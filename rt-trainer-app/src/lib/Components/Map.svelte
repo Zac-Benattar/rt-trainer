@@ -31,6 +31,7 @@
 	let mounted: boolean = false;
 	let currentLocationMarker: any;
 	let waypoints: Waypoint[] = [];
+	let airspaces: Airspace[] = [];
 	let markers: any[] = [];
 	let polygons: any[] = [];
 	let lines: any[] = [];
@@ -48,14 +49,8 @@
 		needsToBeUpdated = false;
 	}
 
-	AirspacesStore.subscribe((atzs) => {
-		atzs.forEach((atz) => {
-			if (atz.type != 14) {
-				drawATZ(atz);
-			} else {
-				drawMATZ(atz);
-			}
-		});
+	AirspacesStore.subscribe((_airspaces) => {
+		airspaces = _airspaces;
 	});
 
 	WaypointsStore.subscribe((_waypoints) => {
@@ -125,6 +120,10 @@
 
 		connectMarkers();
 
+		airspaces.forEach((airspace) => {
+			drawAirspace(airspace);
+		});
+
 		if (mode == MapMode.Scenario) {
 			planeIcon = L.icon({
 				iconUrl: '/images/plane.png',
@@ -176,7 +175,7 @@
 				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 			}
 
-			removeGeometry();
+			await removeGeometry();
 
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
@@ -184,6 +183,10 @@
 			});
 
 			connectMarkers();
+
+			airspaces.forEach((airspace) => {
+				drawAirspace(airspace);
+			});
 
 			if (mode == MapMode.Scenario) {
 				currentLocationMarker.remove();
@@ -242,25 +245,22 @@
 		}
 	}
 
-	async function drawATZ(atz: Airspace) {
+	async function drawAirspace(airspace: Airspace) {
 		if (mounted) {
 			await map;
 
-			// Draw the ATZ
-			polygons.push(
-				L.polygon(atz.coordinates, { color: 'blue' }).bindPopup(atz.getDisplayName()).addTo(map)
-			);
-		}
-	}
-
-	async function drawMATZ(atz: Airspace) {
-		if (mounted) {
-			await map;
-
-			// Draw the ATZ
-			polygons.push(
-				L.polygon(atz.coordinates, { color: 'red' }).bindPopup(atz.getDisplayName()).addTo(map)
-			);
+			if (airspace.type != 14)
+				polygons.push(
+					L.polygon(airspace.coordinates, { color: 'blue' })
+						.bindPopup(airspace.getDisplayName())
+						.addTo(map)
+				);
+			else if (airspace.type == 14)
+				polygons.push(
+					L.polygon(airspace.coordinates, { color: 'red' })
+						.bindPopup(airspace.getDisplayName())
+						.addTo(map)
+				);
 		}
 	}
 

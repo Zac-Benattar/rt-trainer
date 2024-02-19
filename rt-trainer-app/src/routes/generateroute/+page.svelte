@@ -27,6 +27,10 @@
 	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((route) => {
 		waypoints = route;
+
+		if (route.length > 1) {
+			routeName = route[0].name + ' to ' + route[route.length - 1].name;
+		}
 	});
 
 	async function pushRouteToDB(): Promise<void> {
