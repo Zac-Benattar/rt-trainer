@@ -2,14 +2,13 @@ import {
 	AirspacesStore,
 	CurrentRoutePointIndexStore,
 	EndPointIndexStore,
-	GenerationParametersStore,
 	NullRouteStore,
 	ScenarioStore,
 	StartPointIndexStore,
 	WaypointsStore
 } from '$lib/stores';
 import axios from 'axios';
-import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
+import type { ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import { Waypoint } from './AeronauticalClasses/Waypoint';
 import ScenarioPoint from './ScenarioPoints';
@@ -165,14 +164,13 @@ export async function generateRoute(routeSeed: string): Promise<void> {
  */
 export async function checkRadioCallByServer(
 	radioCall: RadioCall,
-	scenarioId: string
 ): Promise<ServerResponse | undefined> {
 	if (!routeGenerated) {
 		console.log('Error: No route');
 		return;
 	}
 	try {
-		const response = await axios.post(`/scenario/${scenarioId}/parse`, {
+		const response = await axios.post(`/parse`, {
 			data: radioCall
 		});
 

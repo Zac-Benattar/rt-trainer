@@ -33,9 +33,7 @@
 		type AircraftDetails,
 		type RadioState,
 		type AltimeterState,
-
 		MapMode
-
 	} from '$lib/ts/SimulatorTypes';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
@@ -43,7 +41,7 @@
 	import { Feedback } from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
 	import { page, updated } from '$app/stores';
-	import Scenario, { checkRadioCallByServer, loadScenario } from '$lib/ts/Scenario';
+	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 
 	// Simulator state and settings
 	export let scenarioId: string;
@@ -105,8 +103,7 @@
 
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
 	$: tutorialStep3 =
-		radioState?.activeFrequency ==
-		scenario?.getCurrentPoint().updateData.currentTargetFrequency;
+		radioState?.activeFrequency == scenario?.getCurrentPoint().updateData.currentTargetFrequency;
 
 	ScenarioStore.subscribe((value) => {
 		scenario = value;
@@ -221,8 +218,7 @@
 			});
 			return false;
 		} else if (
-			radioState.activeFrequency !=
-			scenario?.getCurrentPoint().updateData.currentTargetFrequency
+			radioState.activeFrequency != scenario?.getCurrentPoint().updateData.currentTargetFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -231,7 +227,8 @@
 			});
 			return false;
 		} else if (
-			transponderState.frequency != scenario?.getCurrentPoint().updateData.currentTransponderFrequency
+			transponderState.frequency !=
+			scenario?.getCurrentPoint().updateData.currentTransponderFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -546,7 +543,7 @@
 
 		<Transponder />
 
-		<Map enabled={mapEnabled} mode={MapMode.Scenario}/>
+		<Map enabled={mapEnabled} mode={MapMode.Scenario} />
 
 		<Altimeter />
 	</div>

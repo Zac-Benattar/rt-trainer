@@ -70,8 +70,8 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
 			airspaces.push(intersectionPoints[i].airspace);
 	}
-
     console.log(intersectionPoints);
+
 
 	// Calculate the frequency change points
 

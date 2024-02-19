@@ -1,6 +1,5 @@
 import type Airspace from './AeronauticalClasses/Airspace';
 import type { Waypoint } from './AeronauticalClasses/Waypoint';
-import * as polybool from 'polybooljs';
 
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
@@ -637,6 +636,28 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 	return newBounds;
 }
 
+function isPointInsidePolygon(point: Point, polygon: Point[]): boolean {
+	const x = point[0];
+	const y = point[1];
+
+	let isInside = false;
+
+	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+		const xi = polygon[i][0];
+		const yi = polygon[i][1];
+		const xj = polygon[j][0];
+		const yj = polygon[j][1];
+
+		const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+		if (intersect) {
+			isInside = !isInside;
+		}
+	}
+
+	return isInside;
+}
+
 export function findAirspaceChangePoints(
 	route: Point[],
 	airspaces: Airspace[]
@@ -648,27 +669,43 @@ export function findAirspaceChangePoints(
 		const startPoint = route[i];
 		const endPoint = route[i + 1];
 
-		// Create a line segment from the route points
-		const lineSegment = [startPoint, endPoint];
-
 		// Check for intersection with each polygon
 		for (const airspace of airspaces) {
-			const intersectionResult = polybool.intersect(
-				{
-					regions: [airspace.getCoords()],
-					inverted: false
-				},
-				{
-					regions: [lineSegment],
-					inverted: false
-				}
-			);
+			// Check if start and end points are on opposite sides of the polygon
+			const isStartInside = isPointInsidePolygon(startPoint, airspace.getCoords());
+			const isEndInside = isPointInsidePolygon(endPoint, airspace.getCoords());
 
-			// Collect intersection points
-			if (intersectionResult.points) {
-				intersections.push(
-					...intersectionResult.points.map((point: Point) => ({ airspace, coordinates: point }))
-				);
+			// If there is a change from inside to outside or vice versa, consider it an intersection
+			if (isStartInside !== isEndInside) {
+				// Find the intersection point
+
+				// Calculate the intersection point
+				const x1 = startPoint[0];
+				const y1 = startPoint[1];
+				const x2 = endPoint[0];
+				const y2 = endPoint[1];
+				const x3 = airspace.getCoords()[0][0];
+				const y3 = airspace.getCoords()[0][1];
+				const x4 = airspace.getCoords()[1][0];
+				const y4 = airspace.getCoords()[1][1];
+
+				let ua = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+				let ub = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
+				const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+
+				if (denominator === 0) {
+					continue;
+				}
+
+				ua = ua / denominator;
+				ub = ub / denominator;
+
+				const intersectionX = x1 + ua * (x2 - x1);
+				const intersectionY = y1 + ua * (y2 - y1);
+
+				const intersectionPoint: Point = [intersectionX, intersectionY];
+
+				intersections.push({ airspace, coordinates: intersectionPoint });
 			}
 		}
 	}
