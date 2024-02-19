@@ -1,5 +1,5 @@
 import type { Feedback } from './Feedback';
-import type { EmergencyType } from './RouteTypes';
+import type { EmergencyType } from './ScenarioTypes';
 import type Seed from './Seed';
 
 export type GenerationParameters = {

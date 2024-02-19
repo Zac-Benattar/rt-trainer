@@ -11,7 +11,7 @@ import {
 	StartUpStage,
 	TakeOffStage,
 	TaxiStage
-} from './RouteStages';
+} from './ScenarioStages';
 import type { METORDataSample } from './AeronauticalClasses/Airport';
 
 export default class Parser {

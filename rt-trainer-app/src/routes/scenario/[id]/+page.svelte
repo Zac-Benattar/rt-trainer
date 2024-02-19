@@ -106,11 +106,12 @@
 			)
 	);
 
-	ScenarioStore.set(new Scenario(data.scenario?.seed, waypoints));
+	const scenario = new Scenario(data.scenario?.seed, waypoints);
+	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);
 	if (endPointIndex == -1) {
-		EndPointIndexStore.set(routePoints.length - 1);
+		EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
 	} else {
 		EndPointIndexStore.set(endPointIndex);
 	}
@@ -118,5 +119,5 @@
 </script>
 
 <div class="flex" style="justify-content: center;">
-	<Simulator scenarioId={id}/>
+	<Simulator scenarioId={id} />
 </div>

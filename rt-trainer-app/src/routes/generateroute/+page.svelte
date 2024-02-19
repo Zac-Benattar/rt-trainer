@@ -3,10 +3,8 @@
 	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, GenerationParametersStore, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Scenario';
-	import Seed from '$lib/ts/Seed';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';
-
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 
@@ -15,12 +13,10 @@
 	let routeSeed: string = routeCUID();
 	let routeName: string = '';
 	let routeDescription: string = '';
-	let seed: Seed = new Seed(routeSeed);
 
 	$: {
-		seed = new Seed(routeSeed);
 		ClearSimulationStores();
-		GenerationParametersStore.set({ seed, hasEmergency: true });
+		GenerationParametersStore.set({ seed: routeSeed, hasEmergency: true });
 		generateRoute();
 	}
 
@@ -38,6 +34,7 @@
 			const response = await axios.post(`/api/routes`, {
 				name: routeName ? routeName : 'Unnamed Route',
 				routeDescription: routeDescription,
+				type: 1, // 1 = generated FRTOL route - safe for use in the simulator in its current state
 				createdBy: $page.data.userId,
 				waypointsObject: waypoints
 			});

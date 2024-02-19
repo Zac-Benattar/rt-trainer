@@ -8,7 +8,7 @@
 	import { AirspacesStore, CurrentRoutePointStore, WaypointsStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import type { Pose } from '$lib/ts/RouteTypes';
+	import type { Pose } from '$lib/ts/ScenarioTypes';
 	import { convertMinutesToTimeString, getBoundsWith10PercentMargins } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';

@@ -67,6 +67,7 @@
     "geist": "^1.0.0",
     "leaflet": "^1.9.4",
     "leaflet-rotatedmarker": "^0.2.0",
+    "polybooljs": "^1.2.0",
     "reflect-metadata": "^0.2.1"
   }
 }

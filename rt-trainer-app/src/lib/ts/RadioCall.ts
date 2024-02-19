@@ -11,7 +11,7 @@ import {
 	replaceWithPhoneticAlphabet
 } from './utils';
 import { Feedback } from './Feedback';
-import type RoutePoint from './RoutePoints';
+import type ScenarioPoint from './ScenarioPoints';
 import type { Waypoint } from './AeronauticalClasses/Waypoint';
 import type { Runway } from './AeronauticalClasses/Runway';
 import type { METORDataSample } from './AeronauticalClasses/METORData';
@@ -81,7 +81,7 @@ export default class RadioCall {
 		return this.seed;
 	}
 
-	public getCurrentRoutePoint(): RoutePoint {
+	public getCurrentRoutePoint(): ScenarioPoint {
 		return this.route.getCurrentPoint();
 	}
 

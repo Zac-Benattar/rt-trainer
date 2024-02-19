@@ -9,9 +9,8 @@ import {
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
-// TODO
 export default class RouteGenerator {
-	public static async getRoute(seed: number): Promise<Waypoint[]> {
+	public static async generateFRTOLRouteFromSeed(seed: number): Promise<Waypoint[]> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
@@ -22,7 +21,7 @@ export default class RouteGenerator {
 		// await writeDataToJSON();
 
 		// Load data
-		[airportsData, airspacesData] = await readDataFromJSON();
+		[airportsData, airspacesData] = readDataFromJSON();
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
@@ -164,14 +163,14 @@ export default class RouteGenerator {
 				destinationAirport.coordinates
 			];
 			onRouteAirspace = [];
-			for (let i = 0; i < nearbyATZs.length; i++) {
-				const atz = nearbyATZs[i];
-				if (atz.isIncludedInRoute(route)) {
-					if (atz.type == 1 || (atz.type == 14 && atz != chosenMATZ)) {
+			for (let i = 0; i < allAirspaces.length; i++) {
+				const airspace = allAirspaces[i];
+				if (airspace.isIncludedInRoute(route)) {
+					if (airspace.type == 1 || (airspace.type == 14 && airspace != chosenMATZ)) {
 						validRoute = false;
 						break;
 					}
-					if (atz != chosenMATZ) onRouteAirspace.push(atz);
+					if (airspace != chosenMATZ) onRouteAirspace.push(airspace);
 				}
 			}
 		}

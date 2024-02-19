@@ -45,6 +45,7 @@ export const routes = mysqlTable('route', {
 		.primaryKey()
 		.$defaultFn(() => shortCUID()),
 	name: varchar('name', { length: 100 }).notNull(),
+	type: tinyint('type').notNull(),
 	description: varchar('description', { length: 2000 }),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),

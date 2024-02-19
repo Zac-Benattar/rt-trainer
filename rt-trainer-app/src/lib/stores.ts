@@ -76,7 +76,7 @@ export const ScenarioStore = writable<Scenario | undefined>(undefined);
 
 export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 	if ($RouteStore) {
-		return $RouteStore.routePoints;
+		return $RouteStore.scenarioPoints;
 	} else {
 		return [];
 	}
@@ -133,7 +133,7 @@ export const CurrentRoutePointStore = derived(
 	[ScenarioStore, CurrentRoutePointIndexStore],
 	([$RouteStore]) => {
 		if ($RouteStore) {
-			if ($RouteStore.routePoints.length > 0) {
+			if ($RouteStore.scenarioPoints.length > 0) {
 				return $RouteStore.getCurrentPoint();
 			}
 		}

@@ -1,4 +1,4 @@
-/* Stages of a route point. Each stage has a different set of actions that can be performed.
+/* Stages that a scenario point could be. Each stage has a different set of actions that can be performed.
 	some of the airborne waypoint stages are optional depending on the generation. */
 export enum StartUpStage {
 	RadioCheck = 'Radio Check',

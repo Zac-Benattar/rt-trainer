@@ -1,5 +1,6 @@
+import type Airspace from './AeronauticalClasses/Airspace';
 import type { Waypoint } from './AeronauticalClasses/Waypoint';
-import type Seed from './Seed';
+import * as polybool from 'polybooljs';
 
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
@@ -429,11 +430,11 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
-export function getRandomSqwuakCode(seed: Seed): number {
+export function getRandomSqwuakCode(seed: number): number {
 	let code: number = 0;
 	for (let i = 0; i < 4; i++) {
 		// Swap this out for a big prime
-		code += ((seed.scenarioSeed * 49823748933 * i) % 8) * (10 ^ i);
+		code += ((seed * 49823748933 * i) % 8) * (10 ^ i);
 	}
 	return code;
 }
@@ -617,7 +618,12 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 		return bounds;
 	}
 
-	if (Number.isNaN(bounds[0][0]) || Number.isNaN(bounds[0][1]) || Number.isNaN(bounds[1][0]) || Number.isNaN(bounds[1][1]))
+	if (
+		Number.isNaN(bounds[0][0]) ||
+		Number.isNaN(bounds[0][1]) ||
+		Number.isNaN(bounds[1][0]) ||
+		Number.isNaN(bounds[1][1])
+	)
 		return [
 			[0, 0],
 			[0, 0]
@@ -629,4 +635,43 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 	];
 
 	return newBounds;
+}
+
+export function findAirspaceChangePoints(
+	route: Point[],
+	airspaces: Airspace[]
+): { airspace: Airspace; coordinates: Point }[] {
+	const intersections: { airspace: Airspace; coordinates: Point }[] = [];
+
+	// Iterate through consecutive pairs of route points
+	for (let i = 0; i < route.length - 1; i++) {
+		const startPoint = route[i];
+		const endPoint = route[i + 1];
+
+		// Create a line segment from the route points
+		const lineSegment = [startPoint, endPoint];
+
+		// Check for intersection with each polygon
+		for (const airspace of airspaces) {
+			const intersectionResult = polybool.intersect(
+				{
+					regions: [airspace.getCoords()],
+					inverted: false
+				},
+				{
+					regions: [lineSegment],
+					inverted: false
+				}
+			);
+
+			// Collect intersection points
+			if (intersectionResult.points) {
+				intersections.push(
+					...intersectionResult.points.map((point: Point) => ({ airspace, coordinates: point }))
+				);
+			}
+		}
+	}
+
+	return intersections;
 }

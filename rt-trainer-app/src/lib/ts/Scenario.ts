@@ -10,7 +10,7 @@ import axios from 'axios';
 import type { GenerationParameters, ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
 import { Waypoint } from './AeronauticalClasses/Waypoint';
-import RoutePoint from './RoutePoints';
+import ScenarioPoint from './ScenarioPoints';
 import { Type, plainToInstance } from 'class-transformer';
 import { Airport } from './AeronauticalClasses/Airport';
 import 'reflect-metadata';
@@ -20,8 +20,8 @@ import Airspace from './AeronauticalClasses/Airspace';
 export default class Scenario {
 	seed: string;
 
-	@Type(() => RoutePoint)
-	routePoints: RoutePoint[] = [];
+	@Type(() => ScenarioPoint)
+	scenarioPoints: ScenarioPoint[] = [];
 
 	@Type(() => Airport)
 	airports: Airport[] = [];
@@ -33,27 +33,28 @@ export default class Scenario {
 	waypoints: Waypoint[] = [];
 	currentPointIndex: number = 0;
 
-	constructor(seed: string, waypoints: Waypoint[]) {
+	constructor(seed: string, waypoints: Waypoint[], airspace: Airspace[], airports: Airport[], scenarioPoints: ScenarioPoint[]) {
 		this.seed = seed;
 		this.waypoints = waypoints;
-
-		this.generateScenario();
+		this.airspaces = airspace;
+		this.airports = airports;
+		this.scenarioPoints = scenarioPoints;
 	}
 
-	public getCurrentPoint(): RoutePoint {
-		return this.routePoints[this.currentPointIndex];
+	public getCurrentPoint(): ScenarioPoint {
+		return this.scenarioPoints[this.currentPointIndex];
 	}
 
-	public getPoints(): RoutePoint[] {
-		return this.routePoints;
+	public getPoints(): ScenarioPoint[] {
+		return this.scenarioPoints;
 	}
 
-	public getStartPoint(): RoutePoint {
-		return this.routePoints[0];
+	public getStartPoint(): ScenarioPoint {
+		return this.scenarioPoints[0];
 	}
 
-	public getEndPoint(): RoutePoint {
-		return this.routePoints[this.routePoints.length - 1];
+	public getEndPoint(): ScenarioPoint {
+		return this.scenarioPoints[this.scenarioPoints.length - 1];
 	}
 
 	public getStartAirport(): Airport {

@@ -9,5 +9,5 @@ export async function GET({ params, setHeaders }) {
 	// 	'cache-control': 'max-age=60'
 	// });
 
-	return json(await RouteGenerator.getRoute(seed));
+	return json(await RouteGenerator.generateFRTOLRouteFromSeed(seed));
 }

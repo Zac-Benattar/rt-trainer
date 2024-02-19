@@ -27,7 +27,7 @@
 		TutorialStore,
 		AltimeterStateStore
 	} from '$lib/stores';
-	import type RoutePoint from '$lib/ts/RoutePoints';
+	import type ScenarioPoint from '$lib/ts/ScenarioPoints';
 	import {
 		type TransponderState,
 		type AircraftDetails,
@@ -162,8 +162,8 @@
 	});
 
 	EndPointIndexStore.subscribe((value) => {
-		if (scenario && scenario.routePoints && value >= scenario.routePoints.length) {
-			value = scenario.routePoints.length - 1;
+		if (scenario && scenario.scenarioPoints && value >= scenario.scenarioPoints.length) {
+			value = scenario.scenarioPoints.length - 1;
 		}
 
 		endPointIndex = value;
