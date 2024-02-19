@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, gt } from 'drizzle-orm';
 import { routes, scenarios, users } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
@@ -28,6 +28,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
+	// Return the user's recent routes where there is at least one waypoint
 	return {
 		userRecentRoutes: await db.query.routes.findMany({
 			columns: {
@@ -35,6 +36,11 @@ export const load: PageServerLoad = async (event) => {
 				name: true,
 				description: true,
 				createdAt: true
+			},
+			with: {
+				waypoints: {
+					where: (waypoints, { gt }) => gt(waypoints.index, 0)
+				}
 			},
 			where: eq(routes.createdBy, userId),
 			orderBy: [desc(routes.createdAt)],

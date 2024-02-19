@@ -30,7 +30,7 @@ export const waypoints = mysqlTable('waypoint', {
 	description: varchar('description', { length: 2000 }),
 	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
 	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
-	routeId: int('route_id').notNull(),
+	routeId: varchar('route_id', { length: 12 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow()
 });
@@ -90,15 +90,9 @@ export const users = mysqlTable('user', {
 	email: varchar('email', { length: 255 }).notNull(),
 	emailVerified: timestamp('emailVerified', { mode: 'date', fsp: 3 }).defaultNow(),
 	image: varchar('image', { length: 255 }),
-	prefix: varchar('prefix', { length: 20 })
-		.notNull()
-		.default('STUDENT'),
-	callsign: varchar('callsign', { length: 20 })
-		.notNull()
-		.default('G-OFLY'),
-	aircraftType: varchar('aircraftType', { length: 30 })
-		.notNull()
-		.default('Cessna 172'),
+	prefix: varchar('prefix', { length: 20 }).notNull().default('STUDENT'),
+	callsign: varchar('callsign', { length: 20 }).notNull().default('G-OFLY'),
+	aircraftType: varchar('aircraftType', { length: 30 }).notNull().default('Cessna 172')
 });
 
 export const usersRelations = relations(users, ({ many }) => ({

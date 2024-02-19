@@ -40,6 +40,7 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 		allAirspaces.push(airspace);
 	}
 
+    console.log(waypoints[0].name);
 	const startAirport = allAirports.find((x) => x.name == waypoints[0].name);
 	if (startAirport == undefined) {
 		throw new Error('Start airport not found');
