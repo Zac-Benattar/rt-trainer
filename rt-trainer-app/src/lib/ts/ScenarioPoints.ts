@@ -333,7 +333,8 @@ export function getEndAirportScenarioPoints(
 	);
 
 	const landingTime =
-		previousPointTime + 10 +
+		previousPointTime +
+		10 +
 		Math.round(
 			(distanceToLandingAirportFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) *
 				FLIGHT_TIME_MULTIPLIER

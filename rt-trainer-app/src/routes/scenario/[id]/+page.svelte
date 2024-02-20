@@ -3,15 +3,20 @@
 	import { page } from '$app/stores';
 	import {
 		AircraftDetailsStore,
+		AirspacesStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		ScenarioStore,
 		StartPointIndexStore,
-		TutorialStore
+		TutorialStore,
+
+		WaypointsStore
+
 	} from '$lib/stores';
 	import type { PageData } from './$types';
 	import Scenario from '$lib/ts/Scenario';
 	import { plainToInstance } from 'class-transformer';
+	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	export let data: PageData;
 
@@ -84,6 +89,8 @@
 	console.log(scenario);
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
+	AirspacesStore.set(scenario.airspaces);
+	WaypointsStore.set(scenario.waypoints);
 	StartPointIndexStore.set(startPointIndex);
 	if (endPointIndex == -1) {
 		EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
