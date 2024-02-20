@@ -12,20 +12,30 @@ export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
 	const routeId = event.params.id;
 
+	let prefix: string | null = null;
+	let callsign: string | null = null;
+	let aircraftType: string | null = null;
+
 	let userId = '-1';
 
 	if (!session?.user && routeId != 'demo') throw redirect(303, '/login');
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
-		const row = await db.query.users.findFirst({
+		const userRow = await db.query.users.findFirst({
 			columns: {
-				id: true
+				id: true,
+				prefix: true,
+				callsign: true,
+				aircraftType: true
 			},
 			where: eq(users.email, session.user.email)
 		});
 
-		if (row != null || row != undefined) {
-			userId = row.id;
+		if (userRow != null || userRow != undefined) {
+			userId = userRow.id;
+			prefix = userRow.prefix;
+			callsign = userRow.callsign;
+			aircraftType = userRow.aircraftType;
 		}
 	}
 
@@ -60,6 +70,11 @@ export const load: PageServerLoad = async (event) => {
 	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypoints);
 
 	return {
-		scenario: scenario
+		scenario: scenario,
+		aircraftDetails: {
+			prefix: prefix,
+			callsign: callsign,
+			aircraftType: aircraftType
+		}
 	};
 };

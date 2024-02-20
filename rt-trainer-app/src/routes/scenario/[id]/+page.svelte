@@ -2,6 +2,7 @@
 	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
 	import { page } from '$app/stores';
 	import {
+		AircraftDetailsStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
 		ScenarioStore,
@@ -18,20 +19,18 @@
 	// Get the slug
 	const { id } = $page.params;
 
+	let callsign: string = data.aircraftDetails?.callsign ?? 'G-OFLY';
+	let prefix: string = data.aircraftDetails?.prefix ?? 'STUDENT';
+	let aircraftType: string = data.aircraftDetails?.aircraftType ?? 'Cessna 172';
+
 	// Check whether the callsign is specified
 	const callsignString: string | null = $page.url.searchParams.get('callsign');
-	let callsign: string = 'G-OFLY';
-	if (callsignString != null) {
-		if (callsignString == '') {
-			callsign = 'G-OFLY';
-		} else {
-			callsign = callsignString;
-		}
+	if (callsignString != null && callsignString != '') {
+		callsign = callsignString;
 	}
 
 	// Check whether the prefix is specified
 	const prefixString: string | null = $page.url.searchParams.get('prefix');
-	let prefix: string = 'G-OFLY';
 	if (prefixString != null) {
 		if (
 			prefixString == '' ||
@@ -48,20 +47,8 @@
 
 	// Check whether the aircraft type is specified
 	const aircraftTypeString: string | null = $page.url.searchParams.get('aircraftType');
-	let aircraftType: string = 'Cessna 172';
-	if (aircraftTypeString != null) {
-		if (aircraftTypeString == '') {
-			aircraftType = 'Cessna 172';
-		} else {
-			aircraftType = aircraftTypeString;
-		}
-	}
-
-	// Check whether emergencies are enabled
-	let hasEmergency: boolean = false;
-	const emergenciesString: string | null = $page.url.searchParams.get('emergencies');
-	if (emergenciesString != null) {
-		hasEmergency = emergenciesString === 'True';
+	if (aircraftTypeString != null && aircraftTypeString != '') {
+		aircraftType = aircraftTypeString;
 	}
 
 	// Check whether start point index has been set
@@ -69,7 +56,6 @@
 	const startPointIndexString: string | null = $page.url.searchParams.get('startPoint');
 	if (startPointIndexString != null) {
 		startPointIndex = parseInt(startPointIndexString);
-		console.log(startPointIndex);
 		if (startPointIndex < 0) {
 			startPointIndex = 0;
 		}
@@ -95,7 +81,7 @@
 		throw new Error('Scenario data is not available');
 	}
 
-	const scenario = plainToInstance(Scenario, data.scenario);
+	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);
@@ -105,6 +91,11 @@
 		EndPointIndexStore.set(endPointIndex);
 	}
 	TutorialStore.set(tutorial);
+	AircraftDetailsStore.set({
+		callsign: callsign,
+		prefix: prefix,
+		aircraftType: aircraftType
+	});
 </script>
 
 <div class="flex" style="justify-content: center;">
