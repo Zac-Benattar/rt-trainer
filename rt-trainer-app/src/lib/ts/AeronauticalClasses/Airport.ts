@@ -2,8 +2,9 @@ import { Type } from 'class-transformer';
 import { Frequency } from '../Frequency';
 import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
+import 'reflect-metadata';
 
-/* Aerodrome data. */
+/* Airport data. */
 export default class Airport {
 	name: string;
 	icaoCode: string;
@@ -24,6 +25,8 @@ export default class Airport {
 
 	@Type(() => Frequency)
 	frequencies: Frequency[];
+
+	@Type(() => METORData)
 	metorData: METORData = new METORData(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	constructor(

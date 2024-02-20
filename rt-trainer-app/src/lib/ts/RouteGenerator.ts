@@ -16,17 +16,21 @@ export default class RouteGenerator {
 		airspaces: Airspace[];
 		airports: Airport[];
 	}> {
+		// Prevent seeds which don't give a route
+		if (seed < 0) {
+			seed = -seed;
+		} else if (seed == 0) {
+			seed = 1;
+		}
+
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
-		let airportsData: AirportData[] = [];
-		let airspacesData: AirspaceData[] = [];
+		const airportsData: AirportData[] = readAirportDataFromJSON();
+		const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
 
 		// // Remove for production
 		// await writeDataToJSON();
-
-		// Load data
-		[airportsData, airspacesData] = readDataFromJSON();
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allAirports: Airport[] = [];
@@ -174,6 +178,12 @@ export default class RouteGenerator {
 					}
 					if (airspace != chosenMATZ) onRouteAirspace.push(airspace);
 				}
+			}
+			onRouteAirspace.push(chosenMATZ);
+
+			if (onRouteAirspace.length > 7) {
+				validRoute = false;
+				continue;
 			}
 		}
 
