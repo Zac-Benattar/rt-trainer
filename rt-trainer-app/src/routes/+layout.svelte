@@ -56,7 +56,7 @@
 		// Otherwise user is logged in and sidebar can be shown
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'lg';
+		burgerButton = 'lg:hidden';
 	}
 </script>
 

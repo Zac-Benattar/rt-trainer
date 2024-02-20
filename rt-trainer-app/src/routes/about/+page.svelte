@@ -1,80 +1,81 @@
 <script lang="ts">
 </script>
 
-<div class="p-5 sm:ml-10 sm:w-9/12">
-	<div class="p-1 h2">About</div>
-	<div class="px-3">
-		<p class="p-2">
-			<b>RT Trainer</b> - A web based training platform for future pilots to learn
-			<a
-				href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
-				>Radio Telephony (RT)</a
-			>
-			skills required to pass the CAA RT exam in order to obtain a
-			<a
-				href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
-				>Flight Radiotelephony Operator's License (FRTOL)</a
-			>. More information about the licence and exam can be found on the
-			<a
-				href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
-				>CAA's website</a
-			>.
-		</p>
-		<p class="p-2">
-			This website was created as part of Zac Benattar's third year computer science project. The <a
-				href="https://github.com/Zac-Benattar/csproj">GitHub repository</a
-			>
-			contains the accompanying code and documents for the project. The fronted was built using
-			<a href="https://svelte.dev/">Svelte</a>, and the backend is a Vite websever built using
-			<a href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
-			<a href="https://vercel.com/">Vercel</a>. The database for user and aeronautical data is
-			hosted by <a href="https://planetscale.com/">Planetscale</a>. This project was developed with
-			assistence from the
-			<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>.
-		</p>
-	</div>
-
-	<div class="p-1 h3">Contact</div>
-	<div class="px-3">
-		<p class="p-2">
-			<b>Developer</b> - Zac Benattar
-			<br />Contact me about issues you encounter, feature requests, or any other questions you have
-			at zbenattar@gmail.com
-		</p>
-	</div>
-
-	<div class="p-1 h3">Attributions</div>
-	<ul class="px-5 list-disc">
-		<li class="py-2">
-			<div class="h4">Aeronatical Data</div>
-			<p>
-				The datacomes from <a href="https://www.openaip.net/">OpenAIP</a>, a free and up to date
-				aeronautical information database for flight simulation and aviation. The data is licensed
-				under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
-			</p>
-		</li>
-		<li class="py-2">
-			<div class="h4">Map</div>
-			<p>
-				The map is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
-				<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
-				<a href="https://www.mapbox.com/">Mapbox</a> tiles.
-			</p>
-		</li>
-		<li class="py-2">
-			<div class="h4">Images</div>
-			<p>
-				<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
-					>Plane icon created by Freepik - Flaticon</a
+<div class="flex flex-row place-content-center h-full w-full">
+	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
+		<div class="p-1 h2">About</div>
+		<div class="px-3">
+			<p class="p-2">
+				<b>RT Trainer</b> - A web based training platform for future pilots to learn
+				<a
+					href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
+					>Radio Telephony (RT)</a
 				>
+				skills required to pass the CAA RT exam in order to obtain a
+				<a
+					href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
+					>Flight Radiotelephony Operator's License (FRTOL)</a
+				>. More information about the licence and exam can be found on the
+				<a
+					href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
+					>CAA's website</a
+				>.
 			</p>
-		</li>
-	</ul>
+			<p class="p-2">
+				This website was created as part of Zac Benattar's third year computer science project. The
+				fronted was built using
+				<a href="https://svelte.dev/">Svelte</a> and the backend is a Vite webserver built using
+				<a href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
+				<a href="https://vercel.com/">Vercel</a>. A
+				<a href="https://planetscale.com/">Planetscale</a>
+				database is used for user data. This project was developed with assistance from the
+				<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>.
+			</p>
+		</div>
+
+		<div class="p-1 h3">Contact</div>
+		<div class="px-3">
+			<p class="p-2">
+				<b>Developer</b> - Zac Benattar
+				<br />Contact me about issues you encounter, feature requests, or any other questions you
+				have at zbenattar@gmail.com
+			</p>
+		</div>
+
+		<div class="p-1 h3">Attributions</div>
+		<ul class="px-5 list-disc">
+			<li class="py-2">
+				<div class="h4">Aeronatical Data</div>
+				<p>
+					All airport and airspace data comes from <a href="https://www.openaip.net/">OpenAIP</a>, a
+					free and up to date aeronautical information database for flight simulation and aviation.
+					The data is licensed under the
+					<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
+				</p>
+			</li>
+			<li class="py-2">
+				<div class="h4">Map</div>
+				<p>
+					The map component is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
+					<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
+					<a href="https://www.mapbox.com/">Mapbox</a> tiles.
+				</p>
+			</li>
+			<li class="py-2">
+				<div class="h4">Images</div>
+				<p>
+					<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
+						>Landing page plane icon by Freepik - Flaticon</a
+					>
+				</p>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <style lang="postcss">
 	a {
-		color: #0000FF;
+		color: #0000ff;
 		text-decoration: underline;
 	}
 </style>
