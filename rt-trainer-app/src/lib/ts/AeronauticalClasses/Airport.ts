@@ -110,10 +110,20 @@ export default class Airport {
 		return this.runways[index];
 	}
 
+	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): [number, number] {
+		const runway = this.getTakeoffRunway(seed);
+		const lat1 = this.coordinates[0];
+		const lon1 = this.coordinates[1];
+		const lat2 = lat1 + (distance / 111111) * Math.cos((runway.trueHeading * Math.PI) / 180);
+		const lon2 = lon1 + (distance / 111111) * Math.sin((runway.trueHeading * Math.PI) / 180);
+
+		return [lat2, lon2];
+	}
+
 	public getPointAlongLandingRunwayVector(seed: number, distance: number): [number, number] {
 		const runway = this.getLandingRunway(seed);
-		const lat1 = runway.thresholdCoordinates[0];
-		const lon1 = runway.thresholdCoordinates[1];
+		const lat1 = this.coordinates[0];
+		const lon1 = this.coordinates[1];
 		const lat2 = lat1 + (distance / 111111) * Math.cos((runway.trueHeading * Math.PI) / 180);
 		const lon2 = lon1 + (distance / 111111) * Math.sin((runway.trueHeading * Math.PI) / 180);
 

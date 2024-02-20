@@ -10,18 +10,21 @@ import {
 } from './OpenAIPHandler';
 import Scenario from './Scenario';
 import type ScenarioPoint from './ScenarioPoints';
-import { getEndAirportScenarioPoints, getStartAirportScenarioPoints } from './ScenarioPoints';
-import type { FrequencyChangePoint } from './ScenarioTypes';
+import {
+	getAirborneScenarioPoints,
+	getEndAirportScenarioPoints,
+	getStartAirportScenarioPoints
+} from './ScenarioPoints';
 import { findAirspaceChangePoints } from './utils';
 
-export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario {
+export function generateScenario(
+	seed: number,
+	waypoints: Waypoint[],
+	hasEmergency: boolean
+): Scenario {
 	const airports: Airport[] = [];
 	const airspaces: Airspace[] = [];
 	const scenarioPoints: ScenarioPoint[] = [];
-
-	const AIRCRAFT_AVERAGE_SPEED = 125; // knots
-	const NAUTICAL_MILE = 1852;
-	const FLIGHT_TIME_MULTIPLIER = 1.3;
 
 	const airportsData: AirportData[] = readAirportDataFromJSON();
 	const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
@@ -63,24 +66,36 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 	];
 
 	// Get all on route airspaces
-	const frequencyChangePoints: FrequencyChangePoint[] = [];
 	const intersectionPoints: { airspace: Airspace; coordinates: [number, number] }[] =
 		findAirspaceChangePoints(route, allAirspaces);
 	for (let i = 0; i < intersectionPoints.length; i++) {
 		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
 			airspaces.push(intersectionPoints[i].airspace);
 	}
-	// console.log(intersectionPoints);
-
-	// Calculate the frequency change points
-
-	// Generate the scenario points
 
 	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, airports));
 
-	// Calculate airborne scenarion points
+	scenarioPoints.push(
+		...getAirborneScenarioPoints(
+			seed,
+			waypoints,
+			airspaces,
+			intersectionPoints,
+			airports,
+			scenarioPoints[scenarioPoints.length - 1],
+			hasEmergency
+		)
+	);
 
-	scenarioPoints.push(...getEndAirportScenarioPoints(seed, waypoints, airspaces, airports));
+	scenarioPoints.push(
+		...getEndAirportScenarioPoints(
+			seed,
+			waypoints,
+			airspaces,
+			airports,
+			scenarioPoints[scenarioPoints.length - 1]
+		)
+	);
 
 	return new Scenario(seed.toString(), waypoints, airspaces, airports, scenarioPoints);
 }

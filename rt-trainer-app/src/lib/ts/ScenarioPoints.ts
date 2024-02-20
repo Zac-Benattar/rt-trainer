@@ -1,5 +1,5 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
-import { EmergencyType, type Pose } from './ScenarioTypes';
+import { EmergencyType, type FrequencyChangePoint, type Pose } from './ScenarioTypes';
 import {
 	ChangeZoneStage,
 	CircuitAndLandingStage,
@@ -11,10 +11,14 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './ScenarioStages';
-import { lerp, lerpLocation } from './utils';
+import { haversineDistance, lerp, lerpLocation } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
+
+const AIRCRAFT_AVERAGE_SPEED = 125; // knots
+const NAUTICAL_MILE = 1852;
+const FLIGHT_TIME_MULTIPLIER = 1.3;
 
 /* A point on the route used in generation. Not necissarily visible to the user */
 export default class ScenarioPoint {
@@ -125,10 +129,10 @@ export function getStartAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
-	// const climbingOutPosition = takeoffRunway.getPointAlongVector(1.3);
+	const climbingOutPosition = startAerodrome.getPointAlongTakeoffRunwayVector(seed, 1.3);
 	const climbingOutPose: Pose = {
-		lat: startAerodrome.coordinates[0],
-		long: startAerodrome.coordinates[1],
+		lat: climbingOutPosition[0],
+		long: climbingOutPosition[1],
 		magneticHeading: 0,
 		trueHeading: takeoffRunway.trueHeading,
 		altitude: 1200,
@@ -315,11 +319,25 @@ export function getEndAirportScenarioPoints(
 	seed: number,
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
-	airports: Airport[]
+	airports: Airport[],
+	previousScenarioPoint: ScenarioPoint
 ): ScenarioPoint[] {
 	const stages: ScenarioPoint[] = [];
 	const endAerodrome: Airport = airports[airports.length - 1];
-	const landingTime = waypoints[waypoints.length - 1].arrivalTime;
+	const previousPointTime = previousScenarioPoint.timeAtPoint;
+	const distanceToLandingAirportFromPrevPoint = haversineDistance(
+		previousScenarioPoint.pose.lat,
+		previousScenarioPoint.pose.long,
+		endAerodrome.coordinates[0],
+		endAerodrome.coordinates[1]
+	);
+
+	const landingTime =
+		previousPointTime + 10 +
+		Math.round(
+			(distanceToLandingAirportFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) *
+				FLIGHT_TIME_MULTIPLIER
+		);
 	const landingRunway = endAerodrome.getLandingRunway(seed);
 
 	const parkedPose: Pose = {
@@ -375,7 +393,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 15
+			landingTime - 10
 		);
 		stages.push(requestJoin);
 
@@ -384,7 +402,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 15
+			landingTime - 10
 		);
 		stages.push(reportDetails);
 
@@ -393,7 +411,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 14
+			landingTime - 9
 		);
 		stages.push(readbackOverheadJoinClearance);
 
@@ -402,7 +420,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 10
+			landingTime - 9
 		);
 		stages.push(reportAirodromeInSight);
 
@@ -411,7 +429,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 10
+			landingTime - 8
 		);
 		stages.push(contactTower);
 
@@ -420,7 +438,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 9
+			landingTime - 8
 		);
 		stages.push(reportStatus);
 
@@ -429,7 +447,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 9
+			landingTime - 7
 		);
 		stages.push(readbackLandingInformation);
 
@@ -447,7 +465,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 7
+			landingTime - 6
 		);
 		stages.push(wilcoReportDownwind);
 
@@ -456,7 +474,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 5
+			landingTime - 6
 		);
 		stages.push(reportDownwind);
 
@@ -465,7 +483,7 @@ export function getEndAirportScenarioPoints(
 			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 4
+			landingTime - 5
 		);
 		stages.push(wilcoFollowTraffic);
 
@@ -528,7 +546,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 15
+			landingTime - 10
 		);
 		stages.push(requestJoin);
 
@@ -537,7 +555,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 15
+			landingTime - 10
 		);
 		stages.push(reportDetails);
 
@@ -546,7 +564,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 14
+			landingTime - 9
 		);
 		stages.push(reportCrosswindJoin);
 
@@ -555,7 +573,7 @@ export function getEndAirportScenarioPoints(
 			parkedPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
-			landingTime - 12
+			landingTime - 6
 		);
 		stages.push(reportDownwind);
 
@@ -599,21 +617,67 @@ export function getEndAirportScenarioPoints(
 	return stages;
 }
 
-export function getAirborneRoutePoints(
+function getFrequencyChanges(
+	airspaceChangePoints: { airspace: Airspace; coordinates: [number, number] }[]
+): FrequencyChangePoint[] {
+	if (airspaceChangePoints.length == 0) {
+		return [];
+	}
+
+	const frequencyChanges: FrequencyChangePoint[] = [];
+
+	// First will be the start frequency
+	frequencyChanges.push({
+		oldAirspace: undefined,
+		newAirspace: airspaceChangePoints[0].airspace,
+		coordinates: airspaceChangePoints[0].coordinates
+	});
+
+	for (let i = 0; i < airspaceChangePoints.length - 1; i++) {
+		if (airspaceChangePoints[i].airspace != airspaceChangePoints[i + 1].airspace)
+			frequencyChanges.push({
+				oldAirspace: airspaceChangePoints[i].airspace,
+				newAirspace: airspaceChangePoints[i + 1].airspace,
+				coordinates: airspaceChangePoints[i + 1].coordinates
+			});
+	}
+
+	return frequencyChanges;
+}
+
+export function getAirborneScenarioPoints(
 	seed: number,
-	numAirborneWaypoints: number,
+	waypoints: Waypoint[],
+	airspaces: Airspace[],
+	airspaceChangePoints: { airspace: Airspace; coordinates: [number, number] }[],
+	airports: Airport[],
+	previousScenarioPoint: ScenarioPoint,
 	hasEmergency: boolean
 ): ScenarioPoint[] {
-	const waypoints: Waypoint[] = [];
+	const frequencyChanges: FrequencyChangePoint[] = getFrequencyChanges(airspaceChangePoints);
 
 	// Add events at each point
-	const routePoints: ScenarioPoint[] = [];
+	const scenarioPoints: ScenarioPoint[] = [];
 	const endStageIndexes: number[] = [];
-	for (let i = 0; i < waypoints.length; i++) {
-		const waypoint = waypoints[i];
+	let timeAtPreviousPoint = previousScenarioPoint.timeAtPoint;
+	let previousCoord = [previousScenarioPoint.pose.lat, previousScenarioPoint.pose.long];
+	for (let i = 0; i < frequencyChanges.length; i++) {
+		const distanceToNextPoint: number = haversineDistance(
+			previousCoord[0],
+			previousCoord[1],
+			frequencyChanges[i].coordinates[0],
+			frequencyChanges[i].coordinates[1]
+		);
+		const timeAtCurrentPoint =
+			timeAtPreviousPoint +
+			Math.round(
+				(distanceToNextPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) * FLIGHT_TIME_MULTIPLIER
+			);
+
+		const freqChange = frequencyChanges[i];
 		const pose: Pose = {
-			lat: waypoint.lat,
-			long: waypoint.long,
+			lat: freqChange.coordinates[0],
+			long: freqChange.coordinates[1],
 			magneticHeading: 0.0,
 			trueHeading: 0.0,
 			altitude: 0.0,
@@ -633,9 +697,9 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime - 1
+			timeAtCurrentPoint
 		);
-		routePoints.push(requestFrequencyChange);
+		scenarioPoints.push(requestFrequencyChange);
 
 		const acknowledgeApproval = new ScenarioPoint(
 			ChangeZoneStage.AcknowledgeApproval,
@@ -650,9 +714,9 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime
+			timeAtCurrentPoint + 1
 		);
-		routePoints.push(acknowledgeApproval);
+		scenarioPoints.push(acknowledgeApproval);
 
 		const contactNewFrequency = new ScenarioPoint(
 			ChangeZoneStage.ContactNewFrequency,
@@ -667,9 +731,9 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime + 1
+			timeAtCurrentPoint + 1
 		);
-		routePoints.push(contactNewFrequency);
+		scenarioPoints.push(contactNewFrequency);
 
 		const passMessage = new ScenarioPoint(
 			ChangeZoneStage.PassMessage,
@@ -684,9 +748,9 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime + 2
+			timeAtCurrentPoint + 2
 		);
-		routePoints.push(passMessage);
+		scenarioPoints.push(passMessage);
 
 		const squawk = new ScenarioPoint(
 			ChangeZoneStage.Squawk,
@@ -701,9 +765,9 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime + 3
+			timeAtCurrentPoint + 2
 		);
-		routePoints.push(squawk);
+		scenarioPoints.push(squawk);
 
 		const readbackApproval = new ScenarioPoint(
 			ChangeZoneStage.ReadbackApproval,
@@ -718,16 +782,19 @@ export function getAirborneRoutePoints(
 				emergency: EmergencyType.None
 			},
 			i + 1,
-			waypoint.arrivalTime + 4
+			timeAtCurrentPoint + 3
 		);
-		routePoints.push(readbackApproval);
-		endStageIndexes.push(routePoints.length - 1);
+		scenarioPoints.push(readbackApproval);
+		endStageIndexes.push(scenarioPoints.length - 1);
+
+		previousCoord = freqChange.coordinates;
+		timeAtPreviousPoint = timeAtCurrentPoint + 3;
 	}
 
 	if (hasEmergency) {
 		// Add emergency before a random waypoint on the route, not first point
 		const emergencyPointIndex = (seed % (waypoints.length - 1)) + 1;
-		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex - 1] + 1;
+		const emergencyScenarioPointIndex = endStageIndexes[emergencyPointIndex - 1] + 1;
 
 		let emergencyType: EmergencyType = EmergencyType.None;
 
@@ -750,8 +817,8 @@ export function getAirborneRoutePoints(
 
 		const emergencyTime: number = Math.round(
 			lerp(
-				waypoints[emergencyPointIndex - 1].arrivalTime,
-				waypoints[emergencyPointIndex].arrivalTime,
+				scenarioPoints[emergencyPointIndex - 1].timeAtPoint,
+				scenarioPoints[emergencyPointIndex].timeAtPoint,
 				lerpPercentage
 			)
 		);
@@ -780,7 +847,7 @@ export function getAirborneRoutePoints(
 			emergencyPointIndex,
 			emergencyTime
 		);
-		routePoints.splice(emergencyRoutePointIndex, 0, declareEmergency);
+		scenarioPoints.splice(emergencyScenarioPointIndex, 0, declareEmergency);
 
 		const wilcoInstructions = new ScenarioPoint(
 			PanPanStage.WilcoInstructions,
@@ -797,7 +864,7 @@ export function getAirborneRoutePoints(
 			emergencyPointIndex,
 			emergencyTime + 1
 		);
-		routePoints.splice(emergencyRoutePointIndex + 1, 0, wilcoInstructions);
+		scenarioPoints.splice(emergencyScenarioPointIndex + 1, 0, wilcoInstructions);
 
 		const cancelPanPan = new ScenarioPoint(
 			PanPanStage.CancelPanPan,
@@ -814,8 +881,8 @@ export function getAirborneRoutePoints(
 			emergencyPointIndex,
 			emergencyTime + 4
 		);
-		routePoints.splice(emergencyRoutePointIndex + 2, 0, cancelPanPan);
+		scenarioPoints.splice(emergencyScenarioPointIndex + 2, 0, cancelPanPan);
 	}
 
-	return routePoints;
+	return scenarioPoints;
 }

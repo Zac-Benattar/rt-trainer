@@ -30,7 +30,7 @@ export enum FlightRules {
 }
 
 export type FrequencyChangePoint = {
-	oldAirspace: Airspace | null;
-	newAirspace: Airspace | null;
+	oldAirspace: Airspace | undefined;
+	newAirspace: Airspace | undefined;
 	coordinates: [number, number];
 };

@@ -68,7 +68,7 @@ export const load: PageServerLoad = async (event) => {
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
 
-	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypointsList);
+	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypointsList, scenarioRow.hasEmergency);
 
 	return {
 		scenario: instanceToPlain(scenario),
