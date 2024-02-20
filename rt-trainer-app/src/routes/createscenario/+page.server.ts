@@ -86,11 +86,6 @@ export const actions = {
 			createdBy: userId
 		});
 
-		redirect(303, `/scenario/${scenarioId}`);
-
-		return {
-			success: true,
-			scenarioId: scenarioId
-		};
+		throw redirect(303, `/scenario/${scenarioId}`);
 	}
 };
