@@ -32,15 +32,12 @@ export async function writeDataToJSON(): Promise<void> {
 	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaces, null, 2));
 }
 
-export function readDataFromJSON(): [AirportData[], AirspaceData[]] {
-	const airportsData = JSON.parse(
-		readFileSync('src/lib/data/airports.json', 'utf8')
-	) as AirportData[];
-	const airspacesData = JSON.parse(
-		readFileSync('src/lib/data/airspaces.json', 'utf8')
-	) as AirspaceData[];
+export function readAirportDataFromJSON(): AirportData[] {
+	return JSON.parse(readFileSync('src/lib/data/airports.json', 'utf8')) as AirportData[];
+}
 
-	return [airportsData, airspacesData];
+export function readAirspaceDataFromJSON(): AirspaceData[] {
+	return JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
 }
 
 export function airportDataToAirport(airportData: AirportData): Airport {

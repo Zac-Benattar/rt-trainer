@@ -7,8 +7,10 @@
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import axios from 'axios';
-	import { WaypointsStore } from '$lib/stores';
+	import { AirspacesStore, WaypointsStore } from '$lib/stores';
 	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import { plainToInstance } from 'class-transformer';
+	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	const weatherCUID = init({ length: 6 });
 
@@ -39,24 +41,23 @@
 
 		try {
 			const response = await axios.get(`/api/routes/${selectedRouteId}`);
+			console.log(response);
 
 			if (response === undefined) {
 				console.log('Failed to load route from DB');
 			} else {
 				const waypoints: Waypoint[] = [];
 				for (const waypoint of response.data.waypoints) {
-					waypoints.push(
-						new Waypoint(
-							waypoint.name,
-							waypoint.latitude,
-							waypoint.longitude,
-							waypoint.type,
-							waypoint.index
-						)
-					);
+					waypoints.push(plainToInstance(Waypoint, waypoint as Waypoint));
+				}
+
+				const airspaces: Airspace[] = [];
+				for (const airspace of response.data.airspaces) {
+					airspaces.push(plainToInstance(Airspace, airspace as Airspace));
 				}
 
 				WaypointsStore.set(waypoints);
+				AirspacesStore.set(airspaces);
 			}
 		} catch (error: unknown) {
 			if (error.message === 'Network Error') {

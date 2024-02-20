@@ -2,7 +2,12 @@ import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
-import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
+import {
+	airportDataToAirport,
+	airspaceDataToAirspace,
+	readAirportDataFromJSON,
+	readAirspaceDataFromJSON
+} from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
 export default class RouteGenerator {
@@ -261,5 +266,48 @@ export default class RouteGenerator {
 			airspaces: onRouteAirspace,
 			airports: [startAirport, destinationAirport]
 		};
+	}
+
+	public static async getAirspaceDataFromWaypointsList(waypoints: Waypoint[]): Promise<Airspace[]> {
+		const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
+
+		const allAirspaces: Airspace[] = [];
+		for (let i = 0; i < airspacesData.length; i++) {
+			const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
+			allAirspaces.push(airspace);
+		}
+
+		const route: [number, number][] = [];
+		for (let i = 0; i < waypoints.length; i++) {
+			route.push(waypoints[i].getCoords());
+		}
+
+		const onRouteAirspace: Airspace[] = [];
+		for (let i = 0; i < allAirspaces.length; i++) {
+			const airspace = allAirspaces[i];
+			if (airspace.isIncludedInRoute(route)) {
+				onRouteAirspace.push(airspace);
+			}
+		}
+
+		return onRouteAirspace;
+	}
+
+	public static async getAirportDataFromWaypointsList(waypoints: Waypoint[]): Promise<Airport[]> {
+		const airportsData: AirportData[] = readAirportDataFromJSON();
+
+		const allAirports: Airport[] = [];
+		for (let i = 0; i < airportsData.length; i++) {
+			const airport: Airport = airportDataToAirport(airportsData[i]);
+			allAirports.push(airport);
+		}
+
+		const airports: Airport[] = [];
+		for (let i = 0; i < waypoints.length; i++) {
+			const airport = allAirports.find((x) => x.name == waypoints[i].name);
+			if (airport != undefined) airports.push(airport);
+		}
+
+		return airports;
 	}
 }
