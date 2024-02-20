@@ -24,7 +24,7 @@
 					<TreeView hyphenOpacity={'opacity-0'}>
 						{#each results.getStartUpAndTaxiCalls() as item}
 							<TreeViewItem>
-								{item[0].getCurrentRoutePoint().stage}
+								{item[0].getCurrentScenarioPoint().stage}
 								<svelte:fragment slot="children">
 									{#each item as call}
 										<div class="">
@@ -85,7 +85,7 @@
 					><TreeView hyphenOpacity={'opacity-0'}>
 						{#each results.getAirborneCalls() as item}
 							<TreeViewItem>
-								{item[0].getCurrentRoutePoint().stage}
+								{item[0].getCurrentScenarioPoint().stage}
 								<svelte:fragment slot="children">
 									{#each item as call}
 										<div class="">
@@ -146,7 +146,7 @@
 					><TreeView hyphenOpacity={'opacity-0'}>
 						{#each results.getLandingCalls() as item}
 							<TreeViewItem>
-								{item[0].getCurrentRoutePoint().stage}
+								{item[0].getCurrentScenarioPoint().stage}
 								<svelte:fragment slot="children">
 									{#each item as call}
 										<div class="">

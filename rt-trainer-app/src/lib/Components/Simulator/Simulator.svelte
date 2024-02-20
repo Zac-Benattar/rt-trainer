@@ -407,7 +407,6 @@
 			userMessage,
 			simpleHash(seed),
 			scenario,
-			currentRoutePointIndex,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,
 			scenario.getCurrentPoint().updateData.callsignModified,

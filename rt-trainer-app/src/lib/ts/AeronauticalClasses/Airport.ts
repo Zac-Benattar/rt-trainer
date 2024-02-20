@@ -173,7 +173,7 @@ export default class Airport {
 
 	public getInformationFrequencyValue(): string | undefined {
 		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 15) {
+			if (this.frequencies[i].type == 15 || this.frequencies[i].type == 10) {
 				return this.frequencies[i].value;
 			}
 		}

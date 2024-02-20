@@ -785,7 +785,7 @@ export function getAirborneScenarioPoints(
 		timeAtPreviousPoint = timeAtCurrentPoint + 3;
 	}
 
-	if (hasEmergency) {
+	if (hasEmergency && scenarioPoints.length > 0) {
 		// Add emergency before a random waypoint on the route, not first point
 		const emergencyPointIndex = (seed % (waypoints.length - 1)) + 1;
 		const emergencyScenarioPointIndex = endStageIndexes[emergencyPointIndex - 1] + 1;
@@ -811,8 +811,8 @@ export function getAirborneScenarioPoints(
 
 		const emergencyTime: number = Math.round(
 			lerp(
-				scenarioPoints[emergencyPointIndex - 1].timeAtPoint,
-				scenarioPoints[emergencyPointIndex].timeAtPoint,
+				scenarioPoints[emergencyScenarioPointIndex - 1].timeAtPoint,
+				scenarioPoints[emergencyScenarioPointIndex].timeAtPoint,
 				lerpPercentage
 			)
 		);

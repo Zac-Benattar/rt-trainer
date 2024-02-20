@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { SpeechBufferStore, SpeechInputEnabledStore } from '$lib/stores';
-	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { swapDigitsWithWords } from '$lib/ts/utils';
 
 	export let enabled: boolean = false;
 	export let speechEnabled: boolean = true; // User's choice
 	export let transmitting: boolean = false;
 	let mounted: boolean = false;
-	const modalStore = getModalStore();
 	let SpeechRecognitionType: any;
 	let SpeechGrammarList: any;
 	let SpeechRecognitionEvent: any;
@@ -33,8 +32,10 @@
 		recognition = new SpeechRecognitionType();
 		recognition.lang = 'en';
 		recognition.onresult = (event: SpeechRecognitionEvent) => {
-			const speechInput = event.results[0][0].transcript;
+			let speechInput = event.results[0][0].transcript;
 			console.log(`You said: ${speechInput}, Confidence: ${event.results[0][0].confidence}`);
+
+			speechInput = swapDigitsWithWords(speechInput);
 
 			SpeechBufferStore.set(speechInput);
 		};
@@ -47,7 +48,6 @@
 				transmitButton.classList.add('active');
 				transmitting = true;
 				recognition?.start();
-				console.log('Transmitting...');
 			}
 		}
 	};
@@ -59,7 +59,6 @@
 				transmitButton.classList.remove('active');
 				transmitting = false;
 				recognition?.stop();
-				console.log('Stopped transmitting...');
 			}
 		}
 	};

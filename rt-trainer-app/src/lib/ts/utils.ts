@@ -95,6 +95,34 @@ export function isCallsignStandardRegistration(callsign: string): boolean {
 	return callsign.length == 6 && callsign.charAt(1) == '-';
 }
 
+export function swapDigitsWithWords(inputString: string): string {
+	const digitWords: Record<string, string> = {
+		'0': 'Zero ',
+		'1': 'One ',
+		'2': 'Two ',
+		'3': 'Three ',
+		'4': 'Four ',
+		'5': 'Five ',
+		'6': 'Six ',
+		'7': 'Seven ',
+		'8': 'Eight ',
+		'9': 'Nine '
+	};
+
+	const result = inputString
+		.split('')
+		.map((char) => {
+			if (/\d/.test(char)) {
+				return digitWords[char];
+			} else {
+				return char;
+			}
+		})
+		.join('');
+
+	return result;
+}
+
 /* Returns a abbreviated callsign. */
 export function getAbbreviatedCallsign(
 	scenarioSeed: number,

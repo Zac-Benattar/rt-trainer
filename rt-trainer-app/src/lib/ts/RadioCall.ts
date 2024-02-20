@@ -1,4 +1,4 @@
-import type Scenario from './Scenario';
+import Scenario from './Scenario';
 import {
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
@@ -15,12 +15,14 @@ import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Runway from './AeronauticalClasses/Runway';
 import type { METORDataSample } from './AeronauticalClasses/METORData';
 import type Airport from './AeronauticalClasses/Airport';
+import { Type } from 'class-transformer';
 
 export default class RadioCall {
 	private message: string;
 	private seed: number;
+
+	@Type(() => Scenario)
 	private scenario: Scenario;
-	private currentPointIndex: number;
 	private prefix: string;
 	private userCallsign: string;
 	private userCallsignModified: boolean;
@@ -30,6 +32,8 @@ export default class RadioCall {
 	private currentRadioFrequency: string;
 	private currentTransponderFrequency: string;
 	private aircraftType: string;
+
+	@Type(() => Feedback)
 	private feedback: Feedback;
 	private closestVRP: Waypoint | undefined;
 
@@ -37,7 +41,6 @@ export default class RadioCall {
 		message: string,
 		seed: number,
 		scenario: Scenario,
-		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,
 		userCallsignModified: boolean,
@@ -51,7 +54,6 @@ export default class RadioCall {
 		this.message = message;
 		this.seed = seed;
 		this.scenario = scenario;
-		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
 		this.userCallsignModified = userCallsignModified;
@@ -80,7 +82,7 @@ export default class RadioCall {
 		return this.seed;
 	}
 
-	public getCurrentRoutePoint(): ScenarioPoint {
+	public getCurrentScenarioPoint(): ScenarioPoint {
 		return this.scenario.getCurrentPoint();
 	}
 
@@ -537,7 +539,7 @@ export default class RadioCall {
 	public assertCallContainsAltitude(): boolean {
 		if (
 			!this.callContainsWord('altitude') &&
-			!this.callContainsWord(this.getCurrentRoutePoint().pose.altitude.toString())
+			!this.callContainsWord(this.getCurrentScenarioPoint().pose.altitude.toString())
 		) {
 			this.feedback.pushSevereMistake("Your call didn't contain your altitude.");
 			return false;
@@ -719,7 +721,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentAltitude(): number {
-		return this.getCurrentRoutePoint().pose.altitude;
+		return this.getCurrentScenarioPoint().pose.altitude;
 	}
 
 	public getCurrentAltitudeString(): string {
@@ -765,7 +767,7 @@ export default class RadioCall {
 	}
 
 	public getPreviousWaypoint(): Waypoint {
-		return this.scenario.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
+		return this.scenario.waypoints[this.getCurrentScenarioPoint().nextWaypointIndex];
 	}
 
 	public getPreviousWaypointName(): string {
@@ -784,7 +786,7 @@ export default class RadioCall {
 
 	public getDistanceToPreviousWaypointInMeters(): number {
 		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		return haversineDistance(prev.lat, prev.long, currentPose.lat, currentPose.long);
 	}
 
@@ -795,7 +797,7 @@ export default class RadioCall {
 
 	public getPositionRelativeToLastWaypoint(): string {
 		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		const heading = getHeadingBetween(prev.lat, prev.long, currentPose.lat, currentPose.long);
 		const compassDirection = getCompassDirectionFromHeading(heading);
 		const distance = this.getDistanceToPreviousWaypointNearestMile();
@@ -853,7 +855,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypoint(): Waypoint {
-		return this.scenario.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
+		return this.scenario.waypoints[this.getCurrentScenarioPoint().nextWaypointIndex];
 	}
 
 	public getNextWaypointName(): string {
@@ -862,7 +864,7 @@ export default class RadioCall {
 
 	public getNextWaypointDistance(): number {
 		const next = this.getNextWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		return haversineDistance(next.lat, next.long, currentPose.lat, currentPose.long);
 	}
 
@@ -890,7 +892,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentTime(): number {
-		return this.getCurrentRoutePoint().timeAtPoint;
+		return this.getCurrentScenarioPoint().timeAtPoint;
 	}
 
 	public assertCallContainsCurrentTime(): boolean {

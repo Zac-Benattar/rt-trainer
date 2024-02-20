@@ -22,11 +22,12 @@
 		mode: 'OFF',
 		dialMode: 'OFF',
 		activeFrequency: '121.800',
-		standbyFrequency: '124.030',
+		standbyFrequency: '129.800',
 		tertiaryFrequency: '177.200'
 	};
+
 	let activeFrequency: number = 121.8;
-	let standbyFrequency: number = 124.03;
+	let standbyFrequency: number = 129.8;
 	let tertiaryFrequency: number = 177.2;
 
 	let displayOn: boolean = false;

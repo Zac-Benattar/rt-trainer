@@ -36,7 +36,11 @@ export default class RouteGenerator {
 		const allValidAirports: Airport[] = [];
 		for (let i = 0; i < airportsData.length; i++) {
 			const airport: Airport = airportDataToAirport(airportsData[i]);
-			if (airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9)
+			if (
+				(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
+				airport.frequencies != null &&
+				airport.frequencies.findIndex((x) => x.type == 4) == -1
+			)
 				allValidAirports.push(airport);
 		}
 

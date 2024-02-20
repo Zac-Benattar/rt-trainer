@@ -32,6 +32,7 @@ export default class Scenario {
 
 	@Type(() => Waypoint)
 	waypoints: Waypoint[] = [];
+	
 	currentPointIndex: number = 0;
 
 	constructor(

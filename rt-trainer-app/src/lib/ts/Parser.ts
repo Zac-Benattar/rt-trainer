@@ -16,7 +16,7 @@ import type { METORDataSample } from './AeronauticalClasses/METORData';
 
 export default class Parser {
 	public static parseCall(radioCall: RadioCall): ServerResponse {
-		switch (radioCall.getCurrentRoutePoint().stage) {
+		switch (radioCall.getCurrentScenarioPoint().stage) {
 			case StartUpStage.RadioCheck:
 				return this.parseRadioCheck(radioCall);
 			case StartUpStage.DepartureInformationRequest:
@@ -93,7 +93,7 @@ export default class Parser {
 				return this.parseVFRPositionReport(radioCall);
 			default:
 				throw new Error(
-					'Unimplemented route point type: ' + radioCall.getCurrentRoutePoint().stage
+					'Unimplemented route point type: ' + radioCall.getCurrentScenarioPoint().stage
 				);
 		}
 	}
@@ -568,9 +568,7 @@ if (not in level flight. */
 	}
 
 	public static parselandingContactTower(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall
-			.getEndAirport()
-			.getShortName()} tower ${radioCall
+		const expectedRadioCall: string = `${radioCall.getEndAirport().getShortName()} tower ${radioCall
 			.getEndAirport()
 			.getLandingFrequency()}, ${radioCall.getTargetAllocatedCallsign()}`;
 
