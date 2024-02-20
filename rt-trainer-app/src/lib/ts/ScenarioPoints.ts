@@ -129,7 +129,7 @@ export function getStartAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
-	const climbingOutPosition = startAerodrome.getPointAlongTakeoffRunwayVector(seed, 1.3);
+	const climbingOutPosition = startAerodrome.getPointAlongTakeoffRunwayVector(seed, 1.0);
 	const climbingOutPose: Pose = {
 		lat: climbingOutPosition[0],
 		long: climbingOutPosition[1],
@@ -350,7 +350,7 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
-	const followTrafficLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -4.5);
+	const followTrafficLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -3.5);
 	const followTrafficPose: Pose = {
 		lat: followTrafficLocation[0],
 		long: followTrafficLocation[1],
@@ -360,7 +360,7 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 84.0
 	};
 
-	const reportFinalLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -3.6);
+	const reportFinalLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -1.6);
 	const reportFinalPose: Pose = {
 		lat: reportFinalLocation[0],
 		long: reportFinalLocation[1],
@@ -391,7 +391,7 @@ export function getEndAirportScenarioPoints(
 	if (endAerodrome.isControlled()) {
 		const requestJoin = new ScenarioPoint(
 			InboundForJoinStage.RequestJoin,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 10
@@ -400,7 +400,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportDetails = new ScenarioPoint(
 			InboundForJoinStage.ReportDetails,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 10
@@ -409,7 +409,7 @@ export function getEndAirportScenarioPoints(
 
 		const readbackOverheadJoinClearance = new ScenarioPoint(
 			InboundForJoinStage.ReadbackOverheadJoinClearance,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 9
@@ -418,7 +418,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportAirodromeInSight = new ScenarioPoint(
 			InboundForJoinStage.ReportAerodromeInSight,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 9
@@ -427,7 +427,7 @@ export function getEndAirportScenarioPoints(
 
 		const contactTower = new ScenarioPoint(
 			InboundForJoinStage.ContactTower,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 8
@@ -436,7 +436,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportStatus = new ScenarioPoint(
 			CircuitAndLandingStage.ReportStatus,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 8
@@ -445,7 +445,7 @@ export function getEndAirportScenarioPoints(
 
 		const readbackLandingInformation = new ScenarioPoint(
 			CircuitAndLandingStage.ReadbackLandingInformation,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 7
@@ -454,7 +454,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportDescending = new ScenarioPoint(
 			CircuitAndLandingStage.ReportDescending,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 7
@@ -463,7 +463,7 @@ export function getEndAirportScenarioPoints(
 
 		const wilcoReportDownwind = new ScenarioPoint(
 			CircuitAndLandingStage.WilcoReportDownwind,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 6
@@ -472,7 +472,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportDownwind = new ScenarioPoint(
 			CircuitAndLandingStage.ReportDownwind,
-			parkedPose,
+			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAerodrome),
 			waypoints.length - 1,
 			landingTime - 6
@@ -626,13 +626,6 @@ function getFrequencyChanges(
 	}
 
 	const frequencyChanges: FrequencyChangePoint[] = [];
-
-	// First will be the start frequency
-	frequencyChanges.push({
-		oldAirspace: undefined,
-		newAirspace: airspaceChangePoints[0].airspace,
-		coordinates: airspaceChangePoints[0].coordinates
-	});
 
 	for (let i = 0; i < airspaceChangePoints.length - 1; i++) {
 		if (airspaceChangePoints[i].airspace != airspaceChangePoints[i + 1].airspace)

@@ -9,9 +9,7 @@
 		ScenarioStore,
 		StartPointIndexStore,
 		TutorialStore,
-
 		WaypointsStore
-
 	} from '$lib/stores';
 	import type { PageData } from './$types';
 	import Scenario from '$lib/ts/Scenario';
@@ -87,6 +85,7 @@
 
 	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
 	console.log(scenario);
+	scenario.currentPointIndex = startPointIndex;
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	AirspacesStore.set(scenario.airspaces);

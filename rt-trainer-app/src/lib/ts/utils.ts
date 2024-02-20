@@ -1,5 +1,5 @@
 import type Airspace from './AeronauticalClasses/Airspace';
-import type { Waypoint } from './AeronauticalClasses/Waypoint';
+import type Waypoint from './AeronauticalClasses/Waypoint';
 
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
@@ -337,9 +337,9 @@ export function getNewCoordsFromCoord(
 	startLat: number,
 	startLong: number,
 	angle: number, // Angle in degrees (bearing from the starting point)
-	distance: number // Distance in kilometers
-): { lat: number; long: number } {
-	const earthRadius = 6371; // Earth's radius in kilometers
+	distance: number // Distance in nautical miles
+): Point {
+	const earthRadius = 3440.065; // Earth's radius in nauical miles
 
 	const startLatRad = toRadians(startLat);
 	const startLongRad = toRadians(startLong);
@@ -360,7 +360,7 @@ export function getNewCoordsFromCoord(
 	const newLat = toDegrees(newLatRad);
 	const newLong = toDegrees(newLongRad);
 
-	return { lat: newLat, long: newLong };
+	return [newLat, newLong];
 }
 
 export function getCompassDirectionFromHeading(heading: number) {
