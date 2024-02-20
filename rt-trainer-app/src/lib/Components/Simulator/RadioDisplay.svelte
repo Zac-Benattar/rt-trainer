@@ -9,83 +9,9 @@
 
 	let mounted: boolean = false;
 
-	// Digit arrays hold the digits of frequencies
-	let SFDigitArr = ['0', '0', '0', '0', '0', '0']; // Standby frequency
-	let AFDigitArr = ['0', '0', '0', '0', '0', '0']; // Active frequency
-	let TFDigitArr = ['0', '0', '0', '0', '0', '0']; // Tertiary frequency
-
 	$: showDisplayText = DisplayOn ? 'displayon' : 'displayoff';
-	$: {
-		if (!DisplayOn) {
-			mode = 'COM';
-		}
-	}
-	$: if (mounted) {
-		let split = standbyFrequency.toString().split('.');
-		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ['0', '0', '0'];
-		if (split.length >= 2) {
-			newDigitArrRight = split[1].split('');
-		}
-
-		for (let i = 0; i < 4; i++) {
-			if (newDigitArrLeft[i] == null) {
-				newDigitArrLeft[i] = '0';
-			}
-			if (newDigitArrRight[i] == null) {
-				newDigitArrRight[i] = '0';
-			}
-		}
-		SFDigitArr[0] = newDigitArrLeft[0];
-		SFDigitArr[1] = newDigitArrLeft[1];
-		SFDigitArr[2] = newDigitArrLeft[2];
-		SFDigitArr[3] = newDigitArrRight[0];
-		SFDigitArr[4] = newDigitArrRight[1];
-		SFDigitArr[5] = newDigitArrRight[2];
-	}
-	$: if (mounted) {
-		let split = activeFrequency.toString().split('.');
-		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ['0', '0', '0'];
-		if (split.length >= 2) {
-			newDigitArrRight = split[1].split('');
-		}
-		for (let i = 0; i < 4; i++) {
-			if (newDigitArrLeft[i] == null) {
-				newDigitArrLeft[i] = '0';
-			}
-			if (newDigitArrRight[i] == null) {
-				newDigitArrRight[i] = '0';
-			}
-		}
-		AFDigitArr[0] = newDigitArrLeft[0];
-		AFDigitArr[1] = newDigitArrLeft[1];
-		AFDigitArr[2] = newDigitArrLeft[2];
-		AFDigitArr[3] = newDigitArrRight[0];
-		AFDigitArr[4] = newDigitArrRight[1];
-		AFDigitArr[5] = newDigitArrRight[2];
-	}
-	$: if (mounted) {
-		let split = tertiaryFrequency.toString().split('.');
-		let newDigitArrLeft = split[0].split('');
-		let newDigitArrRight: string[] = ['0', '0', '0'];
-		if (split.length >= 2) {
-			newDigitArrRight = split[1].split('');
-		}
-		for (let i = 0; i < 4; i++) {
-			if (newDigitArrLeft[i] == null) {
-				newDigitArrLeft[i] = '0';
-			}
-			if (newDigitArrRight[i] == null) {
-				newDigitArrRight[i] = '0';
-			}
-		}
-		TFDigitArr[0] = newDigitArrLeft[0];
-		TFDigitArr[1] = newDigitArrLeft[1];
-		TFDigitArr[2] = newDigitArrLeft[2];
-		TFDigitArr[3] = newDigitArrRight[0];
-		TFDigitArr[4] = newDigitArrRight[1];
-		TFDigitArr[5] = newDigitArrRight[2];
+	$: if (!DisplayOn) {
+		mode = 'COM';
 	}
 
 	onMount(() => {
@@ -101,34 +27,22 @@
 	</div>
 	<div class="sevenSEG flex flex-row flex-wrap sm:ml-8 sm:mr-10">
 		<div class="alternate-frequency flex flex-row">
-			<div id="alternate-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[0]}</div>
-			<div id="alternate-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[1]}</div>
-			<div id="alternate-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
-			<div id="alternate-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[3]}</div>
-			<div id="alternate-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[4]}</div>
-			<div id="alternate-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{AFDigitArr[5]}</div>
+			<div id="alternate-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">
+				{activeFrequency.toFixed(3)}
+			</div>
 		</div>
 		<div>
 			<div class="divider-pipe text-[23px] sm:text-md md:text-3xl/6 mx-2 sm:mx-8">|</div>
 		</div>
 		<div class="primary-frequency flex flex-row">
-			<div id="primary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[0]}</div>
-			<div id="primary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[1]}</div>
-			<div id="primary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
-			<div id="primary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[3]}</div>
-			<div id="primary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[4]}</div>
-			<div id="primary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{SFDigitArr[5]}</div>
+			<div id="primary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">
+				{standbyFrequency.toFixed(3)}
+			</div>
 		</div>
 		<div class="tertiary-frequency flex flex-row">
-			<div id="tertiary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[0]}</div>
-			<div id="tertiary-rdigit-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[1]}</div>
-			<div id="tertiary-rdigit-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[2]}</div>
-			<div class="rdecimal-point text-[23px] sm:text-md md:text-3xl/6">.</div>
-			<div id="tertiary-rdigit-dp-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[3]}</div>
-			<div id="tertiary-rdigit-dp-1" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[4]}</div>
-			<div id="tertiary-rdigit-dp-2" class="rdigit text-[23px] sm:text-md md:text-3xl/6">{TFDigitArr[5]}</div>
+			<div id="tertiary-rdigit-0" class="rdigit text-[23px] sm:text-md md:text-3xl/6">
+				{tertiaryFrequency.toFixed(3)}
+			</div>
 		</div>
 	</div>
 </div>
@@ -162,12 +76,6 @@
 	}
 
 	.radio-segdisplay .rdigit {
-		font-family: DSEG7ClassicMini;
-		text-algin: right;
-		padding: 8px 0px;
-	}
-
-	.radio-segdisplay .rdecimal-point {
 		font-family: DSEG7ClassicMini;
 		text-algin: right;
 		padding: 8px 0px;

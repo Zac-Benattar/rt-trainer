@@ -71,9 +71,12 @@
 
 	const handleSWAPButtonClick = () => {
 		if (radioState.dialMode != 'OFF') {
-			let tempFrequency = radioState.activeFrequency;
-			radioState.activeFrequency = radioState.standbyFrequency;
-			radioState.standbyFrequency = tempFrequency;
+			let tempFrequency: number = activeFrequency;
+			activeFrequency = standbyFrequency;
+			standbyFrequency = tempFrequency;
+
+			radioState.activeFrequency = activeFrequency.toFixed(3);
+			radioState.standbyFrequency = standbyFrequency.toFixed(3);
 		}
 	};
 

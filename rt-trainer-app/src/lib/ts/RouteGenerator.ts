@@ -33,10 +33,11 @@ export default class RouteGenerator {
 		// await writeDataToJSON();
 
 		// Add airports to list of valid airports for takeoff/landing
-		const allAirports: Airport[] = [];
+		const allValidAirports: Airport[] = [];
 		for (let i = 0; i < airportsData.length; i++) {
 			const airport: Airport = airportDataToAirport(airportsData[i]);
-			allAirports.push(airport);
+			if (airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9)
+				allValidAirports.push(airport);
 		}
 
 		// Add airspaces to list of valid airspaces for route
@@ -46,10 +47,12 @@ export default class RouteGenerator {
 			allAirspaces.push(airspace);
 		}
 
-		console.log(`Total Airports: ${allAirports.length} \n Total Airspaces: ${allAirspaces.length}`);
+		console.log(
+			`Total Airports: ${allValidAirports.length} \n Total Airspaces: ${allAirspaces.length}`
+		);
 
 		const maxIterations = 200;
-		const numberOfValidAirports = allAirports.length;
+		const numberOfValidAirports = allValidAirports.length;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
@@ -67,7 +70,7 @@ export default class RouteGenerator {
 			validRoute = true;
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
-			startAirport = allAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
+			startAirport = allValidAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
 			if (startAirport.type == 3 || startAirport.type == 9) {
 				startAirportIsControlled = true;
 			}
@@ -107,8 +110,8 @@ export default class RouteGenerator {
 			const possibleDestinations = [];
 			const matzCenter = chosenMATZ.centrePoint;
 
-			for (let i = 0; i < allAirports.length; i++) {
-				const airport = allAirports[i];
+			for (let i = 0; i < allValidAirports.length; i++) {
+				const airport = allValidAirports[i];
 				const distance = haversineDistance(
 					matzCenter[0],
 					matzCenter[1],

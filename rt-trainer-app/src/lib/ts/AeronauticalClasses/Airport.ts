@@ -154,6 +154,9 @@ export default class Airport {
 			groundOrInformationFrequency = this.getInformationFrequencyValue();
 		}
 		if (groundOrInformationFrequency == undefined) {
+			groundOrInformationFrequency = this.getAGFrequencyValue();
+		}
+		if (groundOrInformationFrequency == undefined) {
 			groundOrInformationFrequency = '000.000';
 		}
 		return groundOrInformationFrequency;
@@ -171,6 +174,15 @@ export default class Airport {
 	public getInformationFrequencyValue(): string | undefined {
 		for (let i = 0; i < this.frequencies.length; i++) {
 			if (this.frequencies[i].type == 15) {
+				return this.frequencies[i].value;
+			}
+		}
+		return undefined;
+	}
+
+	public getAGFrequencyValue(): string | undefined {
+		for (let i = 0; i < this.frequencies.length; i++) {
+			if (this.frequencies[i].type == 17) {
 				return this.frequencies[i].value;
 			}
 		}

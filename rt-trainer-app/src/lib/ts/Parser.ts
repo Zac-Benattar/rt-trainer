@@ -14,7 +14,6 @@ import {
 } from './ScenarioStages';
 import type { METORDataSample } from './AeronauticalClasses/METORData';
 
-
 export default class Parser {
 	public static parseCall(radioCall: RadioCall): ServerResponse {
 		switch (radioCall.getCurrentRoutePoint().stage) {
