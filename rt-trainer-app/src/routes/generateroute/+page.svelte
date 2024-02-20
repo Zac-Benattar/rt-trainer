@@ -3,7 +3,7 @@
 	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Scenario';
-	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type  Waypoint  from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';

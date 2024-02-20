@@ -1,9 +1,14 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
+	import Map from '$lib/Components/Map.svelte';
 	import { GlobeOutline, EditOutline } from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { init } from '@paralleldrive/cuid2';
+	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import axios from 'axios';
+	import { WaypointsStore } from '$lib/stores';
+	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	const weatherCUID = init({ length: 6 });
 
@@ -28,11 +33,44 @@
 			routesClassAlertText = 'hidden';
 		}
 	}
+
+	async function loadRoute(event: Event) {
+		selectedRouteId = (event.target as HTMLInputElement).value;
+
+		try {
+			const response = await axios.get(`/api/routes/${selectedRouteId}`);
+
+			if (response === undefined) {
+				console.log('Failed to load route from DB');
+			} else {
+				const waypoints: Waypoint[] = [];
+				for (const waypoint of response.data.waypoints) {
+					waypoints.push(
+						new Waypoint(
+							waypoint.name,
+							waypoint.latitude,
+							waypoint.longitude,
+							waypoint.type,
+							waypoint.index
+						)
+					);
+				}
+
+				WaypointsStore.set(waypoints);
+			}
+		} catch (error: unknown) {
+			if (error.message === 'Network Error') {
+				console.log('Failed to load route from DB');
+			} else {
+				console.log('Error: ', error);
+			}
+		}
+	}
 </script>
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->
 <div class="flex flex-col place-content-center">
-	<div class="flex flex-row p-3 place-content-center sm:place-content-start">
+	<div class="flex flex-row p-3 place-content-center sm:place-content-start gap-5">
 		{#if form?.missing}<p class="error">The email field is required</p>{/if}
 		{#if form?.notFound}<p class="error">Route not found</p>{/if}
 		{#if form?.success}<p class="success">Route created successfully.</p>
@@ -67,7 +105,12 @@
 
 						<ListBox class="card {routesClass}">
 							{#each data.userRecentRoutes as route}
-								<ListBoxItem bind:group={selectedRouteId} name="routeId" value={route.id}>
+								<ListBoxItem
+									bind:group={selectedRouteId}
+									name="routeId"
+									value={route.id}
+									on:click={loadRoute}
+								>
 									<svelte:fragment slot="lead">
 										<span class="badge-icon p-4 variant-soft-secondary">
 											<GlobeOutline />
@@ -120,5 +163,15 @@
 				</form>
 			</div>
 		{/if}
+
+		<div class="flex flex-col">
+			<div class="h4 p-1">Route Preview</div>
+			<Map
+				enabled={true}
+				widthSmScreen={'600px'}
+				heightSmScreen={'500px'}
+				mode={MapMode.ScenarioPlan}
+			/>
+		</div>
 	</div>
 </div>

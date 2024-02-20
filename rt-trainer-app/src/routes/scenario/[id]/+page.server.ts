@@ -57,7 +57,7 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
-	const waypoints: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
+	const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
 		return new Waypoint(
 			waypoint.name,
 			parseFloat(waypoint.latitude),
@@ -66,9 +66,9 @@ export const load: PageServerLoad = async (event) => {
 			waypoint.index
 		);
 	});
-	waypoints.sort((a, b) => a.index - b.index);
+	waypointsList.sort((a, b) => a.index - b.index);
 
-	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypoints);
+	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypointsList);
 
 	return {
 		scenario: instanceToPlain(scenario),
