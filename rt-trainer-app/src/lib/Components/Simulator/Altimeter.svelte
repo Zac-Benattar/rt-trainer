@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AltimeterStateStore, CurrentRoutePointStore } from '$lib/stores';
+	import { AltimeterStateStore, CurrentScenarioPointStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import FrequencyDial from './FrequencyDial.svelte';
 
@@ -7,8 +7,8 @@
 	let currentAltitude: number = 0;
 	let currentPressure: number = 1013;
 
-	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
-		if (currentRoutePoint != null && mounted) {
+	CurrentScenarioPointStore.subscribe((currentRoutePoint) => {
+		if (currentRoutePoint != null) {
 			let targetPose = currentRoutePoint.pose;
 			currentAltitude = targetPose.altitude;
 		}
@@ -21,7 +21,7 @@
 		setPressureDial(currentPressure);
 	}
 
-	$: AltimeterStateStore.set({pressure: currentPressure});
+	$: AltimeterStateStore.set({ pressure: currentPressure });
 
 	function setAltitudeDial(altitude: number) {
 		const longArrow = document.getElementsByClassName('long-arrow')[0] as HTMLAnchorElement;
@@ -42,7 +42,7 @@
 			// 90 degrees is 1035 (max), -20 degrees is 980 (min), correct with - 540
 			var newRotation = Math.round(((pressure % 360) / 55) * 110) - 540;
 			dialFace.style.transform = 'rotate(' + newRotation + 'deg)';
-			currentAltitude = 30 * pressure -30390;
+			currentAltitude = 30 * pressure - 30390;
 		}
 	}
 

@@ -9,7 +9,7 @@ import type {
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
 import type Airspace from './ts/AeronauticalClasses/Airspace';
-import type { Waypoint } from './ts/AeronauticalClasses/Waypoint';
+import type Waypoint from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: '0',
@@ -115,7 +115,7 @@ function createEndPointIndexStore() {
 
 export const EndPointIndexStore = createEndPointIndexStore();
 
-export const CurrentRoutePointStore = derived(
+export const CurrentScenarioPointStore = derived(
 	[ScenarioStore, CurrentRoutePointIndexStore],
 	([$RouteStore]) => {
 		if ($RouteStore) {
@@ -126,12 +126,12 @@ export const CurrentRoutePointStore = derived(
 	}
 );
 
-export const CurrentTargetStore = derived(CurrentRoutePointStore, ($CurrentRoutePointStore) => {
+export const CurrentTargetStore = derived(CurrentScenarioPointStore, ($CurrentRoutePointStore) => {
 	return $CurrentRoutePointStore?.updateData.currentTarget || '';
 });
 
 export const CurrentTargetFrequencyStore = derived(
-	CurrentRoutePointStore,
+	CurrentScenarioPointStore,
 	($CurrentRoutePointStore) => {
 		return $CurrentRoutePointStore?.updateData.currentTargetFrequency || '000.000';
 	}

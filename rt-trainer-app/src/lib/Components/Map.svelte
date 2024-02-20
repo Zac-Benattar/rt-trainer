@@ -5,7 +5,7 @@
 	top of the file. Read more here about the issue and solution in the blog post by 
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
-	import { AirspacesStore, CurrentRoutePointStore, WaypointsStore } from '$lib/stores';
+	import { AirspacesStore, CurrentScenarioPointStore, WaypointsStore } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
@@ -73,7 +73,7 @@
 		needsToBeUpdated = true;
 	});
 
-	CurrentRoutePointStore.subscribe((currentRoutePoint) => {
+	CurrentScenarioPointStore.subscribe((currentRoutePoint) => {
 		if (currentRoutePoint != null) {
 			targetPose = currentRoutePoint.pose;
 			currentTime = convertMinutesToTimeString(currentRoutePoint.timeAtPoint);
