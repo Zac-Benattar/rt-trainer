@@ -11,7 +11,7 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './ScenarioStages';
-import { haversineDistance, lerp, lerpLocation } from './utils';
+import { haversineDistance, lerp, lerpLocation, toDegrees } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
@@ -123,7 +123,6 @@ export function getStartAirportScenarioPoints(
 	const groundedPose: Pose = {
 		lat: startAerodrome.coordinates[0],
 		long: startAerodrome.coordinates[1],
-		magneticHeading: 0,
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0.0
@@ -133,7 +132,6 @@ export function getStartAirportScenarioPoints(
 	const climbingOutPose: Pose = {
 		lat: climbingOutPosition[0],
 		long: climbingOutPosition[1],
-		magneticHeading: 0,
 		trueHeading: takeoffRunway.trueHeading,
 		altitude: 1200,
 		airSpeed: 70.0
@@ -344,7 +342,6 @@ export function getEndAirportScenarioPoints(
 	const parkedPose: Pose = {
 		lat: endAerodrome.coordinates[0],
 		long: endAerodrome.coordinates[1],
-		magneticHeading: 0,
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0.0
@@ -354,7 +351,6 @@ export function getEndAirportScenarioPoints(
 	const followTrafficPose: Pose = {
 		lat: followTrafficLocation[0],
 		long: followTrafficLocation[1],
-		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 1200,
 		airSpeed: 84.0
@@ -364,7 +360,6 @@ export function getEndAirportScenarioPoints(
 	const reportFinalPose: Pose = {
 		lat: reportFinalLocation[0],
 		long: reportFinalLocation[1],
-		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 750,
 		airSpeed: 55.0
@@ -373,7 +368,6 @@ export function getEndAirportScenarioPoints(
 	const onRunwayPose: Pose = {
 		lat: endAerodrome.getPointAlongLandingRunwayVector(seed, 0)[0],
 		long: endAerodrome.getPointAlongLandingRunwayVector(seed, 0)[1],
-		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 0.0,
 		airSpeed: 0.0
@@ -382,7 +376,6 @@ export function getEndAirportScenarioPoints(
 	const runwayVacatedPose: Pose = {
 		lat: endAerodrome.coordinates[0],
 		long: endAerodrome.coordinates[1],
-		magneticHeading: 0,
 		trueHeading: 0,
 		altitude: 0.0,
 		airSpeed: 0.0
@@ -669,13 +662,20 @@ export function getAirborneScenarioPoints(
 			);
 
 		const freqChange = frequencyChanges[i];
+		const heading = Math.round(
+			toDegrees(
+				Math.atan2(
+					freqChange.coordinates[1] - previousCoord[1],
+					freqChange.coordinates[0] - previousCoord[0]
+				)
+			)
+		);
 		const pose: Pose = {
 			lat: freqChange.coordinates[0],
 			long: freqChange.coordinates[1],
-			magneticHeading: 0.0,
-			trueHeading: 0.0,
-			altitude: 0.0,
-			airSpeed: 0.0
+			trueHeading: heading,
+			altitude: 2000,
+			airSpeed: 130
 		};
 
 		const requestFrequencyChange = new ScenarioPoint(
@@ -820,8 +820,7 @@ export function getAirborneScenarioPoints(
 		const emergencyPose: Pose = {
 			lat: emergencyLocation.lat,
 			long: emergencyLocation.long,
-			magneticHeading: 0.0,
-			trueHeading: 0.0,
+			trueHeading: scenarioPoints[emergencyPointIndex - 1].pose.trueHeading,
 			altitude: 0.0,
 			airSpeed: 0.0
 		};

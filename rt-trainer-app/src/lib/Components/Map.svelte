@@ -22,7 +22,6 @@
 	let targetPose: Pose = {
 		lat: 0,
 		long: 0,
-		magneticHeading: 0,
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0
@@ -65,7 +64,6 @@
 			targetPose = {
 				lat: waypoints[0].lat,
 				long: waypoints[0].long,
-				magneticHeading: 0,
 				trueHeading: 0,
 				altitude: 0,
 				airSpeed: 0
@@ -88,7 +86,6 @@
 				targetPose = {
 					lat: 0,
 					long: 0,
-					magneticHeading: 0,
 					trueHeading: 0,
 					altitude: 0,
 					airSpeed: 0
@@ -151,7 +148,7 @@
 					text.style.backgroundColor = 'white';
 					text.innerHTML =
 						'<p> Heading: ' +
-						targetPose.magneticHeading +
+						targetPose.trueHeading +
 						'<br> Airspeed: ' +
 						targetPose.airSpeed +
 						'<br> Time: ' +
