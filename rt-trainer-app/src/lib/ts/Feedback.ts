@@ -1,4 +1,4 @@
-export class Feedback {
+export default class Feedback {
 	private severeMistakes: string[];
 	private minorMistakes: string[];
 

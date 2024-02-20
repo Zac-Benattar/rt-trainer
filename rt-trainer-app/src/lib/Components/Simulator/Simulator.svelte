@@ -27,7 +27,6 @@
 		TutorialStore,
 		AltimeterStateStore
 	} from '$lib/stores';
-	import type ScenarioPoint from '$lib/ts/ScenarioPoints';
 	import {
 		type TransponderState,
 		type AircraftDetails,
@@ -35,12 +34,16 @@
 		type AltimeterState,
 		MapMode
 	} from '$lib/ts/SimulatorTypes';
-	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
+	import {
+		isCallsignStandardRegistration,
+		replaceWithPhoneticAlphabet,
+		simpleHash
+	} from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
-	import { Feedback } from '$lib/ts/Feedback';
+	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
-	import { page, updated } from '$app/stores';
+	import { updated } from '$app/stores';
 	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 
 	// Simulator state and settings
@@ -402,7 +405,7 @@
 		awaitingRadioCallCheck = true;
 		currentRadioCall = new RadioCall(
 			userMessage,
-			seed,
+			simpleHash(seed),
 			scenario,
 			currentRoutePointIndex,
 			aircraftDetails.prefix,
@@ -472,8 +475,6 @@
 	}
 
 	onMount(async () => {
-		loadScenario(scenario);
-
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;
 		} else {
@@ -487,7 +488,7 @@
 		<p>
 			A new version of the app is available
 
-			<button on:click={() => location.reload()}> reload the page </button>
+			<button on:click={() => location.reload()}> Reload the page </button>
 		</p>
 	</div>
 {/if}

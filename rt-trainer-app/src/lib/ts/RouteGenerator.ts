@@ -1,13 +1,16 @@
-import { WaypointType, Waypoint } from './AeronauticalClasses/Waypoint';
+import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { haversineDistance } from './utils';
-import type { Airport } from './AeronauticalClasses/Airport';
+import type Airport from './AeronauticalClasses/Airport';
 import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
-import type { Route } from './AeronauticalClasses/Route';
 
 export default class RouteGenerator {
-	public static async generateFRTOLRouteFromSeed(seed: number): Promise<Route> {
+	public static async generateFRTOLRouteFromSeed(seed: number): Promise<{
+		waypoints: Waypoint[];
+		airspaces: Airspace[];
+		airports: Airport[];
+	}> {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
@@ -256,7 +259,7 @@ export default class RouteGenerator {
 		return {
 			waypoints: [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint],
 			airspaces: onRouteAirspace,
-			airports: [startAirport, destinationAirport],
-		}
+			airports: [startAirport, destinationAirport]
+		};
 	}
 }

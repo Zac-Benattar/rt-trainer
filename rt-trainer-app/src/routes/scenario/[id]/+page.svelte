@@ -11,7 +11,6 @@
 	} from '$lib/stores';
 	import type { PageData } from './$types';
 	import Scenario from '$lib/ts/Scenario';
-	import { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { plainToInstance } from 'class-transformer';
 
 	export let data: PageData;

@@ -1,5 +1,5 @@
 /* Point in space along a route. */
-export class Waypoint {
+export default class Waypoint {
 	type: WaypointType;
 	lat: number;
 	long: number;

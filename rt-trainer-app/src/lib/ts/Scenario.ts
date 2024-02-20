@@ -10,10 +10,10 @@ import {
 import axios from 'axios';
 import type { ServerResponse } from './ServerClientTypes';
 import type RadioCall from './RadioCall';
-import { Waypoint } from './AeronauticalClasses/Waypoint';
+import Waypoint from './AeronauticalClasses/Waypoint';
 import ScenarioPoint from './ScenarioPoints';
 import { Type, plainToInstance } from 'class-transformer';
-import { Airport } from './AeronauticalClasses/Airport';
+import Airport from './AeronauticalClasses/Airport';
 import 'reflect-metadata';
 import Airspace from './AeronauticalClasses/Airspace';
 
@@ -141,7 +141,7 @@ export async function generateRoute(routeSeed: string): Promise<void> {
 			WaypointsStore.set(
 				response.data.waypoints.map((waypoint: Waypoint) => plainToInstance(Waypoint, waypoint))
 			);
-			AirspacesStore.set( 
+			AirspacesStore.set(
 				response.data.airspaces.map((airspace: Airspace) => plainToInstance(Airspace, airspace))
 			);
 		}
@@ -163,7 +163,7 @@ export async function generateRoute(routeSeed: string): Promise<void> {
  * @returns Promise<ServerResponse | undefined>
  */
 export async function checkRadioCallByServer(
-	radioCall: RadioCall,
+	radioCall: RadioCall
 ): Promise<ServerResponse | undefined> {
 	if (!routeGenerated) {
 		console.log('Error: No route');

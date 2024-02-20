@@ -12,8 +12,8 @@ import {
 	TaxiStage
 } from './ScenarioStages';
 import { lerp, lerpLocation } from './utils';
-import type { Airport } from './AeronauticalClasses/Airport';
-import type { Waypoint } from './AeronauticalClasses/Waypoint';
+import type Airport from './AeronauticalClasses/Airport';
+import type Waypoint from './AeronauticalClasses/Waypoint';
 
 /* A point on the route used in generation. Not necissarily visible to the user */
 export default class ScenarioPoint {
@@ -104,14 +104,14 @@ export function getParkedMadeContactUncontrolledUpdateData(
     TakeOff,
 	Climb Out of the start aerodrome's airspace.
 	 */
-export function getStartAerodromeRoutePoints(seed: number, route: Waypoint[]): ScenarioPoint[] {
+export function getStartAerodromeRoutePoints(seed: number, waypoints: Waypoint[]): ScenarioPoint[] {
 	const stages: ScenarioPoint[] = [];
-	const startAerodrome: Airport = route[0];
+	const startAerodrome: Airport = getStartAirport();
 	const startAerodromeTime: number = startAerodrome.getStartTime();
 	const startPoints = startAerodrome.getStartPoints();
-	const startPointIndex = seed.scenarioSeed % startPoints.length;
+	const startPointIndex = seed % startPoints.length;
 	const holdingPoint = startAerodrome.getTakeoffRunwayTaxiwayHoldingPoint();
-	const takeoffRunway = startAerodrome.getTakeoffRunway();
+	const takeoffRunway = startAerodrome.getTakeoffRunway(seed);
 
 	const parkedPose: Pose = {
 		lat: startPoints[startPointIndex].lat,
@@ -326,7 +326,7 @@ export function getStartAerodromeRoutePoints(seed: number, route: Waypoint[]): S
 	return stages;
 }
 
-export function getEndAerodromeRoutePoints(seed: number, route: Scenario): ScenarioPoint[] {
+export function getEndAerodromeRoutePoints(seed: number, route: Route): ScenarioPoint[] {
 	const stages: ScenarioPoint[] = [];
 	const endAerodrome: Airport = route.getEndAirport();
 	const waypoints: Waypoint[] = [];
@@ -611,7 +611,7 @@ export function getEndAerodromeRoutePoints(seed: number, route: Scenario): Scena
 }
 
 export function getAirborneRoutePoints(
-	seed: Seed,
+	seed: number,
 	numAirborneWaypoints: number,
 	hasEmergency: boolean
 ): ScenarioPoint[] {
@@ -737,20 +737,20 @@ export function getAirborneRoutePoints(
 
 	if (hasEmergency) {
 		// Add emergency before a random waypoint on the route, not first point
-		const emergencyPointIndex = (seed.scenarioSeed % (waypoints.length - 1)) + 1;
+		const emergencyPointIndex = (seed % (waypoints.length - 1)) + 1;
 		const emergencyRoutePointIndex = endStageIndexes[emergencyPointIndex - 1] + 1;
 
 		let emergencyType: EmergencyType = EmergencyType.None;
 
 		// Get a random emergency type which is not none
-		const index = seed.scenarioSeed % (Object.keys(EmergencyType).length - 1);
+		const index = seed % (Object.keys(EmergencyType).length - 1);
 		emergencyType = Object.values(EmergencyType)[index + 1];
 
 		// Generate the points to add on the route
 		// Get the percentage of the distance between the two points to add the emergency at
 		// At least 5% of the distance must be between the two points, and at most 90%
 		// This minimises the chance of the emergency ending after the next actual route point time
-		const lerpPercentage: number = (seed.scenarioSeed % 85) / 100 + 0.05;
+		const lerpPercentage: number = (seed % 85) / 100 + 0.05;
 		const emergencyLocation = lerpLocation(
 			waypoints[emergencyPointIndex].lat,
 			waypoints[emergencyPointIndex].long,

@@ -1,4 +1,3 @@
-import type Seed from '../Seed';
 import { numberToPhoneticString, seededNormalDistribution } from '../utils';
 
 /* METORlogical data. */
@@ -35,11 +34,11 @@ export class METORData {
 		this.stdDewpoint = stdDewpoint;
 	}
 
-	public getSample(seed: Seed): METORDataSample {
+	public getSample(seed: number): METORDataSample {
 		// let season: Season = Season.Spring;
 		let meanTemperature: number = 0.0;
 
-		switch (seed.weatherSeed % 4) {
+		switch (seed % 4) {
 			case 0:
 				// season = Season.Spring;
 				meanTemperature = this.meanTemperature * 1.3;
@@ -60,22 +59,22 @@ export class METORData {
 
 		// Simulate temperature, wind direction, wind speed and pressure with a normal distribution
 		const windDirection =
-			seededNormalDistribution(seed.weatherSeed.toString(), this.avgWindDirection, 10.0) % 360.0;
+			seededNormalDistribution(seed.toString(), this.avgWindDirection, 10.0) % 360.0;
 
 		const temperature = seededNormalDistribution(
-			seed.weatherSeed.toString(),
+			seed.toString(),
 			meanTemperature,
 			this.stdTemperature
 		);
 
 		const windSpeed = seededNormalDistribution(
-			seed.weatherSeed.toString(),
+			seed.toString(),
 			this.meanWindSpeed,
 			this.stdWindSpeed
 		);
 
 		const pressure = seededNormalDistribution(
-			seed.weatherSeed.toString(),
+			seed.toString(),
 			this.meanPressure,
 			this.stdTemperature
 		);

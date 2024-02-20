@@ -11,7 +11,7 @@
 	import type { Pose } from '$lib/ts/ScenarioTypes';
 	import { convertMinutesToTimeString, getBoundsWith10PercentMargins } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
-	import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 
 	export let enabled: boolean = true;

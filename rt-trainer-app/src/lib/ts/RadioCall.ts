@@ -1,5 +1,4 @@
 import type Scenario from './Scenario';
-import type Seed from './Seed';
 import {
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
@@ -10,17 +9,17 @@ import {
 	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet
 } from './utils';
-import { Feedback } from './Feedback';
+import Feedback from './Feedback';
 import type ScenarioPoint from './ScenarioPoints';
-import type { Waypoint } from './AeronauticalClasses/Waypoint';
-import type { Runway } from './AeronauticalClasses/Runway';
+import type Waypoint from './AeronauticalClasses/Waypoint';
+import type Runway from './AeronauticalClasses/Runway';
 import type { METORDataSample } from './AeronauticalClasses/METORData';
-import type { Airport } from './AeronauticalClasses/Airport';
+import type Airport from './AeronauticalClasses/Airport';
 
 export default class RadioCall {
 	private message: string;
-	private seed: Seed;
-	private route: Scenario;
+	private seed: number;
+	private scenario: Scenario;
 	private currentPointIndex: number;
 	private prefix: string;
 	private userCallsign: string;
@@ -36,8 +35,8 @@ export default class RadioCall {
 
 	constructor(
 		message: string,
-		seed: Seed,
-		route: Scenario,
+		seed: number,
+		scenario: Scenario,
 		currentRoutePoint: number,
 		prefix: string,
 		userCallsign: string,
@@ -51,7 +50,7 @@ export default class RadioCall {
 	) {
 		this.message = message;
 		this.seed = seed;
-		this.route = route;
+		this.scenario = scenario;
 		this.currentPointIndex = currentRoutePoint;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
@@ -66,23 +65,23 @@ export default class RadioCall {
 	}
 
 	public getStartAirport(): Airport {
-		return this.route.getStartAirport();
+		return this.scenario.getStartAirport();
 	}
 
 	public getEndAirport(): Airport {
-		return this.route.getEndAirport();
+		return this.scenario.getEndAirport();
 	}
 
 	public getRadioCall(): string {
 		return processString(this.message.trim().toLowerCase());
 	}
 
-	public getSeed(): Seed {
+	public getSeed(): number {
 		return this.seed;
 	}
 
 	public getCurrentRoutePoint(): ScenarioPoint {
-		return this.route.getCurrentPoint();
+		return this.scenario.getCurrentPoint();
 	}
 
 	public getPrefix(): string {
@@ -399,7 +398,7 @@ export default class RadioCall {
 				this.getPrefix() +
 				' ' +
 				replaceWithPhoneticAlphabet(
-					getAbbreviatedCallsign(this.seed.scenarioSeed, this.getAircraftType(), this.userCallsign)
+					getAbbreviatedCallsign(this.seed, this.getAircraftType(), this.userCallsign)
 				)
 			);
 		}
@@ -414,19 +413,6 @@ export default class RadioCall {
 		if (callsigns[0] != callsigns[1]) return callsigns;
 		return [callsigns[0]];
 	}
-
-	// public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-	// 	return Route.getStartAerodrome(this.seed);
-	// }
-
-	// public getEndAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-	// 	return Route.getEndAerodrome(this.seed);
-	// }
-
-	// public getStartAerodromeStartingPoint(): AerodromeStartPoint {
-	// 	const startPoints = this.getStartAerodrome().getStartPoints();
-	// 	return startPoints[this.seed.scenarioSeed % startPoints.length];
-	// }
 
 	public getStartAerodromeMETORSample(): METORDataSample {
 		return this.getStartAirport().getMETORSample(this.seed);
@@ -500,7 +486,7 @@ export default class RadioCall {
 	}
 
 	public getSquarkCode(): number {
-		return 2434 + (this.seed.scenarioSeed % 5) - 2;
+		return 2434 + (this.seed % 5) - 2;
 	}
 
 	public assertCallContainsSqwarkCode(): boolean {
@@ -675,10 +661,10 @@ export default class RadioCall {
 
 	public getTakeoffTurnoutHeading(): number {
 		const headingToFirstWaypoint = getHeadingBetween(
-			this.route.waypoints[0].lat,
-			this.route.waypoints[0].long,
-			this.route.waypoints[1].lat,
-			this.route.waypoints[1].long
+			this.scenario.waypoints[0].lat,
+			this.scenario.waypoints[0].long,
+			this.scenario.waypoints[1].lat,
+			this.scenario.waypoints[1].long
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -714,16 +700,16 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTraffic(): string {
-		if (this.seed.scenarioSeed % 2 == 0) return 'traffic is Cessna 152 reported final';
+		if (this.seed % 2 == 0) return 'traffic is Cessna 152 reported final';
 		else return 'no reported traffic';
 	}
 
 	public getLandingTraffic(): string {
 		if (this.getEndAirport().isControlled()) {
-			if (this.seed.scenarioSeed % 5 == 0) return 'Vehicle crossing';
+			if (this.seed % 5 == 0) return 'Vehicle crossing';
 			else return '';
 		} else {
-			if (this.seed.scenarioSeed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
+			if (this.seed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
 			else return 'no reported traffic';
 		}
 	}
@@ -779,7 +765,7 @@ export default class RadioCall {
 	}
 
 	public getPreviousWaypoint(): Waypoint {
-		return this.route.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
+		return this.scenario.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
 	}
 
 	public getPreviousWaypointName(): string {
@@ -867,7 +853,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypoint(): Waypoint {
-		return this.route.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
+		return this.scenario.waypoints[this.getCurrentRoutePoint().nextWaypointIndex];
 	}
 
 	public getNextWaypointName(): string {

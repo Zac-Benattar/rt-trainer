@@ -1,7 +1,7 @@
-import type { Airport } from './AeronauticalClasses/Airport';
+import type Airport from './AeronauticalClasses/Airport';
 import type Airspace from './AeronauticalClasses/Airspace';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
-import type { Waypoint } from './AeronauticalClasses/Waypoint';
+import type Waypoint from './AeronauticalClasses/Waypoint';
 import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
 import Scenario from './Scenario';
 import type ScenarioPoint from './ScenarioPoints';
@@ -70,8 +70,7 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
 			airspaces.push(intersectionPoints[i].airspace);
 	}
-    console.log(intersectionPoints);
-
+	console.log(intersectionPoints);
 
 	// Calculate the frequency change points
 

@@ -6,8 +6,8 @@ import type {
 	AirspaceData
 } from './AeronauticalClasses/OpenAIPTypes';
 import { readFileSync, writeFileSync } from 'fs';
-import { Airport } from './AeronauticalClasses/Airport';
-import { Runway } from './AeronauticalClasses/Runway';
+import Airport from './AeronauticalClasses/Airport';
+import Runway from './AeronauticalClasses/Runway';
 import { Frequency } from './Frequency';
 import Airspace from './AeronauticalClasses/Airspace';
 import { getPolygonCenter } from './utils';

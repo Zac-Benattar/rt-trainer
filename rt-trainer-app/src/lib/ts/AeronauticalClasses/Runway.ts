@@ -1,4 +1,4 @@
-export class Runway {
+export default class Runway {
 	designator: string;
 	trueHeading: number;
 	alignedTrueNorth: boolean;

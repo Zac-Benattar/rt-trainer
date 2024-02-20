@@ -1,11 +1,10 @@
 import { Type } from 'class-transformer';
 import { Frequency } from '../Frequency';
-import type Seed from '../Seed';
-import { Runway } from './Runway';
+import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
 
 /* Aerodrome data. */
-export class Airport {
+export default class Airport {
 	name: string;
 	icaoCode: string;
 	iataCode: string;
@@ -81,12 +80,12 @@ export class Airport {
 		return this.metorData;
 	}
 
-	public getMETORSample(seed: Seed): METORDataSample {
+	public getMETORSample(seed: number): METORDataSample {
 		return this.metorData.getSample(seed);
 	}
 
-	public getTakeoffRunway(seed: Seed): Runway {
-		let index = seed.scenarioSeed % this.runways.length;
+	public getTakeoffRunway(seed: number): Runway {
+		let index = seed % this.runways.length;
 		while (this.runways[index].landingOnly) {
 			index = (index + 1) % this.runways.length;
 		}
@@ -99,8 +98,8 @@ export class Airport {
 		throw new Error('Not implemented');
 	}
 
-	public getLandingRunway(seed: Seed): Runway {
-		let index = seed.scenarioSeed % this.runways.length;
+	public getLandingRunway(seed: number): Runway {
+		let index = seed % this.runways.length;
 		while (this.runways[index].takeOffOnly) {
 			index = (index + 1) % this.runways.length;
 		}
@@ -108,13 +107,13 @@ export class Airport {
 		return this.runways[index];
 	}
 
-	public getStartTime(seed: Seed): number {
+	public getStartTime(seed: number): number {
 		// (In minutes)
 		// 1pm + (0-4hours) - 2 hours -> 11am - 3pm
-		return 780 + (seed.scenarioSeed % 240) - 120;
+		return 780 + (seed % 240) - 120;
 	}
 
-	public getTakeoffTime(seed: Seed): number {
+	public getTakeoffTime(seed: number): number {
 		return this.getStartTime(seed) + 10;
 	}
 
@@ -126,7 +125,7 @@ export class Airport {
 		throw new Error('Not implemented yet');
 	}
 
-	public getATISLetter(seed: Seed): string {
-		return String.fromCharCode(65 + (seed.scenarioSeed % 26));
+	public getATISLetter(seed: number): string {
+		return String.fromCharCode(65 + (seed % 26));
 	}
 }

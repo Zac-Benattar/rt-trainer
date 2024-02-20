@@ -5,7 +5,7 @@ import { scenarios, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import { simpleHash } from '$lib/ts/utils';
-import { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
