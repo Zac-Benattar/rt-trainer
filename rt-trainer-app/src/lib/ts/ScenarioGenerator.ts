@@ -2,9 +2,15 @@ import type Airport from './AeronauticalClasses/Airport';
 import type Airspace from './AeronauticalClasses/Airspace';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 import type Waypoint from './AeronauticalClasses/Waypoint';
-import { airportDataToAirport, airspaceDataToAirspace, readDataFromJSON } from './OpenAIPHandler';
+import {
+	airportDataToAirport,
+	airspaceDataToAirspace,
+	readAirportDataFromJSON,
+	readAirspaceDataFromJSON
+} from './OpenAIPHandler';
 import Scenario from './Scenario';
 import type ScenarioPoint from './ScenarioPoints';
+import { getEndAirportScenarioPoints, getStartAirportScenarioPoints } from './ScenarioPoints';
 import type { FrequencyChangePoint } from './ScenarioTypes';
 import { findAirspaceChangePoints } from './utils';
 
@@ -17,11 +23,8 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 	const NAUTICAL_MILE = 1852;
 	const FLIGHT_TIME_MULTIPLIER = 1.3;
 
-	let airportsData: AirportData[] = [];
-	let airspacesData: AirspaceData[] = [];
-
-	// Load data
-	[airportsData, airspacesData] = readDataFromJSON();
+	const airportsData: AirportData[] = readAirportDataFromJSON();
+	const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
 
 	// Add airports to list of valid airports for takeoff/landing
 	const allAirports: Airport[] = [];
@@ -67,11 +70,17 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
 			airspaces.push(intersectionPoints[i].airspace);
 	}
-	console.log(intersectionPoints);
+	// console.log(intersectionPoints);
 
 	// Calculate the frequency change points
 
 	// Generate the scenario points
+
+	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, airports));
+
+	// Calculate airborne scenarion points
+
+	scenarioPoints.push(...getEndAirportScenarioPoints(seed, waypoints, airspaces, airports));
 
 	return new Scenario(seed.toString(), waypoints, airspaces, airports, scenarioPoints);
 }
