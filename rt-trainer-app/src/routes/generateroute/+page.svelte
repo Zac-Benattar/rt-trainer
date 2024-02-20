@@ -3,16 +3,20 @@
 	import Map from '$lib/Components/Map.svelte';
 	import { ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Scenario';
-	import type  Waypoint  from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import { goto } from '$app/navigation';
 
 	const routeCUID = init({ length: 8 });
 
 	let routeSeed: string = routeCUID();
 	let routeName: string = '';
 	let routeDescription: string = '';
+
+	let routeSeedClasses: string = '';
+	let routeSeedDescription: string = 'This seed will be used to generate the route';
 
 	$: {
 		ClearSimulationStores();
@@ -28,10 +32,27 @@
 		}
 	});
 
+	async function handleSaveRoute() {
+		if (routeSeed === '') {
+			// Set the style of the input to indicate an error
+			routeSeedClasses = 'input-error';
+			routeSeedDescription = 'Please enter a route seed';
+			return;
+		}
+
+		if (routeName === '') {
+			routeName = 'Unnamed Route';
+		}
+
+		await pushRouteToDB();
+
+		goto('/myroutes');
+	}
+
 	async function pushRouteToDB(): Promise<void> {
 		try {
 			const response = await axios.post(`/api/routes`, {
-				name: routeName ? routeName : 'Unnamed Route',
+				name: routeName,
 				routeDescription: routeDescription,
 				type: 1, // 1 = generated FRTOL route - safe for use in the simulator in its current state
 				createdBy: $page.data.userId,
@@ -90,16 +111,16 @@
 			<div>
 				<div class="h4 p-1">Route Seed</div>
 				<input
-					class="input"
+					class="input {routeSeedClasses}"
 					name="routeSeed"
 					type="text"
 					placeholder={routeSeed}
 					bind:value={routeSeed}
 				/>
-				<div class="text-sm opacity-50 p-1">This seed will be used to generate the route</div>
+				<div class="text-sm opacity-50 p-1">{routeSeedDescription}</div>
 			</div>
 
-			<button class="btn variant-filled" on:click={pushRouteToDB}>Save Route</button>
+			<button class="btn variant-filled" on:click={handleSaveRoute}>Save Route</button>
 		</div>
 
 		<Map enabled={true} widthSmScreen={'600px'} heightSmScreen={'500px'} mode={MapMode.RoutePlan} />
