@@ -20,9 +20,6 @@ export function generateScenario(seed: number, waypoints: Waypoint[]): Scenario 
 	let airportsData: AirportData[] = [];
 	let airspacesData: AirspaceData[] = [];
 
-	// // Remove for production
-	// await writeDataToJSON();
-
 	// Load data
 	[airportsData, airspacesData] = readDataFromJSON();
 

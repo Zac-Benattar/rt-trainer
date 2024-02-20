@@ -6,6 +6,7 @@ import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import { simpleHash } from '$lib/ts/utils';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+import { instanceToPlain } from 'class-transformer';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
@@ -70,7 +71,7 @@ export const load: PageServerLoad = async (event) => {
 	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypoints);
 
 	return {
-		scenario: scenario,
+		scenario: instanceToPlain(scenario),
 		aircraftDetails: {
 			prefix: prefix,
 			callsign: callsign,
