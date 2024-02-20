@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	// import IconBrandGoogle from 'virtual:icons/logos/google-icon';
 	// import IconBrandFacebook from 'virtual:icons/logos/facebook';
 
@@ -13,7 +13,7 @@
 	} from 'flowbite-svelte-icons';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 
-	let email = '';
+	let warningVisible: boolean = true;
 
 	const handleEmailSignIn = () => {
 		// handle email provider sign in
@@ -36,11 +36,40 @@
 	const handleSignOut = () => {
 		signOut({ callbackUrl: '/' });
 	};
+
+	const handleWarningAccept = () => {
+		warningVisible = false;
+	};
 </script>
 
 <div class="flex flex-row place-content-center h-full w-full">
-	<div class="flex flex-col p-5 place-content-evenly h-full w-full">
+	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
 		{#if !$page.data.session}
+			{#if warningVisible}
+				<div class="flex flex-row place-content-center">
+					<div class="">
+						<aside class="alert variant-filled-error">
+							<!-- Icon -->
+							<div><ExclamationCircleOutline /></div>
+							<!-- Message -->
+							<div class="alert-message">
+								<h3 class="h3">Warning</h3>
+								<p>
+									This is a very early version of RT Trainer. Your routes, scenarios and statistics
+									may be deleted or modified without warning while the system is finalised. Please
+									report any issues you find.
+								</p>
+							</div>
+							<!-- Actions -->
+							<div class="alert-actions">
+								<button class="btn-xl variant-filled" on:click={handleWarningAccept}
+									>I accept that my data may be deleted</button
+								>
+							</div>
+						</aside>
+					</div>
+				</div>
+			{/if}
 			<div class="flex flex-row place-content-center">
 				<div class="card p-5 space-y-6 shadow-xl sm:max-w-xs">
 					<p class="font-semibold">Welcome, login with</p>
@@ -100,11 +129,13 @@
 				</div>
 			</div>
 		{:else}
-			<div class="card p-6 space-y-6 shadow-xl w-48">
-				<div class="flex flex-wrap space-y-4 space-x-0 md:flex-nowrap md:space-x-4 md:space-y-0">
-					<button class="btn variant-ringed-surface w-full gap-2" on:click={handleSignOut}
-						>Sign Out</button
-					>
+			<div class="flex flex-row place-content-center">
+				<div class="card p-6 space-y-6 shadow-xl w-48">
+					<div class="flex flex-wrap space-y-4 space-x-0 md:flex-nowrap md:space-x-4 md:space-y-0">
+						<button class="btn variant-ringed-surface w-full gap-2" on:click={handleSignOut}
+							>Sign Out</button
+						>
+					</div>
 				</div>
 			</div>
 		{/if}
