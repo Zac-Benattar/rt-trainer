@@ -1,10 +1,9 @@
 <script lang="ts">
 	import Radio from './Radio.svelte';
 	import Transponder from './Transponder.svelte';
-	import Map from './Map.svelte';
+	import Map from '../Map.svelte';
 	import MessageInput from './MessageInput.svelte';
 	import MessageOutput from './MessageOutput.svelte';
-	import axios from 'axios';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
@@ -15,10 +14,9 @@
 		UserMessageStore,
 		ATCMessageStore,
 		CurrentTargetStore,
-		RouteStore,
+		ScenarioStore,
 		AircraftDetailsStore,
 		GenerationParametersStore,
-		CurrentRoutePointStore,
 		SpeechOutputEnabledStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
@@ -29,25 +27,28 @@
 		TutorialStore,
 		AltimeterStateStore
 	} from '$lib/stores';
-	import type RoutePoint from '$lib/ts/RoutePoints';
-	import type {
-		TransponderState,
-		AircraftDetails,
-		RadioState,
-		AltimeterState
+	import {
+		type TransponderState,
+		type AircraftDetails,
+		type RadioState,
+		type AltimeterState,
+		MapMode
 	} from '$lib/ts/SimulatorTypes';
-	import type Seed from '$lib/ts/Seed';
-	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
+	import {
+		isCallsignStandardRegistration,
+		replaceWithPhoneticAlphabet,
+		simpleHash
+	} from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
-	import { Feedback } from '$lib/ts/Feedback';
+	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './Altimeter.svelte';
 	import { updated } from '$app/stores';
-	import { checkRadioCallByServer, initiateScenario } from '$lib/ts/Route';
+	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 
 	// Simulator state and settings
-	let seed: Seed;
-	let airborneWaypoints: number = 2;
+	export let scenarioId: string;
+	let seed: string;
 	let hasEmergency: boolean;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
@@ -56,10 +57,9 @@
 	let atcMessage: string;
 	let userMessage: string;
 	let currentTarget: string;
-	let currentTargetFrequency: number;
-	let route: RoutePoint[] = [];
+	let currentTargetFrequency: string;
+	let scenario: Scenario | undefined = undefined;
 	let currentRoutePointIndex: number = 0;
-	let currentRoutePoint: RoutePoint;
 	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
@@ -106,11 +106,10 @@
 
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
 	$: tutorialStep3 =
-		radioState?.activeFrequency.toFixed(3) ==
-		currentRoutePoint?.updateData.currentTargetFrequency.toFixed(3);
+		radioState?.activeFrequency == scenario?.getCurrentPoint().updateData.currentTargetFrequency;
 
-	RouteStore.subscribe((value) => {
-		route = value;
+	ScenarioStore.subscribe((value) => {
+		scenario = value;
 	});
 
 	SpeechOutputEnabledStore.subscribe((value) => {
@@ -123,7 +122,6 @@
 
 	GenerationParametersStore.subscribe((value) => {
 		seed = value.seed;
-		airborneWaypoints = value.airborneWaypoints;
 		hasEmergency = value.hasEmergency;
 	});
 
@@ -155,10 +153,6 @@
 		currentRoutePointIndex = value;
 	});
 
-	CurrentRoutePointStore.subscribe((value) => {
-		currentRoutePoint = value;
-	});
-
 	CurrentTargetStore.subscribe((value) => {
 		currentTarget = value;
 	});
@@ -168,8 +162,8 @@
 	});
 
 	EndPointIndexStore.subscribe((value) => {
-		if (route && value >= route.length) {
-			value = route.length - 1;
+		if (scenario && scenario.scenarioPoints && value >= scenario.scenarioPoints.length) {
+			value = scenario.scenarioPoints.length - 1;
 		}
 
 		endPointIndex = value;
@@ -227,8 +221,7 @@
 			});
 			return false;
 		} else if (
-			radioState.activeFrequency.toFixed(3) !=
-			currentRoutePoint.updateData.currentTargetFrequency.toFixed(3)
+			radioState.activeFrequency != scenario?.getCurrentPoint().updateData.currentTargetFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -237,7 +230,8 @@
 			});
 			return false;
 		} else if (
-			transponderState.frequency != currentRoutePoint.updateData.currentTransponderFrequency
+			transponderState.frequency !=
+			scenario?.getCurrentPoint().updateData.currentTransponderFrequency
 		) {
 			modalStore.trigger({
 				type: 'alert',
@@ -245,7 +239,7 @@
 				body: 'Transponder frequency incorrect'
 			});
 			return false;
-		} else if (altimeterState.pressure != currentRoutePoint.updateData.currentPressure) {
+		} else if (altimeterState.pressure != scenario?.getCurrentPoint().updateData.currentPressure) {
 			// modalStore.trigger({
 			// 	type: 'alert',
 			// 	title: 'Error',
@@ -392,7 +386,7 @@
 		}
 
 		// Check state matches expected state
-		if (route.length == 0) {
+		if (scenario == undefined) {
 			console.log('Error: No route');
 			modalStore.trigger({
 				type: 'alert',
@@ -411,13 +405,11 @@
 		awaitingRadioCallCheck = true;
 		currentRadioCall = new RadioCall(
 			userMessage,
-			seed,
-			airborneWaypoints,
-			route,
-			currentRoutePointIndex,
+			simpleHash(seed),
+			scenario,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,
-			currentRoutePoint.updateData.callsignModified,
+			scenario.getCurrentPoint().updateData.callsignModified,
 			transponderState.vfrHasExecuted,
 			currentTarget,
 			currentTargetFrequency,
@@ -450,7 +442,7 @@
 				body: 'Do you want view your feedback?',
 				response: (r: boolean) => {
 					if (r) {
-						goto('/scenario/' + seed.seedString + '/results/');
+						goto('/scenario/' + scenarioId + '/results/');
 					}
 				}
 			};
@@ -482,8 +474,6 @@
 	}
 
 	onMount(async () => {
-		initiateScenario();
-
 		if (window.SpeechRecognition || window.webkitSpeechRecognition) {
 			speechRecognitionSupported = true;
 		} else {
@@ -497,7 +487,7 @@
 		<p>
 			A new version of the app is available
 
-			<button on:click={() => location.reload()}> reload the page </button>
+			<button on:click={() => location.reload()}> Reload the page </button>
 		</p>
 	</div>
 {/if}
@@ -553,12 +543,8 @@
 
 		<Transponder />
 
-		<Map enabled={mapEnabled} />
+		<Map enabled={mapEnabled} mode={MapMode.Scenario} />
 
 		<Altimeter />
-
-		<!-- <Kneeboard /> -->
-
-		<!-- <ScenarioLink /> -->
 	</div>
 </div>

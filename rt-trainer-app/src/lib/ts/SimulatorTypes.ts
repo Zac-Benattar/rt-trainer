@@ -4,27 +4,33 @@ export type RadioMode = 'OFF' | 'COM' | 'NAV';
 
 export type RadioDialMode = 'OFF' | 'SBY';
 
+export enum MapMode {
+	RoutePlan,
+	ScenarioPlan,
+	Scenario
+}
+
 /* The state of the radio. */
 export type RadioState = {
 	mode: RadioMode;
 	dialMode: RadioDialMode;
-	activeFrequency: number;
-	standbyFrequency: number;
-	tertiaryFrequency: number;
+	activeFrequency: string;
+	standbyFrequency: string;
+	tertiaryFrequency: string;
 };
 
 /* The state of the transponder. */
 export type TransponderState = {
 	dialMode: TransponderDialMode;
-	frequency: number;
+	frequency: string;
 	identEnabled: boolean;
 	vfrHasExecuted: boolean;
 };
 
 /* The state of the altimeter. */
 export type AltimeterState = {
-	pressure: number; 
-}
+	pressure: number;
+};
 
 /* The details of a aircraft selected by the user. */
 export type AircraftDetails = {

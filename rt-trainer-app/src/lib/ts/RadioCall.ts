@@ -1,5 +1,4 @@
-import Route, { getWaypointsFromVRPsJSON } from './Route';
-import type Seed from './Seed';
+import Scenario from './Scenario';
 import {
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
@@ -10,58 +9,51 @@ import {
 	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet
 } from './utils';
-import type {
-	ControlledAerodrome,
-	AerodromeStartPoint,
-	METORDataSample,
-	Runway,
-	RunwayHoldingPoint,
-	Taxiway,
-	UncontrolledAerodrome
-} from './Aerodrome';
-import { Feedback } from './Feedback';
-import type { Waypoint } from './RouteTypes';
-import type RoutePoint from './RoutePoints';
+import Feedback from './Feedback';
+import type ScenarioPoint from './ScenarioPoints';
+import type Waypoint from './AeronauticalClasses/Waypoint';
+import type Runway from './AeronauticalClasses/Runway';
+import type { METORDataSample } from './AeronauticalClasses/METORData';
+import type Airport from './AeronauticalClasses/Airport';
+import { Type } from 'class-transformer';
 
 export default class RadioCall {
 	private message: string;
-	private seed: Seed;
-	private numAirborneWaypoints: number;
-	private route: RoutePoint[];
-	private currentPointIndex: number;
+	private seed: number;
+
+	@Type(() => Scenario)
+	private scenario: Scenario;
 	private prefix: string;
 	private userCallsign: string;
 	private userCallsignModified: boolean;
 	private squark: boolean;
 	private currentTarget: string;
-	private currentTargetFrequency: number;
-	private currentRadioFrequency: number;
-	private currentTransponderFrequency: number;
+	private currentTargetFrequency: string;
+	private currentRadioFrequency: string;
+	private currentTransponderFrequency: string;
 	private aircraftType: string;
+
+	@Type(() => Feedback)
 	private feedback: Feedback;
 	private closestVRP: Waypoint | undefined;
 
 	constructor(
 		message: string,
-		seed: Seed,
-		numAirborneWaypoints: number,
-		route: RoutePoint[],
-		currentRoutePoint: number,
+		seed: number,
+		scenario: Scenario,
 		prefix: string,
 		userCallsign: string,
 		userCallsignModified: boolean,
 		squark: boolean,
 		currentTarget: string,
-		currentTargetFrequency: number,
-		currentRadioFrequency: number,
-		currentTransponderFrequency: number,
+		currentTargetFrequency: string,
+		currentRadioFrequency: string,
+		currentTransponderFrequency: string,
 		aircraftType: string
 	) {
 		this.message = message;
 		this.seed = seed;
-		this.numAirborneWaypoints = numAirborneWaypoints;
-		this.route = route;
-		this.currentPointIndex = currentRoutePoint;
+		this.scenario = scenario;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
 		this.userCallsignModified = userCallsignModified;
@@ -74,16 +66,24 @@ export default class RadioCall {
 		this.feedback = new Feedback();
 	}
 
+	public getStartAirport(): Airport {
+		return this.scenario.getStartAirport();
+	}
+
+	public getEndAirport(): Airport {
+		return this.scenario.getEndAirport();
+	}
+
 	public getRadioCall(): string {
 		return processString(this.message.trim().toLowerCase());
 	}
 
-	public getSeed(): Seed {
+	public getSeed(): number {
 		return this.seed;
 	}
 
-	public getCurrentRoutePoint(): RoutePoint {
-		return this.route[this.currentPointIndex];
+	public getCurrentScenarioPoint(): ScenarioPoint {
+		return this.scenario.getCurrentPoint();
 	}
 
 	public getPrefix(): string {
@@ -114,28 +114,28 @@ export default class RadioCall {
 		return this.currentTarget;
 	}
 
-	public getCurrentTargetFrequency(): number {
+	public getCurrentTargetFrequency(): string {
 		return this.currentTargetFrequency;
 	}
 
 	public getCurrentTargetFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentTargetFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentTargetFrequency);
 	}
 
-	public getCurrentRadioFrequency(): number {
+	public getCurrentRadioFrequency(): string {
 		return this.currentRadioFrequency;
 	}
 
 	public getCurrentRadioFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentRadioFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentRadioFrequency);
 	}
 
-	public getCurrentTransponderFrequency(): number {
+	public getCurrentTransponderFrequency(): string {
 		return this.currentTransponderFrequency;
 	}
 
 	public getCurrentTransponderFrequencyPhonetics(): string {
-		return replaceWithPhoneticAlphabet(this.currentTransponderFrequency.toString());
+		return replaceWithPhoneticAlphabet(this.currentTransponderFrequency);
 	}
 
 	public getAircraftType(): string {
@@ -154,31 +154,12 @@ export default class RadioCall {
 		return this.feedback.isFlawless();
 	}
 
-	public getJSONData(): string {
-		return JSON.stringify({
-			message: this.message,
-			seed: this.seed,
-			route: this.route,
-			currentPointIndex: this.currentPointIndex,
-			prefix: this.prefix,
-			userCallsign: this.userCallsign,
-			userCallsignModified: this.userCallsignModified,
-			squark: this.squark,
-			currentTarget: this.currentTarget,
-			currentTargetFrequency: this.currentTargetFrequency,
-			currentRadioFrequency: this.currentRadioFrequency,
-			currentTransponderFrequency: this.currentTransponderFrequency,
-			aircraftType: this.aircraftType,
-			feedback: this.feedback
-		});
-	}
-
 	public setFeedback(feedback: Feedback): void {
 		this.feedback = feedback;
 	}
 
 	public isTakeoffAerodromeControlled(): boolean {
-		return this.getStartAerodrome().isControlled();
+		return this.getStartAirport().isControlled();
 	}
 
 	public getUnmodifiedRadioCall(): string {
@@ -205,11 +186,11 @@ export default class RadioCall {
 		return this.getRadioCallWords().findIndex((x) => x.includes('decimal'));
 	}
 
-	private getRadioFrequencyStated(): number {
+	private getRadioFrequencyStated(): string | undefined {
 		const radioCallWords = this.getRadioCallWords();
 		const decimalIndex = this.getRadioFrequencyDecimalIndex();
-		if (decimalIndex <= 2) return -1; // Not enough words before decimal to be a frequency
-		if (decimalIndex >= radioCallWords.length - 1) return -1; // Not enough words after decimal to be a frequency
+		if (decimalIndex <= 2) return undefined; // Not enough words before decimal to be a frequency
+		if (decimalIndex >= radioCallWords.length - 1) return undefined; // Not enough words after decimal to be a frequency
 
 		const beforeDecimal = radioCallWords.slice(decimalIndex - 3, decimalIndex);
 		const convertedBeforeDecimal = beforeDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
@@ -217,9 +198,9 @@ export default class RadioCall {
 
 		const afterDecimal = radioCallWords.slice(decimalIndex + 1, decimalIndex + 4);
 		const convertedAfterDecimal = afterDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
-		const afterDecimalDigits = '.' + convertedAfterDecimal.join('');
+		const afterDecimalDigits = convertedAfterDecimal.join('');
 
-		const freq = parseFloat(beforeDecimalDigits + afterDecimalDigits);
+		const freq = beforeDecimalDigits + '.' + afterDecimalDigits;
 
 		return freq;
 	}
@@ -419,7 +400,7 @@ export default class RadioCall {
 				this.getPrefix() +
 				' ' +
 				replaceWithPhoneticAlphabet(
-					getAbbreviatedCallsign(this.seed.scenarioSeed, this.getAircraftType(), this.userCallsign)
+					getAbbreviatedCallsign(this.seed, this.getAircraftType(), this.userCallsign)
 				)
 			);
 		}
@@ -435,50 +416,37 @@ export default class RadioCall {
 		return [callsigns[0]];
 	}
 
-	public getStartAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-		return Route.getStartAerodrome(this.seed);
-	}
-
-	public getEndAerodrome(): ControlledAerodrome | UncontrolledAerodrome {
-		return Route.getEndAerodrome(this.seed);
-	}
-
-	public getStartAerodromeStartingPoint(): AerodromeStartPoint {
-		const startPoints = this.getStartAerodrome().getStartPoints();
-		return startPoints[this.seed.scenarioSeed % startPoints.length];
-	}
-
 	public getStartAerodromeMETORSample(): METORDataSample {
-		return this.getStartAerodrome().getMETORSample();
+		return this.getStartAirport().getMETORSample(this.seed);
 	}
 
 	public getEndAerodromeMETORSample(): METORDataSample {
-		return this.getEndAerodrome().getMETORSample();
+		return this.getEndAirport().getMETORSample(this.seed);
 	}
 
 	public getTakeoffRunway(): Runway {
-		return this.getStartAerodrome().getTakeoffRunway();
+		return this.getStartAirport().getTakeoffRunway(this.seed);
 	}
 
 	public getTakeoffRunwayName(): string {
-		return this.getStartAerodrome().getTakeoffRunway().name;
+		return this.getStartAirport().getTakeoffRunway(this.seed).designator;
 	}
 
 	public getLandingRunway(): Runway {
-		return this.getEndAerodrome().getLandingRunway();
+		return this.getEndAirport().getLandingRunway(this.seed);
 	}
 
 	public getLandingRunwayName(): string {
-		return this.getEndAerodrome().getLandingRunway().name;
+		return this.getEndAirport().getLandingRunway(this.seed).designator;
 	}
 
 	public assertCallContainsTakeOffRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().designator])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are taking off from."
 			);
 			return false;
-		} else if (!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().name])) {
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getTakeoffRunway().designator])) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
 			);
@@ -498,21 +466,11 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsScenarioStartPoint(): boolean {
-		if (
-			!this.callContainsConsecutiveWords(
-				this.getStartAerodromeStartingPoint().name.toLowerCase().split(' ')
-			)
-		) {
-			this.feedback.pushSevereMistake(
-				"Your call didn't contain your location: " + this.getStartAerodromeStartingPoint().name
-			);
-			return false;
-		}
-		return true;
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsStartAerodromeName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getStartAerodrome().getShortName()])) {
+		if (!this.callContainsConsecutiveWords([this.getStartAirport().getShortName()])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the starting aerodrome."
 			);
@@ -522,7 +480,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsEndAerodromeName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getEndAerodrome().getShortName()])) {
+		if (!this.callContainsConsecutiveWords([this.getEndAirport().getShortName()])) {
 			this.feedback.pushSevereMistake("Your call didn't contain the name of the ending aerodrome.");
 			return false;
 		}
@@ -530,7 +488,7 @@ export default class RadioCall {
 	}
 
 	public getSquarkCode(): number {
-		return 2434 + (this.seed.scenarioSeed % 5) - 2;
+		return 2434 + (this.seed % 5) - 2;
 	}
 
 	public assertCallContainsSqwarkCode(): boolean {
@@ -581,7 +539,7 @@ export default class RadioCall {
 	public assertCallContainsAltitude(): boolean {
 		if (
 			!this.callContainsWord('altitude') &&
-			!this.callContainsWord(this.getCurrentRoutePoint().pose.altitude.toString())
+			!this.callContainsWord(this.getCurrentScenarioPoint().pose.altitude.toString())
 		) {
 			this.feedback.pushSevereMistake("Your call didn't contain your altitude.");
 			return false;
@@ -590,7 +548,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsTakeOffRunwayHoldingPoint(): boolean {
-		if (!this.getTakeoffRunwayTaxiway().holdingPoints[0].name.split(' ')) {
+		if (!this.callContainsWord(this.getTakeoffRunwayTaxiwayHoldingPoint())) {
 			this.feedback.pushSevereMistake("Your call didn't contain your holding point.");
 			return false;
 		}
@@ -695,22 +653,20 @@ export default class RadioCall {
 		return true;
 	}
 
-	public getTakeoffRunwayTaxiway(): Taxiway {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiway();
+	public getTakeoffRunwayTaxiway(): string {
+		throw new Error('Unimplemented function');
 	}
 
-	public getTakeoffRunwayTaxiwayHoldingPoint(): RunwayHoldingPoint {
-		return this.getStartAerodrome().getTakeoffRunwayTaxiwayHoldingPoint();
+	public getTakeoffRunwayTaxiwayHoldingPoint(): string {
+		throw new Error('Unimplemented function');
 	}
 
 	public getTakeoffTurnoutHeading(): number {
-		const routeWaypoints = Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints);
-
 		const headingToFirstWaypoint = getHeadingBetween(
-			routeWaypoints[0].lat,
-			routeWaypoints[0].long,
-			routeWaypoints[1].lat,
-			routeWaypoints[1].long
+			this.scenario.waypoints[0].lat,
+			this.scenario.waypoints[0].long,
+			this.scenario.waypoints[1].lat,
+			this.scenario.waypoints[1].long
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -730,7 +686,7 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTransitionAltitude(): number {
-		return this.getStartAerodrome().getTakeoffTransitionAltitude();
+		return this.getStartAirport().getTakeoffTransitionAltitude();
 	}
 
 	public assertCallContainsNotAboveTransitionAltitude(): boolean {
@@ -746,16 +702,16 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTraffic(): string {
-		if (this.seed.scenarioSeed % 2 == 0) return 'traffic is Cessna 152 reported final';
+		if (this.seed % 2 == 0) return 'traffic is Cessna 152 reported final';
 		else return 'no reported traffic';
 	}
 
 	public getLandingTraffic(): string {
-		if (this.getEndAerodrome().isControlled()) {
-			if (this.seed.scenarioSeed % 5 == 0) return 'Vehicle crossing';
+		if (this.getEndAirport().isControlled()) {
+			if (this.seed % 5 == 0) return 'Vehicle crossing';
 			else return '';
 		} else {
-			if (this.seed.scenarioSeed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
+			if (this.seed % 3 == 0) return 'traffic is a PA 28 lined up to depart';
 			else return 'no reported traffic';
 		}
 	}
@@ -765,7 +721,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentAltitude(): number {
-		return this.getCurrentRoutePoint().pose.altitude;
+		return this.getCurrentScenarioPoint().pose.altitude;
 	}
 
 	public getCurrentAltitudeString(): string {
@@ -781,12 +737,12 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsLandingRunwayName(): boolean {
-		if (!this.callContainsConsecutiveWords([this.getLandingRunway().name])) {
+		if (!this.callContainsConsecutiveWords([this.getLandingRunway().designator])) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the name of the runway you are landing on."
 			);
 			return false;
-		} else if (!this.callContainsConsecutiveWords(['runway', this.getLandingRunway().name])) {
+		} else if (!this.callContainsConsecutiveWords(['runway', this.getLandingRunway().designator])) {
 			this.feedback.pushMinorMistake(
 				'Your call didn\'t contain the word "runway" with the runway name.'
 			);
@@ -811,9 +767,7 @@ export default class RadioCall {
 	}
 
 	public getPreviousWaypoint(): Waypoint {
-		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
-			this.getCurrentRoutePoint().nextWaypointIndex
-		];
+		return this.scenario.waypoints[this.getCurrentScenarioPoint().nextWaypointIndex];
 	}
 
 	public getPreviousWaypointName(): string {
@@ -832,7 +786,7 @@ export default class RadioCall {
 
 	public getDistanceToPreviousWaypointInMeters(): number {
 		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		return haversineDistance(prev.lat, prev.long, currentPose.lat, currentPose.long);
 	}
 
@@ -843,7 +797,7 @@ export default class RadioCall {
 
 	public getPositionRelativeToLastWaypoint(): string {
 		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		const heading = getHeadingBetween(prev.lat, prev.long, currentPose.lat, currentPose.long);
 		const compassDirection = getCompassDirectionFromHeading(heading);
 		const distance = this.getDistanceToPreviousWaypointNearestMile();
@@ -861,7 +815,7 @@ export default class RadioCall {
 	}
 
 	public getLandingParkingSpot(): string {
-		return this.getEndAerodrome().getLandingParkingSpot();
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsLandingParkingSpot(): boolean {
@@ -885,32 +839,7 @@ export default class RadioCall {
 	}
 
 	private getClosestVRP(): Waypoint {
-		// If already calculated then return known value
-		if (this.closestVRP != undefined) return this.closestVRP;
-
-		const currentLat = this.getCurrentRoutePoint().pose.lat;
-		const currentLong = this.getCurrentRoutePoint().pose.long;
-
-		const vRPs = getWaypointsFromVRPsJSON();
-		let closestVRP = vRPs[0];
-		let closestVRPDistance = haversineDistance(
-			currentLat,
-			currentLong,
-			closestVRP.lat,
-			closestVRP.long
-		);
-
-		for (let i = 1; i < vRPs.length; i++) {
-			const distance = haversineDistance(currentLat, currentLong, vRPs[i].lat, vRPs[i].long);
-			if (distance < closestVRPDistance) {
-				closestVRP = vRPs[i];
-				closestVRPDistance = distance;
-			}
-		}
-
-		this.closestVRP = closestVRP;
-
-		return this.closestVRP;
+		throw new Error('Unimplemented function');
 	}
 
 	public getClosestVRPName(): string {
@@ -926,9 +855,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypoint(): Waypoint {
-		return Route.getRouteWaypoints(this.seed, this.numAirborneWaypoints)[
-			this.getCurrentRoutePoint().nextWaypointIndex
-		];
+		return this.scenario.waypoints[this.getCurrentScenarioPoint().nextWaypointIndex];
 	}
 
 	public getNextWaypointName(): string {
@@ -937,7 +864,7 @@ export default class RadioCall {
 
 	public getNextWaypointDistance(): number {
 		const next = this.getNextWaypoint();
-		const currentPose = this.getCurrentRoutePoint().pose;
+		const currentPose = this.getCurrentScenarioPoint().pose;
 		return haversineDistance(next.lat, next.long, currentPose.lat, currentPose.long);
 	}
 
@@ -965,7 +892,7 @@ export default class RadioCall {
 	}
 
 	public getCurrentTime(): number {
-		return this.getCurrentRoutePoint().timeAtPoint;
+		return this.getCurrentScenarioPoint().timeAtPoint;
 	}
 
 	public assertCallContainsCurrentTime(): boolean {
@@ -991,8 +918,8 @@ export default class RadioCall {
 	}
 
 	public getCurrentATISLetter(): string {
-		if (this.getEndAerodrome().isControlled()) {
-			return (this.getEndAerodrome() as ControlledAerodrome).getATISLetter();
+		if (this.getEndAirport().isControlled()) {
+			return this.getEndAirport().getATISLetter(this.seed);
 		} else {
 			throw new Error('No ATIS letter for uncontrolled aerodrome.');
 		}

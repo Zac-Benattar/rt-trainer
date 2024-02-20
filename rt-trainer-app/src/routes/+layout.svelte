@@ -18,6 +18,7 @@
 	import { inject } from '@vercel/analytics';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
+	import 'reflect-metadata';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
@@ -55,7 +56,7 @@
 		// Otherwise user is logged in and sidebar can be shown
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
-		burgerButton = 'lg';
+		burgerButton = 'lg:hidden';
 	}
 </script>
 

@@ -15,7 +15,7 @@
 	});
 
 	CurrentTargetFrequencyStore.subscribe((value) => {
-		currentTargetFrequency = value.toFixed(3);
+		currentTargetFrequency = value;
 	});
 
 	let atcMessage: string;

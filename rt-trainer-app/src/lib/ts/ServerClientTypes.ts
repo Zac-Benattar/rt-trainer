@@ -1,10 +1,8 @@
 import type { Feedback } from './Feedback';
-import type { EmergencyType } from './RouteTypes';
-import type Seed from './Seed';
+import type { EmergencyType } from './ScenarioTypes';
 
 export type GenerationParameters = {
-	seed: Seed;
-	airborneWaypoints: number;
+	seed: string;
 	hasEmergency: boolean;
 };
 
@@ -24,8 +22,7 @@ export class ServerResponse {
 /* Context which must be sent to the server for use in parsing. */
 export type CallParsingContext = {
 	radioCall: string;
-	seed: Seed;
-
+	seed: string;
 };
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */
@@ -33,8 +30,8 @@ export type SimulatorUpdateData = {
 	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: string;
-	currentTargetFrequency: number;
-	currentTransponderFrequency: number;
+	currentTargetFrequency: string;
+	currentTransponderFrequency: string;
 	currentPressure: number;
 	emergency: EmergencyType;
 };

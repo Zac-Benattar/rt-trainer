@@ -1,8 +1,11 @@
+import type Airspace from './AeronauticalClasses/Airspace';
+import type Waypoint from './AeronauticalClasses/Waypoint';
+
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
 	let hash = 0;
 
-	if (str.length === 0) {
+	if (str === undefined || str.length === 0) {
 		return hash;
 	}
 
@@ -11,7 +14,7 @@ export function simpleHash(str: string): number {
 		hash = (hash << 5) - hash + char;
 	}
 
-	return hash;
+	return Math.abs(hash);
 }
 
 // Splits a number into two halves and pads them with zeros to make sure they are the same length
@@ -90,6 +93,34 @@ export function removeDigits(str: string): string {
 
 export function isCallsignStandardRegistration(callsign: string): boolean {
 	return callsign.length == 6 && callsign.charAt(1) == '-';
+}
+
+export function swapDigitsWithWords(inputString: string): string {
+	const digitWords: Record<string, string> = {
+		'0': 'Zero ',
+		'1': 'One ',
+		'2': 'Two ',
+		'3': 'Three ',
+		'4': 'Four ',
+		'5': 'Five ',
+		'6': 'Six ',
+		'7': 'Seven ',
+		'8': 'Eight ',
+		'9': 'Nine '
+	};
+
+	const result = inputString
+		.split('')
+		.map((char) => {
+			if (/\d/.test(char)) {
+				return digitWords[char];
+			} else {
+				return char;
+			}
+		})
+		.join('');
+
+	return result;
 }
 
 /* Returns a abbreviated callsign. */
@@ -304,11 +335,19 @@ export const lerpLocation = (
 };
 
 export function toRadians(degrees: number): number {
-	return degrees * (Math.PI / 180);
+	let radians = degrees * (Math.PI / 180);
+	if (radians < 0) {
+		radians += 2 * Math.PI;
+	}
+	return radians;
 }
 
 export function toDegrees(radians: number): number {
-	return radians * (180 / Math.PI);
+	let degrees = radians * (180 / Math.PI);
+	if (degrees < 0) {
+		degrees += 360;
+	}
+	return degrees;
 }
 
 export function getHeadingBetween(
@@ -334,9 +373,9 @@ export function getNewCoordsFromCoord(
 	startLat: number,
 	startLong: number,
 	angle: number, // Angle in degrees (bearing from the starting point)
-	distance: number // Distance in kilometers
-): { lat: number; long: number } {
-	const earthRadius = 6371; // Earth's radius in kilometers
+	distance: number // Distance in nautical miles
+): Point {
+	const earthRadius = 3440.065; // Earth's radius in nauical miles
 
 	const startLatRad = toRadians(startLat);
 	const startLongRad = toRadians(startLong);
@@ -357,7 +396,7 @@ export function getNewCoordsFromCoord(
 	const newLat = toDegrees(newLatRad);
 	const newLong = toDegrees(newLongRad);
 
-	return { lat: newLat, long: newLong };
+	return [newLat, newLong];
 }
 
 export function getCompassDirectionFromHeading(heading: number) {
@@ -426,11 +465,286 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
-export function getRandomSqwuakCode(seed: Seed): number {
+export function getRandomSqwuakCode(seed: number): number {
 	let code: number = 0;
 	for (let i = 0; i < 4; i++) {
 		// Swap this out for a big prime
-		code += ((seed.scenarioSeed * 49823748933 * i) % 8) * (10 ^ i);
+		code += ((seed * 49823748933 * i) % 8) * (10 ^ i);
 	}
 	return code;
+}
+
+type Point = [number, number];
+
+export function pointInPolygon(point: Point, polygon: Point[]): boolean {
+	const x = point[0];
+	const y = point[1];
+	let inside = false;
+
+	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+		const xi = polygon[i][0];
+		const yi = polygon[i][1];
+		const xj = polygon[j][0];
+		const yj = polygon[j][1];
+
+		const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+		if (intersect) {
+			inside = !inside;
+		}
+	}
+
+	return inside;
+}
+
+export function anyPointsInPolygon(points: Point[], polygon: Point[]): boolean {
+	for (const p of points) {
+		if (pointInPolygon(p, polygon)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export function lineIntersectsPolygon(point1: Point, point2: Point, polygon: Point[]): boolean {
+	// Check if any of the line's end points are inside the polygon
+	if (pointInPolygon(point1, polygon) || pointInPolygon(point2, polygon)) {
+		return true;
+	}
+
+	// Check for intersection by iterating through each edge of the polygon
+	for (let i = 0; i < polygon.length; i++) {
+		const j = (i + 1) % polygon.length;
+		const edgeStart = polygon[i];
+		const edgeEnd = polygon[j];
+
+		// Check if the line segment defined by point1 and point2 intersects the current edge
+		if (doSegmentsIntersect(point1, point2, edgeStart, edgeEnd)) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export function doSegmentsIntersect(a: Point, b: Point, c: Point, d: Point): boolean {
+	const ccw = (p1: Point, p2: Point, p3: Point) => {
+		return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0]);
+	};
+
+	return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
+}
+
+export function polygonIntersectsOrWithinPolygon(
+	innerPolygon: Point[],
+	outerPolygon: Point[]
+): boolean {
+	// Check if any vertex of the inner polygon is inside the outer polygon
+	for (const vertex of innerPolygon) {
+		if (pointInPolygon(vertex, outerPolygon)) {
+			return true;
+		}
+	}
+
+	// Check for intersection by iterating through each edge of both polygons
+	for (let i = 0; i < outerPolygon.length; i++) {
+		const j = (i + 1) % outerPolygon.length;
+		const edgeStartOuter = outerPolygon[i];
+		const edgeEndOuter = outerPolygon[j];
+
+		for (let k = 0; k < innerPolygon.length; k++) {
+			const l = (k + 1) % innerPolygon.length;
+			const edgeStartInner = innerPolygon[k];
+			const edgeEndInner = innerPolygon[l];
+
+			// Check if the edges of both polygons intersect
+			if (doSegmentsIntersect(edgeStartOuter, edgeEndOuter, edgeStartInner, edgeEndInner)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+export function getPolygonCenter(polygon: Point[]): Point {
+	if (polygon.length === 0) {
+		throw new Error('Empty polygon');
+	}
+
+	// Calculate the average of x-coordinates
+	const centerX = polygon.reduce((sum, point) => sum + point[0], 0) / polygon.length;
+
+	// Calculate the average of y-coordinates
+	const centerY = polygon.reduce((sum, point) => sum + point[1], 0) / polygon.length;
+
+	return [centerX, centerY];
+}
+
+export function getClosestPointFromCollection(
+	targetPoint: [number, number],
+	pointsList: [number, number][]
+): [number, number] | null {
+	if (pointsList.length === 0) {
+		return null; // No points in the list
+	}
+
+	let closestPoint = pointsList[0];
+	let minDistance = haversineDistance(
+		targetPoint[0],
+		targetPoint[1],
+		closestPoint[0],
+		closestPoint[1]
+	);
+
+	for (let i = 1; i < pointsList.length; i++) {
+		const currentPoint = pointsList[i];
+		const distance = haversineDistance(
+			targetPoint[0],
+			targetPoint[1],
+			currentPoint[0],
+			currentPoint[1]
+		);
+
+		if (distance < minDistance) {
+			minDistance = distance;
+			closestPoint = currentPoint;
+		}
+	}
+
+	return closestPoint;
+}
+
+// Return the two corners with the smallest and largest x and y coordinates
+export function getBounds(waypoints: Waypoint[]): [number, number][] {
+	let minLat = Infinity;
+	let maxLat = -Infinity;
+	let minLong = Infinity;
+	let maxLong = -Infinity;
+
+	for (const waypoint of waypoints) {
+		if (waypoint.lat < minLat) {
+			minLat = waypoint.lat;
+		}
+		if (waypoint.lat > maxLat) {
+			maxLat = waypoint.lat;
+		}
+		if (waypoint.long < minLong) {
+			minLong = waypoint.long;
+		}
+		if (waypoint.long > maxLong) {
+			maxLong = waypoint.long;
+		}
+	}
+
+	return [
+		[minLat, minLong],
+		[maxLat, maxLong]
+	];
+}
+
+export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
+	const bounds = getBounds(waypoints);
+	const latMargin = (bounds[1][0] - bounds[0][0]) * 0.1;
+	const longMargin = (bounds[1][1] - bounds[0][1]) * 0.1;
+
+	if (latMargin === 0 || longMargin === 0) {
+		return bounds;
+	}
+
+	if (
+		Number.isNaN(bounds[0][0]) ||
+		Number.isNaN(bounds[0][1]) ||
+		Number.isNaN(bounds[1][0]) ||
+		Number.isNaN(bounds[1][1])
+	)
+		return [
+			[0, 0],
+			[0, 0]
+		];
+
+	const newBounds = [
+		[bounds[0][0] - latMargin, bounds[0][1] - longMargin],
+		[bounds[1][0] + latMargin, bounds[1][1] + longMargin]
+	];
+
+	return newBounds;
+}
+
+function isPointInsidePolygon(point: Point, polygon: Point[]): boolean {
+	const x = point[0];
+	const y = point[1];
+
+	let isInside = false;
+
+	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+		const xi = polygon[i][0];
+		const yi = polygon[i][1];
+		const xj = polygon[j][0];
+		const yj = polygon[j][1];
+
+		const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
+
+		if (intersect) {
+			isInside = !isInside;
+		}
+	}
+
+	return isInside;
+}
+
+export function findAirspaceChangePoints(
+	route: Point[],
+	airspaces: Airspace[]
+): { airspace: Airspace; coordinates: Point }[] {
+	const intersections: { airspace: Airspace; coordinates: Point }[] = [];
+
+	// Iterate through consecutive pairs of route points
+	for (let i = 0; i < route.length - 1; i++) {
+		const startPoint = route[i];
+		const endPoint = route[i + 1];
+
+		// Check for intersection with each polygon
+		for (const airspace of airspaces) {
+			// Check if start and end points are on opposite sides of the polygon
+			const isStartInside = isPointInsidePolygon(startPoint, airspace.getCoords());
+			const isEndInside = isPointInsidePolygon(endPoint, airspace.getCoords());
+
+			// If there is a change from inside to outside or vice versa, consider it an intersection
+			if (isStartInside !== isEndInside) {
+				// Find the intersection point
+
+				// Calculate the intersection point
+				const x1 = startPoint[0];
+				const y1 = startPoint[1];
+				const x2 = endPoint[0];
+				const y2 = endPoint[1];
+				const x3 = airspace.getCoords()[0][0];
+				const y3 = airspace.getCoords()[0][1];
+				const x4 = airspace.getCoords()[1][0];
+				const y4 = airspace.getCoords()[1][1];
+
+				let ua = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+				let ub = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
+				const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+
+				if (denominator === 0) {
+					continue;
+				}
+
+				ua = ua / denominator;
+				ub = ub / denominator;
+
+				const intersectionX = x1 + ua * (x2 - x1);
+				const intersectionY = y1 + ua * (y2 - y1);
+
+				const intersectionPoint: Point = [intersectionX, intersectionY];
+
+				intersections.push({ airspace, coordinates: intersectionPoint });
+			}
+		}
+	}
+
+	return intersections;
 }

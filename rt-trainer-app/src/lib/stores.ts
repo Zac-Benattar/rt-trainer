@@ -1,6 +1,5 @@
 import { derived, writable } from 'svelte/store';
 import type { GenerationParameters } from './ts/ServerClientTypes';
-import type RoutePoint from './ts/RoutePoints';
 import type {
 	AircraftDetails,
 	AltimeterState,
@@ -8,15 +7,12 @@ import type {
 	TransponderState
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
-import type { Waypoint } from './ts/RouteTypes';
+import type Scenario from './ts/Scenario';
+import type Airspace from './ts/AeronauticalClasses/Airspace';
+import type Waypoint from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
-	seed: {
-		seedString: '0',
-		scenarioSeed: 0,
-		weatherSeed: 0
-	},
-	airborneWaypoints: 2,
+	seed: '0',
 	hasEmergency: false
 };
 
@@ -29,14 +25,14 @@ const initialAircraftDetails: AircraftDetails = {
 const initialRadioState: RadioState = {
 	mode: 'OFF',
 	dialMode: 'OFF',
-	activeFrequency: 0,
-	standbyFrequency: 0,
-	tertiaryFrequency: 0
+	activeFrequency: '000.000',
+	standbyFrequency: '000.000',
+	tertiaryFrequency: '000.000'
 };
 
 const initialTransponderState: TransponderState = {
 	dialMode: 'OFF',
-	frequency: 0,
+	frequency: '0000',
 	identEnabled: false,
 	vfrHasExecuted: false
 };
@@ -73,10 +69,20 @@ export const ATCMessageStore = writable<string>('');
 
 export const KneeboardStore = writable<string>('');
 
-// Route stores
-export const RouteStore = writable<RoutePoint[]>([]);
+// Scenario stores
+export const ScenarioStore = writable<Scenario | undefined>(undefined);
+
+export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
+	if ($RouteStore) {
+		return $RouteStore.scenarioPoints;
+	} else {
+		return [];
+	}
+});
 
 export const WaypointsStore = writable<Waypoint[]>([]);
+
+export const AirspacesStore = writable<Airspace[]>([]);
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
 
@@ -109,21 +115,25 @@ function createEndPointIndexStore() {
 
 export const EndPointIndexStore = createEndPointIndexStore();
 
-export const CurrentRoutePointStore = derived(
-	[RouteStore, CurrentRoutePointIndexStore],
-	([$RouteStore, $CurrentRoutePointIndexStore]) => {
-		return $RouteStore[$CurrentRoutePointIndexStore];
+export const CurrentScenarioPointStore = derived(
+	[ScenarioStore, CurrentRoutePointIndexStore],
+	([$RouteStore]) => {
+		if ($RouteStore) {
+			if ($RouteStore.scenarioPoints.length > 0) {
+				return $RouteStore.getCurrentPoint();
+			}
+		}
 	}
 );
 
-export const CurrentTargetStore = derived(CurrentRoutePointStore, ($CurrentRoutePointStore) => {
+export const CurrentTargetStore = derived(CurrentScenarioPointStore, ($CurrentRoutePointStore) => {
 	return $CurrentRoutePointStore?.updateData.currentTarget || '';
 });
 
 export const CurrentTargetFrequencyStore = derived(
-	CurrentRoutePointStore,
+	CurrentScenarioPointStore,
 	($CurrentRoutePointStore) => {
-		return $CurrentRoutePointStore?.updateData.currentTargetFrequency || 0;
+		return $CurrentRoutePointStore?.updateData.currentTargetFrequency || '000.000';
 	}
 );
 
@@ -135,8 +145,6 @@ export const TutorialStore = writable<boolean>(false);
 
 // System status stores
 export const NullRouteStore = writable<boolean>(false);
-
-export const OpenAIPHealthStore = writable<string>('');
 
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
@@ -151,8 +159,7 @@ export function ClearSimulationStores(): void {
 	ExpectedUserMessageStore.set('');
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
-	RouteStore.set([]);
-	WaypointsStore.set([]);
+	ScenarioStore.set(undefined);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);
