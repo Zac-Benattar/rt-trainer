@@ -110,6 +110,16 @@ export default class Airport {
 		return this.runways[index];
 	}
 
+	public getPointAlongLandingRunwayVector(seed: number, distance: number): [number, number] {
+		const runway = this.getLandingRunway(seed);
+		const lat1 = runway.thresholdCoordinates[0];
+		const lon1 = runway.thresholdCoordinates[1];
+		const lat2 = lat1 + (distance / 111111) * Math.cos((runway.trueHeading * Math.PI) / 180);
+		const lon2 = lon1 + (distance / 111111) * Math.sin((runway.trueHeading * Math.PI) / 180);
+
+		return [lat2, lon2];
+	}
+
 	public getStartTime(seed: number): number {
 		// (In minutes)
 		// 1pm + (0-4hours) - 2 hours -> 11am - 3pm
@@ -124,8 +134,54 @@ export default class Airport {
 		return this.type == 3 || this.type == 9;
 	}
 
-	public getGroundFrequency(): string {
-		throw new Error('Not implemented yet');
+	public getParkedFrequencyValue(): string {
+		let groundOrInformationFrequency = this.getGroundFrequencyValue();
+		if (groundOrInformationFrequency == undefined) {
+			groundOrInformationFrequency = this.getTowerFrequencyValue();
+		}
+		if (groundOrInformationFrequency == undefined) {
+			groundOrInformationFrequency = this.getInformationFrequencyValue();
+		}
+		if (groundOrInformationFrequency == undefined) {
+			groundOrInformationFrequency = '000.000';
+		}
+		return groundOrInformationFrequency;
+	}
+
+	public getGroundFrequencyValue(): string | undefined {
+		for (let i = 0; i < this.frequencies.length; i++) {
+			if (this.frequencies[i].type == 9) {
+				return this.frequencies[i].value;
+			}
+		}
+		return undefined;
+	}
+
+	public getInformationFrequencyValue(): string | undefined {
+		for (let i = 0; i < this.frequencies.length; i++) {
+			if (this.frequencies[i].type == 15) {
+				return this.frequencies[i].value;
+			}
+		}
+		return undefined;
+	}
+
+	public getTowerFrequencyValue(): string | undefined {
+		for (let i = 0; i < this.frequencies.length; i++) {
+			if (this.frequencies[i].type == 14) {
+				return this.frequencies[i].value;
+			}
+		}
+		return undefined;
+	}
+
+	public getApproachFrequencyValue(): string | undefined {
+		for (let i = 0; i < this.frequencies.length; i++) {
+			if (this.frequencies[i].type == 0) {
+				return this.frequencies[i].value;
+			}
+		}
+		return undefined;
 	}
 
 	public getATISLetter(seed: number): string {

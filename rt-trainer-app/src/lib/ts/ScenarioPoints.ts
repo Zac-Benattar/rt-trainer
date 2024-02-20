@@ -47,7 +47,7 @@ export function getParkedInitialControlledUpdateData(
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: airport.getShortName() + ' Ground',
-		currentTargetFrequency: airport.getGroundFrequency(),
+		currentTargetFrequency: airport.getParkedFrequencyValue(),
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -62,7 +62,7 @@ export function getParkedMadeContactControlledUpdateData(
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Ground',
-		currentTargetFrequency: startAerodrome.getGroundFrequency(),
+		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -77,7 +77,7 @@ export function getParkedInitialUncontrolledUpdateData(
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Information',
-		currentTargetFrequency: startAerodrome.getGroundFrequency(),
+		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -92,7 +92,7 @@ export function getParkedMadeContactUncontrolledUpdateData(
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: startAerodrome.getShortName() + ' Information',
-		currentTargetFrequency: startAerodrome.getGroundFrequency(),
+		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -331,7 +331,7 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
-	const followTrafficLocation = landingRunway.getPointAlongVector(-4.5);
+	const followTrafficLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -4.5);
 	const followTrafficPose: Pose = {
 		lat: followTrafficLocation[0],
 		long: followTrafficLocation[1],
@@ -341,7 +341,7 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 84.0
 	};
 
-	const reportFinalLocation = landingRunway.getPointAlongVector(-3.6);
+	const reportFinalLocation = endAerodrome.getPointAlongLandingRunwayVector(seed, -3.6);
 	const reportFinalPose: Pose = {
 		lat: reportFinalLocation[0],
 		long: reportFinalLocation[1],
@@ -352,8 +352,8 @@ export function getEndAirportScenarioPoints(
 	};
 
 	const onRunwayPose: Pose = {
-		lat: landingRunway.getPointAlongVector(0)[0],
-		long: landingRunway.getPointAlongVector(0)[1],
+		lat: endAerodrome.getPointAlongLandingRunwayVector(seed, 0)[0],
+		long: endAerodrome.getPointAlongLandingRunwayVector(seed, 0)[1],
 		magneticHeading: 0,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 0.0,

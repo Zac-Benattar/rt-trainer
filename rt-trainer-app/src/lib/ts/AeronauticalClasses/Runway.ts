@@ -84,8 +84,4 @@ export default class Runway {
 		this.lightingSystem = lightingSystem;
 		this.visualApproachAids = visualApproachAids;
 	}
-
-	public getPointAlongVector(distance: number): [number, number] {
-		throw new Error('Unimplemented function');
-	}
 }

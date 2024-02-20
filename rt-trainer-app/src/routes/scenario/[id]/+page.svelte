@@ -81,6 +81,7 @@
 	}
 
 	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
+	console.log(scenario);
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);

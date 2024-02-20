@@ -90,7 +90,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 			);
 		}),
 		airportData.frequencies?.map((frequency) => {
-			return new Frequency(frequency.value, frequency.unit, frequency.name, frequency.primary);
+			return new Frequency(frequency.value, frequency.unit, frequency.name, frequency.type, frequency.primary);
 		})
 	);
 }
