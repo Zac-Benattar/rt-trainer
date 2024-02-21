@@ -197,7 +197,7 @@ export default class RouteGenerator {
 			}
 			onRouteAirspace.push(chosenMATZ);
 
-			if (onRouteAirspace.length > 6) {
+			if (onRouteAirspace.length > 7) {
 				validRoute = false;
 				continue;
 			}
