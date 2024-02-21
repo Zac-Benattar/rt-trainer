@@ -1,5 +1,6 @@
 import Scenario from './Scenario';
 import {
+	addSpacesBetweenCharacters,
 	convertMinutesToTimeString,
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
@@ -7,8 +8,10 @@ import {
 	haversineDistance,
 	isCallsignStandardRegistration,
 	processString,
+	removePunctuation,
 	replacePhoneticAlphabetWithChars,
-	replaceWithPhoneticAlphabet
+	replaceWithPhoneticAlphabet,
+	trimSpaces
 } from './utils';
 import Feedback from './Feedback';
 import type ScenarioPoint from './ScenarioPoints';
@@ -324,6 +327,7 @@ export default class RadioCall {
 		return true;
 	}
 
+	// Issue here is that it needs to check for student g o f l y, and its not doing that
 	public callContainsUserCallsign(): boolean {
 		const validUserCallsigns = this.getValidUserCallsigns();
 		return (
@@ -412,9 +416,16 @@ export default class RadioCall {
 	Given that abbreviated callsigns are optional once established both 
 	full and abbreviated versions returned if abbreviation established. */
 	private getValidUserCallsigns(): string[] {
-		const callsigns = [this.getUserCallsignPhonetics(), this.getTargetAllocatedCallsign()];
-		if (callsigns[0] != callsigns[1]) return callsigns;
-		return [callsigns[0]];
+		const callsigns = [
+			trimSpaces(
+				this.prefix + ' ' + addSpacesBetweenCharacters(removePunctuation(this.userCallsign))
+			).toLowerCase(),
+			this.getUserCallsignPhonetics(),
+			this.getTargetAllocatedCallsign()
+		];
+		console.log(callsigns);
+		if (callsigns[1] != callsigns[2]) return callsigns;
+		return [callsigns[1]];
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {
@@ -911,7 +922,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypointArrivalTime(): number {
-		throw new Error('Unimplemented function')
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsNextWaypointArrivalTime(): boolean {
