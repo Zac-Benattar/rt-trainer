@@ -102,7 +102,7 @@
 			name="call-input"
 			rows="4"
 			cols="50"
-			maxlength="100"
+			maxlength="200"
 			placeholder="Enter your radio message here."
 		/>
 	</div>
