@@ -11,7 +11,6 @@ import { instanceToPlain } from 'class-transformer';
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
 	const session = await event.locals.auth();
-	const routeId = event.params.id;
 
 	let prefix: string | null = null;
 	let callsign: string | null = null;
@@ -19,7 +18,52 @@ export const load: PageServerLoad = async (event) => {
 
 	let userId = '-1';
 
-	if (!session?.user && routeId != 'demo') throw redirect(303, '/login');
+	if (!session?.user && scenarioId != 'demo') throw redirect(303, '/login');
+
+	if (scenarioId == 'demo') {
+		const scenarioRow = await db.query.scenarios.findFirst({
+			where: eq(scenarios.id, 'demo'),
+			with: {
+				routes: {
+					with: {
+						waypoints: true
+					}
+				}
+			}
+		});
+
+		if (scenarioRow == null || scenarioRow == undefined) {
+			return {
+				error: 'No scenario found'
+			};
+		}
+
+		const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
+			return new Waypoint(
+				waypoint.name,
+				parseFloat(waypoint.latitude),
+				parseFloat(waypoint.longitude),
+				waypoint.type,
+				waypoint.index
+			);
+		});
+		waypointsList.sort((a, b) => a.index - b.index);
+
+		const scenario = generateScenario(
+			simpleHash(scenarioRow.seed),
+			waypointsList,
+			scenarioRow.hasEmergency
+		);
+
+		return {
+			scenario: instanceToPlain(scenario),
+			aircraftDetails: {
+				prefix: prefix,
+				callsign: callsign,
+				aircraftType: aircraftType
+			}
+		};
+	}
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const userRow = await db.query.users.findFirst({
@@ -68,7 +112,11 @@ export const load: PageServerLoad = async (event) => {
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
 
-	const scenario = generateScenario(simpleHash(scenarioRow.seed), waypointsList, scenarioRow.hasEmergency);
+	const scenario = generateScenario(
+		simpleHash(scenarioRow.seed),
+		waypointsList,
+		scenarioRow.hasEmergency
+	);
 
 	return {
 		scenario: instanceToPlain(scenario),
