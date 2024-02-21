@@ -7,13 +7,37 @@ import {
 	tinyint,
 	smallint,
 	decimal,
-	boolean
+	boolean,
+	json
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
 import { relations } from 'drizzle-orm';
 import { init } from '@paralleldrive/cuid2';
 
 const shortCUID = init({ length: 12 });
+
+/**
+ * Json Data schema
+ */
+
+export const airportsJSON = mysqlTable('airport', {
+	id: varchar('id', { length: 12 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => shortCUID()),
+	json: json('json').notNull(),
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const airspacesJSON = mysqlTable('airspace', {
+	id: varchar('id', { length: 12 })
+		.notNull()
+		.primaryKey()
+		.$defaultFn(() => shortCUID()),
+	json: json('json').notNull(),
+	updatedAt: timestamp('updated_at').defaultNow()
+});
 
 /**
  * Route data schema

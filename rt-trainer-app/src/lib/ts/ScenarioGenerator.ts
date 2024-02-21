@@ -5,7 +5,9 @@ import type Waypoint from './AeronauticalClasses/Waypoint';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
+	readAirportDataFromDB,
 	readAirportDataFromJSON,
+	readAirspaceDataFromDB,
 	readAirspaceDataFromJSON
 } from './OpenAIPHandler';
 import Scenario from './Scenario';
@@ -17,17 +19,17 @@ import {
 } from './ScenarioPoints';
 import { findAirspaceChangePoints } from './utils';
 
-export function generateScenario(
+export async function generateScenario(
 	seed: number,
 	waypoints: Waypoint[],
 	hasEmergency: boolean
-): Scenario {
+): Promise<Scenario> {
 	const airports: Airport[] = [];
 	const airspaces: Airspace[] = [];
 	const scenarioPoints: ScenarioPoint[] = [];
 
-	const airportsData: AirportData[] = readAirportDataFromJSON();
-	const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
+	const airportsData: AirportData[] = await readAirportDataFromDB();
+	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
 
 	// Add airports to list of valid airports for takeoff/landing
 	const allAirports: Airport[] = [];

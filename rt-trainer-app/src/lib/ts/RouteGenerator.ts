@@ -5,8 +5,13 @@ import type Airport from './AeronauticalClasses/Airport';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
+	pushAirportDataToDatabase,
+	pushAirspaceDataToDatabase,
+	readAirportDataFromDB,
 	readAirportDataFromJSON,
-	readAirspaceDataFromJSON
+	readAirspaceDataFromDB,
+	readAirspaceDataFromJSON,
+	writeDataToJSON
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 
@@ -26,11 +31,15 @@ export default class RouteGenerator {
 		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 		const NAUTICAL_MILE = 1852;
 		const FLIGHT_TIME_MULTIPLIER = 1.3;
-		const airportsData: AirportData[] = readAirportDataFromJSON();
-		const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
+		// const airportsData: AirportData[] = readAirportDataFromJSON();
+		const airportsData: AirportData[] = await readAirportDataFromDB();
+		const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
 
 		// // Remove for production
 		// await writeDataToJSON();
+
+		// await pushAirportDataToDatabase();
+		// await pushAirspaceDataToDatabase();
 
 		// Add airports to list of valid airports for takeoff/landing
 		const allValidAirports: Airport[] = [];

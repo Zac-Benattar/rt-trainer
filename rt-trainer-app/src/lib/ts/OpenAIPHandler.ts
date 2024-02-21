@@ -11,6 +11,9 @@ import Runway from './AeronauticalClasses/Runway';
 import { Frequency } from './Frequency';
 import Airspace from './AeronauticalClasses/Airspace';
 import { getPolygonCenter } from './utils';
+import { db } from '$lib/db/db';
+import { airportsJSON, airspacesJSON } from '$lib/db/schema';
+import { json } from '@sveltejs/kit';
 
 export function checkDataUpToDate(): boolean {
 	// TODO
@@ -39,6 +42,42 @@ export function readAirportDataFromJSON(): AirportData[] {
 export function readAirspaceDataFromJSON(): AirspaceData[] {
 	return JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
 }
+
+export async function readAirportDataFromDB(): Promise<AirportData[]> {
+	const airportData = await db.query.airportsJSON.findFirst({
+		columns: {
+			json: true
+		}
+	});
+
+	const airportDataJSON = JSON.parse(airportData.json) as AirportData[];
+
+	return airportDataJSON;
+}
+
+export async function readAirspaceDataFromDB(): Promse<AirspaceData[]> {
+	const airspaceData = await db.query.airspacesJSON.findFirst({
+		columns: {
+			json: true
+		}
+	});
+
+	const airspaceDataJSON = JSON.parse(airspaceData.json) as AirspaceData[];
+
+	return airspaceDataJSON;
+}
+
+// Dangerous functions --------------------------------------------
+export async function pushAirportDataToDatabase(): Promise<void> {
+	const airportData = JSON.stringify(readAirportDataFromJSON());
+	await db.insert(airportsJSON).values({ json: airportData });
+}
+
+export async function pushAirspaceDataToDatabase(): Promise<void> {
+	const airspaceData = JSON.stringify(readAirspaceDataFromJSON());
+	await db.insert(airspacesJSON).values({ json: airspaceData });
+}
+// Dangerous functions --------------------------------------------
 
 export function airportDataToAirport(airportData: AirportData): Airport {
 	return new Airport(
@@ -90,7 +129,13 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 			);
 		}),
 		airportData.frequencies?.map((frequency) => {
-			return new Frequency(frequency.value, frequency.unit, frequency.name, frequency.type, frequency.primary);
+			return new Frequency(
+				frequency.value,
+				frequency.unit,
+				frequency.name,
+				frequency.type,
+				frequency.primary
+			);
 		})
 	);
 }
