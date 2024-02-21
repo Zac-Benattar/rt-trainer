@@ -31,7 +31,7 @@
 				<span class="h2 p-1">
 					Welcome, {$page.data.session.user?.name?.split(' ')[0] ?? 'User'}
 				</span>
-				<div class="flex flex-row gap-5 place-content-start">
+				<div class="flex flex-col sm:flex-row gap-5 place-content-start">
 					<div class="flex flex-col gap-3">
 						<div class="h3">Your Statistics</div>
 						<div class="card p-5 flex justify-between">
