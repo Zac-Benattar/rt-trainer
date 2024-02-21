@@ -475,7 +475,13 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsScenarioStartPoint(): boolean {
-		throw new Error('Unimplemented function');
+		if (!this.callContainsConsecutiveWords([this.getStartAerodromeStartingPoint()])) {
+			this.feedback.pushSevereMistake(
+				"Your call didn't contain the starting point of the scenario."
+			);
+			return false;
+		}
+		return true;
 	}
 
 	public assertCallContainsStartAerodromeName(): boolean {
