@@ -41,7 +41,7 @@
 					on:click={() => {
 						ClearSimulationStores();
 						goto(
-							'/scenario/demo?prefix=STUDENT&callsign=G-OFLY&aircraftType=Cessna 172&emergencies=True&tutorial=True'
+							'/scenario/demo?tutorial=True'
 						);
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
