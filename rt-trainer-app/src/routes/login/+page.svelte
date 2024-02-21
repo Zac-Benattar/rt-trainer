@@ -20,7 +20,7 @@
 	};
 
 	const handleGoogleSignIn = () => {
-		signIn('google', { callbackUrl: '/home' });
+		if (!warningVisible) signIn('google', { callbackUrl: '/home' });
 	};
 
 	// const handleFacebookSignIn = () => {
@@ -30,7 +30,7 @@
 
 	const handleGitHubSignIn = () => {
 		// handle GitHub OAuth sign in
-		signIn('github', { callbackUrl: '/home' });
+		if (!warningVisible) signIn('github', { callbackUrl: '/home' });
 	};
 
 	const handleSignOut = () => {
@@ -55,15 +55,17 @@
 							<div class="alert-message">
 								<h3 class="h3">Warning</h3>
 								<p>
-									This is a very early version of RT Trainer. Your routes, scenarios and statistics
-									may be deleted or modified without warning while the system is finalised. Please
-									report any issues you find.
+									Your account is only used to store your routes, scenarios and statistics. The only
+									personal data shared with RT-Trainer is your email address. This is a very early
+									version of RT Trainer. Your routes, scenarios and statistics may be deleted or
+									modified without warning while the system is finalised. By using RT Trainer you
+									agree to these terms.
 								</p>
 							</div>
 							<!-- Actions -->
 							<div class="alert-actions">
 								<button class="btn-xl variant-filled" on:click={handleWarningAccept}
-									>I accept that my data may be deleted</button
+									>I accept</button
 								>
 							</div>
 						</aside>
