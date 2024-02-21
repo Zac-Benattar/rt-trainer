@@ -150,9 +150,9 @@ export default class Parser {
 
 	// Example: Student Golf Lima Yankee, by the south side hangers, request taxi for vfr flight to birmingham
 	public static parseTaxiRequest(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} ${radioCall.getAircraftType()} by the ${
-			radioCall.getStartAerodromeStartingPoint().name
-		} request taxi VFR to ${radioCall.getEndAirport().getShortName()}`;
+		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} ${radioCall.getAircraftType()} by the ${radioCall.getStartAerodromeStartingPoint()} request taxi VFR to ${radioCall
+			.getEndAirport()
+			.getShortName()}`;
 
 		radioCall.assertCallStartsWithUserCallsign();
 		radioCall.assertCallContainsScenarioStartPoint();
@@ -164,7 +164,7 @@ export default class Parser {
 		const atcResponse = `${radioCall
 			.getTargetAllocatedCallsign()
 			.toUpperCase()}, taxi to holding point ${
-			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint()
 		} via taxiway charlie. Hold short of runway ${
 			radioCall.getTakeoffRunway().designator
 		}, QNH ${radioCall.getStartAerodromeMETORSample().getPressureString()}`;
@@ -175,7 +175,7 @@ export default class Parser {
 	// Example: Taxi holding point alpha via taxiway charlie. Hold short of runway 24, QNH 1013, Student Golf Lima Yankee
 	public static parseTaxiClearanceReadback(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()} taxi holding point ${
-			radioCall.getTakeoffRunwayTaxiwayHoldingPoint().name
+			radioCall.getTakeoffRunwayTaxiwayHoldingPoint()
 		} runway ${radioCall.getTakeoffRunway().designator} QNH ${radioCall
 			.getStartAerodromeMETORSample()
 			.getPressureString()} ${radioCall.getTargetAllocatedCallsign()}`;
@@ -193,7 +193,7 @@ export default class Parser {
 
 	public static parseTaxiInformationRequest(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getTargetAllocatedCallsign()}, by the ${
-			radioCall.getStartAerodromeStartingPoint().name
+			radioCall.getStartAerodromeStartingPoint()
 		}, request taxi information, VFR to ${radioCall.getEndAirport().getShortName()}`;
 
 		radioCall.assertCallStartsWithUserCallsign();

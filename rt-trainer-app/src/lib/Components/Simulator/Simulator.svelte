@@ -360,6 +360,8 @@
 		// Reset failed attempts
 		failedAttempts = 0;
 
+		scenario.currentPointIndex++;
+
 		return true;
 	}
 

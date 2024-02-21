@@ -1,5 +1,6 @@
 import Scenario from './Scenario';
 import {
+	convertMinutesToTimeString,
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
 	getHeadingBetween,
@@ -440,6 +441,14 @@ export default class RadioCall {
 		return this.getEndAirport().getLandingRunway(this.seed).designator;
 	}
 
+	public getStartAerodromeStartingPoint(): string {
+		return 'hangars';
+	}
+
+	public getTakeoffRunwayTaxiwayHoldingPoint(): string {
+		return 'charlie';
+	}
+
 	public assertCallContainsTakeOffRunwayName(): boolean {
 		if (!this.callContainsConsecutiveWords([this.getTakeoffRunway().designator])) {
 			this.feedback.pushSevereMistake(
@@ -651,14 +660,6 @@ export default class RadioCall {
 			return false;
 		}
 		return true;
-	}
-
-	public getTakeoffRunwayTaxiway(): string {
-		throw new Error('Unimplemented function');
-	}
-
-	public getTakeoffRunwayTaxiwayHoldingPoint(): string {
-		throw new Error('Unimplemented function');
 	}
 
 	public getTakeoffTurnoutHeading(): number {
@@ -904,11 +905,11 @@ export default class RadioCall {
 	}
 
 	public getNextWaypointArrivalTime(): number {
-		return this.getNextWaypoint().arrivalTime;
+		throw new Error('Unimplemented function')
 	}
 
 	public assertCallContainsNextWaypointArrivalTime(): boolean {
-		if (!this.callContainsWord(this.getNextWaypoint().arrivalTime.toString())) {
+		if (!this.callContainsWord(convertMinutesToTimeString(this.getNextWaypointArrivalTime()))) {
 			this.feedback.pushSevereMistake(
 				"Your call didn't contain the arrival time at the next waypoint."
 			);
