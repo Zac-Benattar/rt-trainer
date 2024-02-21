@@ -7,7 +7,7 @@
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import axios from 'axios';
-	import { AirspacesStore, WaypointsStore } from '$lib/stores';
+	import { AirspacesStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
@@ -19,6 +19,8 @@
 	let emergency: boolean = true;
 
 	let routesClass: string = '';
+
+	ClearSimulationStores();
 
 	export let data: PageData;
 	export let form: ActionData;
@@ -64,9 +66,9 @@
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->
 <div class="flex flex-col place-content-center">
-	<div class="flex flex-row p-3 place-content-center sm:place-content-start gap-5">
+	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
 		{#if form?.notFound}<p class="error">Route not found</p>{/if}
-		<div class="flex flex-col px-2 xs:w-9/12 gap-2">
+		<div class="flex flex-col px-2 sm:w-9/12 gap-2">
 			<div class="h3 p-1">Create a scenario</div>
 
 			<form class="flex flex-col gap-1" method="POST" action="?/createScenario">
@@ -152,7 +154,7 @@
 			</form>
 		</div>
 
-		<div class="flex flex-col">
+		<div class="flex flex-col xs:pr-3">
 			<div class="h4 p-1">Route Preview</div>
 			<Map
 				enabled={true}

@@ -79,8 +79,8 @@
 </script>
 
 <div class="flex flex-col place-content-center">
-	<div class="flex flex-row p-3 place-content-center sm:place-content-start gap-5">
-		<div class="flex flex-col px-2 xs:w-9/12 gap-2">
+	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
+		<div class="flex flex-col px-2 sm:w-9/12 gap-2">
 			<div class="h3 p-1">Generate a route</div>
 
 			<div>
@@ -123,6 +123,14 @@
 			<button class="btn variant-filled" on:click={handleSaveRoute}>Save Route</button>
 		</div>
 
-		<Map enabled={true} widthSmScreen={'600px'} heightSmScreen={'500px'} mode={MapMode.RoutePlan} />
+		<div class="flex flex-col xs:pr-3">
+			<div class="h4 p-1">Route Preview</div>
+			<Map
+				enabled={true}
+				widthSmScreen={'600px'}
+				heightSmScreen={'500px'}
+				mode={MapMode.RoutePlan}
+			/>
+		</div>
 	</div>
 </div>
