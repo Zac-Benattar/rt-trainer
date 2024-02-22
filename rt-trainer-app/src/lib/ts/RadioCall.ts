@@ -1,5 +1,6 @@
 import Scenario from './Scenario';
 import {
+	addSpacesBetweenCharacters,
 	convertMinutesToTimeString,
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
@@ -7,8 +8,10 @@ import {
 	haversineDistance,
 	isCallsignStandardRegistration,
 	processString,
+	removePunctuation,
 	replacePhoneticAlphabetWithChars,
-	replaceWithPhoneticAlphabet
+	replaceWithPhoneticAlphabet,
+	trimSpaces
 } from './utils';
 import Feedback from './Feedback';
 import type ScenarioPoint from './ScenarioPoints';
@@ -92,14 +95,25 @@ export default class RadioCall {
 	}
 
 	public getUserCallsign(): string {
+		return this.userCallsign.toLowerCase();
+	}
+
+	public getUserCallsignWithPrefix(): string {
 		return this.getPrefix() + ' ' + this.userCallsign.toLowerCase();
 	}
 
 	public getUserCallsignPhonetics(): string {
 		if (isCallsignStandardRegistration(this.userCallsign)) {
+			return replaceWithPhoneticAlphabet(this.userCallsign.toLowerCase());
+		}
+		return this.userCallsign.toLowerCase(); // For callsigns such as Bombadier 123AB
+	}
+
+	public getUserCallsignPhoneticsWithPrefix(): string {
+		if (isCallsignStandardRegistration(this.userCallsign)) {
 			return this.getPrefix() + ' ' + replaceWithPhoneticAlphabet(this.userCallsign.toLowerCase());
 		} else {
-			return this.getUserCallsign();
+			return this.getUserCallsignWithPrefix();
 		}
 	}
 
@@ -220,11 +234,13 @@ export default class RadioCall {
 	}
 
 	private getUserCallsignWords(): string[] {
-		return this.getUserCallsign().split(' ');
+		return this.getUserCallsignWithPrefix().split(' ');
 	}
 
 	private getUserCallsignStartIndexInRadioCall(): number {
-		return this.getRadioCallWords().findIndex((x) => x == this.getUserCallsign().split(' ')[0]);
+		return this.getRadioCallWords().findIndex(
+			(x) => x == this.getUserCallsignWithPrefix().split(' ')[0]
+		);
 	}
 
 	private callContainsWord(word: string): boolean {
@@ -278,7 +294,9 @@ export default class RadioCall {
 	}
 
 	private callStartsWithConsecutiveWords(words: string[]): boolean {
+		console.log('Words to check: ' + words);
 		for (let i = 0; i < words.length; i++) {
+			console.log(`Comparing ${this.getRadioCallWord(i)} with ${words[i].toLowerCase()}`);
 			if (this.getRadioCallWord(i) != words[i].toLowerCase()) return false;
 		}
 		return true;
@@ -324,18 +342,18 @@ export default class RadioCall {
 		return true;
 	}
 
+	// Issue here is that it needs to check for student g o f l y, and its not doing that
 	public callContainsUserCallsign(): boolean {
 		const validUserCallsigns = this.getValidUserCallsigns();
-		return (
-			this.callContainsConsecutiveWords(validUserCallsigns[0].split(' ')) ||
-			(validUserCallsigns.length > 1 &&
-				this.callContainsConsecutiveWords(validUserCallsigns[1].split(' ')))
-		);
+		for (let i = 0; i < validUserCallsigns.length; i++) {
+			if (this.callContainsConsecutiveWords(validUserCallsigns[i].split(' '))) return true;
+		}
+		return false;
 	}
 
 	public assertCallContainsUserCallsign(): boolean {
 		if (!this.callContainsUserCallsign()) {
-			if (this.prefix != '') {
+			if (this.prefix && this.prefix.trim() != '') {
 				this.feedback.pushSevereMistake("Your call didn't contain your callsign.");
 				return false;
 			}
@@ -405,16 +423,36 @@ export default class RadioCall {
 				)
 			);
 		}
-		return this.getUserCallsignPhonetics();
+		return this.getUserCallsignPhoneticsWithPrefix();
 	}
 
 	/* Returns the callsign of the user as they would state it in a radio call.
 	Given that abbreviated callsigns are optional once established both 
 	full and abbreviated versions returned if abbreviation established. */
 	private getValidUserCallsigns(): string[] {
-		const callsigns = [this.getUserCallsignPhonetics(), this.getTargetAllocatedCallsign()];
-		if (callsigns[0] != callsigns[1]) return callsigns;
-		return [callsigns[0]];
+		const callsigns = [
+			trimSpaces(
+				this.prefix + ' ' + addSpacesBetweenCharacters(removePunctuation(this.userCallsign))
+			).toLowerCase(), // Student G O F L Y
+			this.getUserCallsignPhoneticsWithPrefix() // Student Golf Oscar Foxtrot Lima Yankee
+		];
+
+		if (this.userCallsignModified) {
+			callsigns.push(this.getTargetAllocatedCallsign());
+			callsigns.push(
+				this.getPrefix() +
+					' ' +
+					trimSpaces(
+						addSpacesBetweenCharacters(
+							removePunctuation(
+								getAbbreviatedCallsign(this.seed, this.getAircraftType(), this.userCallsign)
+							)
+						)
+					)
+			);
+		}
+
+		return callsigns;
 	}
 
 	public getStartAerodromeMETORSample(): METORDataSample {
@@ -911,7 +949,7 @@ export default class RadioCall {
 	}
 
 	public getNextWaypointArrivalTime(): number {
-		throw new Error('Unimplemented function')
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsNextWaypointArrivalTime(): boolean {

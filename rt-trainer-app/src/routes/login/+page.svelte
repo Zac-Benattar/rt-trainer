@@ -15,10 +15,6 @@
 
 	let warningVisible: boolean = true;
 
-	const handleEmailSignIn = () => {
-		// handle email provider sign in
-	};
-
 	const handleGoogleSignIn = () => {
 		if (!warningVisible) signIn('google', { callbackUrl: '/home' });
 	};

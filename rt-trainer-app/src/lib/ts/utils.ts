@@ -73,12 +73,22 @@ export function haversineDistance(
 
 /* Returns a lower copy of the string with single length spaces and no punctuation. */
 export function processString(str: string): string {
-	return trimSpaces(removePunctuation(str.toLowerCase()));
+	return trimSpaces(removePunctuationExceptDeciamlPointAndHyphen(str.toLowerCase()));
 }
 
-/* Removes all punctuation from a string. */
-export function removePunctuation(str: string): string {
+/* Removes most punctionation from a string */
+export function removePunctuationExceptDeciamlPointAndHyphen(str: string): string {
 	return str.replace(/(?<=\d),(?=\d)|[^\d\w\s.-]/g, ' ');
+}
+
+/* Removes all punctuation from a string */
+export function removePunctuation(str: string): string {
+	return str.replace(/[^\d\w\s]/g, ' ');
+}
+
+/* Adds spaces between each character */
+export function addSpacesBetweenCharacters(str: string): string {
+	return str.split('').join(' ');
 }
 
 /* Shortens all spaces to a single space. */

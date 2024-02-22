@@ -100,7 +100,7 @@ export default class Parser {
 
 	// Example: Wellesbourne Information, student Golf Oscar Foxtrot Lima Yankee, radio check One Eight Zero Decimal Zero Three
 	public static parseRadioCheck(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhonetics()}, radio check ${radioCall.getCurrentRadioFrequencyPhonetics()}`;
+		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhoneticsWithPrefix()}, radio check ${radioCall.getCurrentRadioFrequencyPhonetics()}`;
 
 		radioCall.assertCallContainsCurrentRadioFrequency();
 		radioCall.assertCallStartsWithTargetCallsign();
@@ -109,7 +109,7 @@ export default class Parser {
 
 		// Return ATC response
 		const atcResponse = `${radioCall
-			.getUserCallsignPhonetics()
+			.getUserCallsignPhoneticsWithPrefix()
 			.toUpperCase()}, ${radioCall.getCurrentTarget()}, readability 5, pass your message.`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -355,7 +355,7 @@ accompanied with the planned times to reach them */
 	}
 
 	public static parseRequestMATZPenetration(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhonetics()}, request traffic service, MATZ and ATZ penetration`;
+		const expectedRadioCall: string = `${radioCall.getCurrentTarget()}, ${radioCall.getUserCallsignPhoneticsWithPrefix()}, request traffic service, MATZ and ATZ penetration`;
 
 		radioCall.assertCallStartsWithTargetCallsign();
 		radioCall.assertCallContainsUserCallsign();
