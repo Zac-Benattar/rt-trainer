@@ -35,7 +35,7 @@ export default class RouteGenerator {
 		const airportsData: AirportData[] = await readAirportDataFromDB();
 		const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
 
-		// // Remove for production
+		// Remove for production
 		// await writeDataToJSON();
 
 		// await pushAirportDataToDatabase();

@@ -4,6 +4,7 @@ import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
 import 'reflect-metadata';
 import { getNewCoordsFromCoord } from '../utils';
+import type { AirportReportingPointDBData } from '../OpenAIPHandler';
 
 /* Airport data. */
 export default class Airport {
@@ -14,6 +15,7 @@ export default class Airport {
 	type: number;
 	country: string;
 	coordinates: [number, number];
+	reportingPoints: AirportReportingPointDBData[]
 	elevation: number;
 	trafficType: number[];
 	ppr: boolean;
@@ -38,6 +40,7 @@ export default class Airport {
 		type: number,
 		country: string,
 		coordinates: [number, number],
+		airportReportingPoints: AirportReportingPointDBData[],
 		elevation: number,
 		trafficType: number[],
 		ppr: boolean,
@@ -54,6 +57,7 @@ export default class Airport {
 		this.type = type;
 		this.country = country;
 		this.coordinates = coordinates;
+		this.reportingPoints = airportReportingPoints;
 		this.elevation = elevation;
 		this.trafficType = trafficType;
 		this.ppr = ppr;

@@ -13,7 +13,12 @@ import Airspace from './AeronauticalClasses/Airspace';
 import { getPolygonCenter } from './utils';
 import { db } from '$lib/db/db';
 import { airportsJSON, airspacesJSON } from '$lib/db/schema';
-import { json } from '@sveltejs/kit';
+
+export type AirportReportingPointDBData = {
+	name: string;
+	coordinates: [number, number];
+	compulsory: boolean;
+};
 
 export function checkDataUpToDate(): boolean {
 	// TODO
@@ -21,7 +26,42 @@ export function checkDataUpToDate(): boolean {
 }
 
 export async function writeDataToJSON(): Promise<void> {
+	const airportReportingPoints = await getAllUKAirportReportingPoints();
+
 	const airports = await getAllUKAirports();
+
+	for (let i = 0; i < airportReportingPoints.length; i++) {
+		const associatedAirport = airports.find(
+			(airport) => airport._id === airportReportingPoints[i].airports[0]
+		);
+
+		if (!associatedAirport) {
+			console.log(
+				`No airport found for reporting point: ${airportReportingPoints[i].name} for airport: ${airportReportingPoints[i].airports[0]}`
+			);
+			continue;
+		}
+		if (!associatedAirport.reportingPoints) {
+			associatedAirport.reportingPoints = [];
+			associatedAirport?.reportingPoints.push({
+				name: airportReportingPoints[i].name,
+				coordinates: [
+					airportReportingPoints[i].geometry.coordinates[1],
+					airportReportingPoints[i].geometry.coordinates[0]
+				],
+				compulsory: airportReportingPoints[i].compulsory
+			});
+		} else {
+			associatedAirport.reportingPoints.push({
+				name: airportReportingPoints[i].name,
+				coordinates: [
+					airportReportingPoints[i].geometry.coordinates[1],
+					airportReportingPoints[i].geometry.coordinates[0]
+				],
+				compulsory: airportReportingPoints[i].compulsory
+			});
+		}
+	}
 
 	writeFileSync('src/lib/data/airports.json', JSON.stringify(airports, null, 2));
 
@@ -55,7 +95,7 @@ export async function readAirportDataFromDB(): Promise<AirportData[]> {
 	return airportDataJSON;
 }
 
-export async function readAirspaceDataFromDB(): Promse<AirspaceData[]> {
+export async function readAirspaceDataFromDB(): Promise<AirspaceData[]> {
 	const airspaceData = await db.query.airspacesJSON.findFirst({
 		columns: {
 			json: true
@@ -88,6 +128,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 		airportData.type,
 		airportData.country,
 		[airportData.geometry.coordinates[1], airportData.geometry.coordinates[0]],
+		airportData.reportingPoints,
 		airportData.elevation.value,
 		airportData.trafficType,
 		airportData.ppr,

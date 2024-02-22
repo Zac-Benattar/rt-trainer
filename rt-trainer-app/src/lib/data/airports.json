@@ -1214,7 +1214,65 @@
       "geoidHeight": 56.5434453,
       "hae": 124.5434453
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "DIVIS",
+        "coordinates": [
+          54.6075,
+          -6.01
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GLENG",
+        "coordinates": [
+          54.6805,
+          -5.9816666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LARNE",
+        "coordinates": [
+          54.85333333333333,
+          -5.825333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BALLY",
+        "coordinates": [
+          54.86333333333333,
+          -6.273333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TOOME",
+        "coordinates": [
+          54.75783333333333,
+          -6.4945
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLUNT",
+        "coordinates": [
+          54.6205,
+          -6.533833333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PORT1",
+        "coordinates": [
+          54.425,
+          -6.4475
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261520c4b027aab592b5d88",
@@ -4031,7 +4089,41 @@
       "geoidHeight": 56.37237499999972,
       "hae": 61.37237499999972
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "GROOM",
+        "coordinates": [
+          54.675,
+          -5.618
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WHITE",
+        "coordinates": [
+          54.752833333333335,
+          -5.7095
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "COMBE",
+        "coordinates": [
+          54.55083333333333,
+          -5.745833333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SAIN1",
+        "coordinates": [
+          54.46033333333333,
+          -5.832833333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261520e4b027aab592b5e75",
@@ -5327,7 +5419,89 @@
         1,
         3
       ]
-    }
+    },
+    "reportingPoints": [
+      {
+        "name": "MARSH",
+        "coordinates": [
+          53.696333333333335,
+          -2.9705
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STANN",
+        "coordinates": [
+          53.74666666666667,
+          -3.0316666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GATEG",
+        "coordinates": [
+          53.74666666666667,
+          -3.08
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NBLAC",
+        "coordinates": [
+          53.82333333333333,
+          -3.15
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BLAC1",
+        "coordinates": [
+          53.81166666666667,
+          -3.055
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FLEET",
+        "coordinates": [
+          53.91883333333333,
+          -3.0453333333333332
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "POULT",
+        "coordinates": [
+          53.848333333333336,
+          -2.9903333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GASOM",
+        "coordinates": [
+          53.795,
+          -3
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KIRKH",
+        "coordinates": [
+          53.7825,
+          -2.8713333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "INSKI",
+        "coordinates": [
+          53.82716666666666,
+          -2.8341666666666665
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261520f5e9ded57104539d6",
@@ -5558,7 +5732,17 @@
       "geoidHeight": 45.71476019999977,
       "hae": 216.71476019999977
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "SEVEN",
+        "coordinates": [
+          51.276666666666664,
+          0.18333333333333332
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261520f5e9ded57104539ee",
@@ -5757,7 +5941,73 @@
       "geoidHeight": 49.93704825599997,
       "hae": 149.93704825599997
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "STUDL",
+        "coordinates": [
+          52.267833333333336,
+          -1.8980000000000001
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M40JU",
+        "coordinates": [
+          52.260333333333335,
+          -1.6133333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M42JU",
+        "coordinates": [
+          52.60333333333333,
+          -1.6425
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M6JUN",
+        "coordinates": [
+          52.4625,
+          -1.4941666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LICHF",
+        "coordinates": [
+          52.686166666666665,
+          -1.7986666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M40M4",
+        "coordinates": [
+          52.34866666666667,
+          -1.8096666666666668
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FRANK",
+        "coordinates": [
+          52.42033333333333,
+          -2
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M6HIL",
+        "coordinates": [
+          52.64383333333333,
+          -2.0563333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261520fcb27f42509468ae4",
@@ -6220,7 +6470,49 @@
       "geoidHeight": 47.61962879999993,
       "hae": 59.61962879999993
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "HENGI",
+        "coordinates": [
+          50.712,
+          -1.7488333333333332
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HURST",
+        "coordinates": [
+          50.708333333333336,
+          -1.55
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STONE",
+        "coordinates": [
+          50.91166666666667,
+          -1.657
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TARRA",
+        "coordinates": [
+          50.85,
+          -2.078333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SANDB",
+        "coordinates": [
+          50.68333333333333,
+          -1.9471666666666665
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152104b027aab592b5ee5",
@@ -6478,7 +6770,193 @@
       "geoidHeight": 50.434741400000036,
       "hae": 240.43474140000004
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "MARLB",
+        "coordinates": [
+          51.42,
+          -1.7283333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FROME",
+        "coordinates": [
+          51.22966666666667,
+          -2.320333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MELKS",
+        "coordinates": [
+          51.375,
+          -2.138333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHIPP",
+        "coordinates": [
+          51.46,
+          -2.1233333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DEVIZ",
+        "coordinates": [
+          51.346666666666664,
+          -1.9883333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "AVEBU",
+        "coordinates": [
+          51.428,
+          -1.8546666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WROUG",
+        "coordinates": [
+          51.509166666666665,
+          -1.7996666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MALME",
+        "coordinates": [
+          51.585,
+          -2.1033333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BATHR",
+        "coordinates": [
+          51.417,
+          -2.404166666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "RADST",
+        "coordinates": [
+          51.29216666666667,
+          -2.4486666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M4JUN",
+        "coordinates": [
+          51.502,
+          -2.35
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OLDSE",
+        "coordinates": [
+          51.61116666666667,
+          -2.6436666666666664
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHEWV",
+        "coordinates": [
+          51.325,
+          -2.595
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BARRO",
+        "coordinates": [
+          51.406333333333336,
+          -2.6628333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLIFT",
+        "coordinates": [
+          51.455,
+          -2.6283333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ENAIL",
+        "coordinates": [
+          51.43,
+          -2.735
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHUR1",
+        "coordinates": [
+          51.333333333333336,
+          -2.7933333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M5BRI",
+        "coordinates": [
+          51.48883333333333,
+          -2.693
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WESTO",
+        "coordinates": [
+          51.337833333333336,
+          -2.9425
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLEVE",
+        "coordinates": [
+          51.439166666666665,
+          -2.8513333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M5SED",
+        "coordinates": [
+          51.26883333333333,
+          -2.921333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHEDD",
+        "coordinates": [
+          51.28,
+          -2.8
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WELLS",
+        "coordinates": [
+          51.237,
+          -2.6253333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152104b027aab592b5f11",
@@ -7511,7 +7989,17 @@
       "geoidHeight": 50.23176672000008,
       "hae": 119.23176672000008
     },
-    "__v": 4
+    "__v": 4,
+    "reportingPoints": [
+      {
+        "name": "THORN",
+        "coordinates": [
+          51.61116666666667,
+          -2.5183333333333335
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "62615210cb27f42509468b1a",
@@ -8304,7 +8792,113 @@
       "geoidHeight": 51.838320000000294,
       "hae": 118.8383200000003
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "LLAND",
+        "coordinates": [
+          51.69166666666667,
+          -2.970833333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M4JU1",
+        "coordinates": [
+          51.602,
+          -2.9255
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DOCKS",
+        "coordinates": [
+          51.45666666666666,
+          -3.151666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LAVER",
+        "coordinates": [
+          51.406333333333336,
+          -3.1705
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FLATH",
+        "coordinates": [
+          51.3755,
+          -3.1186666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLATW",
+        "coordinates": [
+          51.073,
+          -3.3691666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MINEH",
+        "coordinates": [
+          51.20583333333333,
+          -3.475
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STHIL",
+        "coordinates": [
+          51.4575,
+          -3.403
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WENVO",
+        "coordinates": [
+          51.4595,
+          -3.2816666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TAFFE",
+        "coordinates": [
+          51.5675,
+          -3.4711666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M4JU2",
+        "coordinates": [
+          51.53216666666667,
+          -3.5733333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NASHP",
+        "coordinates": [
+          51.40083333333333,
+          -3.5521666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NASHS",
+        "coordinates": [
+          51.38133333333333,
+          -3.5575
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152115e9ded5710453a8c",
@@ -8494,7 +9088,65 @@
       "geoidHeight": 48.45107989999974,
       "hae": 136.45107989999974
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "NORT2",
+        "coordinates": [
+          51.83833333333333,
+          -1.8366666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LECHL",
+        "coordinates": [
+          51.693333333333335,
+          -1.69
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BURFO",
+        "coordinates": [
+          51.806666666666665,
+          -1.6366666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHARL",
+        "coordinates": [
+          51.87166666666667,
+          -1.4816666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BAMPT",
+        "coordinates": [
+          51.725,
+          -1.5466666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FARIN",
+        "coordinates": [
+          51.655,
+          -1.5866666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FARMO",
+        "coordinates": [
+          51.75333333333333,
+          -1.3566666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152115e9ded5710453ab0",
@@ -9278,7 +9930,33 @@
       "geoidHeight": 46.44914400000002,
       "hae": 60.44914400000002
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "SGCOU",
+        "coordinates": [
+          52.165,
+          0.175
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NRESE",
+        "coordinates": [
+          52.24333333333333,
+          0.175
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "EPLAN",
+        "coordinates": [
+          52.21333333333333,
+          0.24833333333333335
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152120e8346dfd9252985",
@@ -9695,7 +10373,89 @@
       "geoidHeight": 52.86217000000002,
       "hae": 110.86217000000002
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "WORKI",
+        "coordinates": [
+          54.651666666666664,
+          -3.578333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SILLO",
+        "coordinates": [
+          54.86833333333333,
+          -3.395
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LOCKE",
+        "coordinates": [
+          55.120333333333335,
+          -3.3566666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ANNAN",
+        "coordinates": [
+          54.99,
+          -3.256666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PENRI",
+        "coordinates": [
+          54.6645,
+          -2.7503333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LANGH",
+        "coordinates": [
+          55.153,
+          -3
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WIGTO",
+        "coordinates": [
+          54.824666666666666,
+          -3.1611666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GRETN",
+        "coordinates": [
+          55,
+          -3.0675
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HALTW",
+        "coordinates": [
+          54.968833333333336,
+          -2.4621666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ALSTO",
+        "coordinates": [
+          54.81,
+          -2.4433333333333334
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152124b027aab592b5f8c",
@@ -13048,7 +13808,41 @@
       "geoidHeight": 49.311039866666164,
       "hae": 130.31103986666616
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "DRAYC",
+        "coordinates": [
+          52.326166666666666,
+          -1.3263333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CEMEN",
+        "coordinates": [
+          52.2725,
+          -1.3845
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NUNEA",
+        "coordinates": [
+          52.565,
+          -1.448
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BITTE",
+        "coordinates": [
+          52.45783333333333,
+          -1.2463333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152145e9ded5710453bc2",
@@ -13201,7 +13995,33 @@
       "geoidHeight": 47.50019999999978,
       "hae": 156.50019999999978
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "STEWA",
+        "coordinates": [
+          52.07333333333333,
+          -0.5175
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WOBUR",
+        "coordinates": [
+          51.99,
+          -0.6191666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OLNEY",
+        "coordinates": [
+          52.153333333333336,
+          -0.7016666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "62615214cb27f42509468bea",
@@ -15488,7 +16308,97 @@
       "geoidHeight": 50.661727008000014,
       "hae": 141.661727008
     },
-    "__v": 4
+    "__v": 4,
+    "reportingPoints": [
+      {
+        "name": "INSCH",
+        "coordinates": [
+          57.34283333333333,
+          -2.6141666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BANCH",
+        "coordinates": [
+          57.05,
+          -2.501666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GORSE",
+        "coordinates": [
+          57.17666666666667,
+          -1.8983333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BALIS",
+        "coordinates": [
+          57.235,
+          -2.065
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRID1",
+        "coordinates": [
+          57.166666666666664,
+          -2.0833333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STON1",
+        "coordinates": [
+          56.9625,
+          -2.21
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MELDR",
+        "coordinates": [
+          57.38583333333333,
+          -2.4008333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TURRI",
+        "coordinates": [
+          57.538666666666664,
+          -2.46
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HACKL",
+        "coordinates": [
+          57.33,
+          -1.955
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SHRUB",
+        "coordinates": [
+          57.3,
+          -1.815
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PETER",
+        "coordinates": [
+          57.507,
+          -1.7766666666666668
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "62615215cb27f42509468cb3",
@@ -15786,7 +16696,25 @@
       "geoidHeight": 46.751643799999385,
       "hae": 122.75164379999939
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "MAPLE",
+        "coordinates": [
+          51.6295,
+          -0.5041666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STGIL",
+        "coordinates": [
+          51.633833333333335,
+          -0.5670000000000001
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152164b027aab592b60dd",
@@ -17335,7 +18263,17 @@
       "geoidHeight": 52.248329699999914,
       "hae": 57.248329699999914
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "BROUG",
+        "coordinates": [
+          56.4625,
+          -2.869666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152174b027aab592b6125",
@@ -17985,7 +18923,81 @@
       "geoidHeight": 48.319122500000105,
       "hae": 65.3191225000001
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "WADWO",
+        "coordinates": [
+          53.479166666666664,
+          -1.1483333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THURC",
+        "coordinates": [
+          53.392833333333336,
+          -1.2786666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THORS",
+        "coordinates": [
+          53.22716666666667,
+          -1.0555
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLUMB",
+        "coordinates": [
+          53.29633333333334,
+          -1.0321666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DANES",
+        "coordinates": [
+          53.36033333333334,
+          -0.9353333333333332
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GAINS",
+        "coordinates": [
+          53.392833333333336,
+          -0.7708333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GOOLE",
+        "coordinates": [
+          53.697,
+          -0.8778333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HAXEY",
+        "coordinates": [
+          53.49033333333333,
+          -0.8436666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STAIN",
+        "coordinates": [
+          53.59133333333333,
+          -0.9875
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152175e9ded5710453c91",
@@ -18726,7 +19738,57 @@
       "geoidHeight": 49.47906666666674,
       "hae": 142.47906666666674
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "BOTTE",
+        "coordinates": [
+          52.964666666666666,
+          -0.7816666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MELTO",
+        "coordinates": [
+          52.7395,
+          -0.8928333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MEASH",
+        "coordinates": [
+          52.688833333333335,
+          -1.548
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MARKF",
+        "coordinates": [
+          52.6955,
+          -1.2925
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TROWE",
+        "coordinates": [
+          52.961666666666666,
+          -1.2675
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHURC",
+        "coordinates": [
+          52.88616666666667,
+          -1.6983333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152184b027aab592b617b",
@@ -19451,7 +20513,25 @@
       "geoidHeight": 45.61059599999999,
       "hae": 120.61059599999999
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "RAYDO",
+        "coordinates": [
+          52.016666666666666,
+          1
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "COPDO",
+        "coordinates": [
+          52.038333333333334,
+          1.0983333333333334
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152190e8346dfd9252a00",
@@ -19581,7 +20661,25 @@
       "geoidHeight": 46.61085509999947,
       "hae": 147.61085509999947
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "CANAL",
+        "coordinates": [
+          51.6505,
+          -0.427
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GCOUR",
+        "coordinates": [
+          51.666666666666664,
+          -0.2155
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152190e8346dfd9252a2b",
@@ -19848,7 +20946,17 @@
       "geoidHeight": 53.35684200000006,
       "hae": 80.35684200000006
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "KELTY",
+        "coordinates": [
+          56.13332511812726,
+          -3.3798719994287865
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152194b027aab592b61ad",
@@ -20892,7 +22000,49 @@
       "geoidHeight": 51.95608300000069,
       "hae": 82.95608300000069
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "AXMIN",
+        "coordinates": [
+          50.781666666666666,
+          -3
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CULLO",
+        "coordinates": [
+          50.85783333333333,
+          -3.391166666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TOPSH",
+        "coordinates": [
+          50.68966666666667,
+          -3.4803333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "EXMOU",
+        "coordinates": [
+          50.62466666666667,
+          -3.4021666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CREDI",
+        "coordinates": [
+          50.7905,
+          -3.6513333333333335
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261521a4b027aab592b61d9",
@@ -21728,7 +22878,41 @@
       "geoidHeight": 46.491278200000295,
       "hae": 119.4912782000003
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "HOOKF",
+        "coordinates": [
+          51.2795,
+          -0.962
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ALTON",
+        "coordinates": [
+          51.152,
+          -0.9661666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GUILD",
+        "coordinates": [
+          51.24,
+          -0.5850000000000001
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NOKIA",
+        "coordinates": [
+          51.2925,
+          -0.798
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261521a5e9ded5710453d2f",
@@ -23645,7 +24829,113 @@
       "geoidHeight": 54.917068511999986,
       "hae": 62.917068511999986
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "EKILB",
+        "coordinates": [
+          55.76383333333333,
+          -4.172166666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BAILL",
+        "coordinates": [
+          55.852833333333336,
+          -4.0895
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KINGS",
+        "coordinates": [
+          55.85616666666667,
+          -4.269666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BARRH",
+        "coordinates": [
+          55.8,
+          -4.391666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KILMA",
+        "coordinates": [
+          55.6125,
+          -4.498333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "INVE1",
+        "coordinates": [
+          55.89833333333333,
+          -4.886666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GREEN",
+        "coordinates": [
+          55.94716666666667,
+          -4.751333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ARDMO",
+        "coordinates": [
+          55.971333333333334,
+          -4.699166666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KILM1",
+        "coordinates": [
+          55.8945,
+          -4.6274999999999995
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DUMBA",
+        "coordinates": [
+          55.9445,
+          -4.568333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ERSKI",
+        "coordinates": [
+          55.92033333333333,
+          -4.462833333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BISH1",
+        "coordinates": [
+          55.902166666666666,
+          -4.501666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ALEXA",
+        "coordinates": [
+          55.98883333333333,
+          -4.576333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261521c5e9ded5710453da8",
@@ -25748,7 +27038,25 @@
       "geoidHeight": 47.38340800000003,
       "hae": 160.38340800000003
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "TERRI",
+        "coordinates": [
+          51.766666666666666,
+          -0.785
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LAKES",
+        "coordinates": [
+          51.81,
+          -0.6833333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261521e4b027aab592b6323",
@@ -29105,7 +30413,57 @@
       "geoidHeight": 46.821640000000514,
       "hae": 83.82164000000051
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "BRIGG",
+        "coordinates": [
+          53.553333333333335,
+          -0.48666666666666664
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ELSHA",
+        "coordinates": [
+          53.608666666666664,
+          -0.428
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HUMBE",
+        "coordinates": [
+          53.714166666666664,
+          -0.4505
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "IMMIN",
+        "coordinates": [
+          53.62833333333333,
+          -0.19333333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CAIST",
+        "coordinates": [
+          53.49616666666667,
+          -0.31833333333333336
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LACEB",
+        "coordinates": [
+          53.535333333333334,
+          -0.18033333333333335
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "62615220cb27f42509468f0a",
@@ -29591,7 +30949,49 @@
       "geoidHeight": 53.02361879999992,
       "hae": 62.02361879999992
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "LOCHI",
+        "coordinates": [
+          57.402833333333334,
+          -3.7158333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DORES",
+        "coordinates": [
+          57.382,
+          -4.332
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DINGW",
+        "coordinates": [
+          57.5995,
+          -4.431333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "INVER",
+        "coordinates": [
+          57.692166666666665,
+          -4.1675
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TOMAT",
+        "coordinates": [
+          57.33383333333333,
+          -4
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152214b027aab592b6412",
@@ -29806,7 +31206,41 @@
       "geoidHeight": 56.42297999999974,
       "hae": 73.42297999999974
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "MULLO",
+        "coordinates": [
+          55.59166666666667,
+          -6.338333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PORTE",
+        "coordinates": [
+          55.63333333333333,
+          -6.19
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "RHINN",
+        "coordinates": [
+          55.67333333333333,
+          -6.485
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NCOAS",
+        "coordinates": [
+          55.93333333333333,
+          -6.165
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152214b027aab592b6429",
@@ -31401,7 +32835,33 @@
       "geoidHeight": 52.18164966666717,
       "hae": 70.18164966666717
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "FOOTK",
+        "coordinates": [
+          59.028666666666666,
+          -2.8063333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STRO1",
+        "coordinates": [
+          59.03033333333333,
+          -2.933666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LAMBH",
+        "coordinates": [
+          58.887166666666666,
+          -2.8933333333333335
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152224b027aab592b64a3",
@@ -32678,7 +34138,41 @@
       "geoidHeight": 50.2818273999998,
       "hae": 258.28182739999977
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "ECCUP",
+        "coordinates": [
+          53.87116666666667,
+          -1.5433333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KEIGH",
+        "coordinates": [
+          53.86666666666667,
+          -1.9100000000000001
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DEWSB",
+        "coordinates": [
+          53.69166666666667,
+          -1.635
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HARRO",
+        "coordinates": [
+          53.99166666666667,
+          -1.5266666666666668
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152230e8346dfd9252aa5",
@@ -36112,7 +37606,89 @@
         1,
         3
       ]
-    }
+    },
+    "reportingPoints": [
+      {
+        "name": "COLER",
+        "coordinates": [
+          55.13166666666667,
+          -6.671666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MOVIL",
+        "coordinates": [
+          55.19,
+          -7.04
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BUNCR",
+        "coordinates": [
+          55.13333333333333,
+          -7.456666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NEWTO",
+        "coordinates": [
+          55,
+          -7.506666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LIFFO",
+        "coordinates": [
+          54.83166666666666,
+          -7.48
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LETTE",
+        "coordinates": [
+          54.965,
+          -7.73
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NEWBU",
+        "coordinates": [
+          54.958333333333336,
+          -7.358333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CARRO",
+        "coordinates": [
+          55.125,
+          -7.195
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CLAUD",
+        "coordinates": [
+          54.92,
+          -7.15
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DUNGI",
+        "coordinates": [
+          54.928333333333335,
+          -6.925
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152254b027aab592b65a4",
@@ -36632,7 +38208,89 @@
       "geoidHeight": 46.173805200000004,
       "hae": 152.1738052
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "NUTHA",
+        "coordinates": [
+          51.99,
+          0.062000000000000006
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "AUDLE",
+        "coordinates": [
+          52.00416666666667,
+          0.207
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DIAMO",
+        "coordinates": [
+          51.87833333333333,
+          0.23666666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NENDH",
+        "coordinates": [
+          51.888333333333335,
+          0.225
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PUCKE",
+        "coordinates": [
+          51.885,
+          0.0045000000000000005
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "EPPIN",
+        "coordinates": [
+          51.7,
+          0.11116666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHELM",
+        "coordinates": [
+          51.733333333333334,
+          0.47333333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GREAT",
+        "coordinates": [
+          51.87166666666667,
+          0.3625
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRAIN",
+        "coordinates": [
+          51.87833333333333,
+          0.5538333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HAVER",
+        "coordinates": [
+          52.0825,
+          0.4345
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152255e9ded5710453faf",
@@ -36812,7 +38470,289 @@
       "geoidHeight": 45.862170000000305,
       "hae": 51.862170000000305
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "ISLEO",
+        "coordinates": [
+          51.48383333333334,
+          -0.011666666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THREE",
+        "coordinates": [
+          51.525333333333336,
+          -0.003
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THAME",
+        "coordinates": [
+          51.497166666666665,
+          0.037000000000000005
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BECKT",
+        "coordinates": [
+          51.525333333333336,
+          0.07333333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M11JU",
+        "coordinates": [
+          51.593833333333336,
+          0.037000000000000005
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BANBU",
+        "coordinates": [
+          51.6045,
+          -0.035
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LONDO",
+        "coordinates": [
+          51.5075,
+          -0.0845
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "VAUXH",
+        "coordinates": [
+          51.4875,
+          -0.12666666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHELS",
+        "coordinates": [
+          51.48383333333334,
+          -0.15
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PERIV",
+        "coordinates": [
+          51.53216666666667,
+          -0.3145
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KEWBR",
+        "coordinates": [
+          51.48716666666667,
+          -0.28783333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRENT",
+        "coordinates": [
+          51.4975,
+          -0.292
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BARNE",
+        "coordinates": [
+          51.47416666666667,
+          -0.22366666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CAESA",
+        "coordinates": [
+          51.4255,
+          -0.24616666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MORDE",
+        "coordinates": [
+          51.39083333333333,
+          -0.2353333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TEDDI",
+        "coordinates": [
+          51.42966666666667,
+          -0.31833333333333336
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OXSHO",
+        "coordinates": [
+          51.33716666666667,
+          -0.335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ESHER",
+        "coordinates": [
+          51.3475,
+          -0.36950000000000005
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ARBRO",
+        "coordinates": [
+          51.3495,
+          -0.35
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BANST",
+        "coordinates": [
+          51.33716666666667,
+          -0.217
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BAGSH",
+        "coordinates": [
+          51.343333333333334,
+          -0.6916666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OXSH1",
+        "coordinates": [
+          51.33716666666667,
+          -0.42
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SUNBU",
+        "coordinates": [
+          51.4025,
+          -0.40449999999999997
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FELTH",
+        "coordinates": [
+          51.44166666666667,
+          -0.42583333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BEDFO",
+        "coordinates": [
+          51.45883333333333,
+          -0.4361666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THORP",
+        "coordinates": [
+          51.4005,
+          -0.5378333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "IVERL",
+        "coordinates": [
+          51.5325,
+          -0.5086666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WDRAY",
+        "coordinates": [
+          51.494166666666665,
+          -0.4858333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "AIRPO",
+        "coordinates": [
+          51.4955,
+          -0.45416666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SIPSO",
+        "coordinates": [
+          51.483333333333334,
+          -0.4516666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GUTTE",
+        "coordinates": [
+          51.54833333333333,
+          -0.4186666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HAYES",
+        "coordinates": [
+          51.51166666666666,
+          -0.44333333333333336
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "UXBRI",
+        "coordinates": [
+          51.55883333333333,
+          -0.4703333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NORT1",
+        "coordinates": [
+          51.60333333333333,
+          -0.4553333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "COOKH",
+        "coordinates": [
+          51.5625,
+          -0.7061666666666666
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152255e9ded5710453fcf",
@@ -38321,7 +40261,257 @@
       "geoidHeight": 51.56046719999995,
       "hae": 129.56046719999995
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "GLOSS",
+        "coordinates": [
+          53.4405,
+          -1.9178333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DOVES",
+        "coordinates": [
+          53.5375,
+          -1.9700000000000002
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SWINT",
+        "coordinates": [
+          53.52333333333333,
+          -2.36
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "IRLAM",
+        "coordinates": [
+          53.438833333333335,
+          -2.4130000000000003
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SALEW",
+        "coordinates": [
+          53.43333333333333,
+          -2.3028333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M60M6",
+        "coordinates": [
+          53.55,
+          -2.2611666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HILLT",
+        "coordinates": [
+          53.34166666666667,
+          -2.174166666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ALDER",
+        "coordinates": [
+          53.29533333333333,
+          -2.2121666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "JODRE",
+        "coordinates": [
+          53.236333333333334,
+          -2.3091666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ROSTH",
+        "coordinates": [
+          53.353833333333334,
+          -2.3853333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HOLME",
+        "coordinates": [
+          53.182,
+          -2.368666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CONGL",
+        "coordinates": [
+          53.165,
+          -2.180833333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MACCL",
+        "coordinates": [
+          53.23616666666667,
+          -2.1346666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WHALE",
+        "coordinates": [
+          53.32633333333333,
+          -2
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LAMAL",
+        "coordinates": [
+          53.272166666666664,
+          -2.0425
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BUXTO",
+        "coordinates": [
+          53.255833333333335,
+          -1.9128333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NESTO",
+        "coordinates": [
+          53.291666666666664,
+          -3.06
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CHEST",
+        "coordinates": [
+          53.195,
+          -2.8438333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WINSF",
+        "coordinates": [
+          53.185,
+          -2.5121666666666664
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OULTO",
+        "coordinates": [
+          53.17616666666667,
+          -2.6133333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M56JU",
+        "coordinates": [
+          53.3345,
+          -2.5713333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STRET",
+        "coordinates": [
+          53.34616666666667,
+          -2.5263333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THELW",
+        "coordinates": [
+          53.3905,
+          -2.5058333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M56J1",
+        "coordinates": [
+          53.32716666666666,
+          -2.6436666666666664
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BURTO",
+        "coordinates": [
+          53.416666666666664,
+          -2.638
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HAYDO",
+        "coordinates": [
+          53.47833333333333,
+          -2.6221666666666668
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LEIGH",
+        "coordinates": [
+          53.489666666666665,
+          -2.5596666666666668
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "REEBO",
+        "coordinates": [
+          53.5805,
+          -2.5355
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KIRKB",
+        "coordinates": [
+          53.48,
+          -2.881666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "AINTR",
+        "coordinates": [
+          53.47666666666667,
+          -2.943
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SEAFO",
+        "coordinates": [
+          53.461333333333336,
+          -3.034666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152265e9ded5710454005",
@@ -38501,7 +40691,65 @@
       "geoidHeight": 46.9370241999998,
       "hae": 206.9370241999998
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "M1JUN",
+        "coordinates": [
+          51.82,
+          -0.41833333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M1JU1",
+        "coordinates": [
+          51.756166666666665,
+          -0.41616666666666663
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "A1MJU",
+        "coordinates": [
+          51.78,
+          -0.225
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KIMPT",
+        "coordinates": [
+          51.846666666666664,
+          -0.2966666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HYDEL",
+        "coordinates": [
+          51.844166666666666,
+          -0.36616666666666664
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OFFLE",
+        "coordinates": [
+          51.93333333333333,
+          -0.3416666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PIRTO",
+        "coordinates": [
+          51.971666666666664,
+          -0.33166666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152265e9ded5710454032",
@@ -43099,7 +45347,89 @@
       "geoidHeight": 50.179763233333006,
       "hae": 131.179763233333
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "MORPE",
+        "coordinates": [
+          55.1625,
+          -1.6828333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BOLAM",
+        "coordinates": [
+          55.13133333333333,
+          -1.8744999999999998
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "OUSTO",
+        "coordinates": [
+          55.025,
+          -1.8753333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DERWE",
+        "coordinates": [
+          54.86666666666667,
+          -1.98
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HEXHA",
+        "coordinates": [
+          54.97083333333333,
+          -2.1028333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MASTS",
+        "coordinates": [
+          55.03333333333333,
+          -2.0236666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DURHA",
+        "coordinates": [
+          54.773833333333336,
+          -1.5766666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BLAYD",
+        "coordinates": [
+          54.968333333333334,
+          -1.6936666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BLYTH",
+        "coordinates": [
+          55.123333333333335,
+          -1.4936666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "TYNEB",
+        "coordinates": [
+          54.9675,
+          -1.607
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152294b027aab592b66db",
@@ -44652,7 +46982,89 @@
       "geoidHeight": 45.18543960000031,
       "hae": 63.18543960000031
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "KESWI",
+        "coordinates": [
+          52.58833333333333,
+          1.275
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STOKE",
+        "coordinates": [
+          52.575,
+          1.3313333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NORFO",
+        "coordinates": [
+          52.650333333333336,
+          1.1853333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HETHE",
+        "coordinates": [
+          52.5625,
+          1.175
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LENWA",
+        "coordinates": [
+          52.718666666666664,
+          1.1025
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "ATTLE",
+        "coordinates": [
+          52.693333333333335,
+          1.1086666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "AYLSH",
+        "coordinates": [
+          52.785,
+          1.2553333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "COLTI",
+        "coordinates": [
+          52.75333333333333,
+          1.3553333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THOR1",
+        "coordinates": [
+          52.627,
+          1.3783333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRUND",
+        "coordinates": [
+          52.61783333333333,
+          1.4333333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261522a5e9ded571045415c",
@@ -46641,7 +49053,17 @@
       "geoidHeight": 47.785371200000185,
       "hae": 134.78537120000018
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "ALDE1",
+        "coordinates": [
+          51.04833333333333,
+          -1.7316666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261522b4b027aab592b6772",
@@ -51547,7 +53969,41 @@
       "geoidHeight": 45.76066309999996,
       "hae": 113.76066309999996
     },
-    "__v": 8
+    "__v": 8,
+    "reportingPoints": [
+      {
+        "name": "GODST",
+        "coordinates": [
+          51.247166666666665,
+          -0.06699999999999999
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GODS1",
+        "coordinates": [
+          51.218,
+          -0.051166666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M25M2",
+        "coordinates": [
+          51.26383333333333,
+          -0.128
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BUCKL",
+        "coordinates": [
+          51.242,
+          -0.24666666666666667
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261522e4b027aab592b6862",
@@ -52012,7 +54468,89 @@
       "geoidHeight": 55.27038533333345,
       "hae": 75.27038533333345
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "MAUCH",
+        "coordinates": [
+          55.51583333333333,
+          -4.379166666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CUMNO",
+        "coordinates": [
+          55.4555,
+          -4.2575
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DALRY",
+        "coordinates": [
+          55.397166666666664,
+          -4.5925
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DALME",
+        "coordinates": [
+          55.32333333333333,
+          -4.397166666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PLADD",
+        "coordinates": [
+          55.42633333333333,
+          -5.1178333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CULZE",
+        "coordinates": [
+          55.3695,
+          -4.768
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "DOONF",
+        "coordinates": [
+          55.440333333333335,
+          -4.650833333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HEADS",
+        "coordinates": [
+          55.432833333333335,
+          -4.713
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "IRVIN",
+        "coordinates": [
+          55.61083333333333,
+          -4.698666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WKILB",
+        "coordinates": [
+          55.6855,
+          -4.868
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261522e5e9ded5710454302",
@@ -54828,7 +57366,49 @@
       "geoidHeight": 50.25124466666688,
       "hae": 75.25124466666688
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "VOESC",
+        "coordinates": [
+          60.35,
+          -1.2661666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LINGA",
+        "coordinates": [
+          60.35666666666667,
+          -1.3596666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRAES",
+        "coordinates": [
+          60.397,
+          -1.3538333333333332
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FUGLA",
+        "coordinates": [
+          60.44916666666666,
+          -1.3238333333333334
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HILLS",
+        "coordinates": [
+          60.475833333333334,
+          -1.4886666666666666
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152314b027aab592b691c",
@@ -55045,7 +57625,25 @@
       "geoidHeight": 54.18594000000013,
       "hae": 90.18594000000013
     },
-    "__v": 7
+    "__v": 7,
+    "reportingPoints": [
+      {
+        "name": "STMAR",
+        "coordinates": [
+          49.9675,
+          -6.265833333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "PENDE",
+        "coordinates": [
+          50.165333333333336,
+          -5.672
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152314b027aab592b6934",
@@ -56831,7 +59429,41 @@
       "geoidHeight": 45.5018240000004,
       "hae": 47.5018240000004
     },
-    "__v": 8
+    "__v": 8,
+    "reportingPoints": [
+      {
+        "name": "LEWES",
+        "coordinates": [
+          50.8645,
+          0.024166666666666666
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BRIGH",
+        "coordinates": [
+          50.810833333333335,
+          -0.10083333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WASHI",
+        "coordinates": [
+          50.9095,
+          -0.4078333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LITTL",
+        "coordinates": [
+          50.81283333333333,
+          -0.5463333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152335e9ded571045445e",
@@ -57813,7 +60445,89 @@
       "geoidHeight": 46.73458240000042,
       "hae": 59.73458240000042
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "BUTSER HILL MAST",
+        "coordinates": [
+          50.97666666666667,
+          -0.9822222222222222
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "ROMSEY",
+        "coordinates": [
+          50.990833333333335,
+          -1.4958333333333333
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "BISHOPS",
+        "coordinates": [
+          50.95472222222222,
+          -1.2097222222222221
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "COWES",
+        "coordinates": [
+          50.76146388888889,
+          -1.2930916666666668
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "CALSHOT",
+        "coordinates": [
+          50.81777777777778,
+          -1.3291666666666666
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "M27 JUNCTION 2",
+        "coordinates": [
+          50.94586666666667,
+          -1.529625
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "NEEDLES LIGHTHOUSE",
+        "coordinates": [
+          50.6625,
+          -1.591388888888889
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "BEAULIEU",
+        "coordinates": [
+          50.80416666666667,
+          -1.503888888888889
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "BULLINGTON CROSS",
+        "coordinates": [
+          51.17516944444444,
+          -1.3393027777777777
+        ],
+        "compulsory": true
+      },
+      {
+        "name": "NEW ALRESFORD",
+        "coordinates": [
+          51.08880555555555,
+          -1.14975
+        ],
+        "compulsory": true
+      }
+    ]
   },
   {
     "_id": "626152344b027aab592b69ce",
@@ -58494,7 +61208,49 @@
       "geoidHeight": 45.352752863999996,
       "hae": 60.352752863999996
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "SHEER",
+        "coordinates": [
+          51.44166666666667,
+          0.7483333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STMA1",
+        "coordinates": [
+          51.475,
+          0.6
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BILLE",
+        "coordinates": [
+          51.63333333333333,
+          0.4166666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SWOOD",
+        "coordinates": [
+          51.65,
+          0.6166666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "MALDO",
+        "coordinates": [
+          51.72833333333333,
+          0.6833333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152354b027aab592b69e8",
@@ -62296,7 +65052,25 @@
       "geoidHeight": 49.55768660000021,
       "hae": 56.55768660000021
     },
-    "__v": 8
+    "__v": 8,
+    "reportingPoints": [
+      {
+        "name": "MOUSA",
+        "coordinates": [
+          60,
+          -1.16
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "BODAM",
+        "coordinates": [
+          59.91833333333334,
+          -1.2683333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152370e8346dfd9252c09",
@@ -62874,7 +65648,57 @@
         2,
         4
       ]
-    }
+    },
+    "reportingPoints": [
+      {
+        "name": "REDCA",
+        "coordinates": [
+          54.607166666666664,
+          -1.0641666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "JUNCT",
+        "coordinates": [
+          54.5,
+          -1.6266666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SEDGE",
+        "coordinates": [
+          54.645833333333336,
+          -1.4683333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "HARTL",
+        "coordinates": [
+          54.68333333333333,
+          -1.2138333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "STOK1",
+        "coordinates": [
+          54.46966666666667,
+          -1.1946666666666665
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "NORT4",
+        "coordinates": [
+          54.33883333333333,
+          -1.432
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "626152374b027aab592b6aac",
@@ -67885,7 +70709,41 @@
       "geoidHeight": 52.647756000000044,
       "hae": 69.64775600000004
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "BLACK",
+        "coordinates": [
+          53.7375,
+          -2.4796666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "M6JU1",
+        "coordinates": [
+          53.5345,
+          -2.6978333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "FORMB",
+        "coordinates": [
+          53.552,
+          -3.1053333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "GARST",
+        "coordinates": [
+          53.906333333333336,
+          -2.7758333333333334
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523acb27f42509469434",
@@ -69177,7 +72035,17 @@
       "geoidHeight": 45.19965000000323,
       "hae": 74.19965000000323
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "AVONE",
+        "coordinates": [
+          50.28333333333333,
+          -3.8833333333333333
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523b5e9ded571045468a",
@@ -69538,7 +72406,33 @@
       "geoidHeight": 46.84085593333438,
       "hae": 87.84085593333438
     },
-    "__v": 9
+    "__v": 9,
+    "reportingPoints": [
+      {
+        "name": "NWHIT",
+        "coordinates": [
+          51.56666666666667,
+          -0.8833333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "SMOT1",
+        "coordinates": [
+          51.43333333333333,
+          -0.8666666666666667
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "WWHIT",
+        "coordinates": [
+          51.483333333333334,
+          -0.9166666666666666
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523b5e9ded57104546a9",
@@ -69682,7 +72576,57 @@
       "geoidHeight": 51.56386180800001,
       "hae": 89.56386180800001
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "DUNCA",
+        "coordinates": [
+          58.64383333333333,
+          -3.025333333333333
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "KEISS",
+        "coordinates": [
+          58.53333333333333,
+          -3.1233333333333335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "THRUM",
+        "coordinates": [
+          58.39383333333333,
+          -3.1245
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LYBST",
+        "coordinates": [
+          58.3,
+          -3.285
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "LOCHW",
+        "coordinates": [
+          58.483333333333334,
+          -3.335
+        ],
+        "compulsory": false
+      },
+      {
+        "name": "CASTL",
+        "coordinates": [
+          58.58533333333333,
+          -3.3503333333333334
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523b5e9ded57104546af",
@@ -70369,7 +73313,17 @@
       "geoidHeight": 51.15922066666707,
       "hae": 137.15922066666707
     },
-    "__v": 8
+    "__v": 8,
+    "reportingPoints": [
+      {
+        "name": "ABEAM",
+        "coordinates": [
+          52.50833333333333,
+          -2.2533333333333334
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523c4b027aab592b6c19",
@@ -71517,7 +74471,17 @@
       "geoidHeight": 47.13705000000081,
       "hae": 205.1370500000008
     },
-    "__v": 6
+    "__v": 6,
+    "reportingPoints": [
+      {
+        "name": "GOLDE",
+        "coordinates": [
+          51.64666666666667,
+          -0.8049999999999999
+        ],
+        "compulsory": false
+      }
+    ]
   },
   {
     "_id": "6261523ccb27f425094694a8",
