@@ -39,7 +39,7 @@
 	let burgerButton: string;
 
 	// Reactive Classes
-	$: if ($page.url.pathname === '/') {
+	$: if ($page.url.pathname === '/' || $page.url.pathname === '/login') {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
@@ -48,7 +48,7 @@
 		$page.url.pathname.search('/scenario') != -1 &&
 		$page.url.pathname.search('/results') == -1
 	) {
-		// If on scenario page hide sidebar and ways to access it as user is not logged in
+		// If on scenario page hide sidebar and show burger button
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg';

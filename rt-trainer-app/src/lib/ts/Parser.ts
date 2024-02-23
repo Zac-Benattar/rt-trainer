@@ -561,7 +561,7 @@ if (not in level flight. */
 		if (radioCall.getEndAirport().isControlled()) {
 			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
 				.getEndAirport()
-				.getShortName()} tower on ${radioCall.getEndAirport().getLandingFrequency()}`;
+				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequencyValue()}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -570,7 +570,7 @@ if (not in level flight. */
 	public static parselandingContactTower(radioCall: RadioCall): ServerResponse {
 		const expectedRadioCall: string = `${radioCall.getEndAirport().getShortName()} tower ${radioCall
 			.getEndAirport()
-			.getLandingFrequency()}, ${radioCall.getTargetAllocatedCallsign()}`;
+			.getTowerFrequencyValue()}, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords([
 			radioCall.getEndAirport().getShortName(),
@@ -604,7 +604,7 @@ if (not in level flight. */
 				.getTargetAllocatedCallsign()
 				.toUpperCase()}, contact ${radioCall.getEndAirport().getShortName()} tower on ${radioCall
 				.getEndAirport()
-				.getLandingFrequency()}`;
+				.getTowerFrequencyValue()}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -664,7 +664,7 @@ if (not in level flight. */
 		if (radioCall.getEndAirport().isControlled()) {
 			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
 				.getEndAirport()
-				.getShortName()} tower on ${radioCall.getEndAirport().getLandingFrequency()}`;
+				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequencyValue()}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);

@@ -173,7 +173,7 @@ export function numberToPhoneticString(number: number, precision: number): strin
 		'6': 'Six',
 		'7': 'Seven',
 		'8': 'Eight',
-		'9': 'Nine'
+		'9': 'Niner'
 	};
 
 	const stringNumber = number.toFixed(precision);
@@ -206,6 +206,7 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 		echo: 'E',
 		foxtrot: 'F',
 		golf: 'G',
+		gulf: 'G',
 		hotel: 'H',
 		india: 'I',
 		juliet: 'J',
@@ -231,9 +232,11 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 		three: '3',
 		four: '4',
 		five: '5',
+		fiver: '5',
 		six: '6',
 		seven: '7',
 		eight: '8',
+		nine: '9',
 		niner: '9'
 	};
 
