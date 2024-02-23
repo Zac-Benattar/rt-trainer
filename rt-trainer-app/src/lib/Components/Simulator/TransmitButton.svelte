@@ -11,21 +11,19 @@
 	let SpeechGrammarList: any;
 	let SpeechRecognitionEvent: any;
 	let recognition: any;
+	let transmitButtonClasses = 'disabled';
 
 	SpeechInputEnabledStore.subscribe((value) => {
 		speechEnabled = value;
 	});
 
-	$: if (speechEnabled && mounted) {
-		const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-		if (enabled) {
-			transmitButton.classList.add('enabled');
-		} else {
-			transmitButton.classList.remove('enabled');
-		}
+	$: if (speechEnabled && enabled) {
+		transmitButtonClasses = 'enabled';
+	} else {
+		transmitButtonClasses = 'disabled';
 	}
 
-	$: if (speechEnabled && mounted) {
+	$: if (speechEnabled) {
 		SpeechRecognitionType = window.SpeechRecognition || window.webkitSpeechRecognition;
 		SpeechGrammarList = window.SpeechGrammarList || window.webkitSpeechGrammarList;
 		SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpeechRecognitionEvent;
@@ -39,49 +37,43 @@
 
 			SpeechBufferStore.set(speechInput);
 		};
+	} else {
+		recognition = null;
 	}
 
 	const handleTransmitMouseDown = () => {
 		if (speechEnabled && enabled && !transmitting) {
-			const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-			if (transmitButton != null) {
-				transmitButton.classList.add('active');
-				transmitting = true;
-				recognition?.start();
-			}
+			transmitButtonClasses = 'enabled active';
+			transmitting = true;
+			recognition?.start();
 		}
 	};
 
 	const handleTransmitMouseUp = () => {
 		if (speechEnabled && enabled && transmitting) {
-			const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-			if (transmitButton != null) {
-				transmitButton.classList.remove('active');
-				transmitting = false;
-				recognition?.stop();
-			}
+			transmitButtonClasses = 'enabled';
+			transmitting = false;
+			recognition?.stop();
 		}
 	};
 
 	const handleTransmitMouseLeave = () => {
 		if (speechEnabled && enabled && transmitting) {
-			const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-			if (transmitButton != null) {
-				transmitButton.classList.remove('active');
-				transmitting = false;
-				recognition?.stop();
-			}
+			transmitButtonClasses = 'enabled';
+			transmitting = false;
+			recognition?.stop();
 		}
 	};
 
 	function onKeyDown(e: { keyCode: any }) {
 		switch (e.keyCode) {
 			case 32:
-				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-				if (transmitButton != null) {
-					transmitButton.classList.add('active');
-					transmitting = true;
-					recognition?.start();
+				if (speechEnabled) {
+					if (enabled && !transmitting) {
+						transmitButtonClasses = 'enabled active';
+						transmitting = true;
+						recognition?.start();
+					}
 				}
 				break;
 		}
@@ -90,13 +82,14 @@
 	function onKeyUp(e: { keyCode: any }) {
 		switch (e.keyCode) {
 			case 32:
-				const transmitButton = document.getElementById('transmit-button') as HTMLDivElement;
-				if (transmitButton != null) {
-					transmitButton.classList.remove('active');
-					transmitting = false;
-					recognition?.stop();
+				if (speechEnabled) {
+					if (enabled && transmitting) {
+						transmitButtonClasses = 'enabled';
+						transmitting = false;
+						recognition?.stop();
+					}
+					break;
 				}
-				break;
 		}
 	}
 
@@ -107,7 +100,7 @@
 
 <div
 	id="transmit-button"
-	class="{$$props.class} transmit-button rounded-full cursor-pointer"
+	class="{$$props.class} {transmitButtonClasses} transmit-button rounded-full cursor-pointer"
 	on:mousedown={handleTransmitMouseDown}
 	on:keydown={handleTransmitMouseDown}
 	on:mouseup={handleTransmitMouseUp}
