@@ -117,7 +117,7 @@ export async function pushAirspaceDataToDatabase(): Promise<void> {
 	const airspaceData = JSON.stringify(readAirspaceDataFromJSON());
 	await db.insert(airspacesJSON).values({ json: airspaceData });
 }
-// Dangerous functions --------------------------------------------
+// End of dangerous functions --------------------------------------------
 
 export function airportDataToAirport(airportData: AirportData): Airport {
 	return new Airport(

@@ -15,7 +15,7 @@ export default class Airport {
 	type: number;
 	country: string;
 	coordinates: [number, number];
-	reportingPoints: AirportReportingPointDBData[]
+	reportingPoints: AirportReportingPointDBData[];
 	elevation: number;
 	trafficType: number[];
 	ppr: boolean;
@@ -30,7 +30,7 @@ export default class Airport {
 	frequencies: Frequency[];
 
 	@Type(() => METORData)
-	metorData: METORData = new METORData(0, 0, 0, 0, 0, 0, 0, 0, 0);
+	metorData: METORData;
 
 	constructor(
 		name: string,
@@ -66,6 +66,12 @@ export default class Airport {
 		this.winchOnly = winchOnly;
 		this.runways = runways;
 		this.frequencies = frequencies;
+		// All airports should have coordinates and elevation but for somereason one is always undefined so this gets around it
+		if (coordinates != undefined && elevation != undefined) {
+			this.metorData = this.generateMETORData(coordinates[0], elevation);
+		} else {
+			this.metorData = new METORData(180, 10, 8, 1013.25, 0.1, 15, 5, 12, 3);
+		}
 	}
 
 	public getName(): string {
@@ -213,5 +219,29 @@ export default class Airport {
 
 	public getATISLetter(seed: number): string {
 		return String.fromCharCode(65 + (seed % 26));
+	}
+
+	protected generateMETORData(lat: number, elevation: number): METORData {
+		const avgWindDirection = 180;
+		const meanWindSpeed = 10 + (lat - 48) * 0.5;
+		const stdWindSpeed = 8;
+		const meanPressure = 1013.25 * Math.pow(1 - (6.5 * elevation) / 288150, 5.255); // Formula from https://rechneronline.de/physics/air-pressure-altitude.php
+		const stdPressure = 0.5;
+		const meanTemperature = 15 - (lat - 48) * 0.5;
+		const stdTemperature = 5;
+		const meanDewpoint = meanTemperature - 3;
+		const stdDewpoint = 1;
+
+		return new METORData(
+			avgWindDirection,
+			meanWindSpeed,
+			stdWindSpeed,
+			meanPressure,
+			stdPressure,
+			meanTemperature,
+			stdTemperature,
+			meanDewpoint,
+			stdDewpoint
+		);
 	}
 }

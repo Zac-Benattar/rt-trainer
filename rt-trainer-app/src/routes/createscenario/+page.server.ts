@@ -57,7 +57,7 @@ export const actions = {
 		const name = data.get('scenarioName') == '' ? 'My Scenario' : data.get('scenarioName');
 		const description = data.get('scenarioDescription')?.toString();
 		const emergency = data.get('hasEmergency') == 'on';
-		const weatherSeed = data.get('weatherSeed') == '' ? weatherCUID() : data.get('weatherSeed');
+		const scenarioSeed = data.get('scenarioSeed') == '' ? weatherCUID() : data.get('weatherSeed');
 
 		if (routeId == null || routeId == undefined) {
 			return fail(400, { routeId, missing: true });
@@ -81,7 +81,7 @@ export const actions = {
 			name: name,
 			description: description,
 			route: routeId,
-			weatherSeed: weatherSeed,
+			seed: scenarioSeed,
 			hasEmergency: emergency,
 			createdBy: userId
 		});

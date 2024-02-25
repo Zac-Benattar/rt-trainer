@@ -139,11 +139,13 @@
 					size="sm"
 					on:click={() => {
 						speechInput = !speechInput;
-						modalStore.trigger({
-							type: 'alert',
-							title: 'Speech input is enabled',
-							body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
-						});
+						if (speechInput) {
+							modalStore.trigger({
+								type: 'alert',
+								title: 'Speech input is enabled',
+								body: 'Hold down the spacebar or click and hold the red button to record your message. Let go when you are done.'
+							});
+						}
 					}}
 					><div class="[&>*]:pointer-events-none"
 						use:popup={speechRecognitionExperimentalWarningTooltip}>Voice Input</div>

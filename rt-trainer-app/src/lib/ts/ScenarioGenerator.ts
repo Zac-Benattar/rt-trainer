@@ -6,9 +6,7 @@ import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
 	readAirportDataFromDB,
-	readAirportDataFromJSON,
-	readAirspaceDataFromDB,
-	readAirspaceDataFromJSON
+	readAirspaceDataFromDB
 } from './OpenAIPHandler';
 import Scenario from './Scenario';
 import type ScenarioPoint from './ScenarioPoints';
@@ -34,8 +32,10 @@ export async function generateScenario(
 	// Add airports to list of valid airports for takeoff/landing
 	const allAirports: Airport[] = [];
 	for (let i = 0; i < airportsData.length; i++) {
-		const airport: Airport = airportDataToAirport(airportsData[i]);
-		allAirports.push(airport);
+		if (airportsData[i] && airportsData[i].name != undefined && airportsData[i].geometry.coordinates != undefined) {
+			const airport: Airport = airportDataToAirport(airportsData[i]);
+			allAirports.push(airport);
+		}
 	}
 
 	// Add airspaces to list of valid airspaces for route
