@@ -136,10 +136,11 @@
 				</div>
 
 				<div>
-					<div class="h4 p-1">Weather Seed</div>
-					<input class="input" name="weatherSeed" type="text" placeholder={weatherSeed} />
+					<div class="h4 p-1">Scenario Seed</div>
+					<input class="input" name="scenarioSeed" type="text" placeholder={weatherSeed} />
 					<div class="text-sm opacity-50 p-1">
-						This seed will be used to generate the weather for the scenario
+						This seed will be used to generate the weather conditions, choose runways, determine
+						where the emergency event is if enabled, and affect other variables.
 					</div>
 				</div>
 

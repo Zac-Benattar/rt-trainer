@@ -231,13 +231,13 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 		two: '2',
 		three: '3',
 		four: '4',
-		five: '5',
 		fiver: '5',
+		five: '5',
 		six: '6',
 		seven: '7',
 		eight: '8',
-		nine: '9',
-		niner: '9'
+		niner: '9',
+		nine: '9'
 	};
 
 	// Create a regular expression pattern to match any of the phonetic alphabet words
