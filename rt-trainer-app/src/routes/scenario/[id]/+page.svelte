@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Simulator from '$lib/Components/Simulator/Simulator.svelte';
+	import Simulator from '$lib/Components/Simulator.svelte';
 	import { page } from '$app/stores';
 	import {
 		AircraftDetailsStore,

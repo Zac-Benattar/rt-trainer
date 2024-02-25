@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Radio from './Radio.svelte';
-	import Transponder from './Transponder.svelte';
-	import Map from '../Map.svelte';
-	import MessageInput from './MessageInput.svelte';
-	import MessageOutput from './MessageOutput.svelte';
+	import Radio from './SimulatorComponents/Radio.svelte';
+	import Transponder from './SimulatorComponents/Transponder.svelte';
+	import Map from './Map.svelte';
+	import MessageInput from './SimulatorComponents/MessageInput.svelte';
+	import MessageOutput from './SimulatorComponents/MessageOutput.svelte';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
@@ -42,7 +42,7 @@
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
-	import Altimeter from './Altimeter.svelte';
+	import Altimeter from './SimulatorComponents/Altimeter.svelte';
 	import { updated } from '$app/stores';
 	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 
@@ -526,6 +526,11 @@
 						<ul class="list-disc ml-5">
 							<li>Type your message in the input box.</li>
 							<li>Or enable speech input and say your message out loud.</li>
+							<li>
+								Your callsign is `{aircraftDetails.prefix}
+								{aircraftDetails.callsign}`. You can change this in your
+								<a href="/profile">profile settings</a>.
+							</li>
 						</ul>
 					</Step>
 					<Step>
