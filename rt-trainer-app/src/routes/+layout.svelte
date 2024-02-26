@@ -9,7 +9,8 @@
 		getDrawerStore,
 		storePopup,
 		Modal,
-		Toast
+		Toast,
+		type ModalComponent
 	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -19,6 +20,8 @@
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
+	import PriacyPolicyModal from '$lib/Components/Modals/PrivacyPolicyModal.svelte';
+	import PrivacyPolicyModal from '$lib/Components/Modals/PrivacyPolicyModal.svelte';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
@@ -32,6 +35,11 @@
 	function drawerOpen(): void {
 		drawerStore.open({});
 	}
+
+	const modalRegistry: Record<string, ModalComponent> = {
+		// Set a unique modal ID, then pass the component reference
+		privacyPolicyComponent: { ref: PrivacyPolicyModal }
+	};
 
 	// Holds status of major navigation elements, to control visibility
 	let classesSidebar: string;
@@ -81,7 +89,7 @@
 	<Navigation />
 </Drawer>
 
-<Modal />
+<Modal components={modalRegistry} />
 
 <Toast />
 
