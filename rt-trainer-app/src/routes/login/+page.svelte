@@ -11,63 +11,49 @@
 		QuestionCircleOutline,
 		ExclamationCircleOutline
 	} from 'flowbite-svelte-icons';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
+	import { Accordion, AccordionItem, type ModalSettings } from '@skeletonlabs/skeleton';
 
-	let warningVisible: boolean = true;
+	import { getModalStore } from '@skeletonlabs/skeleton';
+
+	const modalStore = getModalStore();
+
+	let privacyPolicyAccepted: boolean = false;
 
 	const handleGoogleSignIn = () => {
-		if (!warningVisible) signIn('google', { callbackUrl: '/home' });
+		if (privacyPolicyAccepted) signIn('google', { callbackUrl: '/home' });
 	};
 
-	// const handleFacebookSignIn = () => {
-	// 	// handle Facebook OAuth sign in
-	// 	signIn('facebook', { callbackUrl: '/home' });
-	// };
+	const handleFacebookSignIn = () => {
+		if (privacyPolicyAccepted) signIn('facebook', { callbackUrl: '/home' });
+	};
 
 	const handleGitHubSignIn = () => {
-		// handle GitHub OAuth sign in
-		if (!warningVisible) signIn('github', { callbackUrl: '/home' });
+		if (privacyPolicyAccepted) signIn('github', { callbackUrl: '/home' });
 	};
 
 	const handleSignOut = () => {
 		signOut({ callbackUrl: '/' });
 	};
 
-	const handleWarningAccept = () => {
-		warningVisible = false;
+	const showPrivacyPolicyModal = () => {
+		new Promise<boolean>((resolve) => {
+			const modal: ModalSettings = {
+				type: 'component',
+				component: 'privacyPolicyComponent',
+				response: (r: boolean) => {
+					resolve(r);
+				}
+			};
+			modalStore.trigger(modal);
+		}).then((r: any) => {
+			if (r) privacyPolicyAccepted = true;
+		});
 	};
 </script>
 
 <div class="flex flex-row place-content-center h-full w-full">
 	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
 		{#if !$page.data.session}
-			{#if warningVisible}
-				<div class="flex flex-row place-content-center">
-					<div class="">
-						<aside class="alert variant-filled-error">
-							<!-- Icon -->
-							<div><ExclamationCircleOutline /></div>
-							<!-- Message -->
-							<div class="alert-message">
-								<h3 class="h3">Warning</h3>
-								<p>
-									Your account is only used to store your routes, scenarios and statistics. The only
-									personal data shared with RT-Trainer is your email address. This is a very early
-									version of RT Trainer. Your routes, scenarios and statistics may be deleted or
-									modified without warning while the system is finalised. By using RT Trainer you
-									agree to these terms.
-								</p>
-							</div>
-							<!-- Actions -->
-							<div class="alert-actions">
-								<button class="btn-xl variant-filled" on:click={handleWarningAccept}
-									>I accept</button
-								>
-							</div>
-						</aside>
-					</div>
-				</div>
-			{/if}
 			<div class="flex flex-row place-content-center">
 				<div class="card p-5 space-y-6 shadow-xl sm:max-w-xs">
 					<p class="font-semibold">Welcome, login with</p>
@@ -75,21 +61,30 @@
 						<button class="btn variant-ringed-surface gap-2" on:click={handleGoogleSignIn}
 							><GoogleSolid />Google</button
 						>
-						<!-- <button
-				class="btn text-white gap-2"
-				style="background-color: #4267B2;"
-				on:click={handleFacebookSignIn}><FacebookSolid /> Facebook</button
-			> -->
+						<button
+							class="btn text-white gap-2"
+							style="background-color: #4267B2;"
+							on:click={handleFacebookSignIn}><FacebookSolid /> Facebook</button
+						>
 						<button
 							class="btn text-white gap-2"
 							style="background-color: #324792;"
 							on:click={handleGitHubSignIn}><GithubSolid /> GitHub</button
 						>
 					</div>
+					<label class="flex items-center space-x-2">
+						<input class="checkbox" type="checkbox" bind:checked={privacyPolicyAccepted} />
+						<p>
+							I have read and accepted the <button
+								on:click={showPrivacyPolicyModal}
+								class="text-indigo-600">Privacy Policy</button
+							>
+						</p>
+					</label>
 				</div>
 			</div>
 			<div class="flex flex-row place-content-center">
-				<div class="card py-2 px-3 sm:max-w-xl">
+				<div class="card py-2 px-3 space-y-6 shadow-xl sm:max-w-xl">
 					<Accordion autocollapse>
 						<AccordionItem>
 							<svelte:fragment slot="lead"><QuestionCircleOutline /></svelte:fragment>
