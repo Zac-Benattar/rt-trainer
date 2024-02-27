@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import Map from '$lib/Components/Map.svelte';
 	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
-	import axios from 'axios';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
+	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
+	import { enhance } from '$app/forms';
+	import { getToastStore } from '@skeletonlabs/skeleton';
+
+	const toastStore = getToastStore();
+	const modalStore = getModalStore();
 
 	export let data: PageData;
 
@@ -15,6 +19,11 @@
 	let routeName: string = data.userRoutes?.name ?? 'Unnamed Route';
 	let routeDescription: string = data.userRoutes?.description ?? '';
 	let waypoints: Waypoint[] = [];
+
+	let formEl: HTMLFormElement;
+	let confirmedAction: boolean = false;
+
+	const updatedRouteToast: ToastSettings = { message: 'Updated Route' };
 
 	// Populate waypoints array and store
 	if (data.userRoutes?.waypoints != undefined) {
@@ -25,12 +34,64 @@
 		}
 		WaypointsStore.set(waypoints);
 	}
+
+	function showConfirmDeleteModal() {
+		const modal: ModalSettings = {
+			type: 'confirm',
+			title: 'Please Confirm',
+			body: 'Are you sure you wish to delete this route?',
+			response: (r: boolean) => {
+				if (r) {
+					confirmedAction = true;
+					formEl.action = '?/deleteRoute';
+					formEl.requestSubmit();
+					modalStore.clear();
+				}
+			}
+		};
+		modalStore.trigger(modal);
+	}
 </script>
 
 <div class="flex flex-col place-content-center">
 	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
-		<div class="flex flex-col px-2 sm:w-9/12 gap-2">
-			<form class="flex flex-col gap-1" method="POST" action="?/updateRoute">
+		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
+			<form
+				class="flex flex-col gap-1"
+				method="POST"
+				bind:this={formEl}
+				use:enhance={({ formElement, formData, action, cancel, submitter }) => {
+					// `formElement` is this `<form>` element
+					// `formData` is its `FormData` object that's about to be submitted
+					// `action` is the URL to which the form is posted
+					// calling `cancel()` will prevent the submission
+					// `submitter` is the `HTMLElement` that caused the form to be submitted
+
+					const { routeName } = Object.fromEntries(formData);
+					if (routeName.toString().length < 1) {
+						// Show error message
+						cancel();
+						return;
+					}
+
+					if (!confirmedAction && action.href.includes('?/deleteRoute')) {
+						cancel();
+						showConfirmDeleteModal();
+					}
+
+					return async ({ result, update }) => {
+						switch (result.type) {
+							case 'error':
+								console.log('Error:', result.error);
+								break;
+							case 'success':
+								toastStore.trigger(updatedRouteToast);
+								break;
+						}
+						await update({ reset: false });
+					};
+				}}
+			>
 				<div>
 					<div class="h4 p-1">Route Name</div>
 					<input name="routeId" value={data.userRoutes?.id} hidden />
@@ -39,6 +100,7 @@
 						name="routeName"
 						type="text"
 						placeholder="Unnamed Route"
+						required
 						bind:value={routeName}
 					/>
 				</div>
@@ -54,7 +116,14 @@
 					/>
 				</div>
 
-				<button class="btn variant-filled">Update Route</button>
+				<div class="flex flex-row gap-2 mt-2">
+					<button formaction="?/updateRoute" class="btn variant-filled">Update Route</button>
+					<button
+						formaction="?/deleteRoute"
+						class="btn variant-filled-error"
+						on:click={showConfirmDeleteModal}>Delete Route</button
+					>
+				</div>
 			</form>
 		</div>
 

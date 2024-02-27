@@ -57,5 +57,16 @@ export const actions = {
 				description: routeDescription
 			})
 			.where(eq(routes.id, routeId));
+	},
+
+	deleteRoute: async ({ params }) => {
+		const routeId = params.id;
+		if (routeId == null || routeId == undefined) {
+			return fail(400, { routeId, missing: true });
+		}
+
+		await db.delete(routes).where(eq(routes.id, routeId));
+
+		throw redirect(303, '/myroutes');
 	}
 };
