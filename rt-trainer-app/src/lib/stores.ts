@@ -146,6 +146,8 @@ export const TutorialStore = writable<boolean>(false);
 // System status stores
 export const NullRouteStore = writable<boolean>(false);
 
+export const AwaitingServerResponseStore = writable<boolean>(false);
+
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
 	GenerationParametersStore.set(initialGenerationParameters);

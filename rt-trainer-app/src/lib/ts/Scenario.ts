@@ -32,7 +32,7 @@ export default class Scenario {
 
 	@Type(() => Waypoint)
 	waypoints: Waypoint[] = [];
-	
+
 	currentPointIndex: number = 0;
 
 	constructor(
@@ -139,6 +139,7 @@ export async function generateRoute(routeSeed: string): Promise<void> {
 		if (response.data === undefined) {
 			NullRouteStore.set(true);
 		} else {
+			NullRouteStore.set(false);
 			WaypointsStore.set(
 				response.data.waypoints.map((waypoint: Waypoint) => plainToInstance(Waypoint, waypoint))
 			);
@@ -147,11 +148,9 @@ export async function generateRoute(routeSeed: string): Promise<void> {
 			);
 		}
 	} catch (error: unknown) {
-		if (error.message === 'Network Error') {
-			NullRouteStore.set(true);
-		} else {
-			console.log('Error: ', error);
-		}
+		console.log('Error: ', error);
+
+		NullRouteStore.set(true);
 	}
 }
 

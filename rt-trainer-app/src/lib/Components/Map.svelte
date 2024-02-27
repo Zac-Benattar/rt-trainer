@@ -5,7 +5,13 @@
 	top of the file. Read more here about the issue and solution in the blog post by 
 	Stanislav Khromov below.
 	https://khromov.se/using-leaflet-with-sveltekit/ */
-	import { AirspacesStore, CurrentScenarioPointStore, WaypointsStore } from '$lib/stores';
+	import {
+		AirspacesStore,
+		AwaitingServerResponseStore,
+		CurrentScenarioPointStore,
+		NullRouteStore,
+		WaypointsStore
+	} from '$lib/stores';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
@@ -13,6 +19,7 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -40,7 +47,15 @@
 	let planeIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
+	let nullRouteOverlay: HTMLDivElement;
+	let NullRouteTextBox: any;
 	let loading: boolean = false;
+	let nullRoute: boolean = false;
+
+	const conicStops: ConicStop[] = [
+		{ color: 'transparent', start: 0, end: 25 },
+		{ color: 'rgb(var(--color-primary-500))', start: 75, end: 100 }
+	];
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
@@ -50,13 +65,26 @@
 		loading = false;
 	}
 
+	AwaitingServerResponseStore.subscribe((awaitingServerResponse) => {
+		loading = awaitingServerResponse;
+	});
+
+	NullRouteStore.subscribe((_nullRoute) => {
+		nullRoute = _nullRoute;
+		if (nullRoute) {
+			nullRoute = true;
+			waypoints = [];
+			airspaces = [];
+			needsToBeUpdated = true;
+		}
+	});
+
 	AirspacesStore.subscribe((_airspaces) => {
 		airspaces = _airspaces;
 	});
 
 	WaypointsStore.subscribe((_waypoints) => {
 		waypoints = _waypoints;
-		// name += ' ETA: ' + convertMinutesToTimeString(waypoints[i].arrivalTime);
 
 		// If no current route point data, set the targetPose to the first waypoint
 		if (
@@ -167,6 +195,25 @@
 	async function updateMap() {
 		if (mounted) {
 			await map;
+
+			if (nullRoute) {
+				console.log('null route')
+				NullRouteTextBox = L.Control.extend({
+					onAdd: function () {
+						var text = L.DomUtil.create('div');
+						text.id = 'heading_text';
+						text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+						text.style.color = 'black';
+						text.style.backgroundColor = 'white';
+						text.innerHTML = '<p>Bad seed</p>';
+						return text;
+					}
+				});
+
+				nullRouteOverlay = new NullRouteTextBox({ position: 'topright' }).addTo(map);
+			} else {
+				if (nullRouteOverlay) nullRouteOverlay.remove();
+			}
 
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
@@ -290,7 +337,7 @@
 	style="--widthSmScreen: {widthSmScreen}; --heightSmScreen: {heightSmScreen};"
 >
 	{#if enabled}
-		<div id="myMap" class="card flex grow z-[1]" />
+		<div id="myMap" class="card flex grow z-[1] flex flex-row place-content-center" />
 	{:else}
 		<p>Map is disabled</p>
 	{/if}
