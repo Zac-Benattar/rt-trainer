@@ -18,10 +18,10 @@
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
-	const weatherCUID = init({ length: 6 });
+	const scenarioSeedCUID = init({ length: 6 });
 
 	let selectedRouteId: string = '';
-	let scenarioSeed: string = weatherCUID();
+	let scenarioSeed: string = scenarioSeedCUID();
 	let emergency: boolean = true;
 
 	let routesClass: string = '';
@@ -69,11 +69,7 @@
 				NullRouteStore.set(false);
 			}
 		} catch (error: unknown) {
-			if (error.message === 'Network Error') {
-				console.log('Failed to load route from DB');
-			} else {
-				console.log('Error: ', error);
-			}
+			console.log('Error: ', error);
 		}
 	}
 

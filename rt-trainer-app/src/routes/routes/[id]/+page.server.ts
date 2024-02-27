@@ -1,4 +1,4 @@
-import { redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { and, eq } from 'drizzle-orm';
@@ -28,9 +28,34 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		userRoutes: await db.query.routes.findFirst({
 			where: and(eq(routes.createdBy, userId), eq(routes.createdBy, userId)),
-            with: {
-                waypoints: true
-            }
+			with: {
+				waypoints: true
+			}
 		})
 	};
+};
+
+/** @type {import('./$types').Actions} */
+export const actions = {
+	updateRoute: async ({ request }) => {
+		const data = await request.formData();
+		const routeId = data.get('routeId')?.toString();
+		let routeName = data.get('routeName');
+        if (routeName == null || routeName == undefined) {
+            routeName = 'Unnamed Route';
+        }
+		const routeDescription = data.get('routeDescription')?.toString();
+
+		if (routeId == null || routeId == undefined) {
+			return fail(400, { routeId, missing: true });
+		}
+
+		await db
+			.update(routes)
+			.set({
+				name: routeName.toString(),
+				description: routeDescription
+			})
+			.where(eq(routes.id, routeId));
+	}
 };

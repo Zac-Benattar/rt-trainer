@@ -1,12 +1,12 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
-import { and, desc, eq, gt } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 import { routes, scenarios, users } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
 let userId = '-1';
-const weatherCUID = init({ length: 6 });
+const scenarioSeedCUID = init({ length: 6 });
 const scenarioCUID = init({ length: 12 });
 
 export const load: PageServerLoad = async (event) => {
@@ -57,7 +57,7 @@ export const actions = {
 		const name = data.get('scenarioName') == '' ? 'My Scenario' : data.get('scenarioName');
 		const description = data.get('scenarioDescription')?.toString();
 		const emergency = data.get('hasEmergency') == 'on';
-		const scenarioSeed = data.get('scenarioSeed') == '' ? weatherCUID() : data.get('weatherSeed');
+		const scenarioSeed = data.get('scenarioSeed') == '' ? scenarioSeedCUID() : data.get('scenarioSeed');
 
 		if (routeId == null || routeId == undefined) {
 			return fail(400, { routeId, missing: true });

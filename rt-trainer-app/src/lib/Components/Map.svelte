@@ -74,14 +74,11 @@
 
 	AirspacesStore.subscribe((_airspaces) => {
 		airspaces = _airspaces;
-
 		needsRerender = true;
 	});
 
 	WaypointsStore.subscribe((_waypoints) => {
 		waypoints = _waypoints;
-		console.log(waypoints);
-
 		needsRerender = true;
 	});
 
@@ -179,7 +176,7 @@
 			await map;
 
 			if (nullRoute) {
-				console.log('null route')
+				console.log('null route');
 				NullRouteTextBox = L.Control.extend({
 					onAdd: function () {
 						var text = L.DomUtil.create('div');

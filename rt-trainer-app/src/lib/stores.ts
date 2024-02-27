@@ -9,7 +9,7 @@ import type {
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
 import type Airspace from './ts/AeronauticalClasses/Airspace';
-import Waypoint from './ts/AeronauticalClasses/Waypoint';
+import type Waypoint from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: '0',
