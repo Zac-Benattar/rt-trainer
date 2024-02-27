@@ -40,12 +40,14 @@
 	let planeIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
+	let loading: boolean = false;
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
 	$: if (needsToBeUpdated && mounted) {
 		updateMap();
 		needsToBeUpdated = false;
+		loading = false;
 	}
 
 	AirspacesStore.subscribe((_airspaces) => {

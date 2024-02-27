@@ -9,7 +9,7 @@ import type {
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
 import type Airspace from './ts/AeronauticalClasses/Airspace';
-import type Waypoint from './ts/AeronauticalClasses/Waypoint';
+import Waypoint from './ts/AeronauticalClasses/Waypoint';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: '0',
@@ -160,6 +160,8 @@ export function ClearSimulationStores(): void {
 	ATCMessageStore.set('');
 	KneeboardStore.set('');
 	ScenarioStore.set(undefined);
+	WaypointsStore.set([]);
+	AirspacesStore.set([]);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

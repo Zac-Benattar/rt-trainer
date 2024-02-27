@@ -1,7 +1,4 @@
 <script lang="ts">
-	// import IconBrandGoogle from 'virtual:icons/logos/google-icon';
-	// import IconBrandFacebook from 'virtual:icons/logos/facebook';
-
 	import { page } from '$app/stores';
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import {
