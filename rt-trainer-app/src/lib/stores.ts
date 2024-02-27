@@ -10,6 +10,7 @@ import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
 import type Airspace from './ts/AeronauticalClasses/Airspace';
 import type Waypoint from './ts/AeronauticalClasses/Waypoint';
+import type Airport from './ts/AeronauticalClasses/Airport';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: '0',
@@ -69,7 +70,7 @@ export const ATCMessageStore = writable<string>('');
 
 export const KneeboardStore = writable<string>('');
 
-// Scenario stores
+// Scenario/route stores
 export const ScenarioStore = writable<Scenario | undefined>(undefined);
 
 export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
@@ -83,6 +84,8 @@ export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 export const WaypointsStore = writable<Waypoint[]>([]);
 
 export const AirspacesStore = writable<Airspace[]>([]);
+
+export const AirportsStore = writable<Airport[]>([]);
 
 export const CurrentRoutePointIndexStore = writable<number>(0);
 
@@ -164,6 +167,7 @@ export function ClearSimulationStores(): void {
 	ScenarioStore.set(undefined);
 	WaypointsStore.set([]);
 	AirspacesStore.set([]);
+	AirportsStore.set([]);
 	CurrentRoutePointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

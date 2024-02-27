@@ -57,7 +57,8 @@ export const actions = {
 		const name = data.get('scenarioName') == '' ? 'My Scenario' : data.get('scenarioName');
 		const description = data.get('scenarioDescription')?.toString();
 		const emergency = data.get('hasEmergency') == 'on';
-		const scenarioSeed = data.get('scenarioSeed') == '' ? scenarioSeedCUID() : data.get('scenarioSeed');
+		const scenarioSeed =
+			data.get('scenarioSeed') == '' ? scenarioSeedCUID() : data.get('scenarioSeed');
 
 		if (routeId == null || routeId == undefined) {
 			return fail(400, { routeId, missing: true });

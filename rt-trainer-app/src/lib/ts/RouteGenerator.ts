@@ -14,13 +14,10 @@ import {
 	writeDataToJSON
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
+import type { RouteData } from './Scenario';
 
 export default class RouteGenerator {
-	public static async generateFRTOLRouteFromSeed(seed: number): Promise<{
-		waypoints: Waypoint[];
-		airspaces: Airspace[];
-		airports: Airport[];
-	}> {
+	public static async generateFRTOLRouteFromSeed(seed: number): Promise<RouteData | undefined> {
 		// Prevent seeds which don't give a route
 		if (seed < 0) {
 			seed = -seed;
@@ -79,7 +76,6 @@ export default class RouteGenerator {
 
 		while (!validRoute && iterations < maxIterations) {
 			iterations++;
-			console.log('iteration: ', iterations);
 			validRoute = true;
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
@@ -204,8 +200,11 @@ export default class RouteGenerator {
 		}
 
 		if (iterations >= maxIterations || chosenMATZ == undefined || startAirport == undefined) {
-			throw new Error('Could not find a valid route');
+			console.log(`Could not find a valid route after ${iterations} iterations`);
+			return;
 		}
+
+		console.log('Iterations: ', iterations);
 
 		const arrivalTimes: number[] = [
 			Math.round(

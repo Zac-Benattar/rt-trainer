@@ -71,6 +71,8 @@ export const routes = mysqlTable('route', {
 	name: varchar('name', { length: 100 }).notNull(),
 	type: tinyint('type').notNull(),
 	description: varchar('description', { length: 2000 }),
+	airspaces: json('airspaces').notNull(),
+	airports: json('airports').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
 	createdBy: varchar('created_by', { length: 255 }).notNull()

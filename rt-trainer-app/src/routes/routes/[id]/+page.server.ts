@@ -41,9 +41,9 @@ export const actions = {
 		const data = await request.formData();
 		const routeId = data.get('routeId')?.toString();
 		let routeName = data.get('routeName');
-        if (routeName == null || routeName == undefined) {
-            routeName = 'Unnamed Route';
-        }
+		if (routeName == null || routeName == undefined) {
+			routeName = 'Unnamed Route';
+		}
 		const routeDescription = data.get('routeDescription')?.toString();
 
 		if (routeId == null || routeId == undefined) {

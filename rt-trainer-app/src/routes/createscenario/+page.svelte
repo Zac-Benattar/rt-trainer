@@ -32,7 +32,7 @@
 	export let form: ActionData;
 
 	if (form?.missing) {
-		routesClass = 'border border-red-500';
+		routesClass = 'input-error';
 	} else {
 		routesClass = '';
 	}

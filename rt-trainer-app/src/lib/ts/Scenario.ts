@@ -1,4 +1,5 @@
 import {
+	AirportsStore,
 	AirspacesStore,
 	ClearSimulationStores,
 	CurrentRoutePointIndexStore,
@@ -158,7 +159,7 @@ export async function fetchFRTOLRouteBySeed(routeSeed: string): Promise<RouteDat
 	try {
 		const response = await axios.get(`/generateroute/${routeSeed}`);
 
-		if (response.data === undefined) {
+		if (response.data === undefined || response.data == '') {
 			return undefined;
 		} else {
 			const routeData = {
@@ -200,6 +201,7 @@ export async function loadRouteDataBySeed(routeSeed: string): Promise<void> {
 	NullRouteStore.set(false);
 	WaypointsStore.set(routeData.waypoints);
 	AirspacesStore.set(routeData.airspaces);
+	AirportsStore.set(routeData.airports);
 }
 
 /**
