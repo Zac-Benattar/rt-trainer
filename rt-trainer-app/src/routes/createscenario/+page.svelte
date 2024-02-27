@@ -64,10 +64,11 @@
 				NullRouteStore.set(false);
 			}
 		} catch (error: unknown) {
-			console.log('Error: ', error);
-
-			AwaitingServerResponseStore.set(false);
-			NullRouteStore.set(true);
+			if (error.message === 'Network Error') {
+				console.log('Failed to load route from DB');
+			} else {
+				console.log('Error: ', error);
+			}
 		}
 	}
 </script>
