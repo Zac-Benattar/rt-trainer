@@ -64,6 +64,7 @@
 						<button
 							class="btn text-white gap-2"
 							style="background-color: #4267B2;"
+							disabled
 							on:click={handleFacebookSignIn}><FacebookSolid /> Facebook</button
 						>
 						<button
@@ -92,7 +93,7 @@
 								>Why can't I use an email and password?</svelte:fragment
 							>
 							<svelte:fragment slot="content"
-								>For now the answer is that it is too complicated to set up. It will be considered
+								>For now the answer is that it is too time consuming to setup. It will be considered
 								in the future when the core features are working.</svelte:fragment
 							>
 						</AccordionItem>

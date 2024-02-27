@@ -1,25 +1,10 @@
 <script lang="ts">
-	import { getModalStore } from '@skeletonlabs/skeleton';
-
-	const modalStore = getModalStore();
-
-	export let parent: any;
-
-	function onAccept() {
-		if ($modalStore[0].response) $modalStore[0].response(true);
-		parent.onClose();
-	}
-
-	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
-	const cBody = 'px-4 flex flex-col gap-3';
 </script>
 
-{#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>RT-Trainer Privacy Policy</header>
-		<article class={cBody}>
+<div class="flex flex-row place-content-center h-full w-full">
+	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
+		<header class="h2">RT-Trainer Privacy Policy</header>
+		<article class="flex flex-col gap-3">
 			<div><i>Last updated 27th Feburary 2024</i></div>
 
 			<div>
@@ -111,12 +96,8 @@
 				<a href="https://www.ico.org.uk">https://www.ico.org.uk</a>
 			</div>
 		</article>
-		<footer class="modal-footer {parent.regionFooter}">
-			<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>Close</button>
-			<button class="btn {parent.buttonPositive}" on:click={onAccept}>Accept</button>
-		</footer>
 	</div>
-{/if}
+</div>
 
 <style lang="postcss">
 	a {
