@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import Map from '$lib/Components/Map.svelte';
 	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
-	import { generateRoute } from '$lib/ts/Scenario';
+	import { fetchFRTOLRouteBySeed } from '$lib/ts/Scenario';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';
 	import { init } from '@paralleldrive/cuid2';
@@ -21,7 +21,7 @@
 	$: {
 		AwaitingServerResponseStore.set(true);
 		ClearSimulationStores();
-		generateRoute(routeSeed);
+		fetchFRTOLRouteBySeed(routeSeed);
 		AwaitingServerResponseStore.set(false);
 	}
 
@@ -71,11 +71,7 @@
 				}
 			}
 		} catch (error: unknown) {
-			if (error.message === 'Network Error') {
-				console.log('Failed to push route to DB');
-			} else {
-				console.log('Error: ', error);
-			}
+			console.log('Error: ', error);
 		}
 	}
 </script>

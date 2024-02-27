@@ -1,4 +1,4 @@
-import type { Feedback } from './Feedback';
+import type Feedback from './Feedback';
 import type { EmergencyType } from './ScenarioTypes';
 
 export type GenerationParameters = {

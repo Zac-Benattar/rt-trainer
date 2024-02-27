@@ -21,7 +21,7 @@
 	const weatherCUID = init({ length: 6 });
 
 	let selectedRouteId: string = '';
-	let weatherSeed: string = weatherCUID();
+	let scenarioSeed: string = weatherCUID();
 	let emergency: boolean = true;
 
 	let routesClass: string = '';
@@ -37,12 +37,17 @@
 		routesClass = '';
 	}
 
-	async function loadRoute(event: Event) {
+	async function handleRouteIdChange(event: Event) {
 		selectedRouteId = (event.target as HTMLInputElement).value;
+		loadRoute(selectedRouteId);
+		// getScenarioPreview(selectedRouteId, scenarioSeed);
+	}
+
+	async function loadRoute(routeId: string) {
 		AwaitingServerResponseStore.set(true);
 
 		try {
-			const response = await axios.get(`/api/routes/${selectedRouteId}`);
+			const response = await axios.get(`/api/routes/${routeId}`);
 			console.log(response);
 
 			if (response === undefined) {
@@ -71,6 +76,8 @@
 			}
 		}
 	}
+
+	async function getScenarioPreview(routeId: string, scenarioSeed: string) {}
 </script>
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->
@@ -109,7 +116,7 @@
 								bind:group={selectedRouteId}
 								name="routeId"
 								value={route.id}
-								on:click={loadRoute}
+								on:click={handleRouteIdChange}
 							>
 								<svelte:fragment slot="lead">
 									<span class="badge-icon p-4 variant-soft-secondary">
@@ -146,7 +153,7 @@
 
 				<div>
 					<div class="h4 p-1">Scenario Seed</div>
-					<input class="input" name="scenarioSeed" type="text" placeholder={weatherSeed} />
+					<input class="input" name="scenarioSeed" type="text" placeholder={scenarioSeed} />
 					<div class="text-sm opacity-50 p-1">
 						This seed will be used to generate the weather conditions, choose runways, determine
 						where the emergency event is if enabled, and affect other variables.
@@ -165,7 +172,7 @@
 		</div>
 
 		<div class="flex flex-col px-2 xs:pr-3">
-			<div class="h4 p-1">Route Preview</div>
+			<div class="h4 p-1">Scenario Preview</div>
 			<Map
 				enabled={true}
 				widthSmScreen={'600px'}

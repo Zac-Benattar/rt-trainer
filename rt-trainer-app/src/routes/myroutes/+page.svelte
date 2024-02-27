@@ -27,7 +27,7 @@
 					<ul>
 						{#each data.userRoutes as route}
 							<li>
-								<a href="/elements/lists">
+								<a href="/routes/{route.id}">
 									<span class="badge bg-primary-500"><GlobeOutline /></span>
 									<span class="font-bold">{route.name}</span>
 									<div>
