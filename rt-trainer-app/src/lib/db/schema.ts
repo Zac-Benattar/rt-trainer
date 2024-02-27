@@ -52,8 +52,8 @@ export const waypoints = mysqlTable('waypoint', {
 	type: tinyint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
-	latitude: decimal('latitude', { precision: 10, scale: 8 }).notNull(),
-	longitude: decimal('longitude', { precision: 10, scale: 8 }).notNull(),
+	lat: decimal('lat', { precision: 10, scale: 8 }).notNull(),
+	long: decimal('long', { precision: 10, scale: 8 }).notNull(),
 	routeId: varchar('route_id', { length: 12 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow()

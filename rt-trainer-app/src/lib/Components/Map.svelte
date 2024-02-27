@@ -19,7 +19,6 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import { ConicGradient, type ConicStop } from '@skeletonlabs/skeleton';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -41,7 +40,7 @@
 	let markers: any[] = [];
 	let polygons: any[] = [];
 	let lines: any[] = [];
-	let needsToBeUpdated: boolean = false;
+	let needsRerender: boolean = false;
 	let initialZoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
@@ -52,16 +51,11 @@
 	let loading: boolean = false;
 	let nullRoute: boolean = false;
 
-	const conicStops: ConicStop[] = [
-		{ color: 'transparent', start: 0, end: 25 },
-		{ color: 'rgb(var(--color-primary-500))', start: 75, end: 100 }
-	];
-
 	export let mode: MapMode = MapMode.RoutePlan;
 
-	$: if (needsToBeUpdated && mounted) {
+	$: if (needsRerender && mounted) {
 		updateMap();
-		needsToBeUpdated = false;
+		needsRerender = false;
 		loading = false;
 	}
 
@@ -72,35 +66,23 @@
 	NullRouteStore.subscribe((_nullRoute) => {
 		nullRoute = _nullRoute;
 		if (nullRoute) {
-			nullRoute = true;
 			waypoints = [];
 			airspaces = [];
-			needsToBeUpdated = true;
+			needsRerender = true;
 		}
 	});
 
 	AirspacesStore.subscribe((_airspaces) => {
 		airspaces = _airspaces;
+
+		needsRerender = true;
 	});
 
 	WaypointsStore.subscribe((_waypoints) => {
 		waypoints = _waypoints;
+		console.log(waypoints);
 
-		// If no current route point data, set the targetPose to the first waypoint
-		if (
-			(targetPose == null || (targetPose.lat == 0 && targetPose.long == 0)) &&
-			waypoints.length > 0
-		) {
-			targetPose = {
-				lat: waypoints[0].lat,
-				long: waypoints[0].long,
-				trueHeading: 0,
-				altitude: 0,
-				airSpeed: 0
-			};
-		}
-
-		needsToBeUpdated = true;
+		needsRerender = true;
 	});
 
 	CurrentScenarioPointStore.subscribe((currentRoutePoint) => {
