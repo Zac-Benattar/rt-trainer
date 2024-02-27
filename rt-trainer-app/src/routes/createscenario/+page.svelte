@@ -7,7 +7,13 @@
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import axios from 'axios';
-	import { AirspacesStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
+	import {
+		AirspacesStore,
+		AwaitingServerResponseStore,
+		ClearSimulationStores,
+		NullRouteStore,
+		WaypointsStore
+	} from '$lib/stores';
 	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
@@ -33,6 +39,7 @@
 
 	async function loadRoute(event: Event) {
 		selectedRouteId = (event.target as HTMLInputElement).value;
+		AwaitingServerResponseStore.set(true);
 
 		try {
 			const response = await axios.get(`/api/routes/${selectedRouteId}`);
@@ -53,13 +60,13 @@
 
 				WaypointsStore.set(waypoints);
 				AirspacesStore.set(airspaces);
+				AwaitingServerResponseStore.set(false);
+				NullRouteStore.set(false);
 			}
 		} catch (error: unknown) {
-			if (error.message === 'Network Error') {
-				console.log('Failed to load route from DB');
-			} else {
-				console.log('Error: ', error);
-			}
+			console.log('Error: ', error);
+
+			NullRouteStore.set(true);
 		}
 	}
 </script>

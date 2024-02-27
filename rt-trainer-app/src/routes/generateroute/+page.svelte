@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Map from '$lib/Components/Map.svelte';
-	import { ClearSimulationStores, WaypointsStore } from '$lib/stores';
+	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import { generateRoute } from '$lib/ts/Scenario';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import axios from 'axios';
@@ -19,8 +19,10 @@
 	let routeSeedDescription: string = 'This seed will be used to generate the route';
 
 	$: {
+		AwaitingServerResponseStore.set(true);
 		ClearSimulationStores();
 		generateRoute(routeSeed);
+		AwaitingServerResponseStore.set(false);
 	}
 
 	let waypoints: Waypoint[] = [];
