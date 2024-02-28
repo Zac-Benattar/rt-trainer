@@ -5,13 +5,15 @@ export default class Waypoint {
 	long: number;
 	index: number;
 	name: string;
+	description: string;
 
-	constructor(name: string, lat: number, long: number, waypointType: WaypointType, index: number) {
+	constructor(name: string, lat: number, long: number, waypointType: WaypointType, index: number, description: string = '') {
 		this.name = name;
 		this.lat = lat;
 		this.long = long;
 		this.type = waypointType;
 		this.index = index;
+		this.description = description;
 	}
 
 	public getName(): string {

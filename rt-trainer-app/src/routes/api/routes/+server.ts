@@ -1,15 +1,13 @@
 import { db } from '$lib/db/db';
 import { routes, waypoints } from '$lib/db/schema';
-import type { Waypoint } from '$lib/ts/AeronauticalClasses/Waypoint';
+import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { name, createdBy, waypointsObject, type } = await request.json();
+	const { routeName, createdBy, waypointsObject, type, routeDescription, airspaces, airports } = await request.json();
 
-	console.log(name, createdBy, waypointsObject);
-
-	if (!name) {
+	if (!routeName) {
 		return json({ error: 'No name provided' });
 	}
 
@@ -31,13 +29,24 @@ export async function POST({ request }) {
 			if (!waypointsObject[i].long) {
 				return json({ error: `No long provided for waypoint point ${i}` });
 			}
+			if (routeDescription.length > 2000) {
+				return json({ error: 'Description too long. Max length 2000 chars.' });
+			}
 		}
 	}
 
 	const routeIdCreator = init({ length: 12 });
 	const routeId = routeIdCreator();
 
-	await db.insert(routes).values({ id: routeId, name: name, createdBy: createdBy, type: type });
+	await db.insert(routes).values({
+		id: routeId,
+		name: routeName,
+		type: type,
+		airspaces: JSON.stringify(airspaces),
+		airports: JSON.stringify(airports),
+		description: routeDescription,
+		createdBy: createdBy
+	});
 
 	await db.insert(waypoints).values(
 		waypointsObject.map((waypoint: Waypoint) => ({

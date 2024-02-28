@@ -20,6 +20,8 @@
 	let routeDescription: string = data.userRoutes?.description ?? '';
 	let waypoints: Waypoint[] = [];
 
+	let routeNameClasses: string = '';
+
 	let formEl: HTMLFormElement;
 	let confirmedAction: boolean = false;
 
@@ -61,15 +63,10 @@
 				method="POST"
 				bind:this={formEl}
 				use:enhance={({ formElement, formData, action, cancel, submitter }) => {
-					// `formElement` is this `<form>` element
-					// `formData` is its `FormData` object that's about to be submitted
-					// `action` is the URL to which the form is posted
-					// calling `cancel()` will prevent the submission
-					// `submitter` is the `HTMLElement` that caused the form to be submitted
-
 					const { routeName } = Object.fromEntries(formData);
 					if (routeName.toString().length < 1) {
 						// Show error message
+						routeNameClasses = 'input-error';
 						cancel();
 						return;
 					}
@@ -96,11 +93,10 @@
 					<div class="h4 p-1">Route Name</div>
 					<input name="routeId" value={data.userRoutes?.id} hidden />
 					<input
-						class="input"
+						class="input {routeNameClasses}"
 						name="routeName"
 						type="text"
 						placeholder="Unnamed Route"
-						required
 						bind:value={routeName}
 					/>
 				</div>

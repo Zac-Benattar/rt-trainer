@@ -2,10 +2,11 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { eq } from 'drizzle-orm';
-import { routes, users } from '$lib/db/schema';
+import { routes, users, waypoints } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 import RouteGenerator from '$lib/ts/RouteGenerator';
 import { simpleHash } from '$lib/ts/utils';
+import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 let userId = '-1';
 const routeCUID = init({ length: 12 });
@@ -63,6 +64,18 @@ export const actions = {
 			description: routeDescription?.toString(),
 			createdBy: userId
 		});
+
+		await db.insert(waypoints).values(
+			route.waypoints.map((waypoint: Waypoint) => ({
+				index: waypoint.index,
+				type: waypoint.type,
+				name: waypoint.name,
+				description: waypoint.description,
+				lat: waypoint.lat.toString(),
+				long: waypoint.long.toString(),
+				routeId: routeId
+			}))
+		);
 
 		throw redirect(303, `/routes/${routeId}`);
 	}

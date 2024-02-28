@@ -53,7 +53,7 @@
 
 <div class="flex flex-col place-content-center">
 	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
-		<div class="flex flex-col px-2 sm:w-9/12 gap-2">
+		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<div class="h3 p-1">Generate a route</div>
 
 			<form class="flex flex-col gap-1" method="POST" action="?/createScenario">
