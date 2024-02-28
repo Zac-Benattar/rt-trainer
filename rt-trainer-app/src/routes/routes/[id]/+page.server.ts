@@ -29,7 +29,9 @@ export const load: PageServerLoad = async (event) => {
 		userRoutes: await db.query.routes.findFirst({
 			where: and(eq(routes.createdBy, userId), eq(routes.createdBy, userId)),
 			with: {
-				waypoints: true
+				waypoints: {
+					orderBy: (waypoints, { asc }) => [asc(waypoints.index)]
+				}
 			}
 		})
 	};

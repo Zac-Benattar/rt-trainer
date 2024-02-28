@@ -59,8 +59,8 @@ export const actions = {
 			id: routeId,
 			name: routeName.toString(),
 			type: 1,
-			airspaces: JSON.stringify(route.airspaces),
-			airports: JSON.stringify(route.airports),
+			airspaces: JSON.stringify(route.airspaces.map((airspace) => airspace.id)),
+			airports: JSON.stringify(route.airports.map((airport) => airport.id)),
 			description: routeDescription?.toString(),
 			createdBy: userId
 		});

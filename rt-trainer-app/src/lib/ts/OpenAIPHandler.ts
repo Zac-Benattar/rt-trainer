@@ -90,7 +90,7 @@ export async function readAirportDataFromDB(): Promise<AirportData[]> {
 		}
 	});
 
-	const airportDataJSON = JSON.parse(airportData.json) as AirportData[];
+	const airportDataJSON = JSON.parse(airportData?.json as string) as AirportData[];
 
 	return airportDataJSON;
 }
@@ -102,7 +102,7 @@ export async function readAirspaceDataFromDB(): Promise<AirspaceData[]> {
 		}
 	});
 
-	const airspaceDataJSON = JSON.parse(airspaceData.json) as AirspaceData[];
+	const airspaceDataJSON = JSON.parse(airspaceData?.json as string) as AirspaceData[];
 
 	return airspaceDataJSON;
 }
@@ -121,6 +121,7 @@ export async function pushAirspaceDataToDatabase(): Promise<void> {
 
 export function airportDataToAirport(airportData: AirportData): Airport {
 	return new Airport(
+		airportData._id,
 		airportData.name,
 		airportData.icaoCode,
 		airportData.iataCode,
@@ -183,6 +184,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 
 export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	return new Airspace(
+		airspaceData._id,
 		airspaceData.name,
 		airspaceData.type,
 		airspaceData.icaoClass,

@@ -8,6 +8,7 @@ import type { AirportReportingPointDBData } from '../OpenAIPHandler';
 
 /* Airport data. */
 export default class Airport {
+	id: string;
 	name: string;
 	icaoCode: string;
 	iataCode: string;
@@ -33,6 +34,7 @@ export default class Airport {
 	metorData: METORData;
 
 	constructor(
+		id: string,
 		name: string,
 		icaoCode: string,
 		iataCode: string,
@@ -50,6 +52,7 @@ export default class Airport {
 		runways: Runway[],
 		frequencies: Frequency[]
 	) {
+		this.id = id;
 		this.name = name;
 		this.icaoCode = icaoCode;
 		this.iataCode = iataCode;

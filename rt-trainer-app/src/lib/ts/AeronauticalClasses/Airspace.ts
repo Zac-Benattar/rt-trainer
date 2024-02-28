@@ -5,6 +5,7 @@ import {
 } from '../utils';
 
 export default class Airspace {
+	public id: string;
 	public name: string;
 	public type: number;
 	public icaoClass: number;
@@ -23,6 +24,7 @@ export default class Airspace {
 	public lowerLimitMin: number;
 
 	constructor(
+		id: string,
 		name: string,
 		type: number,
 		icaoClass: number,
@@ -40,6 +42,7 @@ export default class Airspace {
 		upperLimitMax: number,
 		lowerLimitMin: number
 	) {
+		this.id = id;
 		this.name = name;
 		this.type = type;
 		this.icaoClass = icaoClass;
