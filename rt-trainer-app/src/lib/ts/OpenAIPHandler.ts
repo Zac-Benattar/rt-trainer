@@ -26,9 +26,9 @@ export function checkDataUpToDate(): boolean {
 }
 
 export async function writeDataToJSON(): Promise<void> {
-	const airportReportingPoints = await getAllUKAirportReportingPoints();
+	const airportReportingPoints = await getAllUKAirportReportingPointsFromOpenAIP();
 
-	const airports = await getAllUKAirports();
+	const airports = await getAllUKAirportsFromOpenAIP();
 
 	for (let i = 0; i < airportReportingPoints.length; i++) {
 		const associatedAirport = airports.find(
@@ -65,7 +65,7 @@ export async function writeDataToJSON(): Promise<void> {
 
 	writeFileSync('src/lib/data/airports.json', JSON.stringify(airports, null, 2));
 
-	const airspaces = await getAllUKAirspace();
+	const airspaces = await getAllUKAirspaceFromOpenAIP();
 
 	for (let i = 0; i < airspaces.length; i++) {
 		const centrePoint = getPolygonCenter(airspaces[i].geometry.coordinates[0]);
@@ -206,7 +206,19 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	);
 }
 
-export async function getAllUKAirports(): Promise<AirportData[]> {
+export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
+	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
+	const airspaces = airspacesData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
+	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
+}
+
+export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
+	const airportsData: AirportData[] = await readAirportDataFromDB();
+	const airports = airportsData.map((airspaceData) => airportDataToAirport(airspaceData));
+	return airports.filter((airports) => airportIds.includes(airports.id));
+}
+
+export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
 			headers: {
@@ -228,7 +240,7 @@ export async function getAllUKAirports(): Promise<AirportData[]> {
 	return [];
 }
 
-export async function getAllUKAirspace(): Promise<AirspaceData[]> {
+export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 	try {
 		const response1 = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
 			headers: {
@@ -263,7 +275,7 @@ export async function getAllUKAirspace(): Promise<AirspaceData[]> {
 	return [];
 }
 
-export async function getAllUKAirportReportingPoints(): Promise<AirportReportingPointData[]> {
+export async function getAllUKAirportReportingPointsFromOpenAIP(): Promise<AirportReportingPointData[]> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/reporting-points`, {
 			headers: {
