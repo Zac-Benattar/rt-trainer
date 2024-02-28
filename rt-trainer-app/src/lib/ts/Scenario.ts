@@ -204,6 +204,49 @@ export async function loadRouteDataBySeed(routeSeed: string): Promise<void> {
 	AirportsStore.set(routeData.airports);
 }
 
+export async function fetchRouteDataById(routeId: string): Promise<RouteData | undefined> {
+	try {
+		const response = await axios.get(`/api/routes/${routeId}`);
+
+		if (response.data === undefined || response.data == '') {
+			return undefined;
+		} else {
+			const routeData: RouteData = {
+				waypoints: response.data.waypoints.map((waypoint: Waypoint) =>
+					plainToInstance(Waypoint, waypoint)
+				),
+				airspaces: response.data.airspaces.map((airspace: Airspace) =>
+					plainToInstance(Airspace, airspace)
+				),
+				airports: response.data.airports.map((airport: Airport) =>
+					plainToInstance(Airport, airport)
+				)
+			};
+			return routeData;
+		}
+	} catch (error: unknown) {
+		console.log('Error: ', error);
+	}
+}
+
+export async function loadRouteDataById(routeId: string): Promise<void> {
+	const routeData = await fetchRouteDataById(routeId);
+
+	// Check the scenario was returned correctly
+	if (routeData == null || routeData == undefined) {
+		console.log('Failed to load route');
+		NullRouteStore.set(true);
+		return;
+	}
+
+	// Reset all existing simulation stores and load the route data into the stores
+	ClearSimulationStores();
+	NullRouteStore.set(false);
+	WaypointsStore.set(routeData.waypoints);
+	AirspacesStore.set(routeData.airspaces);
+	AirportsStore.set(routeData.airports);
+}
+
 /**
  * Checks the radio call by the server. Gets back the radio call in response, the feedback and the expected user response.
  *

@@ -8,6 +8,7 @@
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
+	import { loadRouteDataById } from '$lib/ts/Scenario';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -16,8 +17,8 @@
 
 	ClearSimulationStores();
 
-	let routeName: string = data.userRoutes?.name ?? 'Unnamed Route';
-	let routeDescription: string = data.userRoutes?.description ?? '';
+	let routeName: string = data.routeRow?.name ?? 'Unnamed Route';
+	let routeDescription: string = data.routeRow?.description ?? '';
 	let waypoints: Waypoint[] = [];
 
 	let routeNameClasses: string = '';
@@ -28,13 +29,8 @@
 	const updatedRouteToast: ToastSettings = { message: 'Updated Route' };
 
 	// Populate waypoints array and store
-	if (data.userRoutes?.waypoints != undefined) {
-		for (let i = 0; i < data.userRoutes?.waypoints.length; i++) {
-			waypoints.push(
-				plainToInstance(Waypoint, data.userRoutes?.waypoints[i] as unknown as Waypoint)
-			);
-		}
-		WaypointsStore.set(waypoints);
+	if (data.routeRow) {
+		loadRouteDataById(data.routeRow.id);
 	}
 
 	function showConfirmDeleteModal() {

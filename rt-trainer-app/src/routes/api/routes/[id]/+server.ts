@@ -1,8 +1,9 @@
 import { db } from '$lib/db/db';
 import { routes, waypoints } from '$lib/db/schema';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
-import RouteGenerator from '$lib/ts/RouteGenerator';
-import type { RouteData } from '$lib/ts/Scenario.js';
+import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
+import type { RouteData } from '$lib/ts/Scenario';
+
 import { error, type RequestHandler } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 
@@ -32,8 +33,8 @@ export const GET: RequestHandler = async ({ params }) => {
 		waypointsList.push(
 			new Waypoint(
 				waypoint.name,
-				parseFloat(waypoint.latitude),
-				parseFloat(waypoint.longitude),
+				parseFloat(waypoint.lat),
+				parseFloat(waypoint.long),
 				waypoint.type,
 				waypoint.index
 			)
@@ -42,8 +43,8 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	const routeData: RouteData = {
 		waypoints: waypointsList,
-		airspaces: await RouteGenerator.getAirspaceDataFromWaypointsList(waypointsList),
-		airports: await RouteGenerator.getAirportDataFromWaypointsList(waypointsList)
+		airspaces: await getAirspacesFromIds(routeRow?.airspaceIds as string[]),
+		airports: await getAirportsFromIds(routeRow?.airportIds as string[])
 	};
 
 	return new Response(JSON.stringify(routeData));
