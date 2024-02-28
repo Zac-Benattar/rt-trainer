@@ -33,7 +33,7 @@ export const load: PageServerLoad = async (event) => {
 
 /** @type {import('./$types').Actions} */
 export const actions = {
-	createScenario: async ({ request }) => {
+	createRoute: async ({ request }) => {
 		const data = await request.formData();
 		const routeName = data.get('routeName');
 		const routeDescription = data.get('routeDescription')?.toString();
@@ -59,8 +59,8 @@ export const actions = {
 			id: routeId,
 			name: routeName.toString(),
 			type: 1,
-			airspaces: JSON.stringify(route.airspaces.map((airspace) => airspace.id)),
-			airports: JSON.stringify(route.airports.map((airport) => airport.id)),
+			airspaceIds: JSON.stringify(route.airspaces.map((airspace) => airspace.id)),
+			airportIds: JSON.stringify(route.airports.map((airport) => airport.id)),
 			description: routeDescription?.toString(),
 			createdBy: userId
 		});

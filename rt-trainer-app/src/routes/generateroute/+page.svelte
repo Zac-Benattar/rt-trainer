@@ -56,7 +56,7 @@
 		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<div class="h3 p-1">Generate a route</div>
 
-			<form class="flex flex-col gap-1" method="POST" action="?/createScenario">
+			<form class="flex flex-col gap-1" method="POST" action="?/createRoute">
 				<div>
 					<div class="h4 p-1">Route Name</div>
 					<input
