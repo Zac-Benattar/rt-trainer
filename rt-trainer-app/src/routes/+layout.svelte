@@ -20,7 +20,6 @@
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
-	import PriacyPolicyModal from '$lib/Components/Modals/PrivacyPolicyModal.svelte';
 	import PrivacyPolicyModal from '$lib/Components/Modals/PrivacyPolicyModal.svelte';
 
 	inject({ mode: dev ? 'development' : 'production' });
@@ -42,6 +41,7 @@
 	};
 
 	// Holds status of major navigation elements, to control visibility
+	let showNavigation: boolean = false;
 	let classesSidebar: string;
 	let classesAppBar: string;
 	let burgerButton: string;
@@ -49,6 +49,7 @@
 	// Reactive Classes
 	$: if ($page.url.pathname === '/' || $page.url.pathname === '/login') {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
+		showNavigation = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
@@ -57,11 +58,13 @@
 		$page.url.pathname.search('/results') == -1
 	) {
 		// If on scenario page hide sidebar and show burger button
+		showNavigation = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg';
 	} else {
 		// Otherwise user is logged in and sidebar can be shown
+		showNavigation = true;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
 		burgerButton = 'lg:hidden';
@@ -101,7 +104,7 @@
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
-		{#if !(($page.url.pathname.search('/scenario') != -1 && $page.url.pathname.search('/results') == -1) || $page.url.pathname === '/')}
+		{#if showNavigation}
 			<Navigation />
 		{/if}
 	</svelte:fragment>

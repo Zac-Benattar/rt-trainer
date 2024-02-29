@@ -2,10 +2,32 @@
 	import { goto } from '$app/navigation';
 	import SvgDisplay from '$lib/Components/SVGDisplay.svelte';
 	import { ClearSimulationStores } from '$lib/stores';
+	import { page } from '$app/stores';
+	import { HomeOutline } from 'flowbite-svelte-icons';
+
+	const redirectHome = () => {
+		goto('/home');
+	};
 </script>
 
 <div class="container mx-auto max-w-screen-lg p-5">
 	<div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+		{#if $page.data.session}
+			<div class="space-y-4 md:col-span-12 p-4">
+				<aside class="alert variant-filled-secondary">
+					<div><HomeOutline size="xl" /></div>
+
+					<div class="alert-message">
+						<h3 class="h3">Go to your home page</h3>
+						<p>You are signed in, do you want to be redirected to your home page?</p>
+					</div>
+
+					<div class="alert-actions">
+						<button class="btn-md variant-filled" on:click={redirectHome}>Redirect</button>
+					</div>
+				</aside>
+			</div>
+		{/if}
 		<div class="space-y-4 md:col-span-6 p-4">
 			<h1 class="text-3xl md:text-5xl font-bold">
 				RT Trainer - A <span class="relative px-1 md:px-3 py-1 bg-surface-300-600-token"
@@ -40,9 +62,7 @@
 				<button
 					on:click={() => {
 						ClearSimulationStores();
-						goto(
-							'/simulator/demo?tutorial=True'
-						);
+						goto('/simulator/demo?tutorial=True');
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
 					data-sveltekit-preload-data="hover">Demo route</button
