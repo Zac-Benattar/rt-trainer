@@ -41,7 +41,7 @@
 					on:click={() => {
 						ClearSimulationStores();
 						goto(
-							'/scenario/demo?tutorial=True'
+							'/simulator/demo?tutorial=True'
 						);
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"

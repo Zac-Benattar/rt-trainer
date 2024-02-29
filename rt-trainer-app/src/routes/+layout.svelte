@@ -53,7 +53,7 @@
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
 	} else if (
-		$page.url.pathname.search('/scenario') != -1 &&
+		$page.url.pathname.search('/simulator') != -1 &&
 		$page.url.pathname.search('/results') == -1
 	) {
 		// If on scenario page hide sidebar and show burger button

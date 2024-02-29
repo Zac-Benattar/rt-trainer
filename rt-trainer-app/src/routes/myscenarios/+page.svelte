@@ -27,7 +27,7 @@
 					<ul>
 						{#each data.userScenarios as scenario}
 							<li>
-								<a href="/scenario/{scenario.id}">
+								<a href="/scenarios/{scenario.id}">
 									<span class="badge bg-primary-500"><GlobeOutline /></span>
 									<span class="font-bold">{scenario.name}</span>
 									<div>

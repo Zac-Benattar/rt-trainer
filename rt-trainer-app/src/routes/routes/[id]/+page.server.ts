@@ -7,6 +7,7 @@ import { routes, users } from '$lib/db/schema';
 let userId = '-1';
 
 export const load: PageServerLoad = async (event) => {
+	const routeId = event.params.id;
 	const session = await event.locals.auth();
 	if (!session?.user) throw redirect(303, '/login');
 
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		routeRow: await db.query.routes.findFirst({
-			where: and(eq(routes.createdBy, userId), eq(routes.createdBy, userId)),
+			where: and(eq(routes.id, routeId), eq(routes.createdBy, userId)),
 			with: {
 				waypoints: {
 					orderBy: (waypoints, { asc }) => [asc(waypoints.index)]

@@ -1,13 +1,14 @@
 <script lang="ts">
 	import Map from '$lib/Components/Map.svelte';
-	import { AwaitingServerResponseStore, ClearSimulationStores } from '$lib/stores';
+	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
+	import { plainToInstance } from 'class-transformer';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
-	import { loadRouteDataById } from '$lib/ts/Scenario';
+	import { goto } from '$app/navigation';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -16,37 +17,42 @@
 
 	ClearSimulationStores();
 
-	let routeName: string = data.routeRow?.name ?? 'Unnamed Route';
-	let routeDescription: string = data.routeRow?.description ?? '';
+	let scenarioName: string = data.scenarioRow?.name ?? 'Unnamed Scenario';
+	let scenarioDescription: string = data.scenarioRow?.description ?? '';
 	let waypoints: Waypoint[] = [];
 
-	let routeNameClasses: string = '';
+	let scenarioNameClasses: string = '';
 
 	let formEl: HTMLFormElement;
 	let confirmedAction: boolean = false;
 
-	const updatedRouteToast: ToastSettings = { message: 'Updated Route' };
+	const updatedScenarioToast: ToastSettings = { message: 'Updated Scenario' };
 
+    // Fix this! --------------------------------------------
 	// Populate waypoints array and store
-	if (data.routeRow) {
-		loadRouteDataById(data.routeRow.id);
-	}
+	// if (data.scenarioRow) {
+	// 	loadRouteDataById(data.scenarioRow.id);
+	// }
 
 	function showConfirmDeleteModal() {
 		const modal: ModalSettings = {
 			type: 'confirm',
 			title: 'Please Confirm',
-			body: 'Are you sure you wish to delete this route?',
+			body: 'Are you sure you wish to delete this scenario?',
 			response: (r: boolean) => {
 				if (r) {
 					confirmedAction = true;
-					formEl.action = '?/deleteRoute';
+					formEl.action = '?/deleteScenario';
 					formEl.requestSubmit();
 					modalStore.clear();
 				}
 			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	function redirectToSimulator() {
+		goto(`/simulator/${data.scenarioRow?.id}`);
 	}
 </script>
 
@@ -58,15 +64,15 @@
 				method="POST"
 				bind:this={formEl}
 				use:enhance={({ formElement, formData, action, cancel, submitter }) => {
-					const { routeName } = Object.fromEntries(formData);
-					if (routeName.toString().length < 1) {
+					const { scenarioName } = Object.fromEntries(formData);
+					if (scenarioName.toString().length < 1) {
 						// Show error message
-						routeNameClasses = 'input-error';
+						scenarioNameClasses = 'input-error';
 						cancel();
 						return;
 					}
 
-					if (!confirmedAction && action.href.includes('?/deleteRoute')) {
+					if (!confirmedAction && action.href.includes('?/deleteScenario')) {
 						cancel();
 						showConfirmDeleteModal();
 					}
@@ -77,7 +83,7 @@
 								console.log('Error:', result.error);
 								break;
 							case 'success':
-								toastStore.trigger(updatedRouteToast);
+								toastStore.trigger(updatedScenarioToast);
 								break;
 						}
 						await update({ reset: false });
@@ -85,14 +91,14 @@
 				}}
 			>
 				<div>
-					<div class="h4 p-1">Route Name</div>
-					<input name="routeId" value={data.routeRow?.id} hidden />
+					<div class="h4 p-1">Scenario Name</div>
+					<input name="scenarioId" value={data.scenarioRow?.id} hidden />
 					<input
-						class="input {routeNameClasses}"
-						name="routeName"
+						class="input {scenarioNameClasses}"
+						name="scenarioName"
 						type="text"
-						placeholder="Unnamed Route"
-						bind:value={routeName}
+						placeholder="Unnamed Scenario"
+						bind:value={scenarioName}
 					/>
 				</div>
 
@@ -101,30 +107,31 @@
 					<textarea
 						class="textarea"
 						rows="4"
-						name="routeDescription"
+						name="scenarioDescription"
 						placeholder="No description"
-						bind:value={routeDescription}
+						bind:value={scenarioDescription}
 					/>
 				</div>
 
 				<div class="flex flex-row gap-3 mt-2">
-					<button formaction="?/updateRoute" class="btn variant-filled">Update Route</button>
+					<button formaction="?/updateScenario" class="btn variant-filled">Update Scenario</button>
 					<button
-						formaction="?/deleteRoute"
+						formaction="?/deleteScenario"
 						class="btn variant-filled-error"
-						on:click={showConfirmDeleteModal}>Delete Route</button
+						on:click={showConfirmDeleteModal}>Delete Scenario</button
 					>
+					<button on:click={redirectToSimulator} class="btn variant-filled">Practice</button>
 				</div>
 			</form>
 		</div>
 
 		<div class="flex flex-col px-2 xs:pr-3">
-			<div class="h4 p-1">Route Preview</div>
+			<div class="h4 p-1">Scenario Preview</div>
 			<Map
 				enabled={true}
 				widthSmScreen={'600px'}
 				heightSmScreen={'500px'}
-				mode={MapMode.RoutePlan}
+				mode={MapMode.ScenarioPlan}
 			/>
 		</div>
 	</div>
