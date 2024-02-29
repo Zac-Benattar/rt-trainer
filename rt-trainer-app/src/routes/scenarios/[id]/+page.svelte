@@ -28,8 +28,10 @@
 
 	let scenarioName: string = scenario.name ?? 'Unnamed Scenario';
 	let scenarioDescription: string = scenario.description ?? '';
+	let scenarioSeed: string = scenario.seed ?? '';
 
 	let scenarioNameClasses: string = '';
+	let scenarioSeedClasses: string = '';
 
 	let formEl: HTMLFormElement;
 	let confirmedAction: boolean = false;
@@ -108,6 +110,16 @@
 						name="scenarioDescription"
 						placeholder="No description"
 						bind:value={scenarioDescription}
+					/>
+				</div>
+
+				<div>
+					<div class="h4 p-1">Scenario Seed</div>
+					<input
+						class="input {scenarioSeedClasses}"
+						name="scenarioSeed"
+						type="text"
+						bind:value={scenarioSeed}
 					/>
 				</div>
 

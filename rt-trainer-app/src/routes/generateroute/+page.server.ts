@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import { routes, users, waypoints } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 import RouteGenerator from '$lib/ts/RouteGenerator';
-import { simpleHash } from '$lib/ts/utils';
 import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 let userId = '-1';
@@ -47,7 +46,7 @@ export const actions = {
 			return fail(400, { routeSeedMissing: true });
 		}
 
-		const route = await RouteGenerator.generateFRTOLRouteFromSeed(simpleHash(routeSeed.toString()));
+		const route = await RouteGenerator.generateFRTOLRouteFromSeed(routeSeed.toString());
 
 		if (route == null || route == undefined) {
 			return fail(501, { routeGenerationError: true });

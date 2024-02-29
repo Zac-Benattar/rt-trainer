@@ -1,11 +1,11 @@
 <script lang="ts">
 	import Map from '$lib/Components/Map.svelte';
 	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
-	import { loadRouteDataBySeed } from '$lib/ts/Scenario';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { ActionData } from './$types';
+	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed, loadRouteData } from '$lib/ts/Scenario';
 
 	const routeCUID = init({ length: 8 });
 
@@ -35,18 +35,20 @@
 	}
 
 	$: {
+		console.log(routeSeed);
 		AwaitingServerResponseStore.set(true);
-		ClearSimulationStores();
-		loadRouteDataBySeed(routeSeed);
+		loadFRTOLRouteBySeed(routeSeed);
 		AwaitingServerResponseStore.set(false);
 	}
 
 	let waypoints: Waypoint[] = [];
-	WaypointsStore.subscribe((route) => {
-		waypoints = route;
+	WaypointsStore.subscribe((_waypoints) => {
+		waypoints = _waypoints;
 
-		if (route.length > 1) {
-			routeName = route[0].name + ' to ' + route[route.length - 1].name;
+		if (_waypoints && _waypoints.length > 1) {
+			routeName = _waypoints[0].name + ' to ' + _waypoints[_waypoints.length - 1].name;
+		} else {
+			routeName = '';
 		}
 	});
 </script>

@@ -21,7 +21,7 @@ export async function generateScenario(
 	scenarioId: string,
 	name: string,
 	description: string,
-	seed: number,
+	seed: string,
 	waypoints: Waypoint[],
 	hasEmergency: boolean
 ): Promise<Scenario> {

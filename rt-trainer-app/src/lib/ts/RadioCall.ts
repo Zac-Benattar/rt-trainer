@@ -11,6 +11,7 @@ import {
 	removePunctuation,
 	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet,
+	simpleHash,
 	trimSpaces
 } from './utils';
 import Feedback from './Feedback';
@@ -43,7 +44,7 @@ export default class RadioCall {
 
 	constructor(
 		message: string,
-		seed: number,
+		seedString: string,
 		scenario: Scenario,
 		prefix: string,
 		userCallsign: string,
@@ -56,7 +57,7 @@ export default class RadioCall {
 		aircraftType: string
 	) {
 		this.message = message;
-		this.seed = seed;
+		this.seed = simpleHash(seedString);
 		this.scenario = scenario;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
@@ -294,9 +295,7 @@ export default class RadioCall {
 	}
 
 	private callStartsWithConsecutiveWords(words: string[]): boolean {
-		console.log('Words to check: ' + words);
 		for (let i = 0; i < words.length; i++) {
-			console.log(`Comparing ${this.getRadioCallWord(i)} with ${words[i].toLowerCase()}`);
 			if (this.getRadioCallWord(i) != words[i].toLowerCase()) return false;
 		}
 		return true;
