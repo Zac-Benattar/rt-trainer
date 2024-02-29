@@ -47,15 +47,15 @@
 	let burgerButton: string;
 
 	// Reactive Classes
-	$: if ($page.url.pathname === '/' || $page.url.pathname === '/login') {
+	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/login')) {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
 		showNavigation = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
 	} else if (
-		$page.url.pathname.search('/simulator') != -1 &&
-		$page.url.pathname.search('/results') == -1
+		$page.url.pathname.includes('/simulator') ||
+		$page.url.pathname.includes('/results')
 	) {
 		// If on scenario page hide sidebar and show burger button
 		showNavigation = false;

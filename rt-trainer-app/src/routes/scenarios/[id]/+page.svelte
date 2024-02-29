@@ -50,10 +50,6 @@
 		};
 		modalStore.trigger(modal);
 	}
-
-	function redirectToSimulator() {
-		goto(`/simulator/${data.scenarioRow?.id}`);
-	}
 </script>
 
 <div class="flex flex-col place-content-center">
@@ -120,7 +116,7 @@
 						class="btn variant-filled-error"
 						on:click={showConfirmDeleteModal}>Delete Scenario</button
 					>
-					<button on:click={redirectToSimulator} class="btn variant-filled">Practice</button>
+					<button formaction="?/redirectToSimulator" class="btn variant-filled">Practice</button>
 				</div>
 			</form>
 		</div>

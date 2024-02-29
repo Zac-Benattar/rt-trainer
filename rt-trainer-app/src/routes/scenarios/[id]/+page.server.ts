@@ -75,5 +75,14 @@ export const actions = {
 		await db.delete(scenarios).where(eq(scenarios.id, scenarioId));
 
 		throw redirect(303, '/myscenarios');
+	},
+
+	redirectToSimulator: async ({params}) => {
+		const scenarioId = params.id;
+		if (scenarioId == null || scenarioId == undefined) {
+			return fail(400, { scenarioId: scenarioId, missing: true });
+		}
+
+		throw redirect(303, `/simulator/${scenarioId}`);
 	}
 };
