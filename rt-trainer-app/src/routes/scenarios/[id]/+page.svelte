@@ -1,14 +1,18 @@
 <script lang="ts">
 	import Map from '$lib/Components/Map.svelte';
-	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
-	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import {
+		AirportsStore,
+		AirspacesStore,
+		ClearSimulationStores,
+		WaypointsStore
+	} from '$lib/stores';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
-	import { goto } from '$app/navigation';
+	import Scenario from '$lib/ts/Scenario';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -17,9 +21,13 @@
 
 	ClearSimulationStores();
 
-	let scenarioName: string = data.scenarioRow?.name ?? 'Unnamed Scenario';
-	let scenarioDescription: string = data.scenarioRow?.description ?? '';
-	let waypoints: Waypoint[] = [];
+	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
+	AirspacesStore.set(scenario.airspaces);
+	AirportsStore.set(scenario.airports);
+	WaypointsStore.set(scenario.waypoints);
+
+	let scenarioName: string = scenario.name ?? 'Unnamed Scenario';
+	let scenarioDescription: string = scenario.description ?? '';
 
 	let scenarioNameClasses: string = '';
 
@@ -27,12 +35,6 @@
 	let confirmedAction: boolean = false;
 
 	const updatedScenarioToast: ToastSettings = { message: 'Updated Scenario' };
-
-    // Fix this! --------------------------------------------
-	// Populate waypoints array and store
-	// if (data.scenarioRow) {
-	// 	loadRouteDataById(data.scenarioRow.id);
-	// }
 
 	function showConfirmDeleteModal() {
 		const modal: ModalSettings = {
@@ -88,7 +90,7 @@
 			>
 				<div>
 					<div class="h4 p-1">Scenario Name</div>
-					<input name="scenarioId" value={data.scenarioRow?.id} hidden />
+					<input name="scenarioId" value={scenario.id} hidden />
 					<input
 						class="input {scenarioNameClasses}"
 						name="scenarioName"

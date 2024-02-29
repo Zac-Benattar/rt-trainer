@@ -25,9 +25,9 @@ export default class RouteGenerator {
 			seed = 1;
 		}
 
-		const AIRCRAFT_AVERAGE_SPEED = 125; // knots
-		const NAUTICAL_MILE = 1852;
-		const FLIGHT_TIME_MULTIPLIER = 1.3;
+		// const AIRCRAFT_AVERAGE_SPEED = 125; // knots
+		// const NAUTICAL_MILE = 1852;
+		// const FLIGHT_TIME_MULTIPLIER = 1.3;
 		// const airportsData: AirportData[] = readAirportDataFromJSON();
 		const airportsData: AirportData[] = await readAirportDataFromDB();
 		const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
@@ -206,42 +206,42 @@ export default class RouteGenerator {
 
 		console.log('Iterations: ', iterations);
 
-		const arrivalTimes: number[] = [
-			Math.round(
-				startAirport.getTakeoffTime(seed) +
-					(haversineDistance(
-						startAirport.coordinates[0],
-						startAirport.coordinates[1],
-						matzEntry[0],
-						matzEntry[1]
-					) /
-						NAUTICAL_MILE /
-						AIRCRAFT_AVERAGE_SPEED) *
-						60 *
-						FLIGHT_TIME_MULTIPLIER
-			),
-			Math.round(
-				startAirport.getTakeoffTime(seed) +
-					(haversineDistance(matzEntry[0], matzEntry[1], matzExit[0], matzExit[1]) /
-						NAUTICAL_MILE /
-						AIRCRAFT_AVERAGE_SPEED) *
-						60 *
-						FLIGHT_TIME_MULTIPLIER
-			),
-			Math.round(
-				startAirport.getTakeoffTime(seed) +
-					(haversineDistance(
-						destinationAirport.coordinates[0],
-						destinationAirport.coordinates[1],
-						matzExit[0],
-						matzExit[1]
-					) /
-						NAUTICAL_MILE /
-						AIRCRAFT_AVERAGE_SPEED) *
-						60 *
-						FLIGHT_TIME_MULTIPLIER
-			)
-		];
+		// const arrivalTimes: number[] = [
+		// 	Math.round(
+		// 		startAirport.getTakeoffTime(seed) +
+		// 			(haversineDistance(
+		// 				startAirport.coordinates[0],
+		// 				startAirport.coordinates[1],
+		// 				matzEntry[0],
+		// 				matzEntry[1]
+		// 			) /
+		// 				NAUTICAL_MILE /
+		// 				AIRCRAFT_AVERAGE_SPEED) *
+		// 				60 *
+		// 				FLIGHT_TIME_MULTIPLIER
+		// 	),
+		// 	Math.round(
+		// 		startAirport.getTakeoffTime(seed) +
+		// 			(haversineDistance(matzEntry[0], matzEntry[1], matzExit[0], matzExit[1]) /
+		// 				NAUTICAL_MILE /
+		// 				AIRCRAFT_AVERAGE_SPEED) *
+		// 				60 *
+		// 				FLIGHT_TIME_MULTIPLIER
+		// 	),
+		// 	Math.round(
+		// 		startAirport.getTakeoffTime(seed) +
+		// 			(haversineDistance(
+		// 				destinationAirport.coordinates[0],
+		// 				destinationAirport.coordinates[1],
+		// 				matzExit[0],
+		// 				matzExit[1]
+		// 			) /
+		// 				NAUTICAL_MILE /
+		// 				AIRCRAFT_AVERAGE_SPEED) *
+		// 				60 *
+		// 				FLIGHT_TIME_MULTIPLIER
+		// 	)
+		// ];
 
 		const startWaypoint: Waypoint = new Waypoint(
 			startAirport.name,
@@ -249,8 +249,7 @@ export default class RouteGenerator {
 			startAirport.coordinates[1],
 			WaypointType.Aerodrome,
 			1,
-			undefined,
-			startAirport.getTakeoffTime(seed)
+			undefined
 		);
 
 		if (matzEntry == undefined || matzEntry == null) throw new Error('Entry point is undefined');
@@ -260,8 +259,7 @@ export default class RouteGenerator {
 			matzEntry[1],
 			WaypointType.NewAirspace,
 			2,
-			undefined,
-			arrivalTimes[0]
+			undefined
 		);
 
 		if (matzExit == undefined || matzExit == null) throw new Error('Exit point is undefined');
@@ -271,8 +269,7 @@ export default class RouteGenerator {
 			matzExit[1],
 			WaypointType.NewAirspace,
 			3,
-			undefined,
-			arrivalTimes[1]
+			undefined
 		);
 
 		if (destinationAirport == undefined) throw new Error('Destination airport is undefined');
@@ -282,8 +279,7 @@ export default class RouteGenerator {
 			destinationAirport.coordinates[1],
 			WaypointType.Aerodrome,
 			4,
-			undefined,
-			arrivalTimes[2]
+			undefined
 		);
 
 		return {

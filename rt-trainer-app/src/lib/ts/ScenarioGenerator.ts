@@ -18,6 +18,9 @@ import {
 import { findAirspaceChangePoints } from './utils';
 
 export async function generateScenario(
+	scenarioId: string,
+	name: string,
+	description: string,
 	seed: number,
 	waypoints: Waypoint[],
 	hasEmergency: boolean
@@ -32,7 +35,11 @@ export async function generateScenario(
 	// Add airports to list of valid airports for takeoff/landing
 	const allAirports: Airport[] = [];
 	for (let i = 0; i < airportsData.length; i++) {
-		if (airportsData[i] && airportsData[i].name != undefined && airportsData[i].geometry.coordinates != undefined) {
+		if (
+			airportsData[i] &&
+			airportsData[i].name != undefined &&
+			airportsData[i].geometry.coordinates != undefined
+		) {
 			const airport: Airport = airportDataToAirport(airportsData[i]);
 			allAirports.push(airport);
 		}
@@ -67,7 +74,7 @@ export async function generateScenario(
 		endAirport.coordinates
 	];
 
-	// Get all on route airspaces
+	// Get all on route airspaces - needs fixing
 	const intersectionPoints: { airspace: Airspace; coordinates: [number, number] }[] =
 		findAirspaceChangePoints(route, allAirspaces);
 	for (let i = 0; i < intersectionPoints.length; i++) {
@@ -99,5 +106,14 @@ export async function generateScenario(
 		)
 	);
 
-	return new Scenario(seed.toString(), waypoints, airspaces, airports, scenarioPoints);
+	return new Scenario(
+		scenarioId,
+		name,
+		description,
+		seed.toString(),
+		waypoints,
+		airspaces,
+		airports,
+		scenarioPoints
+	);
 }

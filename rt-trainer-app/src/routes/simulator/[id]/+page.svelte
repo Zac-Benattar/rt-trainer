@@ -3,6 +3,7 @@
 	import { page } from '$app/stores';
 	import {
 		AircraftDetailsStore,
+		AirportsStore,
 		AirspacesStore,
 		CurrentRoutePointIndexStore,
 		EndPointIndexStore,
@@ -14,8 +15,6 @@
 	import type { PageData } from './$types';
 	import Scenario from '$lib/ts/Scenario';
 	import { plainToInstance } from 'class-transformer';
-	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
-
 	export let data: PageData;
 
 	// Get the slug
@@ -89,6 +88,7 @@
 	ScenarioStore.set(scenario);
 	CurrentRoutePointIndexStore.set(startPointIndex);
 	AirspacesStore.set(scenario.airspaces);
+	AirportsStore.set(scenario.airports);
 	WaypointsStore.set(scenario.waypoints);
 	StartPointIndexStore.set(startPointIndex);
 	if (endPointIndex == -1) {
