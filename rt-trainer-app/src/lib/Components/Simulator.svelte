@@ -36,8 +36,7 @@
 	} from '$lib/ts/SimulatorTypes';
 	import {
 		isCallsignStandardRegistration,
-		replaceWithPhoneticAlphabet,
-		simpleHash
+		replaceWithPhoneticAlphabet
 	} from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
@@ -407,7 +406,7 @@
 		awaitingRadioCallCheck = true;
 		currentRadioCall = new RadioCall(
 			userMessage,
-			simpleHash(seed),
+			seed,
 			scenario,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,

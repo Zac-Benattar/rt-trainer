@@ -1,34 +1,25 @@
 import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
-import { haversineDistance } from './utils';
+import { haversineDistance, simpleHash } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
-	pushAirportDataToDatabase,
-	pushAirspaceDataToDatabase,
 	readAirportDataFromDB,
 	readAirportDataFromJSON,
 	readAirspaceDataFromDB,
-	readAirspaceDataFromJSON,
-	writeDataToJSON
+	readAirspaceDataFromJSON
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 import type { RouteData } from './Scenario';
 
 export default class RouteGenerator {
-	public static async generateFRTOLRouteFromSeed(seed: number): Promise<RouteData | undefined> {
-		// Prevent seeds which don't give a route
-		if (seed < 0) {
-			seed = -seed;
-		} else if (seed == 0) {
-			seed = 1;
-		}
+	public static async generateFRTOLRouteFromSeed(
+		seedString: string
+	): Promise<RouteData | undefined> {
+		console.log(seedString);
+		const seed = simpleHash(seedString);
 
-		// const AIRCRAFT_AVERAGE_SPEED = 125; // knots
-		// const NAUTICAL_MILE = 1852;
-		// const FLIGHT_TIME_MULTIPLIER = 1.3;
-		// const airportsData: AirportData[] = readAirportDataFromJSON();
 		const airportsData: AirportData[] = await readAirportDataFromDB();
 		const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
 
@@ -205,43 +196,6 @@ export default class RouteGenerator {
 		}
 
 		console.log('Iterations: ', iterations);
-
-		// const arrivalTimes: number[] = [
-		// 	Math.round(
-		// 		startAirport.getTakeoffTime(seed) +
-		// 			(haversineDistance(
-		// 				startAirport.coordinates[0],
-		// 				startAirport.coordinates[1],
-		// 				matzEntry[0],
-		// 				matzEntry[1]
-		// 			) /
-		// 				NAUTICAL_MILE /
-		// 				AIRCRAFT_AVERAGE_SPEED) *
-		// 				60 *
-		// 				FLIGHT_TIME_MULTIPLIER
-		// 	),
-		// 	Math.round(
-		// 		startAirport.getTakeoffTime(seed) +
-		// 			(haversineDistance(matzEntry[0], matzEntry[1], matzExit[0], matzExit[1]) /
-		// 				NAUTICAL_MILE /
-		// 				AIRCRAFT_AVERAGE_SPEED) *
-		// 				60 *
-		// 				FLIGHT_TIME_MULTIPLIER
-		// 	),
-		// 	Math.round(
-		// 		startAirport.getTakeoffTime(seed) +
-		// 			(haversineDistance(
-		// 				destinationAirport.coordinates[0],
-		// 				destinationAirport.coordinates[1],
-		// 				matzExit[0],
-		// 				matzExit[1]
-		// 			) /
-		// 				NAUTICAL_MILE /
-		// 				AIRCRAFT_AVERAGE_SPEED) *
-		// 				60 *
-		// 				FLIGHT_TIME_MULTIPLIER
-		// 	)
-		// ];
 
 		const startWaypoint: Waypoint = new Waypoint(
 			startAirport.name,

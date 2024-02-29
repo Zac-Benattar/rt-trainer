@@ -4,9 +4,9 @@ import { and, eq } from 'drizzle-orm';
 import { scenarios, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
-import { simpleHash } from '$lib/ts/utils';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { instanceToPlain } from 'class-transformer';
+import RouteGenerator from '$lib/ts/RouteGenerator';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
@@ -18,7 +18,38 @@ export const load: PageServerLoad = async (event) => {
 
 	let userId = '-1';
 
-	if (!session?.user) throw redirect(303, '/login');
+	if (!session?.user && scenarioId != 'demo') throw redirect(303, '/login');
+
+	// Demo code - eventually switch this out for hard coded stuff or redis or something
+	if (scenarioId == 'demo') {
+		const route = await RouteGenerator.generateFRTOLRouteFromSeed('demo');
+
+		console.log('route: ', route);
+
+		if (route == null || route == undefined) {
+			return {
+				error: 'Could not generate demo route'
+			};
+		}
+
+		const scenario = await generateScenario(
+			'demo',
+			'Demo scenario',
+			'Free demo scenario',
+			'demo',
+			route.waypoints,
+			true
+		);
+
+		return {
+			scenario: instanceToPlain(scenario),
+			aircraftDetails: {
+				prefix: prefix,
+				callsign: callsign,
+				aircraftType: aircraftType
+			}
+		};
+	}
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const userRow = await db.query.users.findFirst({
@@ -71,7 +102,7 @@ export const load: PageServerLoad = async (event) => {
 		scenarioId,
 		scenarioRow.name,
 		scenarioRow.description ?? '',
-		simpleHash(scenarioRow.seed),
+		scenarioRow.seed,
 		waypointsList,
 		scenarioRow.hasEmergency
 	);

@@ -11,7 +11,7 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './ScenarioStages';
-import { haversineDistance, lerp, lerpLocation, toDegrees } from './utils';
+import { haversineDistance, lerp, lerpLocation, simpleHash, toDegrees } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
@@ -110,11 +110,12 @@ export function getParkedMadeContactUncontrolledUpdateData(
 	Climb Out of the start aerodrome's airspace.
 	 */
 export function getStartAirportScenarioPoints(
-	seed: number,
+	seedString: string,
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
 	airports: Airport[]
 ): ScenarioPoint[] {
+	const seed = simpleHash(seedString);
 	const stages: ScenarioPoint[] = [];
 	const startAerodrome: Airport = airports[0];
 	const startAerodromeTime: number = startAerodrome.getStartTime(seed);
@@ -314,12 +315,13 @@ export function getStartAirportScenarioPoints(
 }
 
 export function getEndAirportScenarioPoints(
-	seed: number,
+	seedString: string,
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
 	airports: Airport[],
 	previousScenarioPoint: ScenarioPoint
 ): ScenarioPoint[] {
+	const seed = simpleHash(seedString);
 	const stages: ScenarioPoint[] = [];
 	const endAerodrome: Airport = airports[airports.length - 1];
 	const previousPointTime = previousScenarioPoint.timeAtPoint;
@@ -633,7 +635,7 @@ function getFrequencyChanges(
 }
 
 export function getAirborneScenarioPoints(
-	seed: number,
+	seedString: string,
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
 	airspaceChangePoints: { airspace: Airspace; coordinates: [number, number] }[],
@@ -641,6 +643,7 @@ export function getAirborneScenarioPoints(
 	previousScenarioPoint: ScenarioPoint,
 	hasEmergency: boolean
 ): ScenarioPoint[] {
+	const seed = simpleHash(seedString);
 	const frequencyChanges: FrequencyChangePoint[] = getFrequencyChanges(airspaceChangePoints);
 
 	// Add events at each point

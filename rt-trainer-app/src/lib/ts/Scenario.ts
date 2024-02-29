@@ -159,7 +159,7 @@ export type RouteData = {
 };
 
 /**
- * Fetches a FRTOL route from the server where is is generated for this specific response. 
+ * Fetches a FRTOL route from the server where is is generated for this specific response.
  * Returns undefined if the route is not found.
  *
  * @param routeSeed - The seed for the route
@@ -190,18 +190,23 @@ export async function fetchFRTOLRouteBySeed(routeSeed: string): Promise<RouteDat
 	}
 }
 
-/**
- * Loads the route data for a given route defined by its seed from the server into the stores.
- *
- * @param routeSeed - The seed of the route to load (as a string)
- * @returns Promise<void>
- */
-export async function loadRouteDataBySeed(routeSeed: string): Promise<void> {
+export async function loadFRTOLRouteBySeed(routeSeed: string): Promise<void> {
+	ClearSimulationStores();
 	const routeData = await fetchFRTOLRouteBySeed(routeSeed);
+	if (routeData) loadRouteData(routeData);
+	else NullRouteStore.set(true);
+}
 
+/**
+ * Loads the given route data into the stores.
+ *
+ * @param routeData - The route data to load
+ * @returns void
+ */
+export function loadRouteData(routeData: RouteData): void {
 	// Check the scenario was returned correctly
 	if (routeData == null || routeData == undefined) {
-		console.log('Failed to generate route');
+		console.log('Bad route data attempted to be loaded into stores');
 		NullRouteStore.set(true);
 		return;
 	}
