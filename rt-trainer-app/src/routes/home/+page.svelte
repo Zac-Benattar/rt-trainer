@@ -32,7 +32,7 @@
 					Welcome, {$page.data.session.user?.name?.split(' ')[0] ?? 'User'}
 				</span>
 				<div class="flex flex-col sm:flex-row gap-5 place-content-start">
-					<div class="flex flex-col gap-3">
+					<!-- <div class="flex flex-col gap-3">
 						<div class="h3">Your Statistics</div>
 						<div class="card p-5 flex justify-between">
 							<div class="space-y-6">
@@ -62,7 +62,7 @@
 								{(radioCallData.correctPercentageLast30Days * 100).toFixed(0)}%
 							</ProgressRadial>
 						</div>
-					</div>
+					</div> -->
 					<div class="flex flex-col gap-3">
 						<div class="h3">Recently Created Scenarios</div>
 						<div class="flex flex-col gap-3">
@@ -78,8 +78,12 @@
 							{#each data.recentScenarios as scenario}
 								<div class="card p-3 flex flex-row justify-between">
 									<div class="flex flex-col gap-1">
-										<a class="h4" href="/scenario/{scenario.id}">{scenario.name}</a>
-										<div class="text-sm opacity-70">{scenario.createdAt?.toLocaleDateString() + ' ' + scenario.createdAt?.toLocaleTimeString()}</div>
+										<a class="h4" href="/scenarios/{scenario.id}">{scenario.name}</a>
+										<div class="text-sm opacity-70">
+											{scenario.createdAt?.toLocaleDateString() +
+												' ' +
+												scenario.createdAt?.toLocaleTimeString()}
+										</div>
 									</div>
 								</div>
 							{/each}

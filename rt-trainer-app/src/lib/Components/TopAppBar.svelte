@@ -44,17 +44,29 @@
 						</svg>
 					</span>
 				</button>
-				<strong
-					><a href="/" class="btn text-xl sm:text-2xl uppercase" data-sveltekit-preload-data="hover"
-						>RT Trainer</a
-					></strong
-				>
+				{#if $page.data.session}
+					<strong
+						><a
+							href="/home"
+							class="btn text-xl sm:text-2xl uppercase"
+							data-sveltekit-preload-data="hover">RT Trainer</a
+						></strong
+					>
+				{:else}
+					<strong
+						><a
+							href="/"
+							class="btn text-xl sm:text-2xl uppercase"
+							data-sveltekit-preload-data="hover">RT Trainer</a
+						></strong
+					>
+				{/if}
 			</div>
 		</svelte:fragment>
 
 		<svelte:fragment slot="trail">
 			<LightSwitch />
-			{#if $page.data.session != null}
+			{#if $page.data.session}
 				<a class="btn-icon variant-ghost-surface" href="/profile"
 					><Avatar
 						src={userImage}
