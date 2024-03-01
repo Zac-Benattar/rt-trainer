@@ -348,19 +348,11 @@ export const lerpLocation = (
 };
 
 export function toRadians(degrees: number): number {
-	let radians = degrees * (Math.PI / 180);
-	if (radians < 0) {
-		radians += 2 * Math.PI;
-	}
-	return radians;
+	return degrees * (Math.PI / 180);
 }
 
 export function toDegrees(radians: number): number {
-	let degrees = radians * (180 / Math.PI);
-	if (degrees < 0) {
-		degrees += 360;
-	}
-	return degrees;
+	return radians * (180 / Math.PI);
 }
 
 export function getHeadingBetween(
