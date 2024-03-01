@@ -2,7 +2,7 @@ import {
 	AirportsStore,
 	AirspacesStore,
 	ClearSimulationStores,
-	CurrentRoutePointIndexStore,
+	CurrentScenarioPointIndexStore,
 	EndPointIndexStore,
 	NullRouteStore,
 	StartPointIndexStore,
@@ -98,7 +98,7 @@ NullRouteStore.subscribe((value) => {
 });
 
 export function ResetCurrentRoutePointIndex(): void {
-	CurrentRoutePointIndexStore.set(startPointIndex);
+	CurrentScenarioPointIndexStore.set(startPointIndex);
 }
 
 // /**

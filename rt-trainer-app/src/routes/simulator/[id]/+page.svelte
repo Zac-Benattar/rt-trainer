@@ -5,7 +5,7 @@
 		AircraftDetailsStore,
 		AirportsStore,
 		AirspacesStore,
-		CurrentRoutePointIndexStore,
+		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
 		ScenarioStore,
 		StartPointIndexStore,
@@ -86,7 +86,7 @@
 	console.log(scenario);
 	scenario.currentPointIndex = startPointIndex;
 	ScenarioStore.set(scenario);
-	CurrentRoutePointIndexStore.set(startPointIndex);
+	CurrentScenarioPointIndexStore.set(startPointIndex);
 	AirspacesStore.set(scenario.airspaces);
 	AirportsStore.set(scenario.airports);
 	WaypointsStore.set(scenario.waypoints);

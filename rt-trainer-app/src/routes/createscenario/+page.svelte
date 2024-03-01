@@ -40,7 +40,6 @@
 	async function handleRouteIdChange(event: Event) {
 		selectedRouteId = (event.target as HTMLInputElement).value;
 		loadRoute(selectedRouteId);
-		// getScenarioPreview(selectedRouteId, scenarioSeed);
 	}
 
 	async function loadRoute(routeId: string) {
@@ -72,8 +71,6 @@
 			console.log('Error: ', error);
 		}
 	}
-
-	async function getScenarioPreview(routeId: string, scenarioSeed: string) {}
 </script>
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->

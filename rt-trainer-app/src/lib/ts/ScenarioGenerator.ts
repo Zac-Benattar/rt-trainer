@@ -82,15 +82,17 @@ export async function generateScenario(
 			airspaces.push(intersectionPoints[i].airspace);
 	}
 
-	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, airports));
+	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, startAirport));
 
 	scenarioPoints.push(
 		...getAirborneScenarioPoints(
+			scenarioPoints.length,
 			seed,
 			waypoints,
 			airspaces,
 			intersectionPoints,
-			airports,
+			startAirport,
+			endAirport,
 			scenarioPoints[scenarioPoints.length - 1],
 			hasEmergency
 		)
@@ -98,11 +100,12 @@ export async function generateScenario(
 
 	scenarioPoints.push(
 		...getEndAirportScenarioPoints(
+			scenarioPoints.length,
 			seed,
 			waypoints,
 			airspaces,
-			airports,
-			scenarioPoints[scenarioPoints.length - 1]
+			endAirport,
+			scenarioPoints[scenarioPoints.length - 1],
 		)
 	);
 
@@ -114,6 +117,6 @@ export async function generateScenario(
 		waypoints,
 		airspaces,
 		airports,
-		scenarioPoints
+		scenarioPoints,
 	);
 }

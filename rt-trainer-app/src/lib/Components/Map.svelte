@@ -82,23 +82,14 @@
 		needsRerender = true;
 	});
 
-	CurrentScenarioPointStore.subscribe((currentRoutePoint) => {
-		if (currentRoutePoint != null) {
-			targetPose = currentRoutePoint.pose;
-			currentTime = convertMinutesToTimeString(currentRoutePoint.timeAtPoint);
+	CurrentScenarioPointStore.subscribe((currentScenarioPoint) => {
+		if (currentScenarioPoint != null) {
+			targetPose = currentScenarioPoint.pose;
+			currentTime = convertMinutesToTimeString(currentScenarioPoint.timeAtPoint);
 			if (mounted) {
 				updateMap();
 			} else {
-			}
-		} else {
-			if (targetPose == null) {
-				targetPose = {
-					lat: 0,
-					long: 0,
-					trueHeading: 0,
-					altitude: 0,
-					airSpeed: 0
-				};
+				needsRerender = true;
 			}
 		}
 	});
@@ -110,7 +101,7 @@
 
 		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
 
-		if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
+		if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 		}
 
@@ -130,7 +121,7 @@
 			drawAirspace(airspace);
 		});
 
-		if (mode == MapMode.Scenario) {
+		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 			planeIcon = L.icon({
 				iconUrl: '/images/plane.png',
 
@@ -147,7 +138,7 @@
 			}).addTo(map);
 		}
 
-		if (mode == MapMode.Scenario) {
+		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 			FlightInformationTextBox = L.Control.extend({
 				onAdd: function () {
 					var text = L.DomUtil.create('div');
@@ -196,7 +187,7 @@
 
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
-			if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
+			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 			}
 
@@ -213,7 +204,7 @@
 				drawAirspace(airspace);
 			});
 
-			if (mode == MapMode.Scenario) {
+			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
 
 				// Updates the current location marker, done last to make sure it is on top
@@ -224,7 +215,7 @@
 				}).addTo(map);
 			}
 
-			if (mode == MapMode.Scenario) {
+			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				flightInformationOverlay.remove();
 
 				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(

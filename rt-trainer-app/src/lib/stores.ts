@@ -87,7 +87,7 @@ export const AirspacesStore = writable<Airspace[]>([]);
 
 export const AirportsStore = writable<Airport[]>([]);
 
-export const CurrentRoutePointIndexStore = writable<number>(0);
+export const CurrentScenarioPointIndexStore = writable<number>(0);
 
 function createStartPointIndexStore() {
 	const { subscribe, set } = writable(0);
@@ -119,11 +119,15 @@ function createEndPointIndexStore() {
 export const EndPointIndexStore = createEndPointIndexStore();
 
 export const CurrentScenarioPointStore = derived(
-	[ScenarioStore, CurrentRoutePointIndexStore],
-	([$RouteStore]) => {
-		if ($RouteStore) {
-			if ($RouteStore.scenarioPoints.length > 0) {
-				return $RouteStore.getCurrentPoint();
+	[ScenarioStore, CurrentScenarioPointIndexStore],
+	([$ScenarioStore, $CurrentRoutePointStore]) => {
+		if ($ScenarioStore) {
+			if ($ScenarioStore.scenarioPoints.length > 0) {
+				$ScenarioStore.currentPointIndex = Math.max(
+					0,
+					Math.min($CurrentRoutePointStore, $ScenarioStore.scenarioPoints.length - 1)
+				);
+				return $ScenarioStore.getCurrentPoint();
 			}
 		}
 	}
@@ -168,7 +172,7 @@ export function ClearSimulationStores(): void {
 	WaypointsStore.set([]);
 	AirspacesStore.set([]);
 	AirportsStore.set([]);
-	CurrentRoutePointIndexStore.set(0);
+	CurrentScenarioPointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);
 	NullRouteStore.set(false);
