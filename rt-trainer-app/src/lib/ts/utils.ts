@@ -1,5 +1,6 @@
 import type Airspace from './AeronauticalClasses/Airspace';
 import type Waypoint from './AeronauticalClasses/Waypoint';
+import * as turf from '@turf/turf';
 
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
@@ -46,7 +47,8 @@ export function seededNormalDistribution(
 	return result;
 }
 
-/* Returns the distance between two locations on the earth in metres. */
+/**
+ *  Returns the distance between two locations on the earth in metres. */
 export function haversineDistance(
 	lat1: number,
 	long1: number,
@@ -677,79 +679,103 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 	return newBounds;
 }
 
-function isPointInsidePolygon(point: Point, polygon: Point[]): boolean {
-	const x = point[0];
-	const y = point[1];
+export function calculateDistanceAlongRoute(route: Point[], targetPoint: Point): number {
+	let totalDistanceAlongRoute = 0;
 
-	let isInside = false;
+	for (let i = 0; i < route.length - 1; i++) {
+		const segmentLength = haversineDistance(
+			route[i][0],
+			route[i][1],
+			route[i + 1][0],
+			route[i + 1][1]
+		);
 
-	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-		const xi = polygon[i][0];
-		const yi = polygon[i][1];
-		const xj = polygon[j][0];
-		const yj = polygon[j][1];
+		// Check if the target point is between the current segment
+		const distanceToTarget = haversineDistance(
+			route[i][0],
+			route[i][1],
+			targetPoint[0],
+			targetPoint[1]
+		);
+		const distanceToNext = haversineDistance(
+			route[i + 1][0],
+			route[i + 1][1],
+			targetPoint[0],
+			targetPoint[1]
+		);
 
-		const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-
-		if (intersect) {
-			isInside = !isInside;
+		if (distanceToTarget + distanceToNext - segmentLength < 1e-6) {
+			// Target point lies on the current segment
+			totalDistanceAlongRoute += distanceToTarget;
+			break;
 		}
+
+		// Add the distance of the current segment to the total distance
+		totalDistanceAlongRoute += segmentLength;
 	}
 
-	return isInside;
+	return totalDistanceAlongRoute;
 }
 
-export function findAirspaceChangePoints(
-	route: Point[],
-	airspaces: Airspace[]
-): { airspace: Airspace; coordinates: Point }[] {
-	const intersections: { airspace: Airspace; coordinates: Point }[] = [];
+export interface Intersection {
+	point: Point;
+	airspaceId: string;
+	distanceAlongRoute: number;
+}
 
-	// Iterate through consecutive pairs of route points
-	for (let i = 0; i < route.length - 1; i++) {
-		const startPoint = route[i];
-		const endPoint = route[i + 1];
+export function findIntersections(route: Point[], airspaces: Airspace[]): Intersection[] {
+	const routeLine = turf.lineString(route.map((point) => [point[1], point[0]]));
 
-		// Check for intersection with each polygon
-		for (const airspace of airspaces) {
-			// Check if start and end points are on opposite sides of the polygon
-			const isStartInside = isPointInsidePolygon(startPoint, airspace.getCoords());
-			const isEndInside = isPointInsidePolygon(endPoint, airspace.getCoords());
+	const intersections: Intersection[] = [];
 
-			// If there is a change from inside to outside or vice versa, consider it an intersection
-			if (isStartInside !== isEndInside) {
-				// Find the intersection point
+	airspaces.forEach((airspace) => {
+		const airspacePolygon = turf.polygon([
+			airspace.coordinates.map((point) => [point[1], point[0]])
+		]);
 
-				// Calculate the intersection point
-				const x1 = startPoint[0];
-				const y1 = startPoint[1];
-				const x2 = endPoint[0];
-				const y2 = endPoint[1];
-				const x3 = airspace.getCoords()[0][0];
-				const y3 = airspace.getCoords()[0][1];
-				const x4 = airspace.getCoords()[1][0];
-				const y4 = airspace.getCoords()[1][1];
+		if (turf.booleanIntersects(routeLine, airspacePolygon)) {
+			route.forEach((point, pointIndex) => {
+				// // Check if the point is inside the airspace - we dont want this
+				// const pointCoords = turf.point([point[1], point[0]]);
 
-				let ua = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
-				let ub = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
-				const denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+				// // if (turf.booleanPointInPolygon(pointCoords, airspacePolygon)) {
+				// // 	intersections.push({
+				// // 		point,
+				// // 		airspaceId: airspaces[airspaceIndex].id
+				// // 	});
+				// // }
 
-				if (denominator === 0) {
-					continue;
+				if (pointIndex < route.length - 1) {
+					const lineSegment = turf.lineString([
+						[point[1], point[0]],
+						[route[pointIndex + 1][1], route[pointIndex + 1][0]]
+					]);
+
+					if (turf.booleanIntersects(lineSegment, airspacePolygon)) {
+						const intersection = turf.lineIntersect(lineSegment, airspacePolygon);
+						intersection.features.forEach((feature) => {
+							const intersectionPoint: Point = [
+								feature.geometry.coordinates[1],
+								feature.geometry.coordinates[0]
+							];
+
+							const distanceAlongRoute = calculateDistanceAlongRoute(route, intersectionPoint);
+
+							console.log(distanceAlongRoute);
+
+							intersections.push({
+								point: intersectionPoint,
+								airspaceId: airspace.id,
+								distanceAlongRoute
+							});
+						});
+					}
 				}
-
-				ua = ua / denominator;
-				ub = ub / denominator;
-
-				const intersectionX = x1 + ua * (x2 - x1);
-				const intersectionY = y1 + ua * (y2 - y1);
-
-				const intersectionPoint: Point = [intersectionX, intersectionY];
-
-				intersections.push({ airspace, coordinates: intersectionPoint });
-			}
+			});
 		}
-	}
+	});
+
+	intersections.sort((a, b) => a.distanceAlongRoute - b.distanceAlongRoute);
 
 	return intersections;
 }

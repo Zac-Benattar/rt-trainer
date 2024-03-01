@@ -1,5 +1,3 @@
-import type Airspace from './AeronauticalClasses/Airspace';
-
 export enum EmergencyType {
 	None = 'None',
 	EngineFailure = 'Engine Failure',
@@ -29,7 +27,7 @@ export enum FlightRules {
 }
 
 export type FrequencyChangePoint = {
-	oldAirspace: Airspace | undefined;
-	newAirspace: Airspace | undefined;
+	oldAirspaceId: string | undefined;
+	newAirspaceId: string | undefined;
 	coordinates: [number, number];
 };
