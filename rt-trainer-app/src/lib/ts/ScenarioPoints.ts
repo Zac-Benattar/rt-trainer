@@ -11,7 +11,16 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './ScenarioStages';
-import { haversineDistance, lerp, lerpLocation, simpleHash, toDegrees } from './utils';
+import {
+	findIntersections,
+	getHeadingBetween,
+	haversineDistance,
+	lerp,
+	lerpLocation,
+	simpleHash,
+	toDegrees,
+	type Intersection
+} from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
@@ -123,6 +132,12 @@ export function getStartAirportScenarioPoints(
 	const stages: ScenarioPoint[] = [];
 	const startAerodromeTime: number = startAirport.getStartTime(seed);
 	const takeoffRunway = startAirport.getTakeoffRunway(seed);
+	const initialRouteHeading = getHeadingBetween(
+		waypoints[0].getCoords()[0],
+		waypoints[0].getCoords()[1],
+		waypoints[1].getCoords()[0],
+		waypoints[1].getCoords()[1]
+	);
 
 	const groundedPose: Pose = {
 		lat: startAirport.coordinates[0],
@@ -132,11 +147,34 @@ export function getStartAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
+	const takingOffPosition = startAirport.getPointAlongTakeoffRunwayVector(seed, 0);
+	const takingOffPose: Pose = {
+		lat: takingOffPosition[0],
+		long: takingOffPosition[1],
+		trueHeading: takeoffRunway.trueHeading,
+		altitude: 0,
+		airSpeed: 0.0
+	};
+
 	const climbingOutPosition = startAirport.getPointAlongTakeoffRunwayVector(seed, 1.0);
 	const climbingOutPose: Pose = {
 		lat: climbingOutPosition[0],
 		long: climbingOutPosition[1],
 		trueHeading: takeoffRunway.trueHeading,
+		altitude: 1200,
+		airSpeed: 70.0
+	};
+
+	const takeoffAirspace = airspaces.find((x) => x.name.includes(startAirport.name));
+	if (!takeoffAirspace) {
+		throw new Error('No takeoff airspace found for ' + startAirport.name);
+	}
+	const startRoute = [waypoints[0].getCoords(), waypoints[1].getCoords()];
+	const leavingZonePosition = findIntersections(startRoute, [takeoffAirspace]);
+	const leavingZonePose: Pose = {
+		lat: leavingZonePosition[0].point[0],
+		long: leavingZonePosition[0].point[1],
+		trueHeading: initialRouteHeading,
 		altitude: 1200,
 		airSpeed: 70.0
 	};
@@ -315,7 +353,7 @@ export function getStartAirportScenarioPoints(
 		const reportTakingOff = new ScenarioPoint(
 			pointIndex++,
 			TakeOffStage.AnnounceTakingOff,
-			groundedPose,
+			takingOffPose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAirport),
 			0,
 			startAerodromeTime + 10
@@ -325,7 +363,7 @@ export function getStartAirportScenarioPoints(
 		const reportLeavingZone = new ScenarioPoint(
 			pointIndex++,
 			ClimbOutStage.AnnounceLeavingZone,
-			climbingOutPose,
+			leavingZonePose,
 			getParkedMadeContactUncontrolledUpdateData(seed, startAirport),
 			0,
 			startAerodromeTime + 15
@@ -660,9 +698,7 @@ export function getEndAirportScenarioPoints(
 	return stages;
 }
 
-function getFrequencyChanges(
-	airspaceChangePoints: { airspace: Airspace; coordinates: [number, number] }[]
-): FrequencyChangePoint[] {
+function getFrequencyChanges(airspaceChangePoints: Intersection[]): FrequencyChangePoint[] {
 	if (airspaceChangePoints.length == 0) {
 		return [];
 	}
@@ -670,11 +706,11 @@ function getFrequencyChanges(
 	const frequencyChanges: FrequencyChangePoint[] = [];
 
 	for (let i = 0; i < airspaceChangePoints.length - 1; i++) {
-		if (airspaceChangePoints[i].airspace != airspaceChangePoints[i + 1].airspace)
+		if (airspaceChangePoints[i].airspaceId != airspaceChangePoints[i + 1].airspaceId)
 			frequencyChanges.push({
-				oldAirspace: airspaceChangePoints[i].airspace,
-				newAirspace: airspaceChangePoints[i + 1].airspace,
-				coordinates: airspaceChangePoints[i + 1].coordinates
+				oldAirspaceId: airspaceChangePoints[i].airspaceId,
+				newAirspaceId: airspaceChangePoints[i + 1].airspaceId,
+				coordinates: airspaceChangePoints[i + 1].point
 			});
 	}
 
@@ -686,14 +722,14 @@ export function getAirborneScenarioPoints(
 	seedString: string,
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
-	airspaceChangePoints: { airspace: Airspace; coordinates: [number, number] }[],
+	airspaceIntersectionPoints: Intersection[],
 	startAirport: Airport,
 	endAirport: Airport,
 	previousScenarioPoint: ScenarioPoint,
 	hasEmergency: boolean
 ): ScenarioPoint[] {
 	const seed = simpleHash(seedString);
-	const frequencyChanges: FrequencyChangePoint[] = getFrequencyChanges(airspaceChangePoints);
+	const frequencyChanges: FrequencyChangePoint[] = getFrequencyChanges(airspaceIntersectionPoints);
 
 	// Add events at each point
 	const scenarioPoints: ScenarioPoint[] = [];
