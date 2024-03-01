@@ -4,6 +4,7 @@
 		AirportsStore,
 		AirspacesStore,
 		ClearSimulationStores,
+		ScenarioStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
@@ -13,6 +14,7 @@
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import Scenario from '$lib/ts/Scenario';
+	import ScenarioPointPreviewListBox from '$lib/Components/ScenarioPointPreviewListBox.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -22,6 +24,7 @@
 	ClearSimulationStores();
 
 	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
+	ScenarioStore.set(scenario);
 	AirspacesStore.set(scenario.airspaces);
 	AirportsStore.set(scenario.airports);
 	WaypointsStore.set(scenario.waypoints);
@@ -140,9 +143,14 @@
 			<Map
 				enabled={true}
 				widthSmScreen={'600px'}
-				heightSmScreen={'500px'}
+				heightSmScreen={'440px'}
 				mode={MapMode.ScenarioPlan}
 			/>
+
+			<div>
+				<div class="h4 p-1">Scenario Points</div>
+				<ScenarioPointPreviewListBox {scenario} />
+			</div>
 		</div>
 	</div>
 </div>

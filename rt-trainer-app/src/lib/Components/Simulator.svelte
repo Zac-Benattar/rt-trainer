@@ -22,7 +22,7 @@
 		CurrentTargetFrequencyStore,
 		RadioCallsHistoryStore,
 		LiveFeedbackStore,
-		CurrentRoutePointIndexStore,
+		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
 		TutorialStore,
 		AltimeterStateStore
@@ -148,7 +148,7 @@
 		atcMessage = value;
 	});
 
-	CurrentRoutePointIndexStore.subscribe((value) => {
+	CurrentScenarioPointIndexStore.subscribe((value) => {
 		currentRoutePointIndex = value;
 	});
 
@@ -359,8 +359,6 @@
 		// Reset failed attempts
 		failedAttempts = 0;
 
-		scenario.currentPointIndex++;
-
 		return true;
 	}
 
@@ -452,8 +450,8 @@
 			return;
 		}
 
-		// Update the simulator with the next route point
-		CurrentRoutePointIndexStore.update((value) => {
+		// Update the simulator with the next scenario point
+		CurrentScenarioPointIndexStore.update((value) => {
 			value++;
 			return value;
 		});

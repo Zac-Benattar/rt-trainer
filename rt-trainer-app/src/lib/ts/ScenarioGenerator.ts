@@ -15,7 +15,7 @@ import {
 	getEndAirportScenarioPoints,
 	getStartAirportScenarioPoints
 } from './ScenarioPoints';
-import { findAirspaceChangePoints } from './utils';
+import { findIntersections } from './utils';
 
 export async function generateScenario(
 	scenarioId: string,
@@ -74,23 +74,25 @@ export async function generateScenario(
 		endAirport.coordinates
 	];
 
-	// Get all on route airspaces - needs fixing
-	const intersectionPoints: { airspace: Airspace; coordinates: [number, number] }[] =
-		findAirspaceChangePoints(route, allAirspaces);
+	// Collect all intersection points with airspaces
+	const intersectionPoints = findIntersections(route, allAirspaces);
 	for (let i = 0; i < intersectionPoints.length; i++) {
-		if (airspaces.indexOf(intersectionPoints[i].airspace) == -1)
-			airspaces.push(intersectionPoints[i].airspace);
+		if (airspaces.findIndex((x) => x.id == intersectionPoints[i].airspaceId) == -1) {
+			airspaces.push(allAirspaces.find((x) => x.id == intersectionPoints[i].airspaceId) as Airspace);
+		}
 	}
 
-	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, airports));
+	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, startAirport));
 
 	scenarioPoints.push(
 		...getAirborneScenarioPoints(
+			scenarioPoints.length,
 			seed,
 			waypoints,
 			airspaces,
 			intersectionPoints,
-			airports,
+			startAirport,
+			endAirport,
 			scenarioPoints[scenarioPoints.length - 1],
 			hasEmergency
 		)
@@ -98,10 +100,11 @@ export async function generateScenario(
 
 	scenarioPoints.push(
 		...getEndAirportScenarioPoints(
+			scenarioPoints.length,
 			seed,
 			waypoints,
 			airspaces,
-			airports,
+			endAirport,
 			scenarioPoints[scenarioPoints.length - 1]
 		)
 	);

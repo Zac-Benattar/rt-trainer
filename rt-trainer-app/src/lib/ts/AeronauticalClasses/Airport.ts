@@ -3,7 +3,7 @@ import { Frequency } from '../Frequency';
 import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
 import 'reflect-metadata';
-import { getNewCoordsFromCoord } from '../utils';
+import { getNewCoordsFromCoord as calculateNewCoords } from '../utils';
 import type { AirportReportingPointDBData } from '../OpenAIPHandler';
 
 /* Airport data. */
@@ -126,7 +126,7 @@ export default class Airport {
 
 	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): [number, number] {
 		const runway = this.getTakeoffRunway(seed);
-		return getNewCoordsFromCoord(
+		return calculateNewCoords(
 			this.coordinates[0],
 			this.coordinates[1],
 			runway.trueHeading,
@@ -136,7 +136,7 @@ export default class Airport {
 
 	public getPointAlongLandingRunwayVector(seed: number, distance: number): [number, number] {
 		const runway = this.getLandingRunway(seed);
-		return getNewCoordsFromCoord(
+		return calculateNewCoords(
 			this.coordinates[0],
 			this.coordinates[1],
 			runway.trueHeading,

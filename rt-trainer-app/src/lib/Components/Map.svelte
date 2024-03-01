@@ -82,24 +82,11 @@
 		needsRerender = true;
 	});
 
-	CurrentScenarioPointStore.subscribe((currentRoutePoint) => {
-		if (currentRoutePoint != null) {
-			targetPose = currentRoutePoint.pose;
-			currentTime = convertMinutesToTimeString(currentRoutePoint.timeAtPoint);
-			if (mounted) {
-				updateMap();
-			} else {
-			}
-		} else {
-			if (targetPose == null) {
-				targetPose = {
-					lat: 0,
-					long: 0,
-					trueHeading: 0,
-					altitude: 0,
-					airSpeed: 0
-				};
-			}
+	CurrentScenarioPointStore.subscribe((currentScenarioPoint) => {
+		if (currentScenarioPoint != null) {
+			targetPose = currentScenarioPoint.pose;
+			currentTime = convertMinutesToTimeString(currentScenarioPoint.timeAtPoint);
+			updatePose();
 		}
 	});
 
@@ -110,7 +97,7 @@
 
 		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
 
-		if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
+		if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 		}
 
@@ -130,7 +117,7 @@
 			drawAirspace(airspace);
 		});
 
-		if (mode == MapMode.Scenario) {
+		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 			planeIcon = L.icon({
 				iconUrl: '/images/plane.png',
 
@@ -147,7 +134,7 @@
 			}).addTo(map);
 		}
 
-		if (mode == MapMode.Scenario) {
+		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 			FlightInformationTextBox = L.Control.extend({
 				onAdd: function () {
 					var text = L.DomUtil.create('div');
@@ -196,7 +183,7 @@
 
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
-			if ((mode == MapMode.RoutePlan || mode == MapMode.ScenarioPlan) && waypoints.length > 0) {
+			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
 			}
 
@@ -213,7 +200,7 @@
 				drawAirspace(airspace);
 			});
 
-			if (mode == MapMode.Scenario) {
+			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
 
 				// Updates the current location marker, done last to make sure it is on top
@@ -224,7 +211,7 @@
 				}).addTo(map);
 			}
 
-			if (mode == MapMode.Scenario) {
+			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				flightInformationOverlay.remove();
 
 				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
@@ -236,20 +223,39 @@
 		}
 	}
 
+	async function updatePose() {
+		if (mounted) {
+			await map;
+
+			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
+
+			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
+				currentLocationMarker.remove();
+
+				// Updates the current location marker, done last to make sure it is on top
+				currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
+					icon: planeIcon,
+					rotationAngle: targetPose.trueHeading,
+					rotationOrigin: 'center'
+				}).addTo(map);
+			}
+		}
+	}
+
 	async function addMarker(lat: number, long: number, name: string) {
 		markers.push(L.marker([lat, long]).bindPopup(name).addTo(map));
 	}
 
 	async function removeGeometry() {
-		markers.forEach((marker) => {
+		await markers.forEach((marker) => {
 			map.removeLayer(marker);
 		});
 		markers = [];
-		lines.forEach((line) => {
+		await lines.forEach((line) => {
 			map.removeLayer(line);
 		});
 		lines = [];
-		polygons.forEach((polygon) => {
+		await polygons.forEach((polygon) => {
 			map.removeLayer(polygon);
 		});
 		polygons = [];
