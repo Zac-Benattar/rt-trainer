@@ -682,6 +682,9 @@ export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
 export function calculateDistanceAlongRoute(route: Point[], targetPoint: Point): number {
 	let totalDistanceAlongRoute = 0;
 
+	// console.log(route);
+	// console.log(targetPoint);
+
 	for (let i = 0; i < route.length - 1; i++) {
 		const segmentLength = haversineDistance(
 			route[i][0],
@@ -704,7 +707,8 @@ export function calculateDistanceAlongRoute(route: Point[], targetPoint: Point):
 			targetPoint[1]
 		);
 
-		if (distanceToTarget + distanceToNext - segmentLength < 1e-6) {
+		// If the target point is within 5m of the segment, we consider it to be on the segment
+		if (distanceToTarget + distanceToNext - segmentLength < 5) {
 			// Target point lies on the current segment
 			totalDistanceAlongRoute += distanceToTarget;
 			break;
@@ -760,8 +764,6 @@ export function findIntersections(route: Point[], airspaces: Airspace[]): Inters
 							];
 
 							const distanceAlongRoute = calculateDistanceAlongRoute(route, intersectionPoint);
-
-							console.log(distanceAlongRoute);
 
 							intersections.push({
 								point: intersectionPoint,
