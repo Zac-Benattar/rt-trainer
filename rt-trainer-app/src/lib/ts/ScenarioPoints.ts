@@ -476,7 +476,7 @@ export function getEndAirportScenarioPoints(
 
 		const reportAirodromeInSight = new ScenarioPoint(
 			pointIndex++,
-			InboundForJoinStage.ReportAerodromeInSight,
+			InboundForJoinStage.ReportAirportInSight,
 			followTrafficPose,
 			getParkedMadeContactControlledUpdateData(seed, endAirport),
 			waypoints.length - 1,
