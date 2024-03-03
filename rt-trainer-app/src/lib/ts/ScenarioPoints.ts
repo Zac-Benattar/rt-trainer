@@ -1,5 +1,5 @@
 import type { SimulatorUpdateData } from './ServerClientTypes';
-import { EmergencyType, type FrequencyChangePoint, type Pose } from './ScenarioTypes';
+import { EmergencyType, type Pose } from './ScenarioTypes';
 import {
 	ChangeZoneStage,
 	CircuitAndLandingStage,
@@ -11,19 +11,12 @@ import {
 	TakeOffStage,
 	TaxiStage
 } from './ScenarioStages';
-import {
-	findIntersections,
-	getHeadingBetween,
-	haversineDistance,
-	lerp,
-	lerpLocation,
-	simpleHash,
-	toDegrees,
-	type Intersection
-} from './utils';
+import { findIntersections, simpleHash, type Intersection, lerp } from './utils';
+import * as turf from '@turf/turf';
 import type Airport from './AeronauticalClasses/Airport';
 import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
+import type { Position } from '@turf/turf';
 
 const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 const NAUTICAL_MILE = 1852;
@@ -132,16 +125,10 @@ export function getStartAirportScenarioPoints(
 	const stages: ScenarioPoint[] = [];
 	const startAerodromeTime: number = startAirport.getStartTime(seed);
 	const takeoffRunway = startAirport.getTakeoffRunway(seed);
-	const initialRouteHeading = getHeadingBetween(
-		waypoints[0].getCoords()[0],
-		waypoints[0].getCoords()[1],
-		waypoints[1].getCoords()[0],
-		waypoints[1].getCoords()[1]
-	);
+	const initialRouteHeading = turf.bearing(waypoints[0].getCoords(), waypoints[1].getCoords());
 
 	const groundedPose: Pose = {
-		lat: startAirport.coordinates[0],
-		long: startAirport.coordinates[1],
+		position: startAirport.coordinates,
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0.0
@@ -149,8 +136,7 @@ export function getStartAirportScenarioPoints(
 
 	const takingOffPosition = startAirport.getPointAlongTakeoffRunwayVector(seed, 0);
 	const takingOffPose: Pose = {
-		lat: takingOffPosition[0],
-		long: takingOffPosition[1],
+		position: takingOffPosition,
 		trueHeading: takeoffRunway.trueHeading,
 		altitude: 0,
 		airSpeed: 0.0
@@ -158,8 +144,7 @@ export function getStartAirportScenarioPoints(
 
 	const climbingOutPosition = startAirport.getPointAlongTakeoffRunwayVector(seed, 1.0);
 	const climbingOutPose: Pose = {
-		lat: climbingOutPosition[0],
-		long: climbingOutPosition[1],
+		position: climbingOutPosition,
 		trueHeading: takeoffRunway.trueHeading,
 		altitude: 1200,
 		airSpeed: 70.0
@@ -170,10 +155,9 @@ export function getStartAirportScenarioPoints(
 		throw new Error('No takeoff airspace found for ' + startAirport.name);
 	}
 	const startRoute = [waypoints[0].getCoords(), waypoints[1].getCoords()];
-	const leavingZonePosition = findIntersections(startRoute, [takeoffAirspace]);
+	const leavingZonePosition: Position = findIntersections(startRoute, [takeoffAirspace])[0].position;
 	const leavingZonePose: Pose = {
-		lat: leavingZonePosition[0].point[0],
-		long: leavingZonePosition[0].point[1],
+		position: leavingZonePosition,
 		trueHeading: initialRouteHeading,
 		altitude: 1200,
 		airSpeed: 70.0
@@ -385,11 +369,9 @@ export function getEndAirportScenarioPoints(
 	const seed = simpleHash(seedString);
 	const stages: ScenarioPoint[] = [];
 	const previousPointTime = previousScenarioPoint.timeAtPoint;
-	const distanceToLandingAirportFromPrevPoint = haversineDistance(
-		previousScenarioPoint.pose.lat,
-		previousScenarioPoint.pose.long,
-		endAirport.coordinates[0],
-		endAirport.coordinates[1]
+	const distanceToLandingAirportFromPrevPoint = turf.distance(
+		previousScenarioPoint.pose.position,
+		endAirport.coordinates
 	);
 
 	const landingTime =
@@ -402,8 +384,7 @@ export function getEndAirportScenarioPoints(
 	const landingRunway = endAirport.getLandingRunway(seed);
 
 	const parkedPose: Pose = {
-		lat: endAirport.coordinates[0],
-		long: endAirport.coordinates[1],
+		position: endAirport.coordinates,
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0.0
@@ -411,8 +392,7 @@ export function getEndAirportScenarioPoints(
 
 	const followTrafficLocation = endAirport.getPointAlongLandingRunwayVector(seed, -3.5);
 	const followTrafficPose: Pose = {
-		lat: followTrafficLocation[0],
-		long: followTrafficLocation[1],
+		position: followTrafficLocation,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 1200,
 		airSpeed: 84.0
@@ -420,24 +400,21 @@ export function getEndAirportScenarioPoints(
 
 	const reportFinalLocation = endAirport.getPointAlongLandingRunwayVector(seed, -1.6);
 	const reportFinalPose: Pose = {
-		lat: reportFinalLocation[0],
-		long: reportFinalLocation[1],
+		position: reportFinalLocation,
 		trueHeading: landingRunway.trueHeading,
 		altitude: 750,
 		airSpeed: 55.0
 	};
 
 	const onRunwayPose: Pose = {
-		lat: endAirport.getPointAlongLandingRunwayVector(seed, 0)[0],
-		long: endAirport.getPointAlongLandingRunwayVector(seed, 0)[1],
+		position: endAirport.getPointAlongLandingRunwayVector(seed, 0),
 		trueHeading: landingRunway.trueHeading,
 		altitude: 0.0,
 		airSpeed: 0.0
 	};
 
 	const runwayVacatedPose: Pose = {
-		lat: endAirport.coordinates[0],
-		long: endAirport.coordinates[1],
+		position: endAirport.coordinates,
 		trueHeading: 0,
 		altitude: 0.0,
 		airSpeed: 0.0
@@ -698,25 +675,6 @@ export function getEndAirportScenarioPoints(
 	return stages;
 }
 
-function getFrequencyChanges(airspaceChangePoints: Intersection[]): FrequencyChangePoint[] {
-	if (airspaceChangePoints.length == 0) {
-		return [];
-	}
-
-	const frequencyChanges: FrequencyChangePoint[] = [];
-
-	for (let i = 0; i < airspaceChangePoints.length - 1; i++) {
-		if (airspaceChangePoints[i].airspaceId != airspaceChangePoints[i + 1].airspaceId)
-			frequencyChanges.push({
-				oldAirspaceId: airspaceChangePoints[i].airspaceId,
-				newAirspaceId: airspaceChangePoints[i + 1].airspaceId,
-				coordinates: airspaceChangePoints[i + 1].point
-			});
-	}
-
-	return frequencyChanges;
-}
-
 export function getAirborneScenarioPoints(
 	pointIndex: number,
 	seedString: string,
@@ -729,19 +687,16 @@ export function getAirborneScenarioPoints(
 	hasEmergency: boolean
 ): ScenarioPoint[] {
 	const seed = simpleHash(seedString);
-	const frequencyChanges: FrequencyChangePoint[] = getFrequencyChanges(airspaceIntersectionPoints);
 
 	// Add events at each point
 	const scenarioPoints: ScenarioPoint[] = [];
 	const endStageIndexes: number[] = [];
 	let timeAtPreviousPoint = previousScenarioPoint.timeAtPoint;
-	let previousCoord = [previousScenarioPoint.pose.lat, previousScenarioPoint.pose.long];
-	for (let i = 0; i < frequencyChanges.length; i++) {
-		const distanceToNextPoint: number = haversineDistance(
-			previousCoord[0],
-			previousCoord[1],
-			frequencyChanges[i].coordinates[0],
-			frequencyChanges[i].coordinates[1]
+	let previousPosition = previousScenarioPoint.pose.position;
+	for (let i = 0; i < airspaceIntersectionPoints.length; i++) {
+		const distanceToNextPoint: number = turf.distance(
+			previousPosition,
+			airspaceIntersectionPoints[i].position
 		);
 		const timeAtCurrentPoint =
 			timeAtPreviousPoint +
@@ -749,23 +704,18 @@ export function getAirborneScenarioPoints(
 				(distanceToNextPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) * FLIGHT_TIME_MULTIPLIER
 			);
 
-		const freqChange = frequencyChanges[i];
-		const heading = Math.round(
-			toDegrees(
-				Math.atan2(
-					freqChange.coordinates[1] - previousCoord[1],
-					freqChange.coordinates[0] - previousCoord[0]
-				)
-			)
-		);
+		const freqChangePoint = airspaceIntersectionPoints[i];
+		const heading = turf.bearing(freqChangePoint.position, previousPosition);
+
 		const pose: Pose = {
-			lat: freqChange.coordinates[0],
-			long: freqChange.coordinates[1],
+			position: freqChangePoint.position,
 			trueHeading: heading,
 			altitude: 2000,
 			airSpeed: 130
 		};
 
+		console.log(airspaceIntersectionPoints[i]);
+		// Add logic to determine what stages to add at each point
 		const requestFrequencyChange = new ScenarioPoint(
 			pointIndex++,
 			ChangeZoneStage.RequestFrequencyChange,
@@ -875,7 +825,7 @@ export function getAirborneScenarioPoints(
 		scenarioPoints.push(readbackApproval);
 		endStageIndexes.push(scenarioPoints.length - 1);
 
-		previousCoord = freqChange.coordinates;
+		previousPosition = freqChangePoint.position;
 		timeAtPreviousPoint = timeAtCurrentPoint + 3;
 	}
 
@@ -895,13 +845,17 @@ export function getAirborneScenarioPoints(
 		// At least 5% of the distance must be between the two points, and at most 90%
 		// This minimises the chance of the emergency ending after the next actual route point time
 		const lerpPercentage: number = (seed % 85) / 100 + 0.05;
-		const emergencyLocation = lerpLocation(
-			waypoints[emergencyPointIndex].lat,
-			waypoints[emergencyPointIndex].long,
-			waypoints[emergencyPointIndex - 1].lat,
-			waypoints[emergencyPointIndex - 1].long,
-			lerpPercentage
+		const segmentDistance: number = turf.distance(
+			waypoints[emergencyPointIndex].getCoords(),
+			waypoints[emergencyPointIndex - 1].getCoords()
 		);
+		const emergencyPosition: Position = turf.along(
+			turf.lineString([
+				waypoints[emergencyPointIndex].getCoords(),
+				waypoints[emergencyPointIndex - 1].getCoords()
+			]),
+			segmentDistance * lerpPercentage
+		).geometry.coordinates;
 
 		const emergencyTime: number = Math.round(
 			lerp(
@@ -912,8 +866,7 @@ export function getAirborneScenarioPoints(
 		);
 
 		const emergencyPose: Pose = {
-			lat: emergencyLocation.lat,
-			long: emergencyLocation.long,
+			position: emergencyPosition,
 			trueHeading: scenarioPoints[emergencyPointIndex - 1].pose.trueHeading,
 			altitude: 0.0,
 			airSpeed: 0.0

@@ -4,8 +4,6 @@ import {
 	convertMinutesToTimeString,
 	getAbbreviatedCallsign,
 	getCompassDirectionFromHeading,
-	getHeadingBetween,
-	haversineDistance,
 	isCallsignStandardRegistration,
 	processString,
 	removePunctuation,
@@ -21,6 +19,7 @@ import type Runway from './AeronauticalClasses/Runway';
 import type { METORDataSample } from './AeronauticalClasses/METORData';
 import type Airport from './AeronauticalClasses/Airport';
 import { Type } from 'class-transformer';
+import * as turf from '@turf/turf';
 
 export default class RadioCall {
 	private message: string;
@@ -681,11 +680,9 @@ export default class RadioCall {
 	}
 
 	public getTakeoffTurnoutHeading(): number {
-		const headingToFirstWaypoint = getHeadingBetween(
-			this.scenario.waypoints[0].lat,
-			this.scenario.waypoints[0].long,
-			this.scenario.waypoints[1].lat,
-			this.scenario.waypoints[1].long
+		const headingToFirstWaypoint = turf.distance(
+			this.scenario.waypoints[0].getCoords(),
+			this.scenario.waypoints[1].getCoords()
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -801,23 +798,24 @@ export default class RadioCall {
 	}
 
 	public getDistanceToPreviousWaypointInMeters(): number {
-		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentScenarioPoint().pose;
-		return haversineDistance(prev.lat, prev.long, currentPose.lat, currentPose.long);
+		return turf.distance(
+			this.getPreviousWaypoint().getCoords(),
+			this.getCurrentScenarioPoint().pose.position
+		);
 	}
 
-	public getDistanceToPreviousWaypointNearestMile(): number {
-		// round to nearest mile
-		return Math.round(this.getDistanceToPreviousWaypointInMeters() / 1609.344);
+	public getDistanceToPreviousWaypointInNauticalMiles(): number {
+		return this.getDistanceToPreviousWaypointInMeters() / 1852;
 	}
 
 	public getPositionRelativeToLastWaypoint(): string {
-		const prev = this.getPreviousWaypoint();
-		const currentPose = this.getCurrentScenarioPoint().pose;
-		const heading = getHeadingBetween(prev.lat, prev.long, currentPose.lat, currentPose.long);
+		const heading = turf.bearing(
+			this.getPreviousWaypoint().getCoords(),
+			this.getCurrentScenarioPoint().pose.position
+		);
 		const compassDirection = getCompassDirectionFromHeading(heading);
-		const distance = this.getDistanceToPreviousWaypointNearestMile();
-		return distance + ' miles ' + compassDirection;
+		const distance = this.getDistanceToPreviousWaypointInNauticalMiles();
+		return Math.ceil(distance) + ' miles ' + compassDirection;
 	}
 
 	public assertCallContainsPositionRelativeToLastWaypoint(severe: boolean): boolean {
@@ -880,9 +878,10 @@ export default class RadioCall {
 	}
 
 	public getNextWaypointDistance(): number {
-		const next = this.getNextWaypoint();
-		const currentPose = this.getCurrentScenarioPoint().pose;
-		return haversineDistance(next.lat, next.long, currentPose.lat, currentPose.long);
+		return turf.distance(
+			this.getNextWaypoint().getCoords(),
+			this.getCurrentScenarioPoint().pose.position
+		);
 	}
 
 	public getNextWaypointDistanceNearestMile(): number {

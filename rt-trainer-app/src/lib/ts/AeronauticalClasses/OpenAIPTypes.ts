@@ -1,4 +1,6 @@
-import type { AirportReportingPointDBData } from "../OpenAIPHandler";
+import type { Feature } from 'geojson';
+import type { AirportReportingPointDBData } from '../OpenAIPHandler';
+import type * as turf from '@turf/turf';
 
 export type OperatingHours = {
 	dayOfWeek: number;
@@ -70,11 +72,8 @@ export type AirspaceData = {
 	byNotam: boolean;
 	specialAgreement: boolean;
 	requestCompliance: boolean;
-	centrePoint: [number, number]; // Not in OpenAIP original data
-	geometry: {
-		type: 'Polygon';
-		coordinates: [[number, number][]];
-	};
+	centrePoint: Feature;
+	geometry: Feature;
 	country: string;
 	upperLimit: {
 		value: number;

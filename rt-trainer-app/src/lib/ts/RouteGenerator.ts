@@ -1,6 +1,6 @@
 import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
-import { haversineDistance, simpleHash } from './utils';
+import { simpleHash } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
 import {
 	airportDataToAirport,
@@ -12,6 +12,7 @@ import {
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 import type { RouteData } from './Scenario';
+import * as turf from '@turf/turf';
 
 export default class RouteGenerator {
 	public static async generateFRTOLRouteFromSeed(
@@ -58,8 +59,7 @@ export default class RouteGenerator {
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
 		let chosenMATZ: Airspace;
-		let matzEntry: [number, number] | undefined | null;
-		let matzExit: [number, number] | undefined | null;
+		let matzCenter: [number, number] | undefined | null;
 		let onRouteAirspace: Airspace[] = [];
 
 		let validRoute = false;
@@ -78,18 +78,13 @@ export default class RouteGenerator {
 			// Get all ATZ within 30km of the start airport
 			const nearbyATZs: Airspace[] = [];
 			for (let i = 0; i < allAirspaces.length; i++) {
-				const distance = haversineDistance(
-					startAirport.coordinates[0],
-					startAirport.coordinates[1],
-					allAirspaces[i].centrePoint[0],
-					allAirspaces[i].centrePoint[1]
-				);
+				const distance = turf.distance(startAirport.coordinates, allAirspaces[i].centrePoint);
 				if (distance < 30000) nearbyATZs.push(allAirspaces[i]);
 			}
 
 			// Get all valid MATZ from nearby ATZs
 			const nearbyMATZs: Airspace[] = nearbyATZs.filter(
-				(x) => x.type == 14 && !x.pointInsideATZ(startAirport.coordinates)
+				(x) => x.type == 14 && !x.pointInsideATZ((startAirport as Airport).coordinates)
 			);
 			if (nearbyMATZs.length == 0) {
 				validRoute = false;
@@ -108,16 +103,11 @@ export default class RouteGenerator {
 
 			// Get airports within 50km of the chosen MATZ
 			const possibleDestinations = [];
-			const matzCenter = chosenMATZ.centrePoint;
+			matzCenter = chosenMATZ.centrePoint;
 
 			for (let i = 0; i < allValidAirports.length; i++) {
 				const airport = allValidAirports[i];
-				const distance = haversineDistance(
-					matzCenter[0],
-					matzCenter[1],
-					airport.coordinates[0],
-					airport.coordinates[1]
-				);
+				const distance = turf.distance(matzCenter, airport.coordinates);
 
 				if (
 					(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
@@ -157,18 +147,10 @@ export default class RouteGenerator {
 				continue;
 			}
 
-			matzEntry = chosenMATZ.getClosestPointOnEdge(startAirport.coordinates);
-			matzExit = chosenMATZ.getClosestPointOnEdge(destinationAirport.coordinates);
-			if (matzEntry == undefined || matzExit == undefined || matzEntry == matzExit) {
-				validRoute = false;
-				continue;
-			}
-
 			// Get all airspace along the route
 			const route: [number, number][] = [
 				startAirport.coordinates,
-				matzEntry,
-				matzExit,
+				matzCenter,
 				destinationAirport.coordinates
 			];
 			onRouteAirspace = [];
@@ -190,7 +172,7 @@ export default class RouteGenerator {
 			}
 		}
 
-		if (iterations >= maxIterations || chosenMATZ == undefined || startAirport == undefined) {
+		if (iterations >= maxIterations || !chosenMATZ || !startAirport) {
 			console.log(`Could not find a valid route after ${iterations} iterations`);
 			return;
 		}
@@ -206,23 +188,13 @@ export default class RouteGenerator {
 			undefined
 		);
 
-		if (matzEntry == undefined || matzEntry == null) throw new Error('Entry point is undefined');
-		const enterMATZWaypoint: Waypoint = new Waypoint(
-			chosenMATZ.getDisplayName() + ' Entry',
-			matzEntry[0],
-			matzEntry[1],
+		if (matzCenter == undefined || matzCenter == null) throw new Error('Exit point is undefined');
+		const matzWaypoint: Waypoint = new Waypoint(
+			chosenMATZ.getDisplayName() + ' Exit',
+			matzCenter[0],
+			matzCenter[1],
 			WaypointType.NewAirspace,
 			2,
-			undefined
-		);
-
-		if (matzExit == undefined || matzExit == null) throw new Error('Exit point is undefined');
-		const exitMATZWaypoint: Waypoint = new Waypoint(
-			chosenMATZ.getDisplayName() + ' Exit',
-			matzExit[0],
-			matzExit[1],
-			WaypointType.NewAirspace,
-			3,
 			undefined
 		);
 
@@ -232,12 +204,12 @@ export default class RouteGenerator {
 			destinationAirport.coordinates[0],
 			destinationAirport.coordinates[1],
 			WaypointType.Aerodrome,
-			4,
+			3,
 			undefined
 		);
 
 		return {
-			waypoints: [startWaypoint, enterMATZWaypoint, exitMATZWaypoint, endWaypoint],
+			waypoints: [startWaypoint, matzWaypoint, endWaypoint],
 			airspaces: onRouteAirspace,
 			airports: [startAirport, destinationAirport]
 		};

@@ -3,8 +3,8 @@ import { Frequency } from '../Frequency';
 import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
 import 'reflect-metadata';
-import { getNewCoordsFromCoord as calculateNewCoords } from '../utils';
 import type { AirportReportingPointDBData } from '../OpenAIPHandler';
+import * as turf from '@turf/turf';
 
 /* Airport data. */
 export default class Airport {
@@ -124,24 +124,14 @@ export default class Airport {
 		return this.runways[index];
 	}
 
-	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): [number, number] {
+	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): turf.Position {
 		const runway = this.getTakeoffRunway(seed);
-		return calculateNewCoords(
-			this.coordinates[0],
-			this.coordinates[1],
-			runway.trueHeading,
-			distance
-		);
+		return turf.destination(this.coordinates, runway.trueHeading, distance).geometry.coordinates;
 	}
 
-	public getPointAlongLandingRunwayVector(seed: number, distance: number): [number, number] {
+	public getPointAlongLandingRunwayVector(seed: number, distance: number): turf.Position {
 		const runway = this.getLandingRunway(seed);
-		return calculateNewCoords(
-			this.coordinates[0],
-			this.coordinates[1],
-			runway.trueHeading,
-			distance
-		);
+		return turf.destination(this.coordinates, runway.trueHeading, distance).geometry.coordinates;
 	}
 
 	public getStartTime(seed: number): number {

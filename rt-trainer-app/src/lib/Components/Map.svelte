@@ -15,7 +15,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
-	import { convertMinutesToTimeString, getBoundsWith10PercentMargins } from '$lib/ts/utils';
+	import { convertMinutesToTimeString, getBbox10PercentMargins } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
@@ -98,7 +98,7 @@
 		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
 
 		if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+			map.fitBounds(getBbox10PercentMargins(waypoints));
 		}
 
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -184,7 +184,7 @@
 			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
 
 			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+				map.fitBounds(getBbox10PercentMargins(waypoints));
 			}
 
 			await removeGeometry();
