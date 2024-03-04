@@ -72,7 +72,7 @@ export type AirspaceData = {
 	requestCompliance: boolean;
 	centrePoint: [number, number];
 	geometry: {
-		type: ;
+		type: 'Polygon';
 		coordinates: [number, number][][];
 	};
 	country: string;
