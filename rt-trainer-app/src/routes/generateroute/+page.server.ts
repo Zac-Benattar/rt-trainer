@@ -70,8 +70,8 @@ export const actions = {
 				type: waypoint.type,
 				name: waypoint.name,
 				description: waypoint.description,
-				lat: waypoint.lat.toString(),
-				long: waypoint.long.toString(),
+				lat: waypoint.location[1].toString(),
+				long: waypoint.location[0].toString(),
 				routeId: routeId
 			}))
 		);

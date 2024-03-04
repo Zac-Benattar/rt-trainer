@@ -5,10 +5,13 @@ import type Airport from './AeronauticalClasses/Airport';
 import {
 	airportDataToAirport,
 	airspaceDataToAirspace,
+	pushAirportDataToDatabase,
+	pushAirspaceDataToDatabase,
 	readAirportDataFromDB,
 	readAirportDataFromJSON,
 	readAirspaceDataFromDB,
-	readAirspaceDataFromJSON
+	readAirspaceDataFromJSON,
+	writeDataToJSON
 } from './OpenAIPHandler';
 import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 import type { RouteData } from './Scenario';
@@ -53,13 +56,14 @@ export default class RouteGenerator {
 			`Total Airports: ${allValidAirports.length} \n Total Airspaces: ${allAirspaces.length}`
 		);
 
-		const maxIterations = 200;
+		const maxIterations = 100;
 		const numberOfValidAirports = allValidAirports.length;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
 		let chosenMATZ: Airspace;
 		let matzCenter: [number, number] | undefined | null;
+		let pointInMATZ: [number, number];
 		let onRouteAirspace: Airspace[] = [];
 
 		let validRoute = false;
@@ -75,16 +79,12 @@ export default class RouteGenerator {
 				startAirportIsControlled = true;
 			}
 
-			// Get all ATZ within 30km of the start airport
-			const nearbyATZs: Airspace[] = [];
-			for (let i = 0; i < allAirspaces.length; i++) {
-				const distance = turf.distance(startAirport.coordinates, allAirspaces[i].centrePoint);
-				if (distance < 30000) nearbyATZs.push(allAirspaces[i]);
-			}
-
-			// Get all valid MATZ from nearby ATZs
-			const nearbyMATZs: Airspace[] = nearbyATZs.filter(
-				(x) => x.type == 14 && !x.pointInsideATZ((startAirport as Airport).coordinates)
+			// Get all valid MATZ from within 40km of start airport and not inside the ATZ of the start airport
+			const nearbyMATZs: Airspace[] = allAirspaces.filter(
+				(x) =>
+					x.type == 14 &&
+					turf.distance(startAirport.coordinates, x.centrePoint, {units: 'kilometers'}) < 40 &&
+					!x.pointInsideATZ((startAirport as Airport).coordinates)
 			);
 			if (nearbyMATZs.length == 0) {
 				validRoute = false;
@@ -95,23 +95,23 @@ export default class RouteGenerator {
 			const numberOfMATZs = nearbyMATZs.length;
 			chosenMATZ = nearbyMATZs[(seed * 7919 * (iterations + 1)) % numberOfMATZs];
 
-			// This doesn't work - seed 4324 has an issue
 			if (chosenMATZ.pointInsideATZ(startAirport.coordinates)) {
 				validRoute = false;
 				continue;
 			}
 
-			// Get airports within 50km of the chosen MATZ
+			// Get airports within 100km of the chosen MATZ
 			const possibleDestinations = [];
 			matzCenter = chosenMATZ.centrePoint;
 
+			// Turn this into a filter
 			for (let i = 0; i < allValidAirports.length; i++) {
 				const airport = allValidAirports[i];
-				const distance = turf.distance(matzCenter, airport.coordinates);
+				const distance = turf.distance(matzCenter, airport.coordinates, {units: 'kilometers'});
 
 				if (
 					(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
-					distance < 100000
+					distance < 100
 				)
 					possibleDestinations.push(airport);
 			}
@@ -129,11 +129,16 @@ export default class RouteGenerator {
 				destinationAirport =
 					possibleDestinations[(seed * (destIterations + 1)) % possibleDestinations.length];
 
-				if (startAirportIsControlled && destinationAirport.type != 3) {
+				if (
+					startAirportIsControlled &&
+					destinationAirport.type != 3 &&
+					startAirport != destinationAirport
+				) {
 					validDestinationAirport = true;
 				} else if (
 					!startAirportIsControlled &&
-					(destinationAirport.type == 3 || destinationAirport.type == 9)
+					(destinationAirport.type == 3 || destinationAirport.type == 9) &&
+					startAirport != destinationAirport
 				) {
 					validDestinationAirport = true;
 				}
@@ -147,10 +152,13 @@ export default class RouteGenerator {
 				continue;
 			}
 
+			pointInMATZ = turf.pointOnFeature(turf.polygon(chosenMATZ.coordinates)).geometry
+				.coordinates as [number, number];
+
 			// Get all airspace along the route
 			const route: [number, number][] = [
 				startAirport.coordinates,
-				matzCenter,
+				pointInMATZ,
 				destinationAirport.coordinates
 			];
 			onRouteAirspace = [];
@@ -166,7 +174,7 @@ export default class RouteGenerator {
 			}
 			onRouteAirspace.push(chosenMATZ);
 
-			if (onRouteAirspace.length > 7) {
+			if (onRouteAirspace.length > 10) {
 				validRoute = false;
 				continue;
 			}
@@ -181,8 +189,7 @@ export default class RouteGenerator {
 
 		const startWaypoint: Waypoint = new Waypoint(
 			startAirport.name,
-			startAirport.coordinates[0],
-			startAirport.coordinates[1],
+			startAirport.coordinates,
 			WaypointType.Aerodrome,
 			1,
 			undefined
@@ -190,9 +197,8 @@ export default class RouteGenerator {
 
 		if (matzCenter == undefined || matzCenter == null) throw new Error('Exit point is undefined');
 		const matzWaypoint: Waypoint = new Waypoint(
-			chosenMATZ.getDisplayName() + ' Exit',
-			matzCenter[0],
-			matzCenter[1],
+			chosenMATZ.getDisplayName(),
+			pointInMATZ,
 			WaypointType.NewAirspace,
 			2,
 			undefined
@@ -201,8 +207,7 @@ export default class RouteGenerator {
 		if (destinationAirport == undefined) throw new Error('Destination airport is undefined');
 		const endWaypoint: Waypoint = new Waypoint(
 			destinationAirport?.name,
-			destinationAirport.coordinates[0],
-			destinationAirport.coordinates[1],
+			destinationAirport.coordinates,
 			WaypointType.Aerodrome,
 			3,
 			undefined
@@ -215,7 +220,7 @@ export default class RouteGenerator {
 		};
 	}
 
-	public static async getAirspaceDataFromWaypointsList(waypoints: Waypoint[]): Promise<Airspace[]> {
+	public static async getAirspacesOnRouteFromWaypoints(waypoints: Waypoint[]): Promise<Airspace[]> {
 		const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
 
 		const allAirspaces: Airspace[] = [];
@@ -226,7 +231,7 @@ export default class RouteGenerator {
 
 		const route: [number, number][] = [];
 		for (let i = 0; i < waypoints.length; i++) {
-			route.push(waypoints[i].getCoords());
+			route.push(waypoints[i].location);
 		}
 
 		const onRouteAirspace: Airspace[] = [];

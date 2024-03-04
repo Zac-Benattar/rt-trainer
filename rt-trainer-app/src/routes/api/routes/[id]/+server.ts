@@ -33,8 +33,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		waypointsList.push(
 			new Waypoint(
 				waypoint.name,
-				parseFloat(waypoint.lat),
-				parseFloat(waypoint.long),
+				[parseFloat(waypoint.long), parseFloat(waypoint.lat)],
 				waypoint.type,
 				waypoint.index
 			)

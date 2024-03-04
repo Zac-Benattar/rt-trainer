@@ -1,5 +1,4 @@
 import { isInAirspace, isAirspaceIncludedInRoute } from '../utils';
-import type * as turf from '@turf/turf';
 
 export default class Airspace {
 	public id: string;
@@ -12,8 +11,8 @@ export default class Airspace {
 	public byNotam: boolean;
 	public specialAgreement: boolean;
 	public requestCompliance: boolean;
-	public centrePoint: turf.Position;
-	public coordinates: turf.Polygon;
+	public centrePoint: [number, number];
+	public coordinates: [number, number][][];
 	public country: string;
 	public upperLimit: number;
 	public lowerLimit: number;
@@ -31,8 +30,8 @@ export default class Airspace {
 		byNotam: boolean,
 		specialAgreement: boolean,
 		requestCompliance: boolean,
-		centrePoint: turf.Position,
-		coordinates: turf.Polygon,
+		centrePoint: [number, number],
+		coordinates: [number, number][][],
 		country: string,
 		upperLimit: number,
 		lowerLimit: number,

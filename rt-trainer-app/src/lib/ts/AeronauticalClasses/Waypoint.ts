@@ -1,35 +1,23 @@
 /* Point in space along a route. */
 export default class Waypoint {
 	type: WaypointType;
-	lat: number;
-	long: number;
+	location: [number, number];
 	index: number;
 	name: string;
 	description: string;
 
-	constructor(name: string, lat: number, long: number, waypointType: WaypointType, index: number, description: string = '') {
+	constructor(
+		name: string,
+		location: [number, number],
+		waypointType: WaypointType,
+		index: number,
+		description: string = ''
+	) {
 		this.name = name;
-		this.lat = lat;
-		this.long = long;
+		this.location = location;
 		this.type = waypointType;
 		this.index = index;
 		this.description = description;
-	}
-
-	public getName(): string {
-		return this.name;
-	}
-
-	public getLat(): number {
-		return this.lat;
-	}
-
-	public getLong(): number {
-		return this.long;
-	}
-
-	public getCoords(): [number, number] {
-		return [this.lat, this.long];
 	}
 }
 

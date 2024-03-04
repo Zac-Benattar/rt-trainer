@@ -45,19 +45,13 @@ export async function writeDataToJSON(): Promise<void> {
 			associatedAirport.reportingPoints = [];
 			associatedAirport?.reportingPoints.push({
 				name: airportReportingPoints[i].name,
-				coordinates: [
-					airportReportingPoints[i].geometry.coordinates[1],
-					airportReportingPoints[i].geometry.coordinates[0]
-				],
+				coordinates: airportReportingPoints[i].point,
 				compulsory: airportReportingPoints[i].compulsory
 			});
 		} else {
 			associatedAirport.reportingPoints.push({
 				name: airportReportingPoints[i].name,
-				coordinates: [
-					airportReportingPoints[i].geometry.coordinates[1],
-					airportReportingPoints[i].geometry.coordinates[0]
-				],
+				coordinates: airportReportingPoints[i].point,
 				compulsory: airportReportingPoints[i].compulsory
 			});
 		}
@@ -68,7 +62,8 @@ export async function writeDataToJSON(): Promise<void> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 
 	for (let i = 0; i < airspaceData.length; i++) {
-		airspaceData[i].centrePoint = turf.centroid(airspaceData[i].geometry);
+		airspaceData[i].centrePoint = turf.center(turf.polygon(airspaceData[i].geometry.coordinates)).geometry
+			.coordinates as [number, number];
 	}
 
 	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaceData, null, 2));
@@ -127,7 +122,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 		airportData.altIdentifier,
 		airportData.type,
 		airportData.country,
-		[airportData.geometry.coordinates[1], airportData.geometry.coordinates[0]],
+		airportData.geometry.coordinates,
 		airportData.reportingPoints,
 		airportData.elevation.value,
 		airportData.trafficType,
@@ -157,10 +152,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 				runway.declaredDistance.asda?.unit,
 				runway.declaredDistance.lda.value,
 				runway.declaredDistance.lda.unit,
-				[
-					runway.thresholdLocation?.geometry.coordinates[1],
-					runway.thresholdLocation?.geometry.coordinates[0]
-				],
+				runway.thresholdLocation?.geometry.coordinates,
 				runway.thresholdLocation?.elevation.value,
 				runway.thresholdLocation?.elevation.unit,
 				runway.exclusiveAircraftType,
@@ -194,9 +186,7 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 		airspaceData.specialAgreement,
 		airspaceData.requestCompliance,
 		airspaceData.centrePoint,
-		airspaceData.geometry.coordinates[0].map((coordinate) => {
-			return [coordinate[1], coordinate[0]];
-		}),
+		airspaceData.geometry.coordinates,
 		airspaceData.country,
 		airspaceData.upperLimit.value,
 		airspaceData.lowerLimit.value,

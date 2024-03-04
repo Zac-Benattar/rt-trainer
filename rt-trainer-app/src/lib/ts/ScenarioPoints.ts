@@ -125,7 +125,7 @@ export function getStartAirportScenarioPoints(
 	const stages: ScenarioPoint[] = [];
 	const startAerodromeTime: number = startAirport.getStartTime(seed);
 	const takeoffRunway = startAirport.getTakeoffRunway(seed);
-	const initialRouteHeading = turf.bearing(waypoints[0].getCoords(), waypoints[1].getCoords());
+	const initialRouteHeading = turf.bearing(waypoints[0].location, waypoints[1].location);
 
 	const groundedPose: Pose = {
 		position: startAirport.coordinates,
@@ -151,19 +151,17 @@ export function getStartAirportScenarioPoints(
 	};
 
 	const takeoffAirspace = airspaces.find((x) => x.name.includes(startAirport.name));
-	if (!takeoffAirspace) {
-		throw new Error('No takeoff airspace found for ' + startAirport.name);
-	}
-	const startRoute = [waypoints[0].getCoords(), waypoints[1].getCoords()];
-	const leavingZonePosition: Position = findIntersections(startRoute, [takeoffAirspace])[0].position;
-	const leavingZonePose: Pose = {
-		position: leavingZonePosition,
-		trueHeading: initialRouteHeading,
-		altitude: 1200,
-		airSpeed: 70.0
-	};
 
-	if (startAirport.isControlled()) {
+	if (startAirport.isControlled() && takeoffAirspace) {
+		const firstRouteSegment = [waypoints[0].location, waypoints[1].location];
+		const leavingZonePosition: Position = findIntersections(firstRouteSegment, [takeoffAirspace])[0]
+			.position;
+		const leavingZonePose: Pose = {
+			position: leavingZonePosition,
+			trueHeading: initialRouteHeading,
+			altitude: 1200,
+			airSpeed: 70.0
+		};
 		const radioCheck = new ScenarioPoint(
 			pointIndex++,
 			StartUpStage.RadioCheck,
@@ -283,7 +281,17 @@ export function getStartAirportScenarioPoints(
 			startAerodromeTime + 18
 		);
 		stages.push(reportLeavingZone);
-	} else {
+	} else if (takeoffAirspace) {
+		const firstRouteSegment = [waypoints[0].location, waypoints[1].location];
+		const leavingZonePosition: Position = findIntersections(firstRouteSegment, [takeoffAirspace])[0]
+			.position;
+		const leavingZonePose: Pose = {
+			position: leavingZonePosition,
+			trueHeading: initialRouteHeading,
+			altitude: 1200,
+			airSpeed: 70.0
+		};
+		// FISO
 		const radioCheck = new ScenarioPoint(
 			pointIndex++,
 			StartUpStage.RadioCheck,
@@ -353,6 +361,17 @@ export function getStartAirportScenarioPoints(
 			startAerodromeTime + 15
 		);
 		stages.push(reportLeavingZone);
+	} else {
+		// Fully uncontrolled airport - no ATC of any kind
+		const reportTakingOff = new ScenarioPoint(
+			pointIndex++,
+			TakeOffStage.AnnounceTakingOff,
+			takingOffPose,
+			getParkedMadeContactUncontrolledUpdateData(seed, startAirport),
+			0,
+			startAerodromeTime + 10
+		);
+		stages.push(reportTakingOff);
 	}
 
 	return stages;
@@ -714,7 +733,6 @@ export function getAirborneScenarioPoints(
 			airSpeed: 130
 		};
 
-		console.log(airspaceIntersectionPoints[i]);
 		// Add logic to determine what stages to add at each point
 		const requestFrequencyChange = new ScenarioPoint(
 			pointIndex++,
@@ -846,13 +864,13 @@ export function getAirborneScenarioPoints(
 		// This minimises the chance of the emergency ending after the next actual route point time
 		const lerpPercentage: number = (seed % 85) / 100 + 0.05;
 		const segmentDistance: number = turf.distance(
-			waypoints[emergencyPointIndex].getCoords(),
-			waypoints[emergencyPointIndex - 1].getCoords()
+			waypoints[emergencyPointIndex].location,
+			waypoints[emergencyPointIndex - 1].location
 		);
 		const emergencyPosition: Position = turf.along(
 			turf.lineString([
-				waypoints[emergencyPointIndex].getCoords(),
-				waypoints[emergencyPointIndex - 1].getCoords()
+				waypoints[emergencyPointIndex].location,
+				waypoints[emergencyPointIndex - 1].location
 			]),
 			segmentDistance * lerpPercentage
 		).geometry.coordinates;

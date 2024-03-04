@@ -380,25 +380,6 @@ export function getRandomSqwuakCode(seed: number): number {
 	return code;
 }
 
-export function getBbox10PercentMargins(positions: Position[]) {
-	const bboxPolygon = turf.bbox(positions);
-	const marginX = (bboxPolygon[2] - bboxPolygon[0]) * 0.1;
-	const marginY = (bboxPolygon[3] - bboxPolygon[1]) * 0.1;
-
-	if (marginX === 0 || marginY === 0) {
-		return bboxPolygon;
-	}
-
-	const newBounds = [
-		bboxPolygon[0] - marginX,
-		bboxPolygon[1] - marginY,
-		bboxPolygon[2] + marginX,
-		bboxPolygon[3] + marginY
-	];
-
-	return newBounds;
-}
-
 /**
  * Calculates the distance along a route a given target point is in meters
  * @param route - route defined as array of Positions
@@ -443,18 +424,19 @@ export interface Intersection {
  * @returns - list of intersections sorted by distance along the route
  */
 export function findIntersections(route: Position[], airspaces: Airspace[]): Intersection[] {
-	const routeLine = turf.lineString(route.map((point) => [point[1], point[0]]));
+	const routeLine = turf.lineString(route);
 
 	const intersections: Intersection[] = [];
 
 	airspaces.forEach((airspace) => {
-		if (turf.booleanIntersects(routeLine, airspace.coordinates)) {
+		const airspacePolygon = turf.polygon(airspace.coordinates);
+		if (turf.booleanIntersects(routeLine, airspacePolygon)) {
 			route.forEach((point, pointIndex) => {
 				if (pointIndex < route.length - 1) {
 					const lineSegment = turf.lineString([point, route[pointIndex + 1]]);
 
-					if (turf.booleanIntersects(lineSegment, airspace.coordinates)) {
-						const intersection = turf.lineIntersect(lineSegment, airspace.coordinates);
+					if (turf.booleanIntersects(lineSegment, airspacePolygon)) {
+						const intersection = turf.lineIntersect(lineSegment, airspacePolygon);
 						intersection.features.forEach((feature) => {
 							const intersectionPoint: Position = feature.geometry.coordinates;
 
@@ -466,7 +448,7 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 							// in the direction of the heading and checking if it is inside the airspace
 							const enteringAirspace = turf.booleanPointInPolygon(
 								turf.destination(point, heading, 0.01, { units: 'kilometers' }),
-								airspace.coordinates
+								airspacePolygon
 							);
 
 							intersections.push({
@@ -488,11 +470,17 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 }
 
 export function isInAirspace(point: Position, airspace: Airspace): boolean {
-	return turf.booleanPointInPolygon(point, airspace.coordinates);
+	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
 export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace): boolean {
 	const routeLine = turf.lineString(route);
 
-	return turf.booleanIntersects(routeLine, airspace.coordinates);
+	if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
+
+	for (let i = 0; i < route.length; i++) {
+		if (turf.booleanContains(turf.polygon(airspace.coordinates), turf.point(route[i]))) return true;
+	}
+
+	return false;
 }

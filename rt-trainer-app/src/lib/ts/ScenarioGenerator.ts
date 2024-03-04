@@ -29,6 +29,8 @@ export async function generateScenario(
 	const airspaces: Airspace[] = [];
 	const scenarioPoints: ScenarioPoint[] = [];
 
+	waypoints.sort((a, b) => a.index - b.index);
+
 	const airportsData: AirportData[] = await readAirportDataFromDB();
 	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
 
@@ -52,14 +54,16 @@ export async function generateScenario(
 		allAirspaces.push(airspace);
 	}
 
-	const startAirport = allAirports.find((x) => x.name == waypoints[0].name);
+	const startAirport = allAirports.find((x) => x.name.includes(waypoints[0].name));
 	if (startAirport == undefined) {
 		throw new Error('Start airport not found');
 	}
 
 	airports.push(startAirport);
 
-	const endAirport = allAirports.find((x) => x.name == waypoints[waypoints.length - 1].name);
+	const endAirport = allAirports.find((x) =>
+		x.name.includes(waypoints[waypoints.length - 1].name.split(' ')[0])
+	);
 	if (endAirport == undefined) {
 		throw new Error('End airport not found');
 	}
@@ -69,8 +73,7 @@ export async function generateScenario(
 	// Get all airspace along the route
 	const route: [number, number][] = [
 		startAirport.coordinates,
-		waypoints[1].getCoords(),
-		waypoints[2].getCoords(),
+		waypoints[1].location,
 		endAirport.coordinates
 	];
 
@@ -78,7 +81,9 @@ export async function generateScenario(
 	const intersectionPoints = findIntersections(route, allAirspaces);
 	for (let i = 0; i < intersectionPoints.length; i++) {
 		if (airspaces.findIndex((x) => x.id == intersectionPoints[i].airspaceId) == -1) {
-			airspaces.push(allAirspaces.find((x) => x.id == intersectionPoints[i].airspaceId) as Airspace);
+			airspaces.push(
+				allAirspaces.find((x) => x.id == intersectionPoints[i].airspaceId) as Airspace
+			);
 		}
 	}
 
