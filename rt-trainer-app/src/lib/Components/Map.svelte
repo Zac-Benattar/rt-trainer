@@ -8,6 +8,8 @@
 	
 	The coordinates used in the rest of the application are in the format [long, lat],
 	here they must be converted to [lat, long] for Leaflet to understand them correctly.
+
+	This file is also cursed, and I'm sorry for anyone who has to read or maintain it.
 	*/
 	import {
 		AirspacesStore,

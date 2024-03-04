@@ -442,12 +442,12 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 
 							const distanceAlongRoute = calculateDistanceAlongRoute(route, intersectionPoint);
 
-							const heading = turf.bearing(point, intersectionPoint);
+							const heading = turf.bearing(turf.point(point), intersectionPoint);
 
-							// Determine whether the intersection is the entering of an airspace by defining a point 10m
+							// Determine whether the intersection is the entering of an airspace by defining a point 50m
 							// in the direction of the heading and checking if it is inside the airspace
 							const enteringAirspace = turf.booleanPointInPolygon(
-								turf.destination(point, heading, 0.01, { units: 'kilometers' }),
+								turf.destination(intersectionPoint, 0.005, heading, { units: 'kilometers' }),
 								airspacePolygon
 							);
 
