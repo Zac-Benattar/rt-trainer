@@ -62,8 +62,8 @@ export async function writeDataToJSON(): Promise<void> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 
 	for (let i = 0; i < airspaceData.length; i++) {
-		airspaceData[i].centrePoint = turf.center(turf.polygon(airspaceData[i].geometry.coordinates)).geometry
-			.coordinates as [number, number];
+		airspaceData[i].centrePoint = turf.center(turf.polygon(airspaceData[i].geometry.coordinates))
+			.geometry.coordinates as [number, number];
 	}
 
 	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaceData, null, 2));
@@ -191,7 +191,10 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 		airspaceData.upperLimit.value,
 		airspaceData.lowerLimit.value,
 		airspaceData.upperLimitMax?.value,
-		airspaceData.lowerLimitMin?.value
+		airspaceData.lowerLimitMin?.value,
+		airspaceData.frequencies?.map((frequency) => {
+			return new Frequency(frequency.value, frequency.unit, frequency.name, 0, frequency.primary);
+		})
 	);
 }
 

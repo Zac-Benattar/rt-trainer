@@ -1,3 +1,4 @@
+import type { Frequency } from '../Frequency';
 import { isInAirspace, isAirspaceIncludedInRoute } from '../utils';
 
 export default class Airspace {
@@ -18,6 +19,7 @@ export default class Airspace {
 	public lowerLimit: number;
 	public upperLimitMax: number;
 	public lowerLimitMin: number;
+	public frequencies: Frequency[];
 
 	constructor(
 		id: string,
@@ -36,7 +38,8 @@ export default class Airspace {
 		upperLimit: number,
 		lowerLimit: number,
 		upperLimitMax: number,
-		lowerLimitMin: number
+		lowerLimitMin: number,
+		frequencies: Frequency[]
 	) {
 		this.id = id;
 		this.name = name;
@@ -55,6 +58,7 @@ export default class Airspace {
 		this.lowerLimit = lowerLimit;
 		this.upperLimitMax = upperLimitMax;
 		this.lowerLimitMin = lowerLimitMin;
+		this.frequencies = frequencies;
 	}
 
 	public getDisplayName(): string {

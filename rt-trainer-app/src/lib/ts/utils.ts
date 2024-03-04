@@ -371,13 +371,21 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
-export function getRandomSqwuakCode(seed: number): number {
+export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
+	const idHash = simpleHash(airspaceId);
 	let code: number = 0;
 	for (let i = 0; i < 4; i++) {
 		// Swap this out for a big prime
-		code += ((seed * 49823748933 * i) % 8) * (10 ^ i);
+		code += ((seed * 5310545957 * i * idHash) % 8) * (10 ^ i);
 	}
-	return code;
+	return code.toString();
+}
+
+export function getRandomFrequency(seed: number, airspaceId: string): string {
+	const idHash = simpleHash(airspaceId);
+	const frequency =
+		118 + ((9130427071 * seed * idHash) % 20) + '.' + ((seed * idHash) % 20) * 0.025;
+	return frequency;
 }
 
 /**
