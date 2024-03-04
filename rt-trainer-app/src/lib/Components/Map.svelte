@@ -139,7 +139,7 @@
 			});
 
 			// Sets the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.position[1], targetPose.position[0]], {
+			currentLocationMarker = L.marker([targetPose.position[0], targetPose.position[1]], {
 				icon: planeIcon,
 				rotationAngle: targetPose.trueHeading,
 				rotationOrigin: 'center'
@@ -193,7 +193,7 @@
 				if (nullRouteOverlay) nullRouteOverlay.remove();
 			}
 
-			map.setView(targetPose.position, initialZoomLevel);
+			map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
 			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 				// bbox in terms of long, lat - flip them for the actual bounds in lat, long

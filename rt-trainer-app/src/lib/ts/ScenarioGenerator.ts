@@ -71,11 +71,7 @@ export async function generateScenario(
 	airports.push(endAirport);
 
 	// Get all airspace along the route
-	const route: [number, number][] = [
-		startAirport.coordinates,
-		waypoints[1].location,
-		endAirport.coordinates
-	];
+	const route: [number, number][] = waypoints.map((x) => x.location);
 
 	// Collect all intersection points with airspaces
 	const intersectionPoints = findIntersections(route, allAirspaces);

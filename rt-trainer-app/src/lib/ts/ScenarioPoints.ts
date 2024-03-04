@@ -125,7 +125,9 @@ export function getStartAirportScenarioPoints(
 	const stages: ScenarioPoint[] = [];
 	const startAerodromeTime: number = startAirport.getStartTime(seed);
 	const takeoffRunway = startAirport.getTakeoffRunway(seed);
-	const initialRouteHeading = turf.bearing(waypoints[0].location, waypoints[1].location);
+	const initialRouteHeading = Math.round(
+		turf.bearing(waypoints[0].location, waypoints[1].location)
+	);
 
 	const groundedPose: Pose = {
 		position: startAirport.coordinates,
@@ -275,7 +277,7 @@ export function getStartAirportScenarioPoints(
 		const reportLeavingZone = new ScenarioPoint(
 			pointIndex++,
 			ClimbOutStage.ReportLeavingZone,
-			climbingOutPose,
+			leavingZonePose,
 			getParkedMadeContactControlledUpdateData(seed, startAirport),
 			0,
 			startAerodromeTime + 18
