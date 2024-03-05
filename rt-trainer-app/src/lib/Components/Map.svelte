@@ -146,9 +146,7 @@
 				rotationAngle: targetPose.trueHeading,
 				rotationOrigin: 'center'
 			}).addTo(map);
-		}
 
-		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 			FlightInformationTextBox = L.Control.extend({
 				onAdd: function () {
 					var text = L.DomUtil.create('div');
@@ -232,9 +230,7 @@
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
-			}
 
-			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				flightInformationOverlay.remove();
 
 				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
@@ -264,6 +260,12 @@
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
+
+				flightInformationOverlay.remove();
+
+				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
+					map
+				);
 			}
 		}
 	}
