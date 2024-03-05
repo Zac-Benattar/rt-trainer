@@ -741,10 +741,10 @@ export function getAirborneScenarioPoints(
 				(distanceFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) * FLIGHT_TIME_MULTIPLIER
 			);
 
-		const heading = turf.bearing(airspaceIntersectionPoints[i].position, previousPosition);
+		const heading = turf.bearing(waypoints[0].location, airspaceIntersectionPoints[i].position);
 
 		const preIntersectionPose: Pose = {
-			position: turf.destination(airspaceIntersectionPoints[i].position, 0.5, heading, {
+			position: turf.destination(airspaceIntersectionPoints[i].position, -0.5, heading, {
 				units: 'kilometers'
 			}).geometry.coordinates,
 			trueHeading: heading,
