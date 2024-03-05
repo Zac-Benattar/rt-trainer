@@ -4,7 +4,13 @@
 	leaflet but the compromise is to not import Leaflet with an import statement at the 
 	top of the file. Read more here about the issue and solution in the blog post by 
 	Stanislav Khromov below.
-	https://khromov.se/using-leaflet-with-sveltekit/ */
+	https://khromov.se/using-leaflet-with-sveltekit/ 
+	
+	The coordinates used in the rest of the application are in the format [long, lat],
+	here they must be converted to [lat, long] for Leaflet to understand them correctly.
+
+	This file is also cursed, and I'm sorry for anyone who has to read or maintain it.
+	*/
 	import {
 		AirspacesStore,
 		AwaitingServerResponseStore,
@@ -15,10 +21,11 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
-	import { convertMinutesToTimeString, getBoundsWith10PercentMargins } from '$lib/ts/utils';
+	import { convertMinutesToTimeString } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import * as turf from '@turf/turf';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -26,8 +33,7 @@
 	let leaflet: any;
 	let rotated_marker: any;
 	let targetPose: Pose = {
-		lat: 0,
-		long: 0,
+		position: [0, 0],
 		trueHeading: 0,
 		altitude: 0,
 		airSpeed: 0
@@ -95,10 +101,18 @@
 			map.remove();
 		}
 
-		map = L.map('myMap').setView([targetPose?.lat, targetPose?.long], initialZoomLevel);
+		map = L.map('myMap').setView(
+			[targetPose?.position[1], targetPose?.position[0]],
+			initialZoomLevel
+		);
 
 		if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-			map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+			const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+			const bounds = new L.LatLngBounds([
+				[bbox[1], bbox[0]],
+				[bbox[3], bbox[2]]
+			]);
+			map.fitBounds(bounds);
 		}
 
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -108,7 +122,7 @@
 
 		// Adds all waypoints to the map
 		waypoints.forEach((waypoint) => {
-			addMarker(waypoint.lat, waypoint.long, waypoint.name);
+			addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
 		});
 
 		connectMarkers();
@@ -127,7 +141,7 @@
 			});
 
 			// Sets the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
+			currentLocationMarker = L.marker([targetPose.position[0], targetPose.position[1]], {
 				icon: planeIcon,
 				rotationAngle: targetPose.trueHeading,
 				rotationOrigin: 'center'
@@ -181,17 +195,23 @@
 				if (nullRouteOverlay) nullRouteOverlay.remove();
 			}
 
-			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
+			map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
 			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-				map.fitBounds(getBoundsWith10PercentMargins(waypoints));
+				// bbox in terms of long, lat - flip them for the actual bounds in lat, long
+				const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+				const bounds = new L.LatLngBounds([
+					[bbox[1], bbox[0]],
+					[bbox[3], bbox[2]]
+				]);
+				map.fitBounds(bounds);
 			}
 
 			await removeGeometry();
 
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
-				addMarker(waypoint.lat, waypoint.long, waypoint.name);
+				addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
 			});
 
 			connectMarkers();
@@ -204,11 +224,14 @@
 				currentLocationMarker.remove();
 
 				// Updates the current location marker, done last to make sure it is on top
-				currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
-					icon: planeIcon,
-					rotationAngle: targetPose.trueHeading,
-					rotationOrigin: 'center'
-				}).addTo(map);
+				currentLocationMarker = L.marker(
+					new L.LatLng(targetPose.position[1], targetPose.position[0]),
+					{
+						icon: planeIcon,
+						rotationAngle: targetPose.trueHeading,
+						rotationOrigin: 'center'
+					}
+				).addTo(map);
 			}
 
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
@@ -227,17 +250,20 @@
 		if (mounted) {
 			await map;
 
-			map.setView([targetPose.lat, targetPose.long], initialZoomLevel);
+			map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), initialZoomLevel);
 
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
 
 				// Updates the current location marker, done last to make sure it is on top
-				currentLocationMarker = L.marker([targetPose.lat, targetPose.long], {
-					icon: planeIcon,
-					rotationAngle: targetPose.trueHeading,
-					rotationOrigin: 'center'
-				}).addTo(map);
+				currentLocationMarker = L.marker(
+					new L.LatLng(targetPose.position[1], targetPose.position[0]),
+					{
+						icon: planeIcon,
+						rotationAngle: targetPose.trueHeading,
+						rotationOrigin: 'center'
+					}
+				).addTo(map);
 			}
 		}
 	}
@@ -282,13 +308,19 @@
 
 			if (airspace.type != 14)
 				polygons.push(
-					L.polygon(airspace.coordinates, { color: 'blue' })
+					L.polygon(
+						airspace.coordinates[0].map((point) => [point[1], point[0]]),
+						{ color: 'blue' }
+					)
 						.bindPopup(airspace.getDisplayName())
 						.addTo(map)
 				);
 			else if (airspace.type == 14)
 				polygons.push(
-					L.polygon(airspace.coordinates, { color: 'red' })
+					L.polygon(
+						airspace.coordinates[0].map((point) => [point[1], point[0]]),
+						{ color: 'red' }
+					)
 						.bindPopup(airspace.getDisplayName())
 						.addTo(map)
 				);

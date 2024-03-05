@@ -135,7 +135,7 @@ export enum InboundForJoinStage {
 	RequestJoin = 'Request Join',
 	ReportDetails = 'Report Details',
 	ReadbackOverheadJoinClearance = 'Readback Overhead Join Clearance',
-	ReportAerodromeInSight = 'Report Aerodrome In Sight',
+	ReportAirportInSight = 'Report Aerodrome In Sight',
 	ContactTower = 'Contact Tower',
 	AcknowledgeGoAround = 'Acknowledge Go Around', // If told to go around by ATC
 	AnnounceGoAround = 'Announce Go Around' // If pilot decides to go around

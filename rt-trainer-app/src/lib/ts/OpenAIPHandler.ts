@@ -10,9 +10,9 @@ import Airport from './AeronauticalClasses/Airport';
 import Runway from './AeronauticalClasses/Runway';
 import { Frequency } from './Frequency';
 import Airspace from './AeronauticalClasses/Airspace';
-import { getPolygonCenter } from './utils';
 import { db } from '$lib/db/db';
 import { airportsJSON, airspacesJSON } from '$lib/db/schema';
+import * as turf from '@turf/turf';
 
 export type AirportReportingPointDBData = {
 	name: string;
@@ -45,19 +45,13 @@ export async function writeDataToJSON(): Promise<void> {
 			associatedAirport.reportingPoints = [];
 			associatedAirport?.reportingPoints.push({
 				name: airportReportingPoints[i].name,
-				coordinates: [
-					airportReportingPoints[i].geometry.coordinates[1],
-					airportReportingPoints[i].geometry.coordinates[0]
-				],
+				coordinates: airportReportingPoints[i].point,
 				compulsory: airportReportingPoints[i].compulsory
 			});
 		} else {
 			associatedAirport.reportingPoints.push({
 				name: airportReportingPoints[i].name,
-				coordinates: [
-					airportReportingPoints[i].geometry.coordinates[1],
-					airportReportingPoints[i].geometry.coordinates[0]
-				],
+				coordinates: airportReportingPoints[i].point,
 				compulsory: airportReportingPoints[i].compulsory
 			});
 		}
@@ -65,14 +59,14 @@ export async function writeDataToJSON(): Promise<void> {
 
 	writeFileSync('src/lib/data/airports.json', JSON.stringify(airports, null, 2));
 
-	const airspaces = await getAllUKAirspaceFromOpenAIP();
+	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 
-	for (let i = 0; i < airspaces.length; i++) {
-		const centrePoint = getPolygonCenter(airspaces[i].geometry.coordinates[0]);
-		airspaces[i].centrePoint = [centrePoint[0], centrePoint[1]];
+	for (let i = 0; i < airspaceData.length; i++) {
+		airspaceData[i].centrePoint = turf.center(turf.polygon(airspaceData[i].geometry.coordinates))
+			.geometry.coordinates as [number, number];
 	}
 
-	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaces, null, 2));
+	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaceData, null, 2));
 }
 
 export function readAirportDataFromJSON(): AirportData[] {
@@ -128,7 +122,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 		airportData.altIdentifier,
 		airportData.type,
 		airportData.country,
-		[airportData.geometry.coordinates[1], airportData.geometry.coordinates[0]],
+		airportData.geometry.coordinates,
 		airportData.reportingPoints,
 		airportData.elevation.value,
 		airportData.trafficType,
@@ -158,10 +152,7 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 				runway.declaredDistance.asda?.unit,
 				runway.declaredDistance.lda.value,
 				runway.declaredDistance.lda.unit,
-				[
-					runway.thresholdLocation?.geometry.coordinates[1],
-					runway.thresholdLocation?.geometry.coordinates[0]
-				],
+				runway.thresholdLocation?.geometry.coordinates,
 				runway.thresholdLocation?.elevation.value,
 				runway.thresholdLocation?.elevation.unit,
 				runway.exclusiveAircraftType,
@@ -194,15 +185,16 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 		airspaceData.byNotam,
 		airspaceData.specialAgreement,
 		airspaceData.requestCompliance,
-		[airspaceData.centrePoint[1], airspaceData.centrePoint[0]],
-		airspaceData.geometry.coordinates[0].map((coordinate) => {
-			return [coordinate[1], coordinate[0]];
-		}),
+		airspaceData.centrePoint,
+		airspaceData.geometry.coordinates,
 		airspaceData.country,
 		airspaceData.upperLimit.value,
 		airspaceData.lowerLimit.value,
 		airspaceData.upperLimitMax?.value,
-		airspaceData.lowerLimitMin?.value
+		airspaceData.lowerLimitMin?.value,
+		airspaceData.frequencies?.map((frequency) => {
+			return new Frequency(frequency.value, frequency.unit, frequency.name, 0, frequency.primary);
+		})
 	);
 }
 
@@ -275,7 +267,9 @@ export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 	return [];
 }
 
-export async function getAllUKAirportReportingPointsFromOpenAIP(): Promise<AirportReportingPointData[]> {
+export async function getAllUKAirportReportingPointsFromOpenAIP(): Promise<
+	AirportReportingPointData[]
+> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/reporting-points`, {
 			headers: {

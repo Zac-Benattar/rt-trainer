@@ -1,6 +1,8 @@
+import type { Position } from '@turf/turf';
 import type Airspace from './AeronauticalClasses/Airspace';
-import type Waypoint from './AeronauticalClasses/Waypoint';
 import * as turf from '@turf/turf';
+
+export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
 
 // Simple hash function: hash * 31 + char
 export function simpleHash(str: string): number {
@@ -45,31 +47,6 @@ export function seededNormalDistribution(
 	const result = z0 * standardDeviation + mean;
 
 	return result;
-}
-
-/* Returns the distance between two locations on the earth in metres. */
-export function haversineDistance(
-	lat1: number,
-	long1: number,
-	lat2: number,
-	long2: number
-): number {
-	const R = 6371e3; // metres
-	const φ1 = (lat1 * Math.PI) / 180; // φ, λ in radians
-	const φ2 = (lat2 * Math.PI) / 180;
-	const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-	const Δλ = ((long2 - long1) * Math.PI) / 180;
-
-	return (
-		2 *
-		R *
-		Math.asin(
-			Math.sqrt(
-				Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-					Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2)
-			)
-		)
-	);
 }
 
 /* Returns a lower copy of the string with single length spaces and no punctuation. */
@@ -328,83 +305,6 @@ export function generateRandomURLValidString(length: number) {
 	return randomString;
 }
 
-/* Following four functions from https://www.trysmudford.com/blog/linear-interpolation-functions/ */
-export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
-export const invlerp = (x: number, y: number, a: number) => clamp((a - x) / (y - x));
-export const clamp = (a: number, min = 0, max = 1) => Math.min(max, Math.max(min, a));
-export const range = (x1: number, y1: number, x2: number, y2: number, a: number) =>
-	lerp(x2, y2, invlerp(x1, y1, a));
-
-export const lerpLocation = (
-	lat1: number,
-	long1: number,
-	lat2: number,
-	long2: number,
-	a: number
-): { lat: number; long: number } => {
-	return {
-		lat: lerp(lat1, lat2, a),
-		long: lerp(long1, long2, a)
-	};
-};
-
-export function toRadians(degrees: number): number {
-	return degrees * (Math.PI / 180);
-}
-
-export function toDegrees(radians: number): number {
-	return radians * (180 / Math.PI);
-}
-
-export function getHeadingBetween(
-	lat1: number,
-	long1: number,
-	lat2: number,
-	long2: number
-): number {
-	const dLon = toRadians(long2 - long1);
-
-	const y = Math.sin(dLon) * Math.cos(toRadians(lat2));
-	const x =
-		Math.cos(toRadians(lat1)) * Math.sin(toRadians(lat2)) -
-		Math.sin(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.cos(dLon);
-
-	const bearing = toDegrees(Math.atan2(y, x));
-
-	// Normalize the bearing to be in the range [0, 360)
-	return Math.round((bearing + 360) % 360);
-}
-
-export function getNewCoordsFromCoord(
-	startLat: number,
-	startLong: number,
-	angle: number, // Angle in degrees (bearing from the starting point)
-	distance: number // Distance in nautical miles
-): Point {
-	const earthRadius = 3440.065; // Earth's radius in nauical miles
-
-	const startLatRad = toRadians(startLat);
-	const startLongRad = toRadians(startLong);
-	const angleRad = toRadians(angle);
-
-	const newLatRad = Math.asin(
-		Math.sin(startLatRad) * Math.cos(distance / earthRadius) +
-			Math.cos(startLatRad) * Math.sin(distance / earthRadius) * Math.cos(angleRad)
-	);
-
-	const newLongRad =
-		startLongRad +
-		Math.atan2(
-			Math.sin(angleRad) * Math.sin(distance / earthRadius) * Math.cos(startLatRad),
-			Math.cos(distance / earthRadius) - Math.sin(startLatRad) * Math.sin(newLatRad)
-		);
-
-	const newLat = toDegrees(newLatRad);
-	const newLong = toDegrees(newLongRad);
-
-	return [newLat, newLong];
-}
-
 export function getCompassDirectionFromHeading(heading: number) {
 	const compassDirections = [
 		'North',
@@ -471,266 +371,98 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
-export function getRandomSqwuakCode(seed: number): number {
+export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
+	const idHash = simpleHash(airspaceId);
 	let code: number = 0;
 	for (let i = 0; i < 4; i++) {
 		// Swap this out for a big prime
-		code += ((seed * 49823748933 * i) % 8) * (10 ^ i);
+		code += ((seed * 5310545957 * i * idHash) % 8) * (10 ^ i);
 	}
-	return code;
+	return code.toString();
 }
 
-type Point = [number, number];
-
-export function pointInPolygon(point: Point, polygon: Point[]): boolean {
-	const x = point[0];
-	const y = point[1];
-	let inside = false;
-
-	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-		const xi = polygon[i][0];
-		const yi = polygon[i][1];
-		const xj = polygon[j][0];
-		const yj = polygon[j][1];
-
-		const intersect = yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
-
-		if (intersect) {
-			inside = !inside;
-		}
-	}
-
-	return inside;
+export function getRandomFrequency(seed: number, airspaceId: string): string {
+	const idHash = simpleHash(airspaceId);
+	const frequency =
+		118 + ((9130427071 * seed * idHash) % 20) + '.' + ((seed * idHash) % 20) * 0.025;
+	return frequency;
 }
 
-export function anyPointsInPolygon(points: Point[], polygon: Point[]): boolean {
-	for (const p of points) {
-		if (pointInPolygon(p, polygon)) {
-			return true;
+/**
+ * Calculates the distance along a route a given target point is in meters
+ * @param route - route defined as array of Positions
+ * @param targetPoint - target point on route
+ * @returns - distance along the route in meters
+ */
+export function calculateDistanceAlongRoute(route: Position[], targetPoint: Position): number {
+	let totalDistanceAlongRoute = 0;
+
+	for (let i = 0; i < route.length - 1; i++) {
+		const segmentLength = turf.distance(route[i], route[i + 1], { units: 'meters' });
+
+		// Check if the target point is between the current segment
+		const distanceToTarget = turf.distance(route[i], targetPoint, { units: 'meters' });
+		const distanceToNext = turf.distance(route[i + 1], targetPoint, { units: 'meters' });
+
+		// If the target point is within 5m of the segment, we consider it to be on the segment
+		if (distanceToTarget + distanceToNext - segmentLength < 5) {
+			// Target point lies on the current segment
+			totalDistanceAlongRoute += distanceToTarget;
+			break;
 		}
+
+		// Add the distance of the current segment to the total distance
+		totalDistanceAlongRoute += segmentLength;
 	}
 
-	return false;
-}
-
-export function lineIntersectsPolygon(point1: Point, point2: Point, polygon: Point[]): boolean {
-	// Check if any of the line's end points are inside the polygon
-	if (pointInPolygon(point1, polygon) || pointInPolygon(point2, polygon)) {
-		return true;
-	}
-
-	// Check for intersection by iterating through each edge of the polygon
-	for (let i = 0; i < polygon.length; i++) {
-		const j = (i + 1) % polygon.length;
-		const edgeStart = polygon[i];
-		const edgeEnd = polygon[j];
-
-		// Check if the line segment defined by point1 and point2 intersects the current edge
-		if (doSegmentsIntersect(point1, point2, edgeStart, edgeEnd)) {
-			return true;
-		}
-	}
-
-	return false;
-}
-
-export function doSegmentsIntersect(a: Point, b: Point, c: Point, d: Point): boolean {
-	const ccw = (p1: Point, p2: Point, p3: Point) => {
-		return (p3[1] - p1[1]) * (p2[0] - p1[0]) > (p2[1] - p1[1]) * (p3[0] - p1[0]);
-	};
-
-	return ccw(a, c, d) !== ccw(b, c, d) && ccw(a, b, c) !== ccw(a, b, d);
-}
-
-export function polygonIntersectsOrWithinPolygon(
-	innerPolygon: Point[],
-	outerPolygon: Point[]
-): boolean {
-	// Check if any vertex of the inner polygon is inside the outer polygon
-	for (const vertex of innerPolygon) {
-		if (pointInPolygon(vertex, outerPolygon)) {
-			return true;
-		}
-	}
-
-	// Check for intersection by iterating through each edge of both polygons
-	for (let i = 0; i < outerPolygon.length; i++) {
-		const j = (i + 1) % outerPolygon.length;
-		const edgeStartOuter = outerPolygon[i];
-		const edgeEndOuter = outerPolygon[j];
-
-		for (let k = 0; k < innerPolygon.length; k++) {
-			const l = (k + 1) % innerPolygon.length;
-			const edgeStartInner = innerPolygon[k];
-			const edgeEndInner = innerPolygon[l];
-
-			// Check if the edges of both polygons intersect
-			if (doSegmentsIntersect(edgeStartOuter, edgeEndOuter, edgeStartInner, edgeEndInner)) {
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-export function getPolygonCenter(polygon: Point[]): Point {
-	if (polygon.length === 0) {
-		throw new Error('Empty polygon');
-	}
-
-	// Calculate the average of x-coordinates
-	const centerX = polygon.reduce((sum, point) => sum + point[0], 0) / polygon.length;
-
-	// Calculate the average of y-coordinates
-	const centerY = polygon.reduce((sum, point) => sum + point[1], 0) / polygon.length;
-
-	return [centerX, centerY];
-}
-
-export function getClosestPointFromCollection(
-	targetPoint: [number, number],
-	pointsList: [number, number][]
-): [number, number] | null {
-	if (pointsList.length === 0) {
-		return null; // No points in the list
-	}
-
-	let closestPoint = pointsList[0];
-	let minDistance = haversineDistance(
-		targetPoint[0],
-		targetPoint[1],
-		closestPoint[0],
-		closestPoint[1]
-	);
-
-	for (let i = 1; i < pointsList.length; i++) {
-		const currentPoint = pointsList[i];
-		const distance = haversineDistance(
-			targetPoint[0],
-			targetPoint[1],
-			currentPoint[0],
-			currentPoint[1]
-		);
-
-		if (distance < minDistance) {
-			minDistance = distance;
-			closestPoint = currentPoint;
-		}
-	}
-
-	return closestPoint;
-}
-
-// Return the two corners with the smallest and largest x and y coordinates
-export function getBounds(waypoints: Waypoint[]): [number, number][] {
-	let minLat = Infinity;
-	let maxLat = -Infinity;
-	let minLong = Infinity;
-	let maxLong = -Infinity;
-
-	for (const waypoint of waypoints) {
-		if (waypoint.lat < minLat) {
-			minLat = waypoint.lat;
-		}
-		if (waypoint.lat > maxLat) {
-			maxLat = waypoint.lat;
-		}
-		if (waypoint.long < minLong) {
-			minLong = waypoint.long;
-		}
-		if (waypoint.long > maxLong) {
-			maxLong = waypoint.long;
-		}
-	}
-
-	return [
-		[minLat, minLong],
-		[maxLat, maxLong]
-	];
-}
-
-export function getBoundsWith10PercentMargins(waypoints: Waypoint[]) {
-	const bounds = getBounds(waypoints);
-	const latMargin = (bounds[1][0] - bounds[0][0]) * 0.1;
-	const longMargin = (bounds[1][1] - bounds[0][1]) * 0.1;
-
-	if (latMargin === 0 || longMargin === 0) {
-		return bounds;
-	}
-
-	if (
-		Number.isNaN(bounds[0][0]) ||
-		Number.isNaN(bounds[0][1]) ||
-		Number.isNaN(bounds[1][0]) ||
-		Number.isNaN(bounds[1][1])
-	)
-		return [
-			[0, 0],
-			[0, 0]
-		];
-
-	const newBounds = [
-		[bounds[0][0] - latMargin, bounds[0][1] - longMargin],
-		[bounds[1][0] + latMargin, bounds[1][1] + longMargin]
-	];
-
-	return newBounds;
+	return totalDistanceAlongRoute;
 }
 
 export interface Intersection {
-	point: Point;
+	position: Position;
 	airspaceId: string;
+	enteringAirspace: boolean; // True if the intersection is the entering of an airspace, false if it is the exiting
 	distanceAlongRoute: number;
 }
 
-export function findIntersections(route: Point[], airspaces: Airspace[]): Intersection[] {
-	const routeLine = turf.lineString(route.map((point) => [point[1], point[0]]));
+/**
+ * Finds the intersections between a route and a list of airspaces, returning the intersections sorted by distance along the route
+ * @param route - route defined as array of Positions
+ * @param airspaces - list of airspaces
+ * @returns - list of intersections sorted by distance along the route
+ */
+export function findIntersections(route: Position[], airspaces: Airspace[]): Intersection[] {
+	const routeLine = turf.lineString(route);
 
 	const intersections: Intersection[] = [];
 
-	airspaces.forEach((airspace, airspaceIndex) => {
-		const airspacePolygon = turf.polygon([
-			airspace.coordinates.map((point) => [point[1], point[0]])
-		]);
-
+	airspaces.forEach((airspace) => {
+		const airspacePolygon = turf.polygon(airspace.coordinates);
 		if (turf.booleanIntersects(routeLine, airspacePolygon)) {
 			route.forEach((point, pointIndex) => {
-				// // Check if the point is inside the airspace - we dont want this
-				// const pointCoords = turf.point([point[1], point[0]]);
-
-				// // if (turf.booleanPointInPolygon(pointCoords, airspacePolygon)) {
-				// // 	intersections.push({
-				// // 		point,
-				// // 		airspaceId: airspaces[airspaceIndex].id
-				// // 	});
-				// // }
-
 				if (pointIndex < route.length - 1) {
-					const lineSegment = turf.lineString([
-						[point[1], point[0]],
-						[route[pointIndex + 1][1], route[pointIndex + 1][0]]
-					]);
+					const lineSegment = turf.lineString([point, route[pointIndex + 1]]);
 
 					if (turf.booleanIntersects(lineSegment, airspacePolygon)) {
 						const intersection = turf.lineIntersect(lineSegment, airspacePolygon);
 						intersection.features.forEach((feature) => {
-							const intersectionPoint: Point = [
-								feature.geometry.coordinates[1],
-								feature.geometry.coordinates[0]
-							];
+							const intersectionPoint: Position = feature.geometry.coordinates;
 
-							const distanceAlongRoute = turf.length(
-								turf.lineSlice(
-									turf.point([route[0][1], route[0][0]]),
-									turf.point([intersectionPoint[0], intersectionPoint[1]]),
-									routeLine
-								)
+							const distanceAlongRoute = calculateDistanceAlongRoute(route, intersectionPoint);
+
+							const heading = turf.bearing(turf.point(point), intersectionPoint);
+
+							// Determine whether the intersection is the entering of an airspace by defining a point 50m
+							// in the direction of the heading and checking if it is inside the airspace
+							const enteringAirspace = turf.booleanPointInPolygon(
+								turf.destination(intersectionPoint, 0.005, heading, { units: 'kilometers' }),
+								airspacePolygon
 							);
 
 							intersections.push({
-								point: intersectionPoint,
+								position: intersectionPoint,
 								airspaceId: airspace.id,
+								enteringAirspace,
 								distanceAlongRoute
 							});
 						});
@@ -743,4 +475,20 @@ export function findIntersections(route: Point[], airspaces: Airspace[]): Inters
 	intersections.sort((a, b) => a.distanceAlongRoute - b.distanceAlongRoute);
 
 	return intersections;
+}
+
+export function isInAirspace(point: Position, airspace: Airspace): boolean {
+	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
+}
+
+export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace): boolean {
+	const routeLine = turf.lineString(route);
+
+	if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
+
+	for (let i = 0; i < route.length; i++) {
+		if (turf.booleanContains(turf.polygon(airspace.coordinates), turf.point(route[i]))) return true;
+	}
+
+	return false;
 }

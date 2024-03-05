@@ -18,7 +18,6 @@
 
 	let routeName: string = data.routeRow?.name ?? 'Unnamed Route';
 	let routeDescription: string = data.routeRow?.description ?? '';
-	let waypoints: Waypoint[] = [];
 
 	let routeNameClasses: string = '';
 

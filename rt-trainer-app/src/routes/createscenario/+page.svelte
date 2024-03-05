@@ -170,7 +170,7 @@
 				enabled={true}
 				widthSmScreen={'600px'}
 				heightSmScreen={'500px'}
-				mode={MapMode.ScenarioPlan}
+				mode={MapMode.RoutePlan}
 			/>
 		</div>
 	</div>

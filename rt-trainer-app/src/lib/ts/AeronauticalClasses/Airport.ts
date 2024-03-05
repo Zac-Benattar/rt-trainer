@@ -3,8 +3,8 @@ import { Frequency } from '../Frequency';
 import Runway from './Runway';
 import { METORData, METORDataSample } from './METORData';
 import 'reflect-metadata';
-import { getNewCoordsFromCoord as calculateNewCoords } from '../utils';
 import type { AirportReportingPointDBData } from '../OpenAIPHandler';
+import * as turf from '@turf/turf';
 
 /* Airport data. */
 export default class Airport {
@@ -124,26 +124,36 @@ export default class Airport {
 		return this.runways[index];
 	}
 
-	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): [number, number] {
+	/**
+	 * Gets a point some distance in kilometers along the takeoff runway vector
+	 * @param seed - Seed of the scenario - determines which runway to use
+	 * @param distance - Distance in kilometers
+	 * @returns Position of the point
+	 */
+	public getPointAlongTakeoffRunwayVector(seed: number, distance: number): turf.Position {
 		const runway = this.getTakeoffRunway(seed);
-		return calculateNewCoords(
-			this.coordinates[0],
-			this.coordinates[1],
-			runway.trueHeading,
-			distance
-		);
+		return turf.destination(this.coordinates, distance, runway.trueHeading, { units: 'kilometers' })
+			.geometry.coordinates;
 	}
 
-	public getPointAlongLandingRunwayVector(seed: number, distance: number): [number, number] {
+	/**
+	 * Gets a point some distance in kilometers along the landing runway vector
+	 * @param seed - Seed of the scenario - determines which runway to use
+	 * @param distance - Distance in kilometers
+	 * @returns Position of the point
+	 */
+	public getPointAlongLandingRunwayVector(seed: number, distance: number): turf.Position {
 		const runway = this.getLandingRunway(seed);
-		return calculateNewCoords(
-			this.coordinates[0],
-			this.coordinates[1],
-			runway.trueHeading,
-			distance
-		);
+		return turf.destination(this.coordinates, distance, runway.trueHeading, { units: 'kilometers' })
+			.geometry.coordinates;
 	}
 
+	/**
+	 * Gets the start time of the scenario in minutes from midnight, given a seed, assuming it is the takeoff airport of the scenario
+	 * Range from: 660 (11am) - 900 (3pm)
+	 * @param seed - Seed of the scenario
+	 * @returns Time in minutes from midnight
+	 */
 	public getStartTime(seed: number): number {
 		// (In minutes)
 		// 1pm + (0-4hours) - 2 hours -> 11am - 3pm

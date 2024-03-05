@@ -1,4 +1,4 @@
-import type { AirportReportingPointDBData } from "../OpenAIPHandler";
+import type { AirportReportingPointDBData } from '../OpenAIPHandler';
 
 export type OperatingHours = {
 	dayOfWeek: number;
@@ -70,10 +70,10 @@ export type AirspaceData = {
 	byNotam: boolean;
 	specialAgreement: boolean;
 	requestCompliance: boolean;
-	centrePoint: [number, number]; // Not in OpenAIP original data
+	centrePoint: [number, number];
 	geometry: {
 		type: 'Polygon';
-		coordinates: [[number, number][]];
+		coordinates: [number, number][][];
 	};
 	country: string;
 	upperLimit: {
@@ -124,10 +124,7 @@ export type AirportReportingPointData = {
 	name: string;
 	compulsory: boolean;
 	country: string;
-	geometry: {
-		type: 'Point';
-		coordinates: [number, number];
-	};
+	point: [number, number];
 	elevation: {
 		value: number;
 		unit: number;
