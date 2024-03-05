@@ -799,7 +799,7 @@ export default class RadioCall {
 
 	public getDistanceToPreviousWaypointInMeters(): number {
 		return turf.distance(
-			this.getPreviousWaypoint().getCoords(),
+			this.getPreviousWaypoint().location,
 			this.getCurrentScenarioPoint().pose.position
 		);
 	}
@@ -810,7 +810,7 @@ export default class RadioCall {
 
 	public getPositionRelativeToLastWaypoint(): string {
 		const heading = turf.bearing(
-			this.getPreviousWaypoint().getCoords(),
+			this.getPreviousWaypoint().location,
 			this.getCurrentScenarioPoint().pose.position
 		);
 		const compassDirection = getCompassDirectionFromHeading(heading);
@@ -858,7 +858,7 @@ export default class RadioCall {
 	}
 
 	public getClosestVRPName(): string {
-		return this.getClosestVRP().name;
+		throw new Error('Unimplemented function');
 	}
 
 	public assertCallContainsClosestVRPName(severe: boolean): boolean {
@@ -879,7 +879,7 @@ export default class RadioCall {
 
 	public getNextWaypointDistance(): number {
 		return turf.distance(
-			this.getNextWaypoint().getCoords(),
+			this.getNextWaypoint().location,
 			this.getCurrentScenarioPoint().pose.position
 		);
 	}
@@ -977,24 +977,36 @@ export default class RadioCall {
 		return true;
 	}
 
-	public getNextFrequency(): string {
-		throw new Error('Unimplemented method');
+	public getNextFrequency(): string | undefined {
+		return this.scenario.scenarioPoints.find(
+			(x) => x.updateData.currentTargetFrequency != this.currentTargetFrequency
+		)?.updateData.currentTargetFrequency;
 	}
 
 	public assertCallContainsNextFrequency(severe: boolean): boolean {
-		if (!this.callContainsWord(this.getNextFrequency())) {
+		if (this.getNextFrequency() == undefined) {
+			throw new Error('No next frequency found.');
+		}
+
+		if (!this.callContainsWord(this.getNextFrequency() as string)) {
 			this.feedback.pushMistake("Your call didn't contain the next frequency.", severe);
 			return false;
 		}
 		return true;
 	}
 
-	public getNextFrequencyName(): string {
-		throw new Error('Unimplemented method');
+	public getNextFrequencyName(): string | undefined {
+		return this.scenario.scenarioPoints.find(
+			(x) => x.updateData.currentTargetFrequency != this.currentTargetFrequency
+		)?.updateData.currentTarget;
 	}
 
 	public assertCallContainsNextFrequencyName(severe: boolean): boolean {
-		if (!this.callContainsConsecutiveWords([this.getNextFrequencyName()])) {
+		if (this.getNextFrequencyName() == undefined) {
+			throw new Error('No next frequency found.');
+		}
+
+		if (!this.callContainsConsecutiveWords([this.getNextFrequencyName() as string])) {
 			this.feedback.pushMistake("Your call didn't contain the next frequency name.", severe);
 			return false;
 		}
