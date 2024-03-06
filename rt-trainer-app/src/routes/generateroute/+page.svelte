@@ -6,6 +6,7 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { ActionData } from './$types';
 	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed, loadRouteData } from '$lib/ts/Scenario';
+	import { RefreshOutline } from 'flowbite-svelte-icons';
 
 	const routeCUID = init({ length: 8 });
 
@@ -86,13 +87,23 @@
 
 				<div>
 					<div class="h4 p-1">Route Seed</div>
-					<input
-						class="input {routeSeedClasses}"
-						name="routeSeed"
-						type="text"
-						placeholder={routeSeed}
-						bind:value={routeSeed}
-					/>
+					<div class="flex flex-row gap-3">
+						<input
+							class="input {routeSeedClasses}"
+							name="routeSeed"
+							type="text"
+							placeholder={routeSeed}
+							bind:value={routeSeed}
+						/>
+						<button
+							type="button"
+							class="btn variant-filled w-10"
+							on:click={() => {
+								routeSeed = routeCUID();
+							}}><RefreshOutline /></button
+						>
+					</div>
+
 					<div class="text-sm opacity-50 p-1">{routeSeedDescription}</div>
 				</div>
 

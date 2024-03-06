@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import Map from '$lib/Components/Map.svelte';
-	import { GlobeOutline, EditOutline } from 'flowbite-svelte-icons';
+	import { GlobeOutline, EditOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { init } from '@paralleldrive/cuid2';
@@ -77,7 +77,7 @@
 <div class="flex flex-col place-content-center">
 	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
 		{#if form?.notFound}<p class="error">Route not found</p>{/if}
-		<div class="flex flex-col px-2 sm:w-9/12 gap-2">
+		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<div class="h3 p-1">Create a scenario</div>
 
 			<form class="flex flex-col gap-1" method="POST" action="?/createScenario">
@@ -146,10 +146,19 @@
 
 				<div>
 					<div class="h4 p-1">Scenario Seed</div>
-					<input class="input" name="scenarioSeed" type="text" placeholder={scenarioSeed} />
+					<div class="flex flex-row gap-3">
+						<input class="input" name="scenarioSeed" type="text" placeholder={scenarioSeed} />
+						<button
+							type="button"
+							class="btn variant-filled w-10"
+							on:click={() => {
+								scenarioSeed = scenarioSeedCUID();
+							}}><RefreshOutline /></button
+						>
+					</div>
 					<div class="text-sm opacity-50 p-1">
 						This seed will be used to generate the weather conditions, choose runways, determine
-						where the emergency event is if enabled, and affect other variables.
+						the emergency event, and affect other variables.
 					</div>
 				</div>
 
