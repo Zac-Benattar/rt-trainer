@@ -53,10 +53,7 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
-	} else if (
-		$page.url.pathname.includes('/simulator') ||
-		$page.url.pathname.includes('/results')
-	) {
+	} else if ($page.url.pathname.includes('/simulator') || $page.url.pathname.includes('/results')) {
 		// If on scenario page hide sidebar and show burger button
 		showNavigation = false;
 		classesAppBar = 'w-auto';
@@ -130,14 +127,6 @@
 </AppShell>
 
 <style lang="postcss">
-	@font-face {
-		font-family: 'Geist';
-		font-style: normal;
-		font-weight: 100;
-		src: url('/fonts/GeistVF.woff2') format('woff2');
-		font-display: swap;
-	}
-
 	@font-face {
 		font-family: 'DSEG7ClassicMini';
 		font-style: normal;
