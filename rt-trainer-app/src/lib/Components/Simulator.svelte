@@ -488,7 +488,7 @@
 	</div>
 {/if}
 
-<div class="w-full sm:w-9/12 max-w-screen-lg p-5">
+<div class="w-full max-w-screen-lg p-5">
 	<div class="flex flex-row place-content-center gap-5 flex-wrap">
 		{#if tutorialEnabled && !tutorialComplete}
 			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
@@ -537,15 +537,15 @@
 			</div>
 		{/if}
 
-		<div class="w-50%"><MessageInput {speechRecognitionSupported} on:submit={handleSubmit} /></div>
+		<div class="flex flex-col place-content-evenly sm:grid sm:grid-cols-2 gap-5">
+			<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
 
-		<MessageOutput />
-
-		<div class="grow"><Radio /></div>
-
-		<div class="grow">
-			<Transponder />
+			<MessageOutput />
 		</div>
+
+		<Radio />
+
+		<Transponder />
 
 		<Map enabled={mapEnabled} mode={MapMode.Scenario} />
 

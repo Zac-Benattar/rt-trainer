@@ -50,13 +50,13 @@
 	</div>
 
 	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
-		<div class="sm:w-7/12">
+		<div class="flex">
 			<textarea
 				class="textarea bg-secondary-500-50 text-secondary-50 call-target-output"
 				id="call-target-output"
 				name="call-target-output"
 				disabled
-				rows="1"
+				rows="2"
 				cols="50"
 				maxlength="25"
 				placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}</textarea

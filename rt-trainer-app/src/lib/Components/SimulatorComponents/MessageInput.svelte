@@ -94,7 +94,7 @@
 	};
 </script>
 
-<div class="p-1.5 rounded-md max-w-lg flex flex-col grid-cols-1 sm:gap-2 bg-surface-500 text-white {$$props.class}">
+<div class="p-1.5 rounded-md max-w-lg flex flex-col sm:gap-2 bg-surface-500 text-white {$$props.class}">
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
@@ -107,7 +107,7 @@
 		/>
 	</div>
 
-	<div class="flex flex-row px-2 gap-x-3 place-content-end sm:place-content-evenly flex-wrap">
+	<div class="flex flex-row flex-wrap gap-x-1 pb-1 place-content-evenly lg:flex-nowrap">
 		<div class="flex flex-col py-2">
 			<SlideToggle
 				id="enable-live-feedback"

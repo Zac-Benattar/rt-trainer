@@ -149,7 +149,7 @@
 </script>
 
 <div
-	class="transponder-container flex flex-row card gap-4 sm:gap-2 bg-gray-200 text-white grow place-content-evenly p-3 sm:max-h-40 xl:w-full max-w-5xl flex-wrap"
+	class="transponder-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
 >
 	<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 

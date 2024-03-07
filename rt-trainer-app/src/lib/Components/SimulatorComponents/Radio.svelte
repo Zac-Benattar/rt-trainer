@@ -138,7 +138,7 @@
 </script>
 
 <div
-	class="radio-container flex flex-row card gap-4 sm:gap-2 bg-gray-200 text-white grow place-content-evenly p-3 xl:w-full max-w-5xl flex-wrap"
+	class="radio-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
 >
 	<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
 
