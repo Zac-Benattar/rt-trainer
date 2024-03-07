@@ -34,10 +34,7 @@
 		type AltimeterState,
 		MapMode
 	} from '$lib/ts/SimulatorTypes';
-	import {
-		isCallsignStandardRegistration,
-		replaceWithPhoneticAlphabet
-	} from '$lib/ts/utils';
+	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
@@ -490,8 +487,9 @@
 		</p>
 	</div>
 {/if}
-<div class="w-full sm:w-9/12">
-	<div class="flex flex-row place-content-center gap-5 pt-3 sm:pt-5 flex-wrap px-2">
+
+<div class="w-full sm:w-9/12 max-w-screen-lg p-5">
+	<div class="flex flex-row place-content-center gap-5 flex-wrap">
 		{#if tutorialEnabled && !tutorialComplete}
 			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
 				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
@@ -543,9 +541,11 @@
 
 		<MessageOutput />
 
-		<Radio />
+		<div class="grow"><Radio /></div>
 
-		<Transponder />
+		<div class="grow">
+			<Transponder />
+		</div>
 
 		<Map enabled={mapEnabled} mode={MapMode.Scenario} />
 

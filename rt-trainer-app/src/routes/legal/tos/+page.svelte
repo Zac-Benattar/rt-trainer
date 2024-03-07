@@ -2,7 +2,7 @@
 </script>
 
 <div class="flex flex-row place-content-center h-full w-full">
-	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
+	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12 max-w-prose">
 		<header class="h2">RT-Trainer Terms of Service</header>
 		<article>
 			<div class="flex flex-col gap-3">

@@ -49,7 +49,7 @@ export default class RouteGenerator {
 		const allAirspaces: Airspace[] = [];
 		for (let i = 0; i < airspacesData.length; i++) {
 			const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
-			allAirspaces.push(airspace);
+			if (airspace.lowerLimit < 30) allAirspaces.push(airspace);
 		}
 
 		console.log(
@@ -62,7 +62,6 @@ export default class RouteGenerator {
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
 		let chosenMATZ: Airspace;
-		let matzCenter: [number, number] | undefined | null;
 		let pointInMATZ: [number, number];
 		let onRouteAirspace: Airspace[] = [];
 
@@ -83,7 +82,7 @@ export default class RouteGenerator {
 			const nearbyMATZs: Airspace[] = allAirspaces.filter(
 				(x) =>
 					x.type == 14 &&
-					turf.distance(startAirport.coordinates, x.centrePoint, {units: 'kilometers'}) < 40 &&
+					turf.distance(startAirport.coordinates, x.centrePoint, { units: 'kilometers' }) < 40 &&
 					!x.pointInsideATZ((startAirport as Airport).coordinates)
 			);
 			if (nearbyMATZs.length == 0) {
@@ -102,12 +101,13 @@ export default class RouteGenerator {
 
 			// Get airports within 100km of the chosen MATZ
 			const possibleDestinations = [];
-			matzCenter = chosenMATZ.centrePoint;
 
 			// Turn this into a filter
 			for (let i = 0; i < allValidAirports.length; i++) {
 				const airport = allValidAirports[i];
-				const distance = turf.distance(matzCenter, airport.coordinates, {units: 'kilometers'});
+				const distance = turf.distance(chosenMATZ.centrePoint, airport.coordinates, {
+					units: 'kilometers'
+				});
 
 				if (
 					(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
@@ -129,18 +129,20 @@ export default class RouteGenerator {
 				destinationAirport =
 					possibleDestinations[(seed * (destIterations + 1)) % possibleDestinations.length];
 
-				if (
-					startAirportIsControlled &&
-					destinationAirport.type != 3 &&
-					startAirport != destinationAirport
-				) {
-					validDestinationAirport = true;
-				} else if (
-					!startAirportIsControlled &&
-					(destinationAirport.type == 3 || destinationAirport.type == 9) &&
-					startAirport != destinationAirport
-				) {
-					validDestinationAirport = true;
+				if (!chosenMATZ.pointInsideATZ(destinationAirport.coordinates)) {
+					if (
+						startAirportIsControlled &&
+						destinationAirport.type != 3 &&
+						startAirport != destinationAirport
+					) {
+						validDestinationAirport = true;
+					} else if (
+						!startAirportIsControlled &&
+						(destinationAirport.type == 3 || destinationAirport.type == 9) &&
+						startAirport != destinationAirport
+					) {
+						validDestinationAirport = true;
+					}
 				}
 			}
 			if (
@@ -174,7 +176,7 @@ export default class RouteGenerator {
 			}
 			onRouteAirspace.push(chosenMATZ);
 
-			if (onRouteAirspace.length > 10) {
+			if (onRouteAirspace.length > 4) {
 				validRoute = false;
 				continue;
 			}
@@ -195,7 +197,7 @@ export default class RouteGenerator {
 			undefined
 		);
 
-		if (matzCenter == undefined || matzCenter == null) throw new Error('Exit point is undefined');
+		if (pointInMATZ == undefined || pointInMATZ == null) throw new Error('Matz point is undefined');
 		const matzWaypoint: Waypoint = new Waypoint(
 			chosenMATZ.getDisplayName(),
 			pointInMATZ,
