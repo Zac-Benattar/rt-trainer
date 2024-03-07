@@ -73,10 +73,14 @@
 					on:click={() => {
 						readRecievedCalls = !readRecievedCalls;
 					}}
-					><div class="[&>*]:pointer-events-none"
-						use:popup={audioMessagesInfoTooltip}>Read Aloud</div>
+					><div class="[&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
+						Read Aloud
+					</div>
 				</SlideToggle>
-				<div class="card p-4 variant-filled-secondary z-[3]" data-popup="audioMessagesInfoPopupHover">
+				<div
+					class="card p-4 variant-filled-secondary z-[3]"
+					data-popup="audioMessagesInfoPopupHover"
+				>
 					<p>Audio messages read aloud when you recieve a call from ATC or another aircraft.</p>
 					<div class="arrow variant-filled-secondary" />
 				</div>

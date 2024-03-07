@@ -94,7 +94,9 @@
 	};
 </script>
 
-<div class="p-1.5 rounded-md max-w-lg flex flex-col sm:gap-2 bg-surface-500 text-white {$$props.class}">
+<div
+	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow {$$props.class}"
+>
 	<div class="grow flex justify-self-stretch">
 		<textarea
 			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
@@ -118,8 +120,7 @@
 				on:click={() => {
 					liveFeedback = !liveFeedback;
 				}}
-				><div class="[&>*]:pointer-events-none"
-					use:popup={feedbackTooltip}>Feedback</div>
+				><div class="[&>*]:pointer-events-none" use:popup={feedbackTooltip}>Feedback</div>
 			</SlideToggle>
 		</div>
 		<div class="card p-4 variant-filled-secondary z-[3]" data-popup="feedbackPopupHover">
@@ -128,9 +129,7 @@
 		</div>
 
 		{#if speechRecognitionSupported}
-			<div
-				class="flex flex-col py-2"
-			>
+			<div class="flex flex-col py-2">
 				<SlideToggle
 					id="enable-voice-input"
 					name="slider-label"
@@ -147,8 +146,12 @@
 							});
 						}
 					}}
-					><div class="[&>*]:pointer-events-none"
-						use:popup={speechRecognitionExperimentalWarningTooltip}>Voice Input</div>
+					><div
+						class="[&>*]:pointer-events-none"
+						use:popup={speechRecognitionExperimentalWarningTooltip}
+					>
+						Voice Input
+					</div>
 				</SlideToggle>
 			</div>
 			<div
@@ -159,9 +162,7 @@
 				<div class="arrow variant-filled-secondary" />
 			</div>
 		{:else}
-			<div
-				class="flex flex-col py-2"
-			>
+			<div class="flex flex-col py-2">
 				<SlideToggle
 					id="enable-voice-input"
 					name="slider-label"
@@ -169,8 +170,9 @@
 					active="bg-primary-500"
 					size="sm"
 					disabled
-					><div class="[&>*]:pointer-events-none"
-						use:popup={speechRecognitionNotSupportedTooltip}>Voice Input</div>
+					><div class="[&>*]:pointer-events-none" use:popup={speechRecognitionNotSupportedTooltip}>
+						Voice Input
+					</div>
 				</SlideToggle>
 			</div>
 			<div

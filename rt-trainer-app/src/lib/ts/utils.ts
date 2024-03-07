@@ -388,10 +388,6 @@ export function getRandomFrequency(seed: number, airspaceId: string): string {
 	return frequency;
 }
 
-export function normaliseDegrees(degrees: number): number {
-	return ((degrees % 360) + 360) % 360;
-}
-
 /**
  * Calculates the distance along a route a given target point is in meters
  * @param route - route defined as array of Positions

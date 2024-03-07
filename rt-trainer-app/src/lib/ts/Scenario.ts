@@ -239,7 +239,6 @@ export async function fetchRouteDataById(routeId: string): Promise<RouteData | u
 				)
 			};
 
-			console.log(waypoints);
 			return routeData;
 		}
 	} catch (error: unknown) {

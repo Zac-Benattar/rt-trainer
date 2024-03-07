@@ -24,8 +24,6 @@ export const load: PageServerLoad = async (event) => {
 	if (scenarioId == 'demo') {
 		const route = await RouteGenerator.generateFRTOLRouteFromSeed('demo');
 
-		console.log('route: ', route);
-
 		if (route == null || route == undefined) {
 			return {
 				error: 'Could not generate demo route'

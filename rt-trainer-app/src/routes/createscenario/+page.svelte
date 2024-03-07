@@ -47,7 +47,6 @@
 
 		try {
 			const response = await axios.get(`/api/routes/${routeId}`);
-			console.log(response);
 
 			if (response === undefined) {
 				console.log('Failed to load route from DB');

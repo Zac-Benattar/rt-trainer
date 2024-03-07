@@ -21,7 +21,6 @@ export default class RouteGenerator {
 	public static async generateFRTOLRouteFromSeed(
 		seedString: string
 	): Promise<RouteData | undefined> {
-		console.log(seedString);
 		const seed = simpleHash(seedString);
 
 		const airportsData: AirportData[] = await readAirportDataFromDB();

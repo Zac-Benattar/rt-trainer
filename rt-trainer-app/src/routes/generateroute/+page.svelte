@@ -36,7 +36,6 @@
 	}
 
 	$: {
-		console.log(routeSeed);
 		AwaitingServerResponseStore.set(true);
 		loadFRTOLRouteBySeed(routeSeed);
 		AwaitingServerResponseStore.set(false);

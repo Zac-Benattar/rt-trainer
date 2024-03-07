@@ -227,7 +227,7 @@
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
 						icon: planeIcon,
-						rotationAngle: targetPose.trueHeading,
+						rotationAngle: (targetPose.trueHeading / 2),
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
@@ -257,7 +257,7 @@
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
 						icon: planeIcon,
-						rotationAngle: targetPose.trueHeading,
+						rotationAngle: (targetPose.trueHeading / 2),
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
