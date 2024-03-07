@@ -304,7 +304,7 @@
 					patterns: [
 						// defines a pattern of 10px-wide dashes, repeated every 20px on the line
 						{
-							offset: 50,
+							offset: 20,
 							repeat: 200,
 							symbol: L.Symbol.arrowHead({
 								pixelSize: 20,
