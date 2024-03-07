@@ -388,6 +388,10 @@ export function getRandomFrequency(seed: number, airspaceId: string): string {
 	return frequency;
 }
 
+export function normaliseDegrees(degrees: number): number {
+	return ((degrees % 360) + 360) % 360;
+}
+
 /**
  * Calculates the distance along a route a given target point is in meters
  * @param route - route defined as array of Positions
@@ -437,6 +441,8 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 	const intersections: Intersection[] = [];
 
 	airspaces.forEach((airspace) => {
+		if (airspace.lowerLimit > 30) return;
+
 		const airspacePolygon = turf.polygon(airspace.coordinates);
 		if (turf.booleanIntersects(routeLine, airspacePolygon)) {
 			route.forEach((point, pointIndex) => {
@@ -478,11 +484,16 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 }
 
 export function isInAirspace(point: Position, airspace: Airspace): boolean {
+	if (airspace.lowerLimit > 30) return false;
+
 	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
 export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace): boolean {
 	const routeLine = turf.lineString(route);
+
+	// If the lower limit is is above 3000ft, it is not included in the route as that is the maximum altitude of the route
+	if (airspace.lowerLimit > 30) return false;
 
 	if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
 

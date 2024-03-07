@@ -51,7 +51,7 @@ export async function generateScenario(
 	const allAirspaces: Airspace[] = [];
 	for (let i = 0; i < airspacesData.length; i++) {
 		const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
-		allAirspaces.push(airspace);
+		if (airspace.lowerLimit < 30) allAirspaces.push(airspace);
 	}
 
 	const startAirport = allAirports.find((x) => x.name.includes(waypoints[0].name));

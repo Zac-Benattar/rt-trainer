@@ -90,8 +90,7 @@ export const load: PageServerLoad = async (event) => {
 	const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
 		return new Waypoint(
 			waypoint.name,
-			parseFloat(waypoint.lat),
-			parseFloat(waypoint.long),
+			[parseFloat(waypoint.long), parseFloat(waypoint.lat)],
 			waypoint.type,
 			waypoint.index
 		);
