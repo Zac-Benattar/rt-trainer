@@ -1055,4 +1055,16 @@ export default class RadioCall {
 		}
 		return true;
 	}
+
+	public getATCPressureReading(): string {
+		return (1015 - (this.seed % 30)).toString();
+	}
+
+	public assertCallContainsATCPressureReading(severe: boolean): boolean {
+		if (!this.callContainsWord(this.getATCPressureReading())) {
+			this.feedback.pushMistake("Your call didn't contain the pressure reading.", severe);
+			return false;
+		}
+		return true;
+	}
 }

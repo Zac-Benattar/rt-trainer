@@ -418,8 +418,6 @@ accompanied with the planned times to reach them */
 		radioCall.assertCallContainsATCPressureReading(true);
 		radioCall.assertCallEndsWithUserCallsign(false);
 
-		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, leaving ${radioCall.getCurrentATZName()} MATZ, ${radioCall.getATCPressureReading()}`;
-
 		return new ServerResponse(radioCall.getFeedback(), '', expectedRadioCall);
 	}
 
@@ -435,12 +433,12 @@ accompanied with the planned times to reach them */
 	}
 
 	public static parseLeavingMATZFrequencyChangeRequest(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `Roger ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getATCPressureReading()}, request change to ${radioCall.getNextATZName()} ${radioCall.getNextATZFrequency()}`;
+		const expectedRadioCall: string = `Roger ${radioCall.getTargetAllocatedCallsign()}, ${radioCall.getATCPressureReading()}, request change to ${radioCall.getNextFrequencyName()} ${radioCall.getNextFrequency()}`;
 
 		radioCall.assertCallContainsUserCallsign(false);
 		radioCall.assertCallContainsCriticalWords(['request', 'change']);
 
-		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, radar service terminated, sqwuak 7000, freecall ${radioCall.getNextATZName()}`;
+		const atcResponse = `${radioCall.getTargetAllocatedCallsign()}, radar service terminated, sqwuak 7000, freecall ${radioCall.getNextFrequencyName()}`;
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}

@@ -33,18 +33,6 @@ export default class RouteGenerator {
 		// await pushAirportDataToDatabase();
 		// await pushAirspaceDataToDatabase();
 
-		// Add airports to list of valid airports for takeoff/landing
-		const allValidAirports: Airport[] = [];
-		for (let i = 0; i < airportsData.length; i++) {
-			const airport: Airport = airportDataToAirport(airportsData[i]);
-			if (
-				(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
-				airport.frequencies != null &&
-				airport.frequencies.findIndex((x) => x.type == 4) == -1
-			)
-				allValidAirports.push(airport);
-		}
-
 		// Add airspaces to list of valid airspaces for route
 		const allAirspaces: Airspace[] = [];
 		for (let i = 0; i < airspacesData.length; i++) {
@@ -52,8 +40,25 @@ export default class RouteGenerator {
 			if (airspace.lowerLimit < 30) allAirspaces.push(airspace);
 		}
 
+		// Add airports to list of valid airports for takeoff/landing
+		const allValidAirports: Airport[] = [];
+		for (let i = 0; i < airportsData.length; i++) {
+			const airport: Airport = airportDataToAirport(airportsData[i]);
+
+			if (
+				(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
+				airport.frequencies &&
+				airport.frequencies.findIndex((x) => x.type == 4) == -1
+			) {
+				allValidAirports.push(airport);
+				if (airport.name.includes('NUTHAMPSTEAD')) {
+					console.log(airport);
+				}
+			}
+		}
+
 		console.log(
-			`Total Airports: ${allValidAirports.length} \n Total Airspaces: ${allAirspaces.length}`
+			`Total Valid Airports: ${allValidAirports.length} \nTotal Valid Airspaces: ${allAirspaces.length}`
 		);
 
 		const maxIterations = 100;

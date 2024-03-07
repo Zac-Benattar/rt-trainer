@@ -291,17 +291,23 @@ export function getStartAirportScenarioPoints(
 			startAerodromeTime + 18
 		);
 		stages.push(reportLeavingZone);
-	} else if (takeoffAirspace) {
+	} else {
 		const firstRouteSegment = [waypoints[0].location, waypoints[1].location];
-		const leavingZonePosition: Position = findIntersections(firstRouteSegment, [takeoffAirspace])[0]
-			.position;
+		let leavingZonePosition: Position = [0, 0];
+		if (takeoffAirspace)
+			leavingZonePosition = findIntersections(firstRouteSegment, [takeoffAirspace])[0].position;
+		else
+			leavingZonePosition = turf.destination(waypoints[0].location, 4, initialRouteHeading, {
+				units: 'kilometers'
+			}).geometry.coordinates;
+
 		const leavingZonePose: Pose = {
 			position: leavingZonePosition,
 			trueHeading: initialRouteHeading,
 			altitude: 1200,
 			airSpeed: 70.0
 		};
-		// FISO
+
 		const radioCheck = new ScenarioPoint(
 			pointIndex++,
 			StartUpStage.RadioCheck,
@@ -371,17 +377,6 @@ export function getStartAirportScenarioPoints(
 			startAerodromeTime + 15
 		);
 		stages.push(reportLeavingZone);
-	} else {
-		// Fully uncontrolled airport - no ATC of any kind
-		const reportTakingOff = new ScenarioPoint(
-			pointIndex++,
-			TakeOffStage.AnnounceTakingOff,
-			takingOffPose,
-			getParkedMadeContactUncontrolledUpdateData(seed, startAirport),
-			0,
-			startAerodromeTime + 10
-		);
-		stages.push(reportTakingOff);
 	}
 
 	return stages;
@@ -419,7 +414,25 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 0.0
 	};
 
-	const followTrafficLocation = endAirport.getPointAlongLandingRunwayVector(seed, -3.5);
+	/* Safety Sense: "When arriving at an ATC aerodrome you should call 15 NM or 5 minutes
+	 flying time from the ATZ boundary (whichever is greater)"*/
+	const requestJoinDistance = -16.0 + (seed % 20) * 0.1;
+	const requestJoinLocation = endAirport.getPointAlongLandingRunwayVector(
+		seed,
+		requestJoinDistance
+	);
+	const requestJoinPose: Pose = {
+		position: requestJoinLocation,
+		trueHeading: landingRunway.trueHeading,
+		altitude: 1200,
+		airSpeed: 84.0
+	};
+
+	const followTrafficDistance = -7.0 + (seed % 20) * 0.1;
+	const followTrafficLocation = endAirport.getPointAlongLandingRunwayVector(
+		seed,
+		-followTrafficDistance
+	);
 	const followTrafficPose: Pose = {
 		position: followTrafficLocation,
 		trueHeading: landingRunway.trueHeading,
@@ -427,7 +440,11 @@ export function getEndAirportScenarioPoints(
 		airSpeed: 84.0
 	};
 
-	const reportFinalLocation = endAirport.getPointAlongLandingRunwayVector(seed, -1.6);
+	const reportFinalDistance = -4.0 + (seed % 20) * 0.1;
+	const reportFinalLocation = endAirport.getPointAlongLandingRunwayVector(
+		seed,
+		reportFinalDistance
+	);
 	const reportFinalPose: Pose = {
 		position: reportFinalLocation,
 		trueHeading: landingRunway.trueHeading,
@@ -436,7 +453,7 @@ export function getEndAirportScenarioPoints(
 	};
 
 	const onRunwayPose: Pose = {
-		position: endAirport.getPointAlongLandingRunwayVector(seed, 0),
+		position: endAirport.getPointAlongLandingRunwayVector(seed, -0.05),
 		trueHeading: landingRunway.trueHeading,
 		altitude: 0.0,
 		airSpeed: 0.0
@@ -453,7 +470,7 @@ export function getEndAirportScenarioPoints(
 		const requestJoin = new ScenarioPoint(
 			pointIndex++,
 			InboundForJoinStage.RequestJoin,
-			followTrafficPose,
+			requestJoinPose,
 			getParkedMadeContactControlledUpdateData(seed, endAirport),
 			waypoints.length - 1,
 			landingTime - 10
@@ -463,7 +480,7 @@ export function getEndAirportScenarioPoints(
 		const reportDetails = new ScenarioPoint(
 			pointIndex++,
 			InboundForJoinStage.ReportDetails,
-			followTrafficPose,
+			requestJoinPose,
 			getParkedMadeContactControlledUpdateData(seed, endAirport),
 			waypoints.length - 1,
 			landingTime - 10
@@ -473,7 +490,7 @@ export function getEndAirportScenarioPoints(
 		const readbackOverheadJoinClearance = new ScenarioPoint(
 			pointIndex++,
 			InboundForJoinStage.ReadbackOverheadJoinClearance,
-			followTrafficPose,
+			requestJoinPose,
 			getParkedMadeContactControlledUpdateData(seed, endAirport),
 			waypoints.length - 1,
 			landingTime - 9
@@ -742,7 +759,9 @@ export function getAirborneScenarioPoints(
 				(distanceFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) * FLIGHT_TIME_MULTIPLIER
 			);
 
-		const heading = normaliseDegrees(Math.round(turf.bearing(waypoints[0].location, airspaceIntersectionPoints[i].position)));
+		const heading = normaliseDegrees(
+			Math.round(turf.bearing(waypoints[0].location, airspaceIntersectionPoints[i].position))
+		);
 
 		const preIntersectionPose: Pose = {
 			position: turf.destination(airspaceIntersectionPoints[i].position, -0.5, heading, {
