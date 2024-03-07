@@ -441,6 +441,8 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 	const intersections: Intersection[] = [];
 
 	airspaces.forEach((airspace) => {
+		if (airspace.lowerLimit > 30) return;
+
 		const airspacePolygon = turf.polygon(airspace.coordinates);
 		if (turf.booleanIntersects(routeLine, airspacePolygon)) {
 			route.forEach((point, pointIndex) => {
