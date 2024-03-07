@@ -239,7 +239,7 @@ export default class RadioCall {
 
 	public assertCallContainsCriticalWord(word: string): boolean {
 		if (!this.callContainsWord(word)) {
-			this.feedback.pushMistake("Your call didn't contain the word: " + word, true);
+			this.feedback.pushMistake('Your call didn\'t contain the word: "' + word + '"', true);
 
 			return false;
 		}
@@ -248,7 +248,7 @@ export default class RadioCall {
 
 	public assertCallContainsNonCriticalWord(word: string): boolean {
 		if (!this.callContainsWord(word)) {
-			this.feedback.pushMistake("Your call didn't contain the word: " + word, false);
+			this.feedback.pushMistake('Your call didn\'t contain the word: "' + word + '"', false);
 
 			return false;
 		}
@@ -265,7 +265,13 @@ export default class RadioCall {
 
 	public assertCallContainsCriticalWords(words: string[]): boolean {
 		if (!this.callContainsWords(words)) {
-			this.feedback.pushMistake("Your call didn't contain the words: " + words.join(' '), true);
+			if (words.length == 1)
+				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', true);
+			else
+				this.feedback.pushMistake(
+					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					true
+				);
 			return false;
 		}
 		return true;
@@ -273,7 +279,13 @@ export default class RadioCall {
 
 	public assertCallContainsNonCriticalWords(words: string[]): boolean {
 		if (!this.callContainsWords(words)) {
-			this.feedback.pushMistake("Your call didn't contain the words: " + words.join(' '), false);
+			if (words.length == 1)
+				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', false);
+			else
+				this.feedback.pushMistake(
+					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					false
+				);
 			return false;
 		}
 		return true;
@@ -316,7 +328,13 @@ export default class RadioCall {
 
 	public assertCallContainsConsecutiveCriticalWords(words: string[]): boolean {
 		if (!this.callContainsConsecutiveWords(words)) {
-			this.feedback.pushMistake("Your call didn't contain the words: " + words.join(' '), true);
+			if (words.length == 1)
+				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', true);
+			else
+				this.feedback.pushMistake(
+					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					true
+				);
 			return false;
 		}
 		return true;
@@ -324,7 +342,13 @@ export default class RadioCall {
 
 	public assertCallContainsConsecutiveNonCriticalWords(words: string[]): boolean {
 		if (!this.callContainsConsecutiveWords(words)) {
-			this.feedback.pushMistake("Your call didn't contain the words: " + words.join(' '), false);
+			if (words.length == 1)
+				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', false);
+			else
+				this.feedback.pushMistake(
+					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					false
+				);
 			return false;
 		}
 		return true;

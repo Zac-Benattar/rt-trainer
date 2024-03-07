@@ -262,10 +262,10 @@
 		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
 		const feedback = new Feedback();
 		feedbackData.minorMistakes.forEach((element: string) => {
-			feedback.pushMinorMistake(element);
+			feedback.pushMistake(element, false);
 		});
 		feedbackData.severeMistakes.forEach((element: string) => {
-			feedback.pushSevereMistake(element);
+			feedback.pushMistake(element, true);
 		});
 
 		currentRadioCall.setFeedback(feedback);
@@ -282,7 +282,7 @@
 			if (!feedback.isFlawless()) {
 				// Show current mistakes
 				const t: ToastSettings = {
-					message: feedback.getMistakes().join('\n'),
+					message: feedback.getMistakes().join('<br>'),
 					timeout: 15000,
 					hoverable: true,
 					background: 'variant-filled-warning'
@@ -342,7 +342,7 @@
 		} else if (minorMistakes.length > 0) {
 			// Show a toast with the minor mistakes and advance scenario
 			const t: ToastSettings = {
-				message: 'Correct with minor mistakes: ' + minorMistakes.join(', ') + '.'
+				message: 'Correct with minor mistakes: ' + minorMistakes.join('<br>') + '.'
 			};
 			toastStore.trigger(t);
 		} else {
