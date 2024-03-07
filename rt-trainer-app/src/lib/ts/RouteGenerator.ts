@@ -51,9 +51,6 @@ export default class RouteGenerator {
 				airport.frequencies.findIndex((x) => x.type == 4) == -1
 			) {
 				allValidAirports.push(airport);
-				if (airport.name.includes('NUTHAMPSTEAD')) {
-					console.log(airport);
-				}
 			}
 		}
 
@@ -67,7 +64,8 @@ export default class RouteGenerator {
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
 		let chosenMATZ: Airspace;
-		let pointInMATZ: [number, number];
+		let matzEntryPoint: [number, number];
+		let matzExitPoint: [number, number];
 		let onRouteAirspace: Airspace[] = [];
 
 		let validRoute = false;
@@ -159,13 +157,22 @@ export default class RouteGenerator {
 				continue;
 			}
 
-			pointInMATZ = turf.pointOnFeature(turf.polygon(chosenMATZ.coordinates)).geometry
-				.coordinates as [number, number];
+			const matzCoords = chosenMATZ.coordinates[0].map((point) => turf.point([point[0], point[1]]));
+
+			matzEntryPoint = turf.nearestPoint(
+				turf.point(startAirport.coordinates),
+				turf.featureCollection(matzCoords)
+			).geometry.coordinates as [number, number];
+			matzExitPoint = turf.nearestPoint(
+				turf.point(destinationAirport.coordinates),
+				turf.featureCollection(matzCoords)
+			).geometry.coordinates as [number, number];
 
 			// Get all airspace along the route
 			const route: [number, number][] = [
 				startAirport.coordinates,
-				pointInMATZ,
+				matzEntryPoint,
+				matzExitPoint,
 				destinationAirport.coordinates
 			];
 			onRouteAirspace = [];
@@ -202,12 +209,21 @@ export default class RouteGenerator {
 			undefined
 		);
 
-		if (pointInMATZ == undefined || pointInMATZ == null) throw new Error('Matz point is undefined');
-		const matzWaypoint: Waypoint = new Waypoint(
-			chosenMATZ.getDisplayName(),
-			pointInMATZ,
+		if (!matzEntryPoint) throw new Error('MATZ entry point is undefined');
+		const matzEntryWaypoint: Waypoint = new Waypoint(
+			chosenMATZ.getDisplayName() + ' Entry',
+			matzEntryPoint,
 			WaypointType.NewAirspace,
 			2,
+			undefined
+		);
+
+		if (!matzExitPoint) throw new Error('MATZ exit point is undefined');
+		const matzExitWaypoint: Waypoint = new Waypoint(
+			chosenMATZ.getDisplayName() + ' Exit',
+			matzExitPoint,
+			WaypointType.NewAirspace,
+			3,
 			undefined
 		);
 
@@ -216,12 +232,12 @@ export default class RouteGenerator {
 			destinationAirport?.name,
 			destinationAirport.coordinates,
 			WaypointType.Aerodrome,
-			3,
+			4,
 			undefined
 		);
 
 		return {
-			waypoints: [startWaypoint, matzWaypoint, endWaypoint],
+			waypoints: [startWaypoint, matzEntryWaypoint, matzExitWaypoint, endWaypoint],
 			airspaces: onRouteAirspace,
 			airports: [startAirport, destinationAirport]
 		};
