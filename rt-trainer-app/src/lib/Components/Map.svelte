@@ -32,6 +32,7 @@
 	export let heightSmScreen: string = '452px';
 	let leaflet: any;
 	let rotated_marker: any;
+	let polyline_decorator: any;
 	let targetPose: Pose = {
 		position: [0, 0],
 		trueHeading: 0,
@@ -292,14 +293,33 @@
 	async function connectMarkers() {
 		if (markers.length > 1) {
 			for (let i = 0; i < markers.length - 1; i++) {
-				lines.push(
-					L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
-						color: 'red',
-						weight: 3,
-						opacity: 0.5,
-						smoothFactor: 1
-					}).addTo(map)
-				);
+				const line = L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
+					color: '#ff1493',
+					weight: 5,
+					opacity: 1,
+					smoothFactor: 1
+				}).addTo(map);
+
+				const lineDecorator = L.polylineDecorator(line, {
+					patterns: [
+						// defines a pattern of 10px-wide dashes, repeated every 20px on the line
+						{
+							offset: 50,
+							repeat: 200,
+							symbol: L.Symbol.arrowHead({
+								pixelSize: 20,
+								pathOptions: {
+									color: '#F18',
+									fillOpacity: 1,
+									weight: 0,
+									smoothFactor: 1,
+									opacity: 1
+								}
+							})
+						}
+					]
+				}).addTo(map);
+				lines.push(...[line, lineDecorator]);
 			}
 		}
 	}
@@ -333,6 +353,7 @@
 		if (enabled && browser) {
 			leaflet = await import('leaflet');
 			rotated_marker = await import('leaflet-rotatedmarker');
+			polyline_decorator = await import('leaflet-polylinedecorator');
 
 			loadMapScenario();
 			mounted = true;
