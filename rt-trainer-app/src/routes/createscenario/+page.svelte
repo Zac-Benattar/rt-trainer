@@ -147,7 +147,7 @@
 				<div>
 					<div class="h4 p-1">Scenario Seed</div>
 					<div class="flex flex-row gap-3">
-						<input class="input" name="scenarioSeed" type="text" placeholder={scenarioSeed} />
+						<input class="input" name="scenarioSeed" type="text" bind:value={scenarioSeed} />
 						<button
 							type="button"
 							class="btn variant-filled w-10"
