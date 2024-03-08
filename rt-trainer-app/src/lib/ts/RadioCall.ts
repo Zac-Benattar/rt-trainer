@@ -201,27 +201,18 @@ export default class RadioCall {
 		return this.getRadioCallWords().findIndex((x) => x.includes('decimal'));
 	}
 
-	private getRadioFrequencyStated(): string | undefined {
-		const radioCallWords = this.getRadioCallWords();
-		const decimalIndex = this.getRadioFrequencyDecimalIndex();
-		if (decimalIndex <= 2) return undefined; // Not enough words before decimal to be a frequency
-		if (decimalIndex >= radioCallWords.length - 1) return undefined; // Not enough words after decimal to be a frequency
-
-		const beforeDecimal = radioCallWords.slice(decimalIndex - 3, decimalIndex);
-		const convertedBeforeDecimal = beforeDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
-		const beforeDecimalDigits = convertedBeforeDecimal.join('');
-
-		const afterDecimal = radioCallWords.slice(decimalIndex + 1, decimalIndex + 4);
-		const convertedAfterDecimal = afterDecimal.map((x) => replacePhoneticAlphabetWithChars(x));
-		const afterDecimalDigits = convertedAfterDecimal.join('');
-
-		const freq = beforeDecimalDigits + '.' + afterDecimalDigits;
-
-		return freq;
-	}
-
+	// Eventually implement a way of checking for different spellings of phonetic alphabet words and having r on the end of five and nine, maybe map fiver and niner to five and nine
 	private radioFrequencyStatedEqualsCurrent(): boolean {
-		return this.getRadioFrequencyStated() == this.currentRadioFrequency;
+		const radioFrequencyPhonetics = processString(
+			replaceWithPhoneticAlphabet(this.currentRadioFrequency)
+		);
+		const radioFrequencyPhoneticsNoDecimal = processString(
+			radioFrequencyPhonetics.replace('decimal', '')
+		);
+		return (
+			this.getRadioCall().replace('five ', 'fiver ').replace('nine ', 'niner ').includes(radioFrequencyPhonetics) ||
+			this.getRadioCall().replace('five ', 'fiver ').replace('nine ', 'niner ').includes(radioFrequencyPhoneticsNoDecimal)
+		);
 	}
 
 	public assertCallContainsCurrentRadioFrequency(severe: boolean): boolean {
@@ -318,12 +309,7 @@ export default class RadioCall {
 	}
 
 	private callContainsConsecutiveWords(words: string[]): boolean {
-		const startIndex = this.getRadioCallWords().findIndex((x) => x == words[0].toLowerCase());
-		if (startIndex == -1) return false;
-		for (let i = 0; i < words.length; i++) {
-			if (this.getRadioCallWord(startIndex + i) != words[i].toLowerCase()) return false;
-		}
-		return true;
+		return this.getRadioCall().includes(words.join(' '));
 	}
 
 	public assertCallContainsConsecutiveCriticalWords(words: string[]): boolean {
@@ -332,7 +318,7 @@ export default class RadioCall {
 				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', true);
 			else
 				this.feedback.pushMistake(
-					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					'Your call didn\'t contain the consecutive words: "' + words.join('", "') + '"',
 					true
 				);
 			return false;
@@ -346,7 +332,7 @@ export default class RadioCall {
 				this.feedback.pushMistake('Your call didn\'t contain the word: "' + words[0] + '"', false);
 			else
 				this.feedback.pushMistake(
-					'Your call didn\'t contain the words: "' + words.join('", "') + '"',
+					'Your call didn\'t contain the consecutive words: "' + words.join('", "') + '"',
 					false
 				);
 			return false;
@@ -449,7 +435,7 @@ export default class RadioCall {
 			trimSpaces(
 				this.prefix + ' ' + addSpacesBetweenCharacters(removePunctuation(this.userCallsign))
 			).toLowerCase(), // Student G O F L Y
-			this.getUserCallsignPhoneticsWithPrefix() // Student Golf Oscar Foxtrot Lima Yankee
+			this.getUserCallsignPhoneticsWithPrefix().toLowerCase() // Student Golf Oscar Foxtrot Lima Yankee
 		];
 
 		if (this.userCallsignModified) {
@@ -495,7 +481,7 @@ export default class RadioCall {
 	}
 
 	public getStartAirportStartingPoint(): string {
-		return 'hangars';
+		return 'hangers';
 	}
 
 	public getTakeoffRunwayTaxiwayHoldingPoint(): string {
@@ -545,7 +531,7 @@ export default class RadioCall {
 	}
 
 	public assertCallContainsEndAirportName(severe: boolean): boolean {
-		if (!this.callContainsConsecutiveWords([this.getEndAirport().getShortName()])) {
+		if (!this.callContainsConsecutiveWords([this.getEndAirport().getShortName().toLowerCase()])) {
 			this.feedback.pushMistake(
 				"Your call didn't contain the name of the ending aerodrome.",
 				severe
@@ -696,7 +682,7 @@ export default class RadioCall {
 
 	// Doesnt check for the specific flight rules of the scenario - but at time of writing scenario only supports VFR
 	public assertCallContainsFlightRules(severe: boolean): boolean {
-		if (!this.callContainsWord('VFR') || !this.callContainsWord('visual')) {
+		if (!(this.callContainsWord('vfr') || this.callContainsWord('visual'))) {
 			this.feedback.pushMistake("Your call didn't contain your flight rules (VFR).", severe);
 			return false;
 		}
@@ -705,8 +691,8 @@ export default class RadioCall {
 
 	public getTakeoffTurnoutHeading(): number {
 		const headingToFirstWaypoint = turf.distance(
-			this.scenario.waypoints[0].getCoords(),
-			this.scenario.waypoints[1].getCoords()
+			this.scenario.waypoints[0].location,
+			this.scenario.waypoints[1].location
 		);
 
 		// If turnout heading doesnt exist then most likely something has gone very wrong as
@@ -854,7 +840,7 @@ export default class RadioCall {
 	}
 
 	public getLandingParkingSpot(): string {
-		throw new Error('Unimplemented function');
+		return 'hangers';
 	}
 
 	public assertCallContainsLandingParkingSpot(severe: boolean): boolean {

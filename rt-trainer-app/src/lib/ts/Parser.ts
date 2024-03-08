@@ -156,7 +156,7 @@ export default class Parser {
 
 		radioCall.assertCallStartsWithUserCallsign(false);
 		radioCall.assertCallContainsScenarioStartPoint(false);
-		radioCall.assertCallContainsEndAirportName(true);
+		// radioCall.assertCallContainsEndAirportName(true); // This is a critical word but not always understood by the speech recognition so commented out until we can fix
 		radioCall.assertCallContainsCriticalWord('taxi');
 		radioCall.assertCallContainsFlightRules(false);
 
@@ -198,7 +198,7 @@ export default class Parser {
 		radioCall.assertCallContainsConsecutiveCriticalWords(['taxi', 'information']);
 		radioCall.assertCallContainsFlightRules(false);
 		radioCall.assertCallContainsScenarioStartPoint(false);
-		radioCall.assertCallContainsEndAirportName(true);
+		// radioCall.assertCallContainsEndAirportName(true); // This is a critical word but not always understood by the speech recognition so commented out until we can fix
 
 		// Return ATC response
 		const atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, runway ${
@@ -375,8 +375,8 @@ accompanied with the planned times to reach them */
 
 		radioCall.assertCallStartsWithUserCallsign(false);
 		radioCall.assertCallContainsAircraftType(false);
-		radioCall.assertCallContainsStartAirportName(true);
-		radioCall.assertCallContainsEndAirportName(true);
+		// radioCall.assertCallContainsStartAirportName(true); // This is a critical word but not always understood by the speech recognition so commented out until we can fix
+		// radioCall.assertCallContainsEndAirportName(true); // This is a critical word but not always understood by the speech recognition so commented out until we can fix
 		radioCall.assertCallContainsCurrentAltitude(true);
 		radioCall.assertCallContainsNextWaypointName(true);
 		radioCall.assertCallContainsSqwarkCode(true);
@@ -558,16 +558,16 @@ if (not in level flight. */
 		if (radioCall.getEndAirport().isControlled()) {
 			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
 				.getEndAirport()
-				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequencyValue()}`;
+				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequency()?.value}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
 	}
 
 	public static parseLandingContactTower(radioCall: RadioCall): ServerResponse {
-		const expectedRadioCall: string = `${radioCall.getEndAirport().getShortName()} tower ${radioCall
-			.getEndAirport()
-			.getTowerFrequencyValue()}, ${radioCall.getTargetAllocatedCallsign()}`;
+		const expectedRadioCall: string = `${radioCall.getEndAirport().getShortName()} tower ${
+			radioCall.getEndAirport().getTowerFrequency()?.value
+		}, ${radioCall.getTargetAllocatedCallsign()}`;
 
 		radioCall.assertCallContainsConsecutiveCriticalWords([
 			radioCall.getEndAirport().getShortName(),
@@ -599,9 +599,9 @@ if (not in level flight. */
 		if (radioCall.getEndAirport().isControlled()) {
 			atcResponse = `Roger, ${radioCall
 				.getTargetAllocatedCallsign()
-				.toUpperCase()}, contact ${radioCall.getEndAirport().getShortName()} tower on ${radioCall
-				.getEndAirport()
-				.getTowerFrequencyValue()}`;
+				.toUpperCase()}, contact ${radioCall.getEndAirport().getShortName()} tower on ${
+				radioCall.getEndAirport().getTowerFrequency()?.value
+			}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);
@@ -661,7 +661,7 @@ if (not in level flight. */
 		if (radioCall.getEndAirport().isControlled()) {
 			atcResponse = `${radioCall.getTargetAllocatedCallsign().toUpperCase()}, contact ${radioCall
 				.getEndAirport()
-				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequencyValue()}`;
+				.getShortName()} tower on ${radioCall.getEndAirport().getTowerFrequency()?.value}`;
 		}
 
 		return new ServerResponse(radioCall.getFeedback(), atcResponse, expectedRadioCall);

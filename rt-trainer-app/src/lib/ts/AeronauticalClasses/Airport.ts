@@ -168,66 +168,38 @@ export default class Airport {
 		return this.type == 3 || this.type == 9;
 	}
 
-	public getParkedFrequencyValue(): string {
-		let groundOrInformationFrequency = this.getGroundFrequencyValue();
+	public getParkedFrequency(): Frequency | undefined {
+		let groundOrInformationFrequency = this.getGroundFrequency();
 		if (groundOrInformationFrequency == undefined) {
-			groundOrInformationFrequency = this.getTowerFrequencyValue();
+			groundOrInformationFrequency = this.getTowerFrequency();
 		}
 		if (groundOrInformationFrequency == undefined) {
-			groundOrInformationFrequency = this.getInformationFrequencyValue();
+			groundOrInformationFrequency = this.getInformationFrequency();
 		}
 		if (groundOrInformationFrequency == undefined) {
-			groundOrInformationFrequency = this.getAGFrequencyValue();
-		}
-		if (groundOrInformationFrequency == undefined) {
-			groundOrInformationFrequency = '000.000';
+			groundOrInformationFrequency = this.getAGFrequency();
 		}
 		return groundOrInformationFrequency;
 	}
 
-	public getGroundFrequencyValue(): string | undefined {
-		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 9) {
-				return this.frequencies[i].value;
-			}
-		}
-		return undefined;
+	public getGroundFrequency(): Frequency | undefined {
+		return this.frequencies.find((frequency) => frequency.type == 9);
 	}
 
-	public getInformationFrequencyValue(): string | undefined {
-		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 15 || this.frequencies[i].type == 10) {
-				return this.frequencies[i].value;
-			}
-		}
-		return undefined;
+	public getInformationFrequency(): Frequency | undefined {
+		return this.frequencies.find((frequency) => frequency.type == 15 || frequency.type == 10);
 	}
 
-	public getAGFrequencyValue(): string | undefined {
-		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 17) {
-				return this.frequencies[i].value;
-			}
-		}
-		return undefined;
+	public getAGFrequency(): Frequency | undefined {
+		return this.frequencies.find((frequency) => frequency.type == 17);
 	}
 
-	public getTowerFrequencyValue(): string | undefined {
-		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 14) {
-				return this.frequencies[i].value;
-			}
-		}
-		return undefined;
+	public getTowerFrequency(): Frequency | undefined {
+		return this.frequencies.find((frequency) => frequency.type == 14);
 	}
 
-	public getApproachFrequencyValue(): string | undefined {
-		for (let i = 0; i < this.frequencies.length; i++) {
-			if (this.frequencies[i].type == 0) {
-				return this.frequencies[i].value;
-			}
-		}
-		return undefined;
+	public getApproachFrequency(): Frequency | undefined {
+		return this.frequencies.find((frequency) => frequency.type == 0);
 	}
 
 	public getATISLetter(seed: number): string {
