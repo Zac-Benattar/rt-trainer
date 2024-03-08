@@ -63,10 +63,14 @@ export function getParkedInitialControlledUpdateData(
 	seed: number,
 	airport: Airport
 ): SimulatorUpdateData {
+	let name = airport.getParkedFrequency()?.name;
+	if (airport.getParkedFrequency()?.name == 'INFO') {
+		name = airport.getShortName() + ' Information';
+	}
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: airport.getParkedFrequency()?.name,
+		currentTarget: name,
 		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
@@ -78,10 +82,14 @@ export function getParkedMadeContactControlledUpdateData(
 	seed: number,
 	airport: Airport
 ): SimulatorUpdateData {
+	let name = airport.getParkedFrequency()?.name;
+	if (airport.getParkedFrequency()?.name == 'INFO') {
+		name = airport.getShortName() + ' Information';
+	}
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: airport.getParkedFrequency()?.name,
+		currentTarget: name,
 		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
@@ -93,10 +101,14 @@ export function getParkedInitialUncontrolledUpdateData(
 	seed: number,
 	airport: Airport
 ): SimulatorUpdateData {
+	let name = airport.getParkedFrequency()?.name;
+	if (airport.getParkedFrequency()?.name == 'INFO') {
+		name = airport.getShortName() + ' Information';
+	}
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: airport.getParkedFrequency()?.name,
+		currentTarget: name,
 		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
@@ -108,10 +120,14 @@ export function getParkedMadeContactUncontrolledUpdateData(
 	seed: number,
 	airport: Airport
 ): SimulatorUpdateData {
+	let name = airport.getParkedFrequency()?.name;
+	if (airport.getParkedFrequency()?.name == 'INFO') {
+		name = airport.getShortName() + ' Information';
+	}
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: airport.getParkedFrequency()?.name,
+		currentTarget: name,
 		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
