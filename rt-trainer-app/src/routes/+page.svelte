@@ -71,10 +71,10 @@
 				<button
 					on:click={() => {
 						ClearSimulationStores();
-						goto('/createscenario');
+						goto('/login');
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
-					data-sveltekit-preload-data="hover">Setup a scenario</button
+					data-sveltekit-preload-data="hover">Sign in</button
 				>
 			</div>
 		</div>
