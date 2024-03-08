@@ -66,8 +66,8 @@ export function getParkedInitialControlledUpdateData(
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: airport.getShortName() + ' Ground',
-		currentTargetFrequency: airport.getParkedFrequencyValue(),
+		currentTarget: airport.getParkedFrequency()?.name,
+		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -76,13 +76,13 @@ export function getParkedInitialControlledUpdateData(
 
 export function getParkedMadeContactControlledUpdateData(
 	seed: number,
-	startAerodrome: Airport
+	airport: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + ' Ground',
-		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
+		currentTarget: airport.getParkedFrequency()?.name,
+		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -91,13 +91,13 @@ export function getParkedMadeContactControlledUpdateData(
 
 export function getParkedInitialUncontrolledUpdateData(
 	seed: number,
-	startAerodrome: Airport
+	airport: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + ' Information',
-		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
+		currentTarget: airport.getParkedFrequency()?.name,
+		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -106,13 +106,13 @@ export function getParkedInitialUncontrolledUpdateData(
 
 export function getParkedMadeContactUncontrolledUpdateData(
 	seed: number,
-	startAerodrome: Airport
+	airport: Airport
 ): SimulatorUpdateData {
 	return {
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
-		currentTarget: startAerodrome.getShortName() + ' Information',
-		currentTargetFrequency: startAerodrome.getParkedFrequencyValue(),
+		currentTarget: airport.getParkedFrequency()?.name,
+		currentTargetFrequency: airport.getParkedFrequency()?.value,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None

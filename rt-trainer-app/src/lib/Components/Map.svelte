@@ -309,7 +309,7 @@
 							symbol: L.Symbol.arrowHead({
 								pixelSize: 20,
 								pathOptions: {
-									color: '#F18',
+									color: '#ff1493',
 									fillOpacity: 1,
 									weight: 0,
 									smoothFactor: 1,

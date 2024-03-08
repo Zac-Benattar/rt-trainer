@@ -29,8 +29,8 @@ export type CallParsingContext = {
 export type SimulatorUpdateData = {
 	callsignModified: boolean;
 	squark: boolean;
-	currentTarget: string;
-	currentTargetFrequency: string;
+	currentTarget: string  | undefined;
+	currentTargetFrequency: string | undefined;
 	currentTransponderFrequency: string;
 	currentPressure: number;
 	emergency: EmergencyType;
