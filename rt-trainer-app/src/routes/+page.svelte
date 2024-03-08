@@ -10,7 +10,7 @@
 	};
 </script>
 
-<div class="container mx-auto max-w-screen-lg p-5">
+<div class="container mx-auto max-w-screen-lg p-5 tracking-wide">
 	<div class="grid grid-cols-1 md:grid-cols-12 gap-5">
 		{#if $page.data.session}
 			<div class="space-y-4 md:col-span-12 p-4">
@@ -29,8 +29,9 @@
 			</div>
 		{/if}
 		<div class="space-y-4 md:col-span-6 p-4">
-			<h1 class="text-3xl md:text-5xl font-bold">
-				RT Trainer - A <span class="relative px-1 md:px-3 py-1 bg-surface-300-600-token"
+			<h1 class="text-3xl md:text-5xl font-bold leading-10">
+				RT Trainer - A <span
+					class="relative px-1 md:px-3 x-1 inset-y-1 bg-surface-300-600-token hover:rotate-3 hover:scale-110 transition-transform duration-300 ease-in-out"
 					>responsive</span
 				> FRTOL practice tool
 			</h1>
