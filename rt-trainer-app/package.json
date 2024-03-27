@@ -13,7 +13,7 @@
     "format": "prettier --plugin-search-dir . --write .",
     "test:integration": "playwright test",
     "test:unit": "vitest",
-    "db:push": "drizzle-kit push:mysql --config=drizzle.config.ts",
+    "db:push": "drizzle-kit push:pg --config=drizzle.config.ts",
     "db:studio": "drizzle-kit studio"
   },
   "devDependencies": {
@@ -28,7 +28,8 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "autoprefixer": "10.4.16",
-    "dotenv": "^16.4.2",
+    "dotenv": "^16.4.5",
+    "dotenv-expand": "^11.0.6",
     "drizzle-kit": "^0.20.14",
     "eslint": "^8.28.0",
     "eslint-config-prettier": "^8.10.0",
@@ -70,6 +71,7 @@
     "leaflet": "^1.9.4",
     "leaflet-polylinedecorator": "^1.6.0",
     "leaflet-rotatedmarker": "^0.2.0",
+    "pg": "^8.11.3",
     "polybooljs": "^1.2.0",
     "reflect-metadata": "^0.2.1",
     "vercel": "^32.3.0"

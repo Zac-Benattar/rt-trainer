@@ -1,4 +1,5 @@
 import type { CustomThemeConfig } from '@skeletonlabs/tw-plugin';
+import { POSTGRES_URL } from '$env/static/private';
 
 export const myCustomTheme: CustomThemeConfig = {
 	name: 'my-custom-theme',
