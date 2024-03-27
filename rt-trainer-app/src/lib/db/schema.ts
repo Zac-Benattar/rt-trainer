@@ -8,7 +8,6 @@ import {
 	json,
 	pgTable,
 	primaryKey,
-	serial,
 	smallint,
 	text,
 	timestamp,
@@ -16,13 +15,14 @@ import {
 } from 'drizzle-orm/pg-core';
 
 const shortCUID = init({ length: 12 });
+const longCUID = init({ length: 20 });
 
 /**
  * Route data schema
  */
 
 export const waypoints = pgTable('waypoint', {
-	id: serial('id').primaryKey(),
+	id: text('id').primaryKey().$defaultFn(shortCUID),
 	index: smallint('index').notNull(), // Holds the position of the point in the route
 	type: smallint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
 	name: varchar('name', { length: 100 }).notNull(),
@@ -39,8 +39,8 @@ export const waypointsRelations = relations(waypoints, ({ one }) => ({
 }));
 
 export const routes = pgTable('route', {
-	id: serial('id').notNull().primaryKey(),
-	userID: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	id: text('id').primaryKey().$defaultFn(shortCUID),
+	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
 	type: smallint('type').notNull(),
 	description: varchar('description', { length: 2000 }),
@@ -48,7 +48,7 @@ export const routes = pgTable('route', {
 	airportIds: json('airportIds').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
-	createdBy: varchar('created_by', { length: 255 }).notNull()
+	createdBy: text('created_by').references(() => users.id, { onDelete: 'cascade' })
 });
 
 export const routesRelations = relations(routes, ({ one, many }) => ({
@@ -58,14 +58,14 @@ export const routesRelations = relations(routes, ({ one, many }) => ({
 }));
 
 export const scenarios = pgTable('scenario', {
-	id: serial('id').notNull().primaryKey(),
-	userID: integer('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	id: text('id').primaryKey().$defaultFn(longCUID),
+	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
-	route: integer('route_id').references(() => routes.id, { onDelete: 'cascade' }),
+	route: text('route_id').references(() => routes.id, { onDelete: 'cascade' }),
 	seed: varchar('seed', { length: 20 })
 		.notNull()
-		.$defaultFn(() => shortCUID()),
+		.$defaultFn(shortCUID),
 	hasEmergency: boolean('has_emergency').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
@@ -82,7 +82,7 @@ export const scenariosRelations = relations(scenarios, ({ one }) => ({
  */
 
 export const users = pgTable('user', {
-	id: serial('id').primaryKey(),
+	id: text('id').primaryKey().$defaultFn(shortCUID),
 	name: text('name'),
 	email: text('email').notNull(),
 	emailVerified: timestamp('emailVerified', { mode: 'date' }),

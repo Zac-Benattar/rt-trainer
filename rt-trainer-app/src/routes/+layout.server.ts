@@ -5,7 +5,7 @@ import { users } from '$lib/db/schema';
 
 export const load: LayoutServerLoad = async (event) => {
 	const session = await event.locals.auth();
-	let userId = '-1';
+	let userId: number = -1;
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const row = await db.query.users.findFirst({

@@ -16,7 +16,7 @@ export const load: PageServerLoad = async (event) => {
 	let callsign: string | null = null;
 	let aircraftType: string | null = null;
 
-	let userId = '-1';
+	let userId: number = -1;
 
 	if (!session?.user && scenarioId != 'demo') throw redirect(303, '/login');
 

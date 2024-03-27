@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm';
 import { routes, scenarios, users } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
-let userId = '-1';
+let userId: number = -1;
 const scenarioSeedCUID = init({ length: 6 });
 const scenarioCUID = init({ length: 12 });
 
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
 	if (!session?.user) throw redirect(303, '/login');
 
-	userId = '-1';
+	userId = -1;
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const row = await db.query.users.findFirst({
