@@ -6,7 +6,7 @@ import { routes, users, waypoints } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 import RouteGenerator from '$lib/ts/RouteGenerator';
 import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
-import { loadAllAIPDataToStores } from '$lib/ts/OpenAIPHandler';
+import { getAirportData, getAirspaceData } from '$lib/ts/OpenAIPHandler';
 import { instanceToPlain } from 'class-transformer';
 
 let userId = '-1';
@@ -30,7 +30,11 @@ export const load: PageServerLoad = async (event) => {
 			userId = row.id;
 		}
 
-		return { userDetails: row, airspaces: instanceToPlain(await loadAllAIPDataToStores()) };
+		return {
+			userDetails: row,
+			airspaces: instanceToPlain(await getAirspaceData()),
+			airports: instanceToPlain(await getAirportData())
+		};
 	}
 };
 

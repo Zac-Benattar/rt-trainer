@@ -12,6 +12,7 @@
 	This file is also cursed, and I'm sorry for anyone who has to read or maintain it.
 	*/
 	import {
+		AirportsStore,
 		AirspacesStore,
 		AwaitingServerResponseStore,
 		CurrentScenarioPointStore,
@@ -25,6 +26,9 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import type { A } from 'vitest/dist/types-198fd1d9';
+	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
+	import { draw } from 'svelte/transition';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -43,6 +47,7 @@
 	let currentLocationMarker: any;
 	let waypoints: Waypoint[] = [];
 	let airspaces: Airspace[] = [];
+	let airports: Airport[] = [];
 	let markers: any[] = [];
 	let polygons: any[] = [];
 	let lines: any[] = [];
@@ -50,6 +55,7 @@
 	let initialZoomLevel: number = 13;
 	let map: any;
 	let planeIcon: any;
+	let airportIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 	let nullRouteOverlay: HTMLDivElement;
@@ -83,6 +89,11 @@
 		needsRerender = true;
 	});
 
+	AirportsStore.subscribe((_airports) => {
+		airports = _airports;
+		needsRerender = true;
+	});
+
 	WaypointsStore.subscribe((_waypoints) => {
 		waypoints = _waypoints;
 		needsRerender = true;
@@ -99,6 +110,12 @@
 	async function drawAirspaces() {
 		airspaces.forEach((airspace) => {
 			drawAirspace(airspace);
+		});
+	}
+
+	async function drawAirports() {
+		airports.forEach((airport) => {
+			drawAirport(airport);
 		});
 	}
 
@@ -128,67 +145,81 @@
 			maxZoom: 17,
 			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
-	}
 
-	async function loadMapScenario() {
-		// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-		// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
-		// 	const bounds = new L.LatLngBounds([
-		// 		[bbox[1], bbox[0]],
-		// 		[bbox[3], bbox[2]]
-		// 	]);
-		// 	map.fitBounds(bounds);
-		// }
-
-		// Adds all waypoints to the map
-		waypoints.forEach((waypoint) => {
-			addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
+		map.on('click', (e) => {
+			console.log(e.latlng);
 		});
 
-		connectMarkers();
-
-		airspaces.forEach((airspace) => {
-			drawAirspace(airspace);
-		});
-
-		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
-			planeIcon = L.icon({
-				iconUrl: '/images/plane.png',
+		planeIcon = L.icon({
+				iconUrl: '/images/plane-icon.png',
 
 				iconSize: [40, 40], // size of the icon
 				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
 				popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
 			});
 
-			// Sets the current location marker, done last to make sure it is on top
-			currentLocationMarker = L.marker([targetPose.position[0], targetPose.position[1]], {
-				icon: planeIcon,
-				rotationAngle: targetPose.trueHeading,
-				rotationOrigin: 'center'
-			}).addTo(map);
+		airportIcon = L.icon({
+				iconUrl: '/images/airport-icon.png',
 
-			FlightInformationTextBox = L.Control.extend({
-				onAdd: function () {
-					var text = L.DomUtil.create('div');
-					text.id = 'heading_text';
-					text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
-					text.style.color = 'black';
-					text.style.backgroundColor = 'white';
-					text.innerHTML =
-						'<p> Heading: ' +
-						targetPose.trueHeading +
-						'<br> Airspeed: ' +
-						targetPose.airSpeed +
-						'<br> Time: ' +
-						currentTime +
-						'</p>';
-					return text;
-				}
+				iconSize: [40, 40], // size of the icon
+				iconAnchor: [0, 0], // point of the icon which will correspond to marker's location
+				popupAnchor: [20, 40] // point from which the popup should open relative to the iconAnchor
 			});
-
-			flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
-		}
 	}
+
+	// async function loadMapScenario() {
+	// 	// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
+	// 	// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+	// 	// 	const bounds = new L.LatLngBounds([
+	// 	// 		[bbox[1], bbox[0]],
+	// 	// 		[bbox[3], bbox[2]]
+	// 	// 	]);
+	// 	// 	map.fitBounds(bounds);
+	// 	// }
+
+	// 	// Adds all waypoints to the map
+	// 	waypoints.forEach((waypoint) => {
+	// 		addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
+	// 	});
+
+	// 	connectMarkers();
+
+	// 	drawAirspaces();
+
+	// 	drawAirports();
+
+	// 	if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
+
+
+	// 		// Sets the current location marker, done last to make sure it is on top
+	// 		currentLocationMarker = L.marker([targetPose.position[0], targetPose.position[1]], {
+	// 			icon: planeIcon,
+	// 			rotationAngle: targetPose.trueHeading,
+	// 			rotationOrigin: 'center'
+	// 		}).addTo(map);
+
+	// 		FlightInformationTextBox = L.Control.extend({
+	// 			onAdd: function () {
+	// 				var text = L.DomUtil.create('div');
+	// 				text.id = 'heading_text';
+	// 				text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+	// 				text.style.color = 'black';
+	// 				text.style.backgroundColor = 'white';
+	// 				text.innerHTML =
+	// 					'<p> Heading: ' +
+	// 					targetPose.trueHeading +
+	// 					'<br> Airspeed: ' +
+	// 					targetPose.airSpeed +
+	// 					'<br> Time: ' +
+	// 					currentTime +
+	// 					'</p>';
+	// 				return text;
+	// 			}
+	// 		});
+
+	// 		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
+	// 	}
+	// }
 
 	async function updateMap() {
 		if (mounted) {
@@ -237,6 +268,8 @@
 			connectMarkers();
 
 			drawAirspaces();
+
+			drawAirports();
 
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
@@ -346,7 +379,7 @@
 	async function drawAirspace(airspace: Airspace) {
 		if (mounted) {
 			await map;
-			
+
 			if (airspace.type != 14)
 				polygons.push(
 					L.polygon(
@@ -365,6 +398,15 @@
 						.bindPopup(airspace.getDisplayName())
 						.addTo(map)
 				);
+		}
+	}
+
+	async function drawAirport(airport: Airport) {
+		if (mounted) {
+			await map;
+			L.marker([airport.coordinates[1], airport.coordinates[0]], { icon: airportIcon })
+				.bindPopup(airport.name)
+				.addTo(map);
 		}
 	}
 

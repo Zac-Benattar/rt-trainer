@@ -10,8 +10,6 @@ import Airport from './AeronauticalClasses/Airport';
 import Runway from './AeronauticalClasses/Runway';
 import { Frequency } from './Frequency';
 import Airspace from './AeronauticalClasses/Airspace';
-import { db } from '$lib/db/db';
-import { airportsJSON, airspacesJSON } from '$lib/db/schema';
 import * as turf from '@turf/turf';
 
 export type AirportReportingPointDBData = {
@@ -25,10 +23,16 @@ export function checkDataUpToDate(): boolean {
 	return true;
 }
 
-export async function loadAllAIPDataToStores(): Promise<Airspace[]> {
+export async function getAirspaceData(): Promise<Airspace[]> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 	const airspaces = airspaceData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
 	return airspaces;
+}
+
+export async function getAirportData(): Promise<Airport[]> {
+	const airportData = await getAllUKAirportsFromOpenAIP();
+	const airports = airportData.map((airportData) => airportDataToAirport(airportData));
+	return airports;
 }
 
 export async function writeDataToJSON(): Promise<void> {
@@ -83,41 +87,41 @@ export function readAirspaceDataFromJSON(): AirspaceData[] {
 	return JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
 }
 
-export async function readAirportDataFromDB(): Promise<AirportData[]> {
-	const airportData = await db.query.airportsJSON.findFirst({
-		columns: {
-			json: true
-		}
-	});
+// export async function readAirportDataFromDB(): Promise<AirportData[]> {
+// 	const airportData = await db.query.airportsJSON.findFirst({
+// 		columns: {
+// 			json: true
+// 		}
+// 	});
 
-	const airportDataJSON = JSON.parse(airportData?.json as string) as AirportData[];
+// 	const airportDataJSON = JSON.parse(airportData?.json as string) as AirportData[];
 
-	return airportDataJSON;
-}
+// 	return airportDataJSON;
+// }
 
-export async function readAirspaceDataFromDB(): Promise<AirspaceData[]> {
-	const airspaceData = await db.query.airspacesJSON.findFirst({
-		columns: {
-			json: true
-		}
-	});
+// export async function readAirspaceDataFromDB(): Promise<AirspaceData[]> {
+// 	const airspaceData = await db.query.airspacesJSON.findFirst({
+// 		columns: {
+// 			json: true
+// 		}
+// 	});
 
-	const airspaceDataJSON = JSON.parse(airspaceData?.json as string) as AirspaceData[];
+// 	const airspaceDataJSON = JSON.parse(airspaceData?.json as string) as AirspaceData[];
 
-	return airspaceDataJSON;
-}
+// 	return airspaceDataJSON;
+// }
 
-// Dangerous functions --------------------------------------------
-export async function pushAirportDataToDatabase(): Promise<void> {
-	const airportData = JSON.stringify(readAirportDataFromJSON());
-	await db.insert(airportsJSON).values({ json: airportData });
-}
+// // Dangerous functions --------------------------------------------
+// export async function pushAirportDataToDatabase(): Promise<void> {
+// 	const airportData = JSON.stringify(readAirportDataFromJSON());
+// 	await db.insert(airportsJSON).values({ json: airportData });
+// }
 
-export async function pushAirspaceDataToDatabase(): Promise<void> {
-	const airspaceData = JSON.stringify(readAirspaceDataFromJSON());
-	await db.insert(airspacesJSON).values({ json: airspaceData });
-}
-// End of dangerous functions --------------------------------------------
+// export async function pushAirspaceDataToDatabase(): Promise<void> {
+// 	const airspaceData = JSON.stringify(readAirspaceDataFromJSON());
+// 	await db.insert(airspacesJSON).values({ json: airspaceData });
+// }
+// // End of dangerous functions --------------------------------------------
 
 export function airportDataToAirport(airportData: AirportData): Airport {
 	return new Airport(
@@ -150,14 +154,14 @@ export function airportDataToAirport(airportData: AirportData): Airport {
 				runway.dimension.length.unit,
 				runway.dimension.width.value,
 				runway.dimension.width.unit,
-				runway.declaredDistance.tora.value,
-				runway.declaredDistance.tora.unit,
+				runway.declaredDistance.tora?.value,
+				runway.declaredDistance.tora?.unit,
 				runway.declaredDistance.toda?.value,
 				runway.declaredDistance.toda?.unit,
 				runway.declaredDistance.asda?.value,
 				runway.declaredDistance.asda?.unit,
-				runway.declaredDistance.lda.value,
-				runway.declaredDistance.lda.unit,
+				runway.declaredDistance.lda?.value,
+				runway.declaredDistance.lda?.unit,
 				runway.thresholdLocation?.geometry.coordinates,
 				runway.thresholdLocation?.elevation.value,
 				runway.thresholdLocation?.elevation.unit,
@@ -204,17 +208,17 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	);
 }
 
-export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
-	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
-	const airspaces = airspacesData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
-	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
-}
+// export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
+// 	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
+// 	const airspaces = airspacesData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
+// 	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
+// }
 
-export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
-	const airportsData: AirportData[] = await readAirportDataFromDB();
-	const airports = airportsData.map((airspaceData) => airportDataToAirport(airspaceData));
-	return airports.filter((airports) => airportIds.includes(airports.id));
-}
+// export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
+// 	const airportsData: AirportData[] = await readAirportDataFromDB();
+// 	const airports = airportsData.map((airspaceData) => airportDataToAirport(airspaceData));
+// 	return airports.filter((airports) => airportIds.includes(airports.id));
+// }
 
 export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 	try {

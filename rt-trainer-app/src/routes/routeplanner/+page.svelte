@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/Components/Map.svelte';
-	import { AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
+	import { AirportsStore, AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
@@ -11,6 +11,7 @@
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import Airport from '$lib/ts/AeronauticalClasses/Airport';
 
 	const routeCUID = init({ length: 8 });
 
@@ -41,19 +42,24 @@
 		routeSeedClasses = 'input-error';
 	}
 
+	
 	let waypoints: Waypoint[] = [];
 
 	const airspaces = [];
 	for (const airspace of data.airspaces) {
-					airspaces.push(plainToInstance(Airspace, airspace as Airspace));
-				}
+		airspaces.push(plainToInstance(Airspace, airspace as Airspace));
+	}
 	AirspacesStore.set(airspaces);
 
+	const airports = [];
+	for (const airport of data.airports) {
+		airports.push(plainToInstance(Airport, airport as Airport));
+	}
+	AirportsStore.set(airports);
 </script>
 
 <div class="flex flex-col place-content-center">
 	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
-
 		<div class="flex flex-col px-2 xs:pr-3">
 			<Map
 				enabled={true}
