@@ -21,7 +21,7 @@ const longCUID = init({ length: 20 });
  * Route data schema
  */
 
-export const waypoints = pgTable('waypoint', {
+export const waypointsTable = pgTable('waypoint', {
 	id: text('id').primaryKey().$defaultFn(shortCUID),
 	index: smallint('index').notNull(), // Holds the position of the point in the route
 	type: smallint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
@@ -34,11 +34,11 @@ export const waypoints = pgTable('waypoint', {
 	updatedAt: timestamp('updated_at').defaultNow()
 });
 
-export const waypointsRelations = relations(waypoints, ({ one }) => ({
-	route: one(routes, { fields: [waypoints.routeId], references: [routes.id] })
+export const waypointsRelations = relations(waypointsTable, ({ one }) => ({
+	route: one(routesTable, { fields: [waypointsTable.routeId], references: [routesTable.id] })
 }));
 
-export const routes = pgTable('route', {
+export const routesTable = pgTable('route', {
 	id: text('id').primaryKey().$defaultFn(shortCUID),
 	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
@@ -51,18 +51,18 @@ export const routes = pgTable('route', {
 	createdBy: text('created_by').references(() => users.id, { onDelete: 'cascade' })
 });
 
-export const routesRelations = relations(routes, ({ one, many }) => ({
-	users: one(users, { fields: [routes.createdBy], references: [users.id] }),
-	scenarios: many(scenarios),
-	waypoints: many(waypoints)
+export const routesRelations = relations(routesTable, ({ one, many }) => ({
+	users: one(users, { fields: [routesTable.createdBy], references: [users.id] }),
+	scenarios: many(scenariosTable),
+	waypoints: many(waypointsTable)
 }));
 
-export const scenarios = pgTable('scenario', {
+export const scenariosTable = pgTable('scenario', {
 	id: text('id').primaryKey().$defaultFn(longCUID),
 	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
-	route: text('route_id').references(() => routes.id, { onDelete: 'cascade' }),
+	route: text('route_id').references(() => routesTable.id, { onDelete: 'cascade' }),
 	seed: varchar('seed', { length: 20 })
 		.notNull()
 		.$defaultFn(shortCUID),
@@ -72,9 +72,9 @@ export const scenarios = pgTable('scenario', {
 	createdBy: varchar('created_by', { length: 255 }).notNull()
 });
 
-export const scenariosRelations = relations(scenarios, ({ one }) => ({
-	users: one(users, { fields: [scenarios.createdBy], references: [users.id] }),
-	routes: one(routes, { fields: [scenarios.route], references: [routes.id] })
+export const scenariosRelations = relations(scenariosTable, ({ one }) => ({
+	users: one(users, { fields: [scenariosTable.createdBy], references: [users.id] }),
+	routes: one(routesTable, { fields: [scenariosTable.route], references: [routesTable.id] })
 }));
 
 /**
@@ -94,7 +94,7 @@ export const users = pgTable('user', {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-	routes: many(routes)
+	routes: many(routesTable)
 }));
 
 export const accounts = pgTable(

@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { and, eq } from 'drizzle-orm';
-import { scenarios, users } from '$lib/db/schema';
+import { scenariosTable, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -69,7 +69,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenarios.findFirst({
-		where: and(eq(scenarios.createdBy, userId), eq(scenarios.id, scenarioId)),
+		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
 				with: {

@@ -1,5 +1,5 @@
 import { db } from '$lib/db/db';
-import { routes, waypoints } from '$lib/db/schema';
+import { routesTable, waypointsTable } from '$lib/db/schema';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
 import type { RouteData } from '$lib/ts/Scenario';
@@ -16,10 +16,10 @@ export const GET: RequestHandler = async ({ params }) => {
 
 	// Get the route with its route points, ordered by route point index
 	const routeRow = await db.query.routes.findFirst({
-		where: eq(routes.id, id as string),
+		where: eq(routesTable.id, id as string),
 		with: {
 			waypoints: {
-				orderBy: [waypoints.index]
+				orderBy: [waypointsTable.index]
 			}
 		}
 	});
@@ -52,7 +52,7 @@ export const GET: RequestHandler = async ({ params }) => {
 export async function DELETE({ params }) {
 	const id: string = params.id;
 
-	await db.delete(routes).where(eq(routes.id, id));
+	await db.delete(routesTable).where(eq(routesTable.id, id));
 
 	return new Response(JSON.stringify({ result: 'Success' }));
 }

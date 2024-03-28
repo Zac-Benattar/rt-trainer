@@ -24,11 +24,9 @@
 	import type { Pose } from '$lib/ts/ScenarioTypes';
 	import { convertMinutesToTimeString } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
-	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import type { A } from 'vitest/dist/types-198fd1d9';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
-	import { draw } from 'svelte/transition';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -56,6 +54,7 @@
 	let map: any;
 	let planeIcon: any;
 	let airportIcon: any;
+	let airportIconSelected: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 	let nullRouteOverlay: HTMLDivElement;
@@ -151,20 +150,28 @@
 		});
 
 		planeIcon = L.icon({
-				iconUrl: '/images/plane-icon.png',
+			iconUrl: '/images/plane-icon.png',
 
-				iconSize: [40, 40], // size of the icon
-				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-				popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
-			});
+			iconSize: [40, 40], // size of the icon
+			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+		});
 
 		airportIcon = L.icon({
-				iconUrl: '/images/airport-icon.png',
+			iconUrl: '/images/airport-icon-blue.png',
 
-				iconSize: [40, 40], // size of the icon
-				iconAnchor: [0, 0], // point of the icon which will correspond to marker's location
-				popupAnchor: [20, 40] // point from which the popup should open relative to the iconAnchor
-			});
+			iconSize: [40, 40], // size of the icon
+			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+		});
+
+		airportIconSelected = L.icon({
+			iconUrl: '/images/airport-icon-red.png',
+
+			iconSize: [40, 40], // size of the icon
+			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+		});
 	}
 
 	// async function loadMapScenario() {
@@ -189,7 +196,6 @@
 	// 	drawAirports();
 
 	// 	if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
-
 
 	// 		// Sets the current location marker, done last to make sure it is on top
 	// 		currentLocationMarker = L.marker([targetPose.position[0], targetPose.position[1]], {
@@ -243,8 +249,6 @@
 			} else {
 				if (nullRouteOverlay) nullRouteOverlay.remove();
 			}
-
-			console.log('updating map');
 
 			map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
@@ -380,33 +384,80 @@
 		if (mounted) {
 			await map;
 
-			if (airspace.type != 14)
-				polygons.push(
-					L.polygon(
-						airspace.coordinates[0].map((point) => [point[1], point[0]]),
-						{ color: 'blue' }
-					)
-						.bindPopup(airspace.getDisplayName())
-						.addTo(map)
-				);
-			else if (airspace.type == 14)
-				polygons.push(
-					L.polygon(
-						airspace.coordinates[0].map((point) => [point[1], point[0]]),
-						{ color: 'red' }
-					)
-						.bindPopup(airspace.getDisplayName())
-						.addTo(map)
-				);
+			if (airspace.type != 14) {
+				const airspacePolygon = L.polygon(
+					airspace.coordinates[0].map((point) => [point[1], point[0]]),
+					{ color: 'blue' }
+				)
+					.bindPopup(airspace.getDisplayName())
+					.addTo(map);
+
+				airspacePolygon.on('mouseover', function () {
+					airspacePolygon.openPopup();
+				});
+
+				airspacePolygon.on('mouseout', function () {
+					airspacePolygon.closePopup();
+				});
+
+				polygons.push(airspacePolygon);
+			} else if (airspace.type == 14) {
+				const airspacePolygon = L.polygon(
+					airspace.coordinates[0].map((point) => [point[1], point[0]]),
+					{ color: 'red' }
+				)
+					.bindPopup(airspace.getDisplayName())
+					.addTo(map);
+
+				airspacePolygon.on('mouseover', function () {
+					airspacePolygon.openPopup();
+				});
+
+				airspacePolygon.on('mouseout', function () {
+					airspacePolygon.closePopup();
+				});
+
+				polygons.push(airspacePolygon);
+			}
 		}
 	}
 
 	async function drawAirport(airport: Airport) {
 		if (mounted) {
 			await map;
-			L.marker([airport.coordinates[1], airport.coordinates[0]], { icon: airportIcon })
+			const airportMarker = L.marker([airport.coordinates[1], airport.coordinates[0]], {
+				icon: airportIcon,
+				title: airport.name
+			})
 				.bindPopup(airport.name)
 				.addTo(map);
+
+			airportMarker.on('mouseover', function () {
+				airportMarker.openPopup();
+			});
+
+			airportMarker.on('mouseout', function () {
+				airportMarker.closePopup();
+			});
+
+			airportMarker.on('click', function () {
+				if (airportMarker.getIcon() == airportIconSelected) {
+					airportMarker.setIcon(airportIcon);
+					// remove the airport from the route
+					waypoints = waypoints.filter((waypoint) => waypoint.name != airport.name);
+					waypoints.forEach((waypoint, index) => {
+						waypoint.index = index;
+					});
+					WaypointsStore.set(waypoints);
+					needsRerender = true;
+				} else {
+					airportMarker.setIcon(airportIconSelected);
+					// add the airport to the route
+					waypoints.push(new Waypoint(airport.name, airport.coordinates, WaypointType.Aerodrome, waypoints.length));
+					WaypointsStore.set(waypoints);
+					needsRerender = true;
+				}
+			});
 		}
 	}
 

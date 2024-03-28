@@ -2,7 +2,7 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { desc, eq } from 'drizzle-orm';
-import { scenarios, users } from '$lib/db/schema';
+import { scenariosTable, users } from '$lib/db/schema';
 
 let userId = '-1';
 
@@ -33,8 +33,8 @@ export const load: PageServerLoad = async (event) => {
 				description: true,
 				createdAt: true
 			},
-			where: eq(scenarios.createdBy, userId),
-			orderBy: [desc(scenarios.createdAt)],
+			where: eq(scenariosTable.createdBy, userId),
+			orderBy: [desc(scenariosTable.createdAt)],
 			limit: 50
 		})
 	};

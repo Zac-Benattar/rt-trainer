@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { desc, eq } from 'drizzle-orm';
-import { routes, scenarios, users } from '$lib/db/schema';
+import { routesTable, scenariosTable, users } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
 let userId: number = -1;
@@ -42,8 +42,8 @@ export const load: PageServerLoad = async (event) => {
 					where: (waypoints, { gt }) => gt(waypoints.index, 0)
 				}
 			},
-			where: eq(routes.createdBy, userId),
-			orderBy: [desc(routes.createdAt)],
+			where: eq(routesTable.createdBy, userId),
+			orderBy: [desc(routesTable.createdAt)],
 			limit: 20
 		})
 	};
@@ -68,7 +68,7 @@ export const actions = {
 			columns: {
 				id: true
 			},
-			where: eq(routes.id, routeId)
+			where: eq(routesTable.id, routeId)
 		});
 
 		if (route == null || route == undefined) {
@@ -77,7 +77,7 @@ export const actions = {
 
 		const scenarioId = scenarioCUID();
 
-		await db.insert(scenarios).values({
+		await db.insert(scenariosTable).values({
 			id: scenarioId,
 			name: name,
 			description: description,

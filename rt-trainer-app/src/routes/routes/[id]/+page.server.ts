@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { and, eq } from 'drizzle-orm';
-import { routes, users } from '$lib/db/schema';
+import { routesTable, users } from '$lib/db/schema';
 
 let userId = '-1';
 
@@ -28,7 +28,7 @@ export const load: PageServerLoad = async (event) => {
 
 	return {
 		routeRow: await db.query.routes.findFirst({
-			where: and(eq(routes.id, routeId), eq(routes.createdBy, userId)),
+			where: and(eq(routesTable.id, routeId), eq(routesTable.createdBy, userId)),
 			with: {
 				waypoints: {
 					orderBy: (waypoints, { asc }) => [asc(waypoints.index)]
@@ -54,12 +54,12 @@ export const actions = {
 		}
 
 		await db
-			.update(routes)
+			.update(routesTable)
 			.set({
 				name: routeName.toString(),
 				description: routeDescription
 			})
-			.where(eq(routes.id, routeId));
+			.where(eq(routesTable.id, routeId));
 	},
 
 	deleteRoute: async ({ params }) => {
@@ -68,7 +68,7 @@ export const actions = {
 			return fail(400, { routeId, missing: true });
 		}
 
-		await db.delete(routes).where(eq(routes.id, routeId));
+		await db.delete(routesTable).where(eq(routesTable.id, routeId));
 
 		throw redirect(303, '/myroutes');
 	}

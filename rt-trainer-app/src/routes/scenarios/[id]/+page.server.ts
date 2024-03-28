@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { and, eq } from 'drizzle-orm';
-import { scenarios, users } from '$lib/db/schema';
+import { scenariosTable, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -39,7 +39,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenarios.findFirst({
-		where: and(eq(scenarios.createdBy, userId), eq(scenarios.id, scenarioId)),
+		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
 				with: {
@@ -104,13 +104,13 @@ export const actions = {
 		}
 
 		await db
-			.update(scenarios)
+			.update(scenariosTable)
 			.set({
 				name: scenarioName.toString(),
 				description: scenarioDescription,
 				seed: scenarioSeed
 			})
-			.where(eq(scenarios.id, scenarioId));
+			.where(eq(scenariosTable.id, scenarioId));
 	},
 
 	deleteScenario: async ({ params }) => {
@@ -119,7 +119,7 @@ export const actions = {
 			return fail(400, { scenarioId: scenarioId, missing: true });
 		}
 
-		await db.delete(scenarios).where(eq(scenarios.id, scenarioId));
+		await db.delete(scenariosTable).where(eq(scenariosTable.id, scenarioId));
 
 		throw redirect(303, '/myscenarios');
 	},

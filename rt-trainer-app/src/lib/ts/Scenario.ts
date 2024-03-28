@@ -17,7 +17,7 @@ import { Type, plainToInstance } from 'class-transformer';
 import Airport from './AeronauticalClasses/Airport';
 import 'reflect-metadata';
 import Airspace from './AeronauticalClasses/Airspace';
-import { waypoints } from '$lib/db/schema';
+import { waypointsTable } from '$lib/db/schema';
 
 export default class Scenario {
 	id: string;
