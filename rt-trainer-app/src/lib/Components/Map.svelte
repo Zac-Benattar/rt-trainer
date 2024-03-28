@@ -54,7 +54,7 @@
 	let map: any;
 	let planeIcon: any;
 	let airportIcon: any;
-	let airportIconSelected: any;
+	let airportSelectedIcon: any;
 	let flightInformationOverlay: HTMLDivElement;
 	let FlightInformationTextBox: any;
 	let nullRouteOverlay: HTMLDivElement;
@@ -146,7 +146,15 @@
 		}).addTo(map);
 
 		map.on('click', (e) => {
-			console.log(e.latlng);
+			const newWaypoint = new Waypoint(
+				'New Waypoint',
+				[e.latlng.lng, e.latlng.lat],
+				WaypointType.Fix,
+				waypoints.length
+			);
+
+			waypoints.push(newWaypoint);
+			needsRerender = true;
 		});
 
 		planeIcon = L.icon({
@@ -162,15 +170,15 @@
 
 			iconSize: [40, 40], // size of the icon
 			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+			popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
 		});
 
-		airportIconSelected = L.icon({
+		airportSelectedIcon = L.icon({
 			iconUrl: '/images/airport-icon-red.png',
 
-			iconSize: [40, 40], // size of the icon
-			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+			iconSize: [60, 60], // size of the icon
+			iconAnchor: [30, 40], // point of the icon which will correspond to marker's location
+			popupAnchor: [0, -5] // point from which the popup should open relative to the iconAnchor
 		});
 	}
 
@@ -266,10 +274,12 @@
 
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
-				addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
+				if (waypoint.type != WaypointType.Aerodrome) {
+					addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
+				}
 			});
 
-			connectMarkers();
+			connectWaypoints();
 
 			drawAirspaces();
 
@@ -346,15 +356,21 @@
 		polygons = [];
 	}
 
-	async function connectMarkers() {
-		if (markers.length > 1) {
-			for (let i = 0; i < markers.length - 1; i++) {
-				const line = L.polyline([markers[i].getLatLng(), markers[i + 1].getLatLng()], {
-					color: '#ff1493',
-					weight: 5,
-					opacity: 1,
-					smoothFactor: 1
-				}).addTo(map);
+	async function connectWaypoints() {
+		if (waypoints.length > 1) {
+			for (let i = 0; i < waypoints.length - 1; i++) {
+				const line = L.polyline(
+					[
+						[waypoints[i].location[1], waypoints[i].location[0]],
+						[waypoints[i + 1].location[1], waypoints[i + 1].location[0]]
+					],
+					{
+						color: '#ff1493',
+						weight: 5,
+						opacity: 1,
+						smoothFactor: 1
+					}
+				).addTo(map);
 
 				const lineDecorator = L.polylineDecorator(line, {
 					patterns: [
@@ -425,8 +441,16 @@
 	async function drawAirport(airport: Airport) {
 		if (mounted) {
 			await map;
+
+			// if the airport is already in the route, mark it as selected with a different icon
+
+			let icon = airportIcon;
+			if (waypoints.some((waypoint) => waypoint.name == airport.name)) {
+				icon = airportSelectedIcon;
+			}
+
 			const airportMarker = L.marker([airport.coordinates[1], airport.coordinates[0]], {
-				icon: airportIcon,
+				icon: icon,
 				title: airport.name
 			})
 				.bindPopup(airport.name)
@@ -441,7 +465,10 @@
 			});
 
 			airportMarker.on('click', function () {
-				if (airportMarker.getIcon() == airportIconSelected) {
+				if (airportMarker.getIcon() == airportSelectedIcon) {
+					// remove original marker
+					L.DomUtil.remove(airportMarker._icon);
+
 					airportMarker.setIcon(airportIcon);
 					// remove the airport from the route
 					waypoints = waypoints.filter((waypoint) => waypoint.name != airport.name);
@@ -451,11 +478,21 @@
 					WaypointsStore.set(waypoints);
 					needsRerender = true;
 				} else {
-					airportMarker.setIcon(airportIconSelected);
-					// add the airport to the route
-					waypoints.push(new Waypoint(airport.name, airport.coordinates, WaypointType.Aerodrome, waypoints.length));
-					WaypointsStore.set(waypoints);
-					needsRerender = true;
+					L.DomUtil.remove(airportMarker._icon);
+					airportMarker.setIcon(airportSelectedIcon);
+					// add the airport to the route if its not already in it
+					if (!waypoints.some((waypoint) => waypoint.name == airport.name)) {
+						waypoints.push(
+							new Waypoint(
+								airport.name,
+								airport.coordinates,
+								WaypointType.Aerodrome,
+								waypoints.length
+							)
+						);
+						WaypointsStore.set(waypoints);
+						needsRerender = true;
+					}
 				}
 			});
 		}

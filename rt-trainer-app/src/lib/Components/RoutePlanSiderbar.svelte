@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getDrawerStore } from '@skeletonlabs/skeleton';
+	import { getDrawerStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { init } from '@paralleldrive/cuid2';
 	import {
 		RefreshOutline,
@@ -56,7 +56,34 @@
 				<div class="flex flex-col place-content-center">
 					<textarea rows="1" placeholder={waypoint.name} />
 				</div>
-				<div class="flex flex-col place-content-center"><DotsHorizontalOutline /></div>
+				<button
+					class="flex flex-col place-content-center"
+					use:popup={{
+						event: 'click',
+						target: waypoint.name + '-waypoint-details-popup',
+						placement: 'bottom'
+					}}><DotsHorizontalOutline /></button
+				>
+
+				<div
+					id={waypoint.name + '-waypoint-details-popup'}
+					class="card p-4 w-auto shadow-xl z-50"
+					data-popup={waypoint.name + '-waypoint-details-popup'}
+				>
+					<div>
+						<button
+							on:click={() => {
+								WaypointsStore.update((waypoints) => {
+									waypoints = waypoints.filter((w) => w.index !== waypoint.index);
+									waypoints.forEach((waypoint, index) => {
+										waypoint.index = index;
+									});
+									return waypoints;
+								});
+							}}>Delete</button
+						>
+					</div>
+				</div>
 			</div>
 		{/each}
 	</div>
@@ -66,15 +93,26 @@
 			<svelte:fragment slot="lead"><WandMagicSparklesOutline /></svelte:fragment>
 			<svelte:fragment slot="summary">Auto-generate Route</svelte:fragment>
 			<svelte:fragment slot="content"
-				><div class="flex flex-col">
+				><div class="flex flex-col gap-2">
 					<div class="label">Route Seed</div>
 					<div class="flex flex-row gap-2">
-						<textarea class="textarea" rows="1" placeholder={routeSeed} />
+						<textarea
+							id="seed-input"
+							class="textarea"
+							rows="1"
+							maxlength="20"
+							placeholder="Enter a seed"
+						/>
 						<button
 							type="button"
 							class="btn variant-filled w-10"
 							on:click={() => {
 								routeSeed = routeCUID();
+
+								const element = document.getElementById('seed-input');
+								if (element) {
+									element.value = routeSeed;
+								}
 							}}><RefreshOutline /></button
 						>
 					</div>
@@ -86,9 +124,11 @@
 			<svelte:fragment slot="summary">Route Preferences</svelte:fragment>
 			<svelte:fragment slot="content">(content)</svelte:fragment>
 		</AccordionItem>
-		<!-- ... -->
 	</Accordion>
 </div>
 
 <style lang="postcss">
+	textarea {
+		resize: none;
+	}
 </style>
