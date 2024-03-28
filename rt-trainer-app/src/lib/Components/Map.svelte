@@ -27,6 +27,8 @@
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
+	import { init } from '@paralleldrive/cuid2';
+	import { videoOverlay } from 'leaflet';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -61,6 +63,8 @@
 	let NullRouteTextBox: any;
 	let loading: boolean = false;
 	let nullRoute: boolean = false;
+
+	const waypointCUID = init({ length: 8 });
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
@@ -145,7 +149,7 @@
 			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
 
-		map.on('click', (e) => {
+		map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
 			const newWaypoint = new Waypoint(
 				'New Waypoint',
 				[e.latlng.lng, e.latlng.lat],
@@ -154,6 +158,7 @@
 			);
 
 			waypoints.push(newWaypoint);
+			WaypointsStore.set(waypoints);
 			needsRerender = true;
 		});
 
@@ -275,7 +280,7 @@
 			// Adds all waypoints to the map
 			waypoints.forEach((waypoint) => {
 				if (waypoint.type != WaypointType.Aerodrome) {
-					addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
+					addWaypointMarker(waypoint);
 				}
 			});
 
@@ -337,8 +342,39 @@
 		}
 	}
 
-	async function addMarker(lat: number, long: number, name: string) {
-		markers.push(L.marker([lat, long]).bindPopup(name).addTo(map));
+	async function addWaypointMarker(_waypoint: Waypoint) {
+
+		const div = document.createElement('div');
+		div.innerHTML = `<br>${_waypoint.name}<br>`;
+		div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
+
+		const textarea = document.createElement('textarea');
+		textarea.className = 'textarea';
+		textarea.rows = 1;
+		textarea.placeholder = _waypoint.name;
+		div.appendChild(textarea);
+
+		const button = document.createElement('button');
+		button.innerHTML = 'Remove';
+		button.className = 'btn variant-filled';
+		button.onclick = () => {
+			waypoints = waypoints.filter((waypoint) => waypoint != _waypoint);
+			WaypointsStore.set(waypoints);
+			needsRerender = true;
+		};
+		div.appendChild(button);
+
+		const popupsettings = {
+			maxWidth: 500,
+			minWidth: 200,
+			className: 'popup'
+		};
+
+		const marker = L.marker([_waypoint.location[1], _waypoint.location[0]])
+			.bindPopup(div, popupsettings)
+			.addTo(map);
+
+		markers.push(marker);
 	}
 
 	async function removeGeometry() {
@@ -544,5 +580,9 @@
 			max-width: var(--widthSmScreen);
 			max-height: var(--heightSmScreen);
 		}
+	}
+
+	:global(.textarea) {
+		resize: none;
 	}
 </style>

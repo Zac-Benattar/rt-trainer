@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { getDrawerStore, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import {
+		getDrawerStore,
+		ListBox,
+		ListBoxItem,
+		popup,
+		type PopupSettings
+	} from '@skeletonlabs/skeleton';
 	import { init } from '@paralleldrive/cuid2';
 	import {
 		RefreshOutline,
@@ -8,7 +14,6 @@
 		DotsHorizontalOutline
 	} from 'flowbite-svelte-icons';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { waypointsTable } from '$lib/db/schema';
 	import { WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
@@ -26,6 +31,15 @@
 	WaypointsStore.subscribe((value) => {
 		waypoints = value;
 	});
+
+	let distanceUnit: string = 'Nautical Miles';
+
+	const distanceUnitsPopupCombobox: PopupSettings = {
+		event: 'click',
+		target: 'distance-unit-popup',
+		placement: 'bottom',
+		closeQuery: '.listbox-item'
+	};
 </script>
 
 <div class="flex flex-col grow p-3 gap-2">
@@ -47,6 +61,11 @@
 
 	<div class="flex flex-col gap-2 p-2">
 		<div>Route Waypoints</div>
+		{#if waypoints.length == 0}
+			<div class="p-1">
+				<p class="text-slate-600">Add a waypoint by clicking on an airport or any other spot on the map.</p>
+			</div>
+		{/if}
 		{#each waypoints as waypoint}
 			<div class="flex flex-row gap-2 place-content-center">
 				<div class="flex flex-col place-content-center">
@@ -54,7 +73,7 @@
 						🛩️{:else if waypoint.index == waypoints.length - 1}🏁{:else}🚩{/if}
 				</div>
 				<div class="flex flex-col place-content-center">
-					<textarea rows="1" placeholder={waypoint.name} />
+					<textarea class='textarea' rows="1" placeholder={waypoint.name} />
 				</div>
 				<button
 					class="flex flex-col place-content-center"
@@ -119,10 +138,26 @@
 				</div></svelte:fragment
 			>
 		</AccordionItem>
-		<AccordionItem>
+		<AccordionItem open>
 			<svelte:fragment slot="lead"><CogOutline /></svelte:fragment>
-			<svelte:fragment slot="summary">Route Preferences</svelte:fragment>
-			<svelte:fragment slot="content">(content)</svelte:fragment>
+			<svelte:fragment slot="summary">Preferences</svelte:fragment>
+			<svelte:fragment slot="content"
+				><div>
+					<button class="btn textarea w-[266px] justify-between" use:popup={distanceUnitsPopupCombobox}>
+						<span>{distanceUnit ?? 'Distance Unit'}</span>
+						<span>↓</span>
+					</button>
+
+					<div class="card shadow-xl w-[266px] py-2" data-popup="distance-unit-popup">
+						<ListBox rounded="rounded-none">
+							<ListBoxItem bind:group={distanceUnit} name="medium" value="Nautical Miles">Nautical Miles</ListBoxItem>
+							<ListBoxItem bind:group={distanceUnit} name="medium" value="Miles">Miles</ListBoxItem>
+							<ListBoxItem bind:group={distanceUnit} name="medium" value="Kilometers">Kilometers</ListBoxItem>
+						</ListBox>
+						<div class="arrow bg-surface-100-800-token" />
+					</div>
+				</div></svelte:fragment
+			>
 		</AccordionItem>
 	</Accordion>
 </div>
