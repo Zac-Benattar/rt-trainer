@@ -68,8 +68,6 @@ export const ExpectedUserMessageStore = writable<string>('');
 
 export const ATCMessageStore = writable<string>('');
 
-export const KneeboardStore = writable<string>('');
-
 // Scenario/route stores
 export const ScenarioStore = writable<Scenario | undefined>(undefined);
 
@@ -167,7 +165,6 @@ export function ClearSimulationStores(): void {
 	UserMessageStore.set('');
 	ExpectedUserMessageStore.set('');
 	ATCMessageStore.set('');
-	KneeboardStore.set('');
 	ScenarioStore.set(undefined);
 	WaypointsStore.set([]);
 	AirspacesStore.set([]);

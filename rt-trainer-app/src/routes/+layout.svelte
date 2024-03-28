@@ -14,7 +14,8 @@
 	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
-	import Navigation from '$lib/Components/Sidebar.svelte';
+	import Navigation from '$lib/Components/NAVSidebar.svelte';
+	import RoutePlanSiderbar from '$lib/Components/RoutePlanSiderbar.svelte';
 	import { dev } from '$app/environment';
 	import { inject } from '@vercel/analytics';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
@@ -41,7 +42,9 @@
 	};
 
 	// Holds status of major navigation elements, to control visibility
+	let showTopAppBar: boolean = true;
 	let showNavigation: boolean = false;
+	let showRoutePlanSidebar: boolean = false;
 	let classesSidebar: string;
 	let classesAppBar: string;
 	let burgerButton: string;
@@ -49,19 +52,33 @@
 	// Reactive Classes
 	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/login')) {
 		// If on homepage hide sidebar and ways to access it as user is not logged in
+		showTopAppBar = true;
 		showNavigation = false;
+		showRoutePlanSidebar = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg:hidden';
 	} else if ($page.url.pathname.includes('/simulator') || $page.url.pathname.includes('/results')) {
 		// If on scenario page hide sidebar and show burger button
+		showTopAppBar = true;
 		showNavigation = false;
+		showRoutePlanSidebar = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg';
+	} else if ($page.url.pathname.includes('/routeplanner')) {
+		// If on route planner page hide sidebar and show burger button
+		showTopAppBar = false;
+		showNavigation = false;
+		showRoutePlanSidebar = true;
+		classesAppBar = 'w-auto';
+		classesSidebar = 'w-0 lg:w-80';
+		burgerButton = 'lg:hidden';
 	} else {
 		// Otherwise user is logged in and sidebar can be shown
+		showTopAppBar = true;
 		showNavigation = true;
+		showRoutePlanSidebar = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0 lg:w-64';
 		burgerButton = 'lg:hidden';
@@ -83,10 +100,14 @@
 
 <!-- Navigatiton Drawer -->
 <Drawer width="w-64">
-	<h2 class="p-4">Navigation</h2>
-	<hr />
+	{#if showRoutePlanSidebar}
+		<RoutePlanSiderbar />
+	{:else if showNavigation}
+		<h2 class="p-4">Navigation</h2>
+		<hr />
 
-	<Navigation />
+		<Navigation />
+	{/if}
 </Drawer>
 
 <Modal components={modalRegistry} />
@@ -97,12 +118,16 @@
 <AppShell slotSidebarLeft="bg-surface-500/5 appbar {classesSidebar}" slotHeader={classesAppBar}>
 	<svelte:fragment slot="header">
 		<!-- App Bar -->
-		<TopAppBar {burgerButton} enabled={true} on:burgerButtonClicked={drawerOpen} />
+		{#if showTopAppBar}
+			<TopAppBar {burgerButton} enabled={true} on:burgerButtonClicked={drawerOpen} />
+		{/if}
 	</svelte:fragment>
 	<svelte:fragment slot="sidebarLeft">
 		<!-- Navigation -->
 		{#if showNavigation}
 			<Navigation />
+		{:else if showRoutePlanSidebar}
+			<RoutePlanSiderbar />
 		{/if}
 	</svelte:fragment>
 	<svelte:fragment slot="pageFooter">

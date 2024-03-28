@@ -25,7 +25,6 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import * as turf from '@turf/turf';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -97,9 +96,27 @@
 		}
 	});
 
-	async function loadMapScenario() {
+	async function drawAirspaces() {
+		airspaces.forEach((airspace) => {
+			drawAirspace(airspace);
+		});
+	}
+
+	async function loadMap() {
 		if (map) {
 			map.remove();
+		}
+
+		if (mode == MapMode.RoutePlan) {
+			initialZoomLevel = 8;
+			targetPose = {
+				position: [-1.46, 52.33],
+				trueHeading: 0,
+				altitude: 0,
+				airSpeed: 0
+			};
+		} else {
+			initialZoomLevel = 15;
 		}
 
 		map = L.map('myMap').setView(
@@ -107,19 +124,21 @@
 			initialZoomLevel
 		);
 
-		if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-			const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
-			const bounds = new L.LatLngBounds([
-				[bbox[1], bbox[0]],
-				[bbox[3], bbox[2]]
-			]);
-			map.fitBounds(bounds);
-		}
-
 		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 			maxZoom: 17,
 			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 		}).addTo(map);
+	}
+
+	async function loadMapScenario() {
+		// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
+		// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+		// 	const bounds = new L.LatLngBounds([
+		// 		[bbox[1], bbox[0]],
+		// 		[bbox[3], bbox[2]]
+		// 	]);
+		// 	map.fitBounds(bounds);
+		// }
 
 		// Adds all waypoints to the map
 		waypoints.forEach((waypoint) => {
@@ -194,17 +213,19 @@
 				if (nullRouteOverlay) nullRouteOverlay.remove();
 			}
 
+			console.log('updating map');
+
 			map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
-			if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-				// bbox in terms of long, lat - flip them for the actual bounds in lat, long
-				const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
-				const bounds = new L.LatLngBounds([
-					[bbox[1], bbox[0]],
-					[bbox[3], bbox[2]]
-				]);
-				map.fitBounds(bounds);
-			}
+			// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
+			// 	// bbox in terms of long, lat - flip them for the actual bounds in lat, long
+			// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+			// 	const bounds = new L.LatLngBounds([
+			// 		[bbox[1], bbox[0]],
+			// 		[bbox[3], bbox[2]]
+			// 	]);
+			// 	map.fitBounds(bounds);
+			// }
 
 			await removeGeometry();
 
@@ -215,9 +236,7 @@
 
 			connectMarkers();
 
-			airspaces.forEach((airspace) => {
-				drawAirspace(airspace);
-			});
+			drawAirspaces();
 
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
@@ -227,7 +246,7 @@
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
 						icon: planeIcon,
-						rotationAngle: (targetPose.trueHeading / 2),
+						rotationAngle: targetPose.trueHeading / 2,
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
@@ -257,7 +276,7 @@
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
 						icon: planeIcon,
-						rotationAngle: (targetPose.trueHeading / 2),
+						rotationAngle: targetPose.trueHeading / 2,
 						rotationOrigin: 'center'
 					}
 				).addTo(map);
@@ -327,7 +346,7 @@
 	async function drawAirspace(airspace: Airspace) {
 		if (mounted) {
 			await map;
-
+			
 			if (airspace.type != 14)
 				polygons.push(
 					L.polygon(
@@ -355,7 +374,7 @@
 			rotated_marker = await import('leaflet-rotatedmarker');
 			polyline_decorator = await import('leaflet-polylinedecorator');
 
-			loadMapScenario();
+			loadMap();
 			mounted = true;
 		}
 	});

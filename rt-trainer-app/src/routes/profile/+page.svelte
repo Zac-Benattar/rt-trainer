@@ -1,9 +1,8 @@
 <script lang="ts">
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import { signOut } from '@auth/sveltekit/client';
 
 	export let data: PageData;
-	export let form: ActionData;
 
 	const handleSignOut = () => {
 		signOut({ callbackUrl: '/' });
@@ -12,11 +11,22 @@
 
 <div class="flex flex-row place-content-center">
 	<div class="flex flex-col p-3 place-content-center gap-3">
+		<div>
+			<h1 class="text-2xl font-bold">Profile</h1>
+			
+		</div>
 		<div class="flex flex-col p-3 place-content-center">
 			<button class="btn variant-ringed-surface gap-2" on:click={handleSignOut}
 				>Sign Out</button
 			>
 		</div>
+		{#if data.userDetails?.accountType == 'admin'}
+			<div class="flex flex-col p-3 place-content-center">
+				<div>
+					ADMIN ACCOUNT
+				</div>
+			</div>
+		{/if}
 
 		<form
 			class="flex flex-col px-2 xs:w-9/12 gap-2"

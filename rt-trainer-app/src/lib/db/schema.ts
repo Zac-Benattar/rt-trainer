@@ -87,6 +87,7 @@ export const users = pgTable('user', {
 	email: text('email').notNull(),
 	emailVerified: timestamp('emailVerified', { mode: 'date' }),
 	image: text('image'),
+	accountType: text('accountType').notNull().default('basic_user'),
 	prefix: text('prefix').notNull().default('STUDENT'),
 	callsign: text('callsign').notNull().default('G-OFLY'),
 	aircraftType: text('aircraftType').notNull().default('Cessna 172')

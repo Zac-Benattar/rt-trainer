@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/Components/Map.svelte';
-	import { AwaitingServerResponseStore, ClearSimulationStores, WaypointsStore } from '$lib/stores';
+	import { AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';

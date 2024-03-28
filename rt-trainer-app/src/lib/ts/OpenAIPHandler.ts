@@ -25,6 +25,12 @@ export function checkDataUpToDate(): boolean {
 	return true;
 }
 
+export async function loadAllAIPDataToStores(): Promise<Airspace[]> {
+	const airspaceData = await getAllUKAirspaceFromOpenAIP();
+	const airspaces = airspaceData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
+	return airspaces;
+}
+
 export async function writeDataToJSON(): Promise<void> {
 	const airportReportingPoints = await getAllUKAirportReportingPointsFromOpenAIP();
 
