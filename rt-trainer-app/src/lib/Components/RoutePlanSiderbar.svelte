@@ -87,11 +87,12 @@
 				</p>
 			</div>
 		{/if}
-		{#each waypoints as waypoint}
+		{#each waypoints as waypoint (waypoint.index)}
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<div
 				class="card p-2 flex flex-row gap-2 place-content-center"
 				draggable="true"
+				animate:flip={{ duration: dragDuration }}
 				on:dragstart={() => {
 					draggingWaypoint = waypoint;
 				}}

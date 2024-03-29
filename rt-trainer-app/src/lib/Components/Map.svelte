@@ -133,13 +133,14 @@
 
 			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				maxZoom: 17,
-				attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+				attribution:
+					'<a href="https://www.openaip.net/">OpenAIP</a> | © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
 
 			map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
 				const newWaypoint = new Waypoint(
 					'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
-					[e.latlng.lng, e.latlng.lat],
+					[parseFloat(e.latlng.lng.toFixed(8)), parseFloat(e.latlng.lat.toFixed(8))],
 					WaypointType.Fix,
 					waypoints.length
 				);
@@ -467,7 +468,7 @@
 			if (airspace.type != 14) {
 				const airspacePolygon = L.polygon(
 					airspace.coordinates[0].map((point) => [point[1], point[0]]),
-					{ color: 'blue' }
+					{ color: 'blue', fillColor: 'blue', fillOpacity: 0.2, weight: 1 }
 				)
 					.bindPopup(airspace.getDisplayName())
 					.addTo(map);

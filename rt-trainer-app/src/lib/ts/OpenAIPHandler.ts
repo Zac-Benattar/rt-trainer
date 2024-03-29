@@ -23,13 +23,13 @@ export function checkDataUpToDate(): boolean {
 	return true;
 }
 
-export async function getAirspaceData(): Promise<Airspace[]> {
+export async function getAllAirspaceData(): Promise<Airspace[]> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 	const airspaces = airspaceData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
 	return airspaces;
 }
 
-export async function getAirportData(): Promise<Airport[]> {
+export async function getAllAirportData(): Promise<Airport[]> {
 	const airportData = await getAllUKAirportsFromOpenAIP();
 	const airports = airportData.map((airportData) => airportDataToAirport(airportData));
 	return airports;
@@ -229,6 +229,7 @@ export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 			},
 			params: {
 				country: 'GB',
+				type: [0, 2, 3, 9],
 				sortBy: 'geometry.coordinates[0]'
 			}
 		});
@@ -252,6 +253,10 @@ export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 			params: {
 				page: 1,
 				country: 'GB',
+				icaoClass: [1, 2, 3, 4, 5, 6, 8],
+				onDemand: false,
+				onRequest: false,
+				byNotam: false,
 				sortBy: 'geometry.coordinates[0][0][0]'
 			}
 		});
@@ -264,6 +269,10 @@ export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 			params: {
 				page: 2,
 				country: 'GB',
+				icaoClass: [1, 2, 3, 4, 5, 6, 8],
+				onDemand: false,
+				onRequest: false,
+				byNotam: false,
 				sortBy: 'geometry.coordinates[0][0][0]'
 			}
 		});
