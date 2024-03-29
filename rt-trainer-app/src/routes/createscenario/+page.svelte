@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
-	import Map from '$lib/Components/Map.svelte';
+	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import { GlobeOutline, EditOutline, RefreshOutline } from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';

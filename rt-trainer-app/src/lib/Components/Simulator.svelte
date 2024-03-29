@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Radio from './SimulatorComponents/Radio.svelte';
 	import Transponder from './SimulatorComponents/Transponder.svelte';
-	import Map from './Map.svelte';
+	import Map from './Leaflet/Map.svelte';
 	import MessageInput from './SimulatorComponents/MessageInput.svelte';
 	import MessageOutput from './SimulatorComponents/MessageOutput.svelte';
 	import type { ServerResponse } from '$lib/ts/ServerClientTypes';

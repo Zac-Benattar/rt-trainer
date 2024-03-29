@@ -1,15 +1,8 @@
 <script lang="ts">
-	/* This file is not correctly typed due to the way SvelteKit builds its production
-	bundle and how Leaflet depends on the window object. This presented issues with loading
-	leaflet but the compromise is to not import Leaflet with an import statement at the 
-	top of the file. Read more here about the issue and solution in the blog post by 
-	Stanislav Khromov below.
-	https://khromov.se/using-leaflet-with-sveltekit/ 
+	/* Structure inspired by ShipBit's youtube tutorial https://www.youtube.com/watch?v=JFctWXEzFZw
 	
 	The coordinates used in the rest of the application are in the format [long, lat],
 	here they must be converted to [lat, long] for Leaflet to understand them correctly.
-
-	This file is also cursed, and I'm sorry for anyone who has to read or maintain it.
 	*/
 	import {
 		AirportsStore,
@@ -19,8 +12,7 @@
 		NullRouteStore,
 		WaypointsStore
 	} from '$lib/stores';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
 	import { convertMinutesToTimeString, getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
@@ -28,13 +20,9 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import { init } from '@paralleldrive/cuid2';
-	import { marker } from 'leaflet';
+	import L from 'leaflet';
+	import 'leaflet/dist/leaflet.css';
 
-	export let enabled: boolean = true;
-	export let widthSmScreen: string = '512px';
-	export let heightSmScreen: string = '452px';
-	let leaflet: any;
-	let rotated_marker: any;
 	let polyline_decorator: any;
 	let targetPose: Pose = {
 		position: [0, 0],
@@ -43,7 +31,6 @@
 		airSpeed: 0
 	};
 	let currentTime: string = '00:00';
-	let mounted: boolean = false;
 	let currentLocationMarker: any;
 	let waypoints: Waypoint[] = [];
 	let airspaces: Airspace[] = [];
@@ -52,31 +39,41 @@
 	let polygons: any[] = [];
 	let lines: any[] = [];
 	let needsRerender: boolean = false;
-	let initialZoomLevel: number = 13;
-	let map: any;
+
 	let planeIcon: any;
 	let airportIcon: any;
 	let airportSelectedIcon: any;
-	let flightInformationOverlay: HTMLDivElement;
-	let FlightInformationTextBox: any;
+	let flightInformarionObject: HTMLDivElement;
+	let FlightInformationClass: any;
+	let routeEditControlsObject: HTMLDivElement;
+	let routeEditControlsClass: any;
 	let nullRouteOverlay: HTMLDivElement;
 	let NullRouteTextBox: any;
-	let loading: boolean = false;
 	let nullRoute: boolean = false;
 	let unnamedWaypointCount = 1;
 	let CUID = init({ length: 8 });
 
+	let map: L.Map | undefined;
+	let mapElement: HTMLDivElement;
+
+	export let bounds: L.LatLngBounds | undefined = undefined;
+	export let view: L.LatLngExpression | undefined = [52.33, -1.42];
+	export let zoom: number | undefined = undefined;
+
 	export let mode: MapMode = MapMode.RoutePlan;
 
-	$: if (needsRerender && mounted && browser) {
-		updateMap();
+	$: if (needsRerender) {
+		// updateMap();
 		needsRerender = false;
-		loading = false;
 	}
 
-	AwaitingServerResponseStore.subscribe((awaitingServerResponse) => {
-		loading = awaitingServerResponse;
-	});
+	$: if (map) {
+		if (bounds) {
+			map.fitBounds(bounds);
+		} else if (view && zoom) {
+			map.setView(view, zoom);
+		}
+	}
 
 	NullRouteStore.subscribe((_nullRoute) => {
 		nullRoute = _nullRoute;
@@ -110,78 +107,70 @@
 		}
 	});
 
-	async function loadMap() {
-		if (browser) {
-			if (map) {
-				map.remove();
-			}
+	// async function loadMap() {
 
-			if (mode == MapMode.RoutePlan) {
-				initialZoomLevel = 8;
-				targetPose = {
-					position: [-1.46, 52.33],
-					trueHeading: 0,
-					altitude: 0,
-					airSpeed: 0
-				};
-			} else {
-				initialZoomLevel = 15;
-			}
+	// 	if (mode == MapMode.RoutePlan) {
+	// 		map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
+	// 			const newWaypoint = new Waypoint(
+	// 				CUID(),
+	// 				'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
+	// 				[parseFloat(e.latlng.lng.toFixed(8)), parseFloat(e.latlng.lat.toFixed(8))],
+	// 				WaypointType.Fix,
+	// 				waypoints.length
+	// 			);
 
-			map = L.map('myMap').setView(
-				[targetPose?.position[1], targetPose?.position[0]],
-				initialZoomLevel
-			);
+	// 			waypoints.push(newWaypoint);
+	// 			WaypointsStore.set(waypoints);
+	// 			needsRerender = true;
+	// 		});
 
-			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-				maxZoom: 17,
-				attribution:
-					'<a href="https://www.openaip.net/">OpenAIP</a> | © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-			}).addTo(map);
+	// 		routeEditControlsClass = L.Control.extend({
+	// 			onAdd: function () {
+	// 				var text = L.DomUtil.create('div');
+	// 				text.id = 'heading_text';
+	// 				text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+	// 				text.style.color = 'black';
+	// 				text.style.backgroundColor = 'white';
+	// 				text.innerHTML =
+	// 					'<p> Heading: ' +
+	// 					targetPose.trueHeading +
+	// 					'<br> Airspeed: ' +
+	// 					targetPose.airSpeed +
+	// 					'<br> Time: ' +
+	// 					currentTime +
+	// 					'</p>';
+	// 				return text;
+	// 			}
+	// 		});
 
-			if (mode == MapMode.RoutePlan) {
-				map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
-					const newWaypoint = new Waypoint(
-						CUID(),
-						'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
-						[parseFloat(e.latlng.lng.toFixed(8)), parseFloat(e.latlng.lat.toFixed(8))],
-						WaypointType.Fix,
-						waypoints.length
-					);
+	// 		routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
+	// 	}
 
-					waypoints.push(newWaypoint);
-					WaypointsStore.set(waypoints);
-					needsRerender = true;
-				});
-			}
+	// 	planeIcon = L.icon({
+	// 		iconUrl: '/images/plane-icon.png',
 
-			planeIcon = L.icon({
-				iconUrl: '/images/plane-icon.png',
+	// 		iconSize: [40, 40], // size of the icon
+	// 		iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+	// 		popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+	// 	});
 
-				iconSize: [40, 40], // size of the icon
-				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-				popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
-			});
+	// 	airportIcon = L.icon({
+	// 		iconUrl: '/images/airport-icon-blue.png',
 
-			airportIcon = L.icon({
-				iconUrl: '/images/airport-icon-blue.png',
+	// 		iconSize: [40, 40], // size of the icon
+	// 		iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+	// 		popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
+	// 	});
 
-				iconSize: [40, 40], // size of the icon
-				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-				popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
-			});
+	// 	airportSelectedIcon = L.icon({
+	// 		iconUrl: '/images/airport-icon-red.png',
 
-			airportSelectedIcon = L.icon({
-				iconUrl: '/images/airport-icon-red.png',
+	// 		iconSize: [60, 60], // size of the icon
+	// 		iconAnchor: [30, 40], // point of the icon which will correspond to marker's location
+	// 		popupAnchor: [0, -5] // point from which the popup should open relative to the iconAnchor
+	// 	});
+	// }
 
-				iconSize: [60, 60], // size of the icon
-				iconAnchor: [30, 40], // point of the icon which will correspond to marker's location
-				popupAnchor: [0, -5] // point from which the popup should open relative to the iconAnchor
-			});
-		}
-	}
-
-	// async function loadMapScenario() {
 	// 	// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 	// 	// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
 	// 	// 	const bounds = new L.LatLngBounds([
@@ -190,17 +179,6 @@
 	// 	// 	]);
 	// 	// 	map.fitBounds(bounds);
 	// 	// }
-
-	// 	// Adds all waypoints to the map
-	// 	waypoints.forEach((waypoint) => {
-	// 		addMarker(waypoint.location[1], waypoint.location[0], waypoint.name);
-	// 	});
-
-	// 	connectMarkers();
-
-	// 	drawAirspaces();
-
-	// 	drawAirports();
 
 	// 	if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 
@@ -232,10 +210,9 @@
 
 	// 		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	// 	}
-	// }
 
 	async function updateMap() {
-		if (mounted && browser) {
+		if (map) {
 			await map;
 
 			if (nullRoute) {
@@ -257,7 +234,7 @@
 				if (nullRouteOverlay) nullRouteOverlay.remove();
 			}
 
-			map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
+			// map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
 			// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
 			// 	// bbox in terms of long, lat - flip them for the actual bounds in lat, long
@@ -284,6 +261,8 @@
 
 			drawAirports();
 
+			//rotationAngle: targetPose.trueHeading / 2,
+			//rotationOrigin: 'center'
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
 
@@ -291,28 +270,24 @@
 				currentLocationMarker = L.marker(
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
-						icon: planeIcon,
-						rotationAngle: targetPose.trueHeading / 2,
-						rotationOrigin: 'center'
+						icon: planeIcon
 					}
 				).addTo(map);
 
-				flightInformationOverlay.remove();
+				routeEditControlsObject.remove();
 
-				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
-					map
-				);
+				routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
 			}
-		} else {
-			console.log('Map not mounted');
 		}
 	}
 
+	// rotationAngle: targetPose.trueHeading / 2,
+	// rotationOrigin: 'center'
 	async function updatePose() {
-		if (mounted && browser) {
+		if (map) {
 			await map;
 
-			map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), initialZoomLevel);
+			map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), zoom);
 
 			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
 				currentLocationMarker.remove();
@@ -321,17 +296,13 @@
 				currentLocationMarker = L.marker(
 					new L.LatLng(targetPose.position[1], targetPose.position[0]),
 					{
-						icon: planeIcon,
-						rotationAngle: targetPose.trueHeading / 2,
-						rotationOrigin: 'center'
+						icon: planeIcon
 					}
 				).addTo(map);
 
-				flightInformationOverlay.remove();
+				routeEditControlsObject.remove();
 
-				flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(
-					map
-				);
+				routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
 			}
 		}
 	}
@@ -349,7 +320,7 @@
 	}
 
 	async function addWaypointMarker(_waypoint: Waypoint) {
-		if (mounted && browser) {
+		if (map) {
 			const div = document.createElement('div');
 			div.innerHTML = `<br>${_waypoint.name}<br>`;
 			div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
@@ -429,7 +400,7 @@
 	}
 
 	async function removeGeometry() {
-		if (mounted && browser) {
+		if (map) {
 			await markers.forEach((marker) => {
 				map.removeLayer(marker);
 			});
@@ -446,7 +417,7 @@
 	}
 
 	async function connectWaypoints() {
-		if (mounted && browser) {
+		if (map) {
 			if (waypoints.length > 1) {
 				for (let i = 0; i < waypoints.length - 1; i++) {
 					const line = L.polyline(
@@ -462,33 +433,33 @@
 						}
 					).addTo(map);
 
-					const lineDecorator = L.polylineDecorator(line, {
-						patterns: [
-							// defines a pattern of 20px-wide dashes, repeated every 200px on the line
-							{
-								offset: 20,
-								repeat: 200,
-								symbol: L.Symbol.arrowHead({
-									pixelSize: 20,
-									pathOptions: {
-										color: '#ff1493',
-										fillOpacity: 1,
-										weight: 0,
-										smoothFactor: 1,
-										opacity: 1
-									}
-								})
-							}
-						]
-					}).addTo(map);
-					lines.push(...[line, lineDecorator]);
+					// const lineDecorator = L.polylineDecorator(line, {
+					// 	patterns: [
+					// 		// defines a pattern of 20px-wide dashes, repeated every 200px on the line
+					// 		{
+					// 			offset: 20,
+					// 			repeat: 200,
+					// 			symbol: L.Symbol.arrowHead({
+					// 				pixelSize: 20,
+					// 				pathOptions: {
+					// 					color: '#ff1493',
+					// 					fillOpacity: 1,
+					// 					weight: 0,
+					// 					smoothFactor: 1,
+					// 					opacity: 1
+					// 				}
+					// 			})
+					// 		}
+					// 	]
+					// }).addTo(map);
+					// lines.push(...[line, lineDecorator]);
 				}
 			}
 		}
 	}
 
 	async function drawAirspace(airspace: Airspace) {
-		if (mounted && browser) {
+		if (map) {
 			await map;
 
 			if (airspace.type != 14) {
@@ -530,7 +501,7 @@
 	}
 
 	async function drawAirport(airport: Airport) {
-		if (mounted && browser) {
+		if (map) {
 			await map;
 
 			// if the airport is already in the route, mark it as selected with a different icon
@@ -590,54 +561,44 @@
 		}
 	}
 
-	onMount(async () => {
-		if (enabled && browser) {
-			leaflet = await import('leaflet');
-			rotated_marker = await import('leaflet-rotatedmarker');
-			polyline_decorator = await import('leaflet-polylinedecorator');
+	const dispatch = createEventDispatcher();
 
-			loadMap();
-			mounted = true;
+	onMount(async () => {
+		if (!bounds && (!view || !zoom)) {
+			throw new Error('Must set either bounds, or both view and zoom.');
 		}
+
+		map = L.map(mapElement)
+			.on('zoom', (e) => dispatch('zoom', e))
+			.on('popupopen', async (e) => {
+				await tick();
+				e.popup.update();
+			});
+
+		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+			maxZoom: 17,
+			attribution:
+				'<a href="https://www.openaip.net/">OpenAIP</a> | © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+		}).addTo(map);
+	});
+
+	onDestroy(() => {
+		map?.remove();
+		map = undefined;
+	});
+
+	setContext('map', {
+		getMap: () => map
 	});
 </script>
 
-<svelte:head>
-	{#if enabled}
-		<link
-			rel="stylesheet"
-			href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
-			integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-			crossorigin=""
-		/>
-	{/if}
-</svelte:head>
-
-<div
-	class="container flex flex-row p-1.5 rounded-md grow h-80 sm:h-96 sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
-	style="--widthSmScreen: {widthSmScreen}; --heightSmScreen: {heightSmScreen};"
->
-	{#if enabled}
-		<div id="myMap" class="card flex grow z-[1] flex flex-row place-content-center" />
-	{:else}
-		<p>Map is disabled</p>
+<div class="w-full h-full" bind:this={mapElement}>
+	{#if map}
+		<slot />
 	{/if}
 </div>
 
 <style lang="postcss">
-	.card {
-		width: 100%;
-	}
-
-	.container {
-		@media (min-width: 640px) {
-			min-width: var(--widthSmScreen);
-			min-height: var(--heightSmScreen);
-			max-width: var(--widthSmScreen);
-			max-height: var(--heightSmScreen);
-		}
-	}
-
 	:global(.textarea) {
 		resize: none;
 	}

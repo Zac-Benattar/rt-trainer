@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Map from '$lib/Components/Map.svelte';
+	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import { AwaitingServerResponseStore, ClearSimulationStores } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';

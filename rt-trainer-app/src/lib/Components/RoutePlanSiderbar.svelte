@@ -64,8 +64,8 @@
 	}
 </script>
 
-<div class="sidebar-container flex flex-col grow p-3 py-0 gap-1 overflow-clip">
-	<div class="flex flex-col sticky top-0 bg-surface-900 z-50">
+<div class="sidebar-container flex flex-col grow py-0 gap-1 overflow-clip">
+	<div class="flex flex-col sticky top-0 p-3 bg-surface-900 z-50">
 		<div class="flex flex-row ml-[-14px]">
 			<strong><a href="/home" class="btn text-xl sm:text-2xl uppercase">RT Trainer</a></strong>
 			<div class="flex flex-col place-content-center"><b>Route Planner</b></div>
@@ -82,7 +82,7 @@
 		<hr />
 	</div>
 
-	<div class="sidebar-contents-container overflow-auto">
+	<div class="sidebar-contents-container overflow-auto px-3 pb-2">
 		<div class="flex flex-col gap-2 p-2">
 			<div><strong>Route Waypoints</strong></div>
 			{#if waypoints.length == 0}

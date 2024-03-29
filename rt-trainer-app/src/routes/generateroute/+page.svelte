@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Map from '$lib/Components/Map.svelte';
+	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import { AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
