@@ -28,6 +28,7 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import { init } from '@paralleldrive/cuid2';
+	import { marker } from 'leaflet';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -63,6 +64,7 @@
 	let loading: boolean = false;
 	let nullRoute: boolean = false;
 	let unnamedWaypointCount = 1;
+	let CUID = init({ length: 8 });
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
@@ -137,18 +139,21 @@
 					'<a href="https://www.openaip.net/">OpenAIP</a> | © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 			}).addTo(map);
 
-			map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
-				const newWaypoint = new Waypoint(
-					'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
-					[parseFloat(e.latlng.lng.toFixed(8)), parseFloat(e.latlng.lat.toFixed(8))],
-					WaypointType.Fix,
-					waypoints.length
-				);
+			if (mode == MapMode.RoutePlan) {
+				map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
+					const newWaypoint = new Waypoint(
+						CUID(),
+						'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
+						[parseFloat(e.latlng.lng.toFixed(8)), parseFloat(e.latlng.lat.toFixed(8))],
+						WaypointType.Fix,
+						waypoints.length
+					);
 
-				waypoints.push(newWaypoint);
-				WaypointsStore.set(waypoints);
-				needsRerender = true;
-			});
+					waypoints.push(newWaypoint);
+					WaypointsStore.set(waypoints);
+					needsRerender = true;
+				});
+			}
 
 			planeIcon = L.icon({
 				iconUrl: '/images/plane-icon.png',
@@ -386,8 +391,29 @@
 				className: 'popup'
 			};
 
+			const myCustomColour = '#FF0000';
+
+			const markerHtmlStyles = `
+  				background-color: ${myCustomColour};
+  				width: 2rem;
+  				height: 2rem;
+  				display: block;
+  				left: -1rem;
+  				top: -1rem;
+  				position: relative;
+  				border-radius: 2rem 2rem 0;
+  				transform: rotate(45deg);`;
+
+			const icon = L.divIcon({
+				className: 'my-custom-pin',
+				iconAnchor: [0, 24],
+				popupAnchor: [0, -36],
+				html: `<span style="${markerHtmlStyles}" />`
+			});
+
 			const marker = L.marker([_waypoint.location[1], _waypoint.location[0]], {
-				draggable: true
+				draggable: true,
+				icon: icon
 			})
 				.bindPopup(div, popupsettings)
 				.addTo(map);
@@ -510,7 +536,7 @@
 			// if the airport is already in the route, mark it as selected with a different icon
 
 			let icon = airportIcon;
-			if (waypoints.some((waypoint) => waypoint.name == airport.name)) {
+			if (waypoints.some((waypoint) => waypoint.id == airport.id)) {
 				icon = airportSelectedIcon;
 			}
 
@@ -521,6 +547,8 @@
 				.bindPopup(airport.name)
 				.addTo(map);
 
+			markers.push(airportMarker);
+
 			airportMarker.on('mouseover', function () {
 				airportMarker.openPopup();
 			});
@@ -530,25 +558,24 @@
 			});
 
 			airportMarker.on('click', function () {
-				if (airportMarker.getIcon() == airportSelectedIcon) {
-					// remove original marker
-					L.DomUtil.remove(airportMarker._icon);
-
+				if (waypoints.some((waypoint) => waypoint.id == airport.id)) {
 					airportMarker.setIcon(airportIcon);
+
 					// remove the airport from the route
-					waypoints = waypoints.filter((waypoint) => waypoint.name != airport.name);
+					waypoints = waypoints.filter((waypoint) => waypoint.id != airport.id);
 					waypoints.forEach((waypoint, index) => {
 						waypoint.index = index;
 					});
 					WaypointsStore.set(waypoints);
 					needsRerender = true;
 				} else {
-					L.DomUtil.remove(airportMarker._icon);
 					airportMarker.setIcon(airportSelectedIcon);
+
 					// add the airport to the route if its not already in it
-					if (!waypoints.some((waypoint) => waypoint.name == airport.name)) {
+					if (!waypoints.some((waypoint) => waypoint.id == airport.id)) {
 						waypoints.push(
 							new Waypoint(
+								airport.id,
 								airport.name,
 								airport.coordinates,
 								WaypointType.Aerodrome,

@@ -34,6 +34,9 @@
 	});
 
 	let distanceUnit: string = 'Nautical Miles';
+	let distanceInMeters: number = 0;
+	let minFL: number = 1500;
+	let maxFL: number = 3000;
 
 	const distanceUnitsPopupCombobox: PopupSettings = {
 		event: 'click',
@@ -61,150 +64,166 @@
 	}
 </script>
 
-<div class="flex flex-col grow p-3 gap-2">
-	<div class="flex flex-col">
+<div class="sidebar-container flex flex-col grow p-3 py-0 gap-1 overflow-clip">
+	<div class="flex flex-col sticky top-0 bg-surface-900 z-50">
 		<div class="flex flex-row ml-[-14px]">
 			<strong><a href="/home" class="btn text-xl sm:text-2xl uppercase">RT Trainer</a></strong>
+			<div class="flex flex-col place-content-center"><b>Route Planner</b></div>
 		</div>
 
-		<div class="flex flex-row mt-[-10px] ml-[6px] pb-2">
-			<ol class="breadcrumb">
+		<div class="flex flex-row mt-[-10px] ml-[6px] pb-2 pb-4">
+			<ol class="flex flex-row gap-2">
 				<li class="crumb"><a class="anchor" href="/myroutes">My Routes</a></li>
 				<li class="crumb-separator" aria-hidden>/</li>
-				<li>New</li>
+				<li class="">New</li>
 			</ol>
 		</div>
+
+		<hr />
 	</div>
 
-	<hr />
-
-	<div class="flex flex-col gap-2 p-2">
-		<div>Route Waypoints</div>
-		{#if waypoints.length == 0}
-			<div class="p-1">
-				<p class="text-slate-600">
-					Add a waypoint by clicking on an airport or any other spot on the map.
-				</p>
-			</div>
-		{/if}
-		{#each waypoints as waypoint (waypoint.index)}
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div
-				class="card p-2 flex flex-row gap-2 place-content-center"
-				draggable="true"
-				animate:flip={{ duration: dragDuration }}
-				on:dragstart={() => {
-					draggingWaypoint = waypoint;
-				}}
-				on:dragend={() => {
-					draggingWaypoint = undefined;
-				}}
-				on:dragenter={() => {
-					swapWith(waypoint);
-				}}
-				on:dragover={(e) => {
-					e.preventDefault();
-				}}
-			>
-				<div class="flex flex-col place-content-center">
-					{#if waypoint.index == 0}
-						🛩️{:else if waypoint.index == waypoints.length - 1}🏁{:else}🚩{/if}
+	<div class="sidebar-contents-container overflow-auto">
+		<div class="flex flex-col gap-2 p-2">
+			<div><strong>Route Waypoints</strong></div>
+			{#if waypoints.length == 0}
+				<div class="p-1">
+					<p class="text-slate-600">
+						Add a waypoint by clicking on an airport or any other spot on the map.
+					</p>
 				</div>
-				<div class="flex flex-col place-content-center">
-					<textarea class="textarea" rows="1" placeholder={waypoint.name} />
-				</div>
-				<button
-					class="flex flex-col place-content-center"
-					use:popup={{
-						event: 'click',
-						target: waypoint.name + '-waypoint-details-popup',
-						placement: 'bottom'
-					}}><DotsHorizontalOutline /></button
-				>
-
+			{/if}
+			{#each waypoints as waypoint (waypoint.index)}
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					id={waypoint.name + '-waypoint-details-popup'}
-					class="card p-4 w-auto shadow-xl z-50"
-					data-popup={waypoint.name + '-waypoint-details-popup'}
+					class="card p-2 flex flex-row gap-2 place-content-center"
+					draggable="true"
+					animate:flip={{ duration: dragDuration }}
+					on:dragstart={() => {
+						draggingWaypoint = waypoint;
+					}}
+					on:dragend={() => {
+						draggingWaypoint = undefined;
+					}}
+					on:dragenter={() => {
+						swapWith(waypoint);
+					}}
+					on:dragover={(e) => {
+						e.preventDefault();
+					}}
 				>
-					<div>
-						<button
-							on:click={() => {
-								WaypointsStore.update((waypoints) => {
-									waypoints = waypoints.filter((w) => w.index !== waypoint.index);
-									waypoints.forEach((waypoint, index) => {
-										waypoint.index = index;
+					<div class="flex flex-col place-content-center">
+						{#if waypoint.index == 0}
+							🛩️{:else if waypoint.index == waypoints.length - 1}🏁{:else}🚩{/if}
+					</div>
+					<div class="flex flex-col place-content-center">
+						<textarea class="textarea" rows="1" placeholder={waypoint.name} />
+					</div>
+					<button
+						class="flex flex-col place-content-center"
+						use:popup={{
+							event: 'click',
+							target: waypoint.name + '-waypoint-details-popup',
+							placement: 'bottom'
+						}}><DotsHorizontalOutline /></button
+					>
+
+					<div
+						id={waypoint.name + '-waypoint-details-popup'}
+						class="card p-4 w-auto shadow-xl z-50"
+						data-popup={waypoint.name + '-waypoint-details-popup'}
+					>
+						<div>
+							<button
+								on:click={() => {
+									WaypointsStore.update((waypoints) => {
+										waypoints = waypoints.filter((w) => w.index !== waypoint.index);
+										waypoints.forEach((waypoint, index) => {
+											waypoint.index = index;
+										});
+										return waypoints;
 									});
-									return waypoints;
-								});
-							}}>Delete</button
-						>
+								}}>Delete</button
+							>
+						</div>
 					</div>
 				</div>
+			{/each}
+		</div>
+
+		<div class="flex flex-col gap-2 p-2">
+			<div>
+				<strong>Preferences</strong>
 			</div>
-		{/each}
-	</div>
+			<div>
+				<button class="btn textarea w-full justify-between" use:popup={distanceUnitsPopupCombobox}>
+					<span class="ml-[-6px]">{distanceUnit ?? 'Distance Unit'}</span>
+					<span>↓</span>
+				</button>
 
-	<Accordion>
-		<AccordionItem open>
-			<svelte:fragment slot="lead"><WandMagicSparklesOutline /></svelte:fragment>
-			<svelte:fragment slot="summary">Auto-generate Route</svelte:fragment>
-			<svelte:fragment slot="content"
-				><div class="flex flex-col gap-2">
-					<div class="label">Route Seed</div>
-					<div class="flex flex-row gap-2">
-						<textarea
-							id="seed-input"
-							class="textarea"
-							rows="1"
-							maxlength="20"
-							placeholder="Enter a seed"
-						/>
-						<button
-							type="button"
-							class="btn variant-filled w-10"
-							on:click={() => {
-								routeSeed = shortCUID();
-
-								const element = document.getElementById('seed-input');
-								if (element) {
-									element.value = routeSeed;
-								}
-							}}><RefreshOutline /></button
+				<div class="card shadow-xl w-[250px] py-2" data-popup="distance-unit-popup">
+					<ListBox rounded="rounded-none">
+						<ListBoxItem bind:group={distanceUnit} name="medium" value="Nautical Miles"
+							>Nautical Miles</ListBoxItem
 						>
-					</div>
-				</div></svelte:fragment
-			>
-		</AccordionItem>
-		<AccordionItem open>
-			<svelte:fragment slot="lead"><CogOutline /></svelte:fragment>
-			<svelte:fragment slot="summary">Preferences</svelte:fragment>
-			<svelte:fragment slot="content"
-				><div>
-					<button
-						class="btn textarea w-[266px] justify-between"
-						use:popup={distanceUnitsPopupCombobox}
-					>
-						<span>{distanceUnit ?? 'Distance Unit'}</span>
-						<span>↓</span>
-					</button>
+						<ListBoxItem bind:group={distanceUnit} name="medium" value="Miles">Miles</ListBoxItem>
+						<ListBoxItem bind:group={distanceUnit} name="medium" value="Kilometers"
+							>Kilometers</ListBoxItem
+						>
+					</ListBox>
+					<div class="arrow bg-surface-100-800-token" />
+				</div>
+			</div>
 
-					<div class="card shadow-xl w-[266px] py-2" data-popup="distance-unit-popup">
-						<ListBox rounded="rounded-none">
-							<ListBoxItem bind:group={distanceUnit} name="medium" value="Nautical Miles"
-								>Nautical Miles</ListBoxItem
-							>
-							<ListBoxItem bind:group={distanceUnit} name="medium" value="Miles">Miles</ListBoxItem>
-							<ListBoxItem bind:group={distanceUnit} name="medium" value="Kilometers"
-								>Kilometers</ListBoxItem
-							>
-						</ListBox>
-						<div class="arrow bg-surface-100-800-token" />
-					</div>
-				</div></svelte:fragment
-			>
-		</AccordionItem>
-	</Accordion>
+			<div class="flex flex-col gap-1">
+				<div class="label">Minimum Flight Level (ft)</div>
+				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={minFL} />
+			</div>
+
+			<div class="flex flex-col gap-1">
+				<div class="label">Maximum Flight Level (ft)</div>
+				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={maxFL} />
+			</div>
+		</div>
+
+		<div class="flex flex-col gap-2 p-2">
+			<div>
+				<strong>Tools</strong>
+			</div>
+
+			<Accordion>
+				<AccordionItem>
+					<svelte:fragment slot="lead"><WandMagicSparklesOutline /></svelte:fragment>
+					<svelte:fragment slot="summary">Auto-generate Route</svelte:fragment>
+					<svelte:fragment slot="content"
+						><div class="flex flex-col gap-2">
+							<div class="label">Route Seed</div>
+							<div class="flex flex-row gap-2">
+								<textarea
+									id="seed-input"
+									class="textarea"
+									rows="1"
+									maxlength="20"
+									placeholder="Enter a seed"
+								/>
+								<button
+									type="button"
+									class="btn variant-filled w-10"
+									on:click={() => {
+										routeSeed = shortCUID();
+
+										const element = document.getElementById('seed-input');
+										if (element) {
+											element.value = routeSeed;
+										}
+									}}><RefreshOutline /></button
+								>
+							</div>
+						</div></svelte:fragment
+					>
+				</AccordionItem>
+			</Accordion>
+		</div>
+	</div>
 </div>
 
 <style lang="postcss">
