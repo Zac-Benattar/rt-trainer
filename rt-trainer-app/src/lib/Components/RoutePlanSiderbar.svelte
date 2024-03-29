@@ -16,6 +16,7 @@
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import { WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import { flip } from 'svelte/animate';
 
 	const drawerStore = getDrawerStore();
 
@@ -23,9 +24,9 @@
 		drawerStore.close();
 	}
 
-	const routeCUID = init({ length: 8 });
+	const shortCUID = init({ length: 8 });
 
-	let routeSeed: string = routeCUID();
+	let routeSeed: string = shortCUID();
 	let waypoints: Waypoint[] = [];
 
 	WaypointsStore.subscribe((value) => {
@@ -40,6 +41,24 @@
 		placement: 'bottom',
 		closeQuery: '.listbox-item'
 	};
+
+	const dragDuration = 200;
+	let draggingWaypoint: Waypoint | undefined = undefined;
+	let animatingWaypoints = new Set();
+
+	function swapWith(waypoint: Waypoint) {
+		if (draggingWaypoint === waypoint || animatingWaypoints.has(waypoint)) return;
+		animatingWaypoints.add(waypoint);
+		setTimeout(() => animatingWaypoints.delete(waypoint), dragDuration);
+		const cardAIndex = waypoints.indexOf(draggingWaypoint);
+		const cardBIndex = waypoints.indexOf(waypoint);
+		waypoints[cardAIndex] = waypoint;
+		waypoints[cardBIndex] = draggingWaypoint;
+		waypoints.forEach((waypoint, index) => {
+			waypoint.index = index;
+		});
+		WaypointsStore.set(waypoints);
+	}
 </script>
 
 <div class="flex flex-col grow p-3 gap-2">
@@ -63,17 +82,35 @@
 		<div>Route Waypoints</div>
 		{#if waypoints.length == 0}
 			<div class="p-1">
-				<p class="text-slate-600">Add a waypoint by clicking on an airport or any other spot on the map.</p>
+				<p class="text-slate-600">
+					Add a waypoint by clicking on an airport or any other spot on the map.
+				</p>
 			</div>
 		{/if}
 		{#each waypoints as waypoint}
-			<div class="flex flex-row gap-2 place-content-center">
+			<!-- svelte-ignore a11y-no-static-element-interactions -->
+			<div
+				class="card p-2 flex flex-row gap-2 place-content-center"
+				draggable="true"
+				on:dragstart={() => {
+					draggingWaypoint = waypoint;
+				}}
+				on:dragend={() => {
+					draggingWaypoint = undefined;
+				}}
+				on:dragenter={() => {
+					swapWith(waypoint);
+				}}
+				on:dragover={(e) => {
+					e.preventDefault();
+				}}
+			>
 				<div class="flex flex-col place-content-center">
 					{#if waypoint.index == 0}
 						🛩️{:else if waypoint.index == waypoints.length - 1}🏁{:else}🚩{/if}
 				</div>
 				<div class="flex flex-col place-content-center">
-					<textarea class='textarea' rows="1" placeholder={waypoint.name} />
+					<textarea class="textarea" rows="1" placeholder={waypoint.name} />
 				</div>
 				<button
 					class="flex flex-col place-content-center"
@@ -126,7 +163,7 @@
 							type="button"
 							class="btn variant-filled w-10"
 							on:click={() => {
-								routeSeed = routeCUID();
+								routeSeed = shortCUID();
 
 								const element = document.getElementById('seed-input');
 								if (element) {
@@ -143,16 +180,23 @@
 			<svelte:fragment slot="summary">Preferences</svelte:fragment>
 			<svelte:fragment slot="content"
 				><div>
-					<button class="btn textarea w-[266px] justify-between" use:popup={distanceUnitsPopupCombobox}>
+					<button
+						class="btn textarea w-[266px] justify-between"
+						use:popup={distanceUnitsPopupCombobox}
+					>
 						<span>{distanceUnit ?? 'Distance Unit'}</span>
 						<span>↓</span>
 					</button>
 
 					<div class="card shadow-xl w-[266px] py-2" data-popup="distance-unit-popup">
 						<ListBox rounded="rounded-none">
-							<ListBoxItem bind:group={distanceUnit} name="medium" value="Nautical Miles">Nautical Miles</ListBoxItem>
+							<ListBoxItem bind:group={distanceUnit} name="medium" value="Nautical Miles"
+								>Nautical Miles</ListBoxItem
+							>
 							<ListBoxItem bind:group={distanceUnit} name="medium" value="Miles">Miles</ListBoxItem>
-							<ListBoxItem bind:group={distanceUnit} name="medium" value="Kilometers">Kilometers</ListBoxItem>
+							<ListBoxItem bind:group={distanceUnit} name="medium" value="Kilometers"
+								>Kilometers</ListBoxItem
+							>
 						</ListBox>
 						<div class="arrow bg-surface-100-800-token" />
 					</div>

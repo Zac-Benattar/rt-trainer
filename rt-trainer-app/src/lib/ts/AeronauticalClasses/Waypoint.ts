@@ -1,3 +1,7 @@
+import { init } from "@paralleldrive/cuid2";
+
+const CUID = init({ length: 10 });
+
 /* Point in space along a route. */
 export default class Waypoint {
 	type: WaypointType;
@@ -5,6 +9,7 @@ export default class Waypoint {
 	index: number;
 	name: string;
 	description: string;
+	id: string;
 
 	constructor(
 		name: string,
@@ -13,11 +18,13 @@ export default class Waypoint {
 		index: number,
 		description: string = ''
 	) {
+		
 		this.name = name;
 		this.location = location;
 		this.type = waypointType;
 		this.index = index;
 		this.description = description;
+		this.id = CUID();
 	}
 }
 
