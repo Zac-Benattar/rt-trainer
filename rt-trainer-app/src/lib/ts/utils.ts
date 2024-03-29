@@ -225,6 +225,13 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 	return str.replace(pattern, (match) => phoneticAlphabetMapping[match.toLowerCase()]).trim();
 }
 
+export function getNthPhoneticAlphabetLetter(n: number): string {
+	// The phonetic alphabet is 26 letters long
+	const index = (n - 1) % 26;
+
+	return replaceWithPhoneticAlphabet(String.fromCharCode(65 + index));
+}
+
 export function replaceWithPhoneticAlphabet(text: string) {
 	const phoneticAlphabet = {
 		A: 'Alpha',

@@ -22,13 +22,12 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
-	import { convertMinutesToTimeString } from '$lib/ts/utils';
+	import { convertMinutesToTimeString, getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import { init } from '@paralleldrive/cuid2';
-	import { videoOverlay } from 'leaflet';
 
 	export let enabled: boolean = true;
 	export let widthSmScreen: string = '512px';
@@ -63,12 +62,11 @@
 	let NullRouteTextBox: any;
 	let loading: boolean = false;
 	let nullRoute: boolean = false;
-
-	const waypointCUID = init({ length: 8 });
+	let unnamedWaypointCount = 1;
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
-	$: if (needsRerender && mounted) {
+	$: if (needsRerender && mounted && browser) {
 		updateMap();
 		needsRerender = false;
 		loading = false;
@@ -110,81 +108,71 @@
 		}
 	});
 
-	async function drawAirspaces() {
-		airspaces.forEach((airspace) => {
-			drawAirspace(airspace);
-		});
-	}
-
-	async function drawAirports() {
-		airports.forEach((airport) => {
-			drawAirport(airport);
-		});
-	}
-
 	async function loadMap() {
-		if (map) {
-			map.remove();
-		}
+		if (browser) {
+			if (map) {
+				map.remove();
+			}
 
-		if (mode == MapMode.RoutePlan) {
-			initialZoomLevel = 8;
-			targetPose = {
-				position: [-1.46, 52.33],
-				trueHeading: 0,
-				altitude: 0,
-				airSpeed: 0
-			};
-		} else {
-			initialZoomLevel = 15;
-		}
+			if (mode == MapMode.RoutePlan) {
+				initialZoomLevel = 8;
+				targetPose = {
+					position: [-1.46, 52.33],
+					trueHeading: 0,
+					altitude: 0,
+					airSpeed: 0
+				};
+			} else {
+				initialZoomLevel = 15;
+			}
 
-		map = L.map('myMap').setView(
-			[targetPose?.position[1], targetPose?.position[0]],
-			initialZoomLevel
-		);
-
-		L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-			maxZoom: 17,
-			attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-		}).addTo(map);
-
-		map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
-			const newWaypoint = new Waypoint(
-				'New Waypoint',
-				[e.latlng.lng, e.latlng.lat],
-				WaypointType.Fix,
-				waypoints.length
+			map = L.map('myMap').setView(
+				[targetPose?.position[1], targetPose?.position[0]],
+				initialZoomLevel
 			);
 
-			waypoints.push(newWaypoint);
-			WaypointsStore.set(waypoints);
-			needsRerender = true;
-		});
+			L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				maxZoom: 17,
+				attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+			}).addTo(map);
 
-		planeIcon = L.icon({
-			iconUrl: '/images/plane-icon.png',
+			map.on('click', (e: { latlng: { lng: number; lat: number } }) => {
+				const newWaypoint = new Waypoint(
+					'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
+					[e.latlng.lng, e.latlng.lat],
+					WaypointType.Fix,
+					waypoints.length
+				);
 
-			iconSize: [40, 40], // size of the icon
-			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-			popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
-		});
+				waypoints.push(newWaypoint);
+				WaypointsStore.set(waypoints);
+				needsRerender = true;
+			});
 
-		airportIcon = L.icon({
-			iconUrl: '/images/airport-icon-blue.png',
+			planeIcon = L.icon({
+				iconUrl: '/images/plane-icon.png',
 
-			iconSize: [40, 40], // size of the icon
-			iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
-			popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
-		});
+				iconSize: [40, 40], // size of the icon
+				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+				popupAnchor: [20, 20] // point from which the popup should open relative to the iconAnchor
+			});
 
-		airportSelectedIcon = L.icon({
-			iconUrl: '/images/airport-icon-red.png',
+			airportIcon = L.icon({
+				iconUrl: '/images/airport-icon-blue.png',
 
-			iconSize: [60, 60], // size of the icon
-			iconAnchor: [30, 40], // point of the icon which will correspond to marker's location
-			popupAnchor: [0, -5] // point from which the popup should open relative to the iconAnchor
-		});
+				iconSize: [40, 40], // size of the icon
+				iconAnchor: [20, 20], // point of the icon which will correspond to marker's location
+				popupAnchor: [0, 0] // point from which the popup should open relative to the iconAnchor
+			});
+
+			airportSelectedIcon = L.icon({
+				iconUrl: '/images/airport-icon-red.png',
+
+				iconSize: [60, 60], // size of the icon
+				iconAnchor: [30, 40], // point of the icon which will correspond to marker's location
+				popupAnchor: [0, -5] // point from which the popup should open relative to the iconAnchor
+			});
+		}
 	}
 
 	// async function loadMapScenario() {
@@ -241,7 +229,7 @@
 	// }
 
 	async function updateMap() {
-		if (mounted) {
+		if (mounted && browser) {
 			await map;
 
 			if (nullRoute) {
@@ -315,7 +303,7 @@
 	}
 
 	async function updatePose() {
-		if (mounted) {
+		if (mounted && browser) {
 			await map;
 
 			map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), initialZoomLevel);
@@ -342,98 +330,138 @@
 		}
 	}
 
+	async function drawAirspaces() {
+		airspaces.forEach((airspace) => {
+			drawAirspace(airspace);
+		});
+	}
+
+	async function drawAirports() {
+		airports.forEach((airport) => {
+			drawAirport(airport);
+		});
+	}
+
 	async function addWaypointMarker(_waypoint: Waypoint) {
+		if (mounted && browser) {
+			const div = document.createElement('div');
+			div.innerHTML = `<br>${_waypoint.name}<br>`;
+			div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
 
-		const div = document.createElement('div');
-		div.innerHTML = `<br>${_waypoint.name}<br>`;
-		div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
+			const nameTextarea = document.createElement('textarea');
+			nameTextarea.className = 'textarea';
+			nameTextarea.rows = 1;
+			nameTextarea.value = _waypoint.name;
+			div.appendChild(nameTextarea);
 
-		const textarea = document.createElement('textarea');
-		textarea.className = 'textarea';
-		textarea.rows = 1;
-		textarea.placeholder = _waypoint.name;
-		div.appendChild(textarea);
+			const latTextarea = document.createElement('textarea');
+			latTextarea.className = 'textarea';
+			latTextarea.rows = 1;
+			latTextarea.value = _waypoint.location[1].toString();
+			div.appendChild(latTextarea);
 
-		const button = document.createElement('button');
-		button.innerHTML = 'Remove';
-		button.className = 'btn variant-filled';
-		button.onclick = () => {
-			waypoints = waypoints.filter((waypoint) => waypoint != _waypoint);
-			WaypointsStore.set(waypoints);
-			needsRerender = true;
-		};
-		div.appendChild(button);
+			const longTextarea = document.createElement('textarea');
+			longTextarea.className = 'textarea';
+			longTextarea.rows = 1;
+			longTextarea.value = _waypoint.location[0].toString();
+			div.appendChild(longTextarea);
 
-		const popupsettings = {
-			maxWidth: 500,
-			minWidth: 200,
-			className: 'popup'
-		};
+			const button = document.createElement('button');
+			button.innerHTML = 'Remove';
+			button.className = 'btn variant-filled';
+			button.onclick = () => {
+				waypoints = waypoints.filter((waypoint) => waypoint != _waypoint);
+				waypoints.forEach((waypoint, index) => {
+					waypoint.index = index;
+				});
+				WaypointsStore.set(waypoints);
+				needsRerender = true;
+			};
+			div.appendChild(button);
 
-		const marker = L.marker([_waypoint.location[1], _waypoint.location[0]])
-			.bindPopup(div, popupsettings)
-			.addTo(map);
+			const popupsettings = {
+				maxWidth: 500,
+				minWidth: 200,
+				className: 'popup'
+			};
 
-		markers.push(marker);
+			const marker = L.marker([_waypoint.location[1], _waypoint.location[0]], {
+				draggable: true
+			})
+				.bindPopup(div, popupsettings)
+				.addTo(map);
+
+			marker.on('dragend', (e: any) => {
+				_waypoint.location = [e.target.getLatLng().lng, e.target.getLatLng().lat];
+				WaypointsStore.set(waypoints);
+				needsRerender = true;
+			});
+
+			markers.push(marker);
+		}
 	}
 
 	async function removeGeometry() {
-		await markers.forEach((marker) => {
-			map.removeLayer(marker);
-		});
-		markers = [];
-		await lines.forEach((line) => {
-			map.removeLayer(line);
-		});
-		lines = [];
-		await polygons.forEach((polygon) => {
-			map.removeLayer(polygon);
-		});
-		polygons = [];
+		if (mounted && browser) {
+			await markers.forEach((marker) => {
+				map.removeLayer(marker);
+			});
+			markers = [];
+			await lines.forEach((line) => {
+				map.removeLayer(line);
+			});
+			lines = [];
+			await polygons.forEach((polygon) => {
+				map.removeLayer(polygon);
+			});
+			polygons = [];
+		}
 	}
 
 	async function connectWaypoints() {
-		if (waypoints.length > 1) {
-			for (let i = 0; i < waypoints.length - 1; i++) {
-				const line = L.polyline(
-					[
-						[waypoints[i].location[1], waypoints[i].location[0]],
-						[waypoints[i + 1].location[1], waypoints[i + 1].location[0]]
-					],
-					{
-						color: '#ff1493',
-						weight: 5,
-						opacity: 1,
-						smoothFactor: 1
-					}
-				).addTo(map);
-
-				const lineDecorator = L.polylineDecorator(line, {
-					patterns: [
-						// defines a pattern of 20px-wide dashes, repeated every 200px on the line
+		if (mounted && browser) {
+			if (waypoints.length > 1) {
+				for (let i = 0; i < waypoints.length - 1; i++) {
+					const line = L.polyline(
+						[
+							[waypoints[i].location[1], waypoints[i].location[0]],
+							[waypoints[i + 1].location[1], waypoints[i + 1].location[0]]
+						],
 						{
-							offset: 20,
-							repeat: 200,
-							symbol: L.Symbol.arrowHead({
-								pixelSize: 20,
-								pathOptions: {
-									color: '#ff1493',
-									fillOpacity: 1,
-									weight: 0,
-									smoothFactor: 1,
-									opacity: 1
-								}
-							})
+							color: '#ff1493',
+							weight: 5,
+							opacity: 1,
+							smoothFactor: 1
 						}
-					]
-				}).addTo(map);
-				lines.push(...[line, lineDecorator]);
+					).addTo(map);
+
+					const lineDecorator = L.polylineDecorator(line, {
+						patterns: [
+							// defines a pattern of 20px-wide dashes, repeated every 200px on the line
+							{
+								offset: 20,
+								repeat: 200,
+								symbol: L.Symbol.arrowHead({
+									pixelSize: 20,
+									pathOptions: {
+										color: '#ff1493',
+										fillOpacity: 1,
+										weight: 0,
+										smoothFactor: 1,
+										opacity: 1
+									}
+								})
+							}
+						]
+					}).addTo(map);
+					lines.push(...[line, lineDecorator]);
+				}
 			}
 		}
 	}
 
 	async function drawAirspace(airspace: Airspace) {
-		if (mounted) {
+		if (mounted && browser) {
 			await map;
 
 			if (airspace.type != 14) {
@@ -475,7 +503,7 @@
 	}
 
 	async function drawAirport(airport: Airport) {
-		if (mounted) {
+		if (mounted && browser) {
 			await map;
 
 			// if the airport is already in the route, mark it as selected with a different icon
