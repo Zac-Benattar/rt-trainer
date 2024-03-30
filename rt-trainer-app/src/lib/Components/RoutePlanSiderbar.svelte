@@ -136,7 +136,7 @@
 							<button
 								on:click={() => {
 									WaypointsStore.update((waypoints) => {
-										waypoints = waypoints.filter((w) => w.index !== waypoint.index);
+										waypoints = waypoints.filter((w) => w.id !== waypoint.id);
 										waypoints.forEach((waypoint, index) => {
 											waypoint.index = index;
 										});

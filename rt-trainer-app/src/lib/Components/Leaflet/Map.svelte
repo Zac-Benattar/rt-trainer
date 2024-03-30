@@ -507,7 +507,7 @@
 			// if the airport is already in the route, mark it as selected with a different icon
 
 			let icon = airportIcon;
-			if (waypoints.some((waypoint) => waypoint.id == airport.id)) {
+			if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
 				icon = airportSelectedIcon;
 			}
 
@@ -529,11 +529,11 @@
 			});
 
 			airportMarker.on('click', function () {
-				if (waypoints.some((waypoint) => waypoint.id == airport.id)) {
+				if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
 					airportMarker.setIcon(airportIcon);
 
 					// remove the airport from the route
-					waypoints = waypoints.filter((waypoint) => waypoint.id != airport.id);
+					waypoints = waypoints.filter((waypoint) => waypoint.referenceObjectId != airport.id);
 					waypoints.forEach((waypoint, index) => {
 						waypoint.index = index;
 					});
@@ -543,7 +543,7 @@
 					airportMarker.setIcon(airportSelectedIcon);
 
 					// add the airport to the route if its not already in it
-					if (!waypoints.some((waypoint) => waypoint.id == airport.id)) {
+					if (!waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
 						waypoints.push(
 							new Waypoint(
 								airport.id,

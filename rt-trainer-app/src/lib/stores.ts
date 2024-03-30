@@ -11,6 +11,7 @@ import type Scenario from './ts/Scenario';
 import type Airspace from './ts/AeronauticalClasses/Airspace';
 import type Waypoint from './ts/AeronauticalClasses/Waypoint';
 import type Airport from './ts/AeronauticalClasses/Airport';
+import * as turf from '@turf/turf';
 
 const initialGenerationParameters: GenerationParameters = {
 	seed: '0',
@@ -80,6 +81,22 @@ export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 });
 
 export const WaypointsStore = writable<Waypoint[]>([]);
+
+export const RouteDistanceStore = derived(WaypointsStore, ($RoutePointStore) => {
+	let distance = 0;
+	for (let i = 0; i < $RoutePointStore.length - 1; i++) {
+		const point1 = $RoutePointStore[i];
+		const point2 = $RoutePointStore[i + 1];
+		distance += turf.distance(point1.location, point2.location, { units: 'meters' });
+	}
+	return distance;
+});
+
+// todo
+export const RouteDurationStore = writable<number>(0);
+
+// todo
+export const SimDurationStore = writable<number>(0);
 
 export const AirspacesStore = writable<Airspace[]>([]);
 
