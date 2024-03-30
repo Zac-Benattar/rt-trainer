@@ -7,7 +7,7 @@
 		SimDurationStore,
 		WaypointsStore
 	} from '$lib/stores';
-	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { ActionData } from './$types';
@@ -21,6 +21,7 @@
 	import Marker from '$lib/Components/Leaflet/Marker.svelte';
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
+	import { getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
 
 	const routeCUID = init({ length: 8 });
 
@@ -35,6 +36,8 @@
 
 	let routeNameClasses: string = '';
 	let routeSeedClasses: string = '';
+
+	let unnamedWaypointCount = 1;
 
 	export let data: PageData;
 
@@ -66,12 +69,9 @@
 	}
 	AirportsStore.set(airports);
 
-	const waypoints: Waypoint[] = [];
+	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((value) => {
-		waypoints.length = 0;
-		for (const waypoint of value) {
-			waypoints.push(waypoint);
-		}
+		waypoints = value;
 	});
 
 	let routeDistanceMeters = 0;
@@ -98,12 +98,32 @@
 	$: routeDurationDisplay = routeDurationSeconds / 60;
 
 	$: simDurationDisplay = simDurationSeconds / 60;
+
+	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
+		console.log(event.detail.latlng);
+		addWaypoint(
+			parseFloat(event.detail.latlng.lat.toFixed(8)),
+			parseFloat(event.detail.latlng.lng.toFixed(8))
+		);
+	}
+
+	function addWaypoint(lat: number, lng: number) {
+		const waypoint = new Waypoint(
+			'Waypoint ' + getNthPhoneticAlphabetLetter(unnamedWaypointCount++),
+			[lng, lat],
+			WaypointType.Fix,
+			waypoints.length
+		);
+		waypoints.push(waypoint);
+		console.log(waypoints);
+		WaypointsStore.set(waypoints);
+	}
 </script>
 
 <div class="flex flex-col place-content-center w-full h-full">
 	<div class="flex flex-col place-content-center sm:place-content-start w-full h-full">
 		<div class="flex flex-col xs:pr-3 w-full h-full">
-			<Map zoom={13} mode={MapMode.RoutePlan}>
+			<Map zoom={13} mode={MapMode.RoutePlan} on:click={onMapClick}>
 				{#each airports as airport}
 					{#if showAllAirports || waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 						<Marker
@@ -111,7 +131,12 @@
 							width={30}
 							height={30}
 						>
-							<CirclePlusSolid color="blue" size="sm" />
+							<!-- If the airport is also a waypoint draw it in red, else blue -->
+							{#if waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
+								<CirclePlusSolid color="red" size="sm" />
+							{:else}
+								<CirclePlusOutline color="blue" size="sm" />
+							{/if}
 
 							<Popup>{airport.name}</Popup>
 						</Marker>

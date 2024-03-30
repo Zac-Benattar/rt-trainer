@@ -570,6 +570,7 @@
 
 		map = L.map(mapElement)
 			.on('zoom', (e) => dispatch('zoom', e))
+			.on('click', (e) => dispatch('click', e))
 			.on('popupopen', async (e) => {
 				await tick();
 				e.popup.update();
