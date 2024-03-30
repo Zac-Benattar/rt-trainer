@@ -1,12 +1,18 @@
 <!-- Based off of ShipBit's youtube tutorial https://www.youtube.com/watch?v=JFctWXEzFZw -->
 
 <script lang="ts">
-	import { onMount, onDestroy, getContext, setContext } from 'svelte';
+	import { onMount, onDestroy, getContext, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 
 	export let width: number;
 	export let height: number;
 	export let latLng: L.LatLngExpression;
+	export let aeroObject: Waypoint | Airport | undefined;
+	export let draggable: boolean = false;
+
+	const dispatch = createEventDispatcher();
 
 	let marker: L.Marker | undefined;
 	let markerElement: HTMLElement;
@@ -25,9 +31,14 @@
 				html: markerElement,
 				className: 'map-marker',
 				iconSize: L.point(width, height),
-				iconAnchor: L.point(width / 2, height / 2)
+				iconAnchor: L.point(width / 2 - 8, height / 2)
 			});
 			marker = L.marker(latLng, { icon }).addTo(map);
+			if (draggable) marker.dragging?.enable();
+			marker?.on('drag', (e) => {
+				dispatch('drag', { event: e, waypoint: aeroObject });
+				map?.invalidateSize();
+			});
 		}
 	});
 

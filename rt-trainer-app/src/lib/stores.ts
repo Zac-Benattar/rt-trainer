@@ -82,6 +82,10 @@ export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
 
 export const WaypointsStore = writable<Waypoint[]>([]);
 
+export const WaypointPointsMapStore = derived(WaypointsStore, ($WaypointsStore) => {
+	return $WaypointsStore.map((waypoint) => [waypoint.location[1], waypoint.location[0]]);
+});
+
 export const RouteDistanceStore = derived(WaypointsStore, ($RoutePointStore) => {
 	let distance = 0;
 	for (let i = 0; i < $RoutePointStore.length - 1; i++) {

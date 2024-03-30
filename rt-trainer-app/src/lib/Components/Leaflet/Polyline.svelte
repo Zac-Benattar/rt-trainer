@@ -3,32 +3,33 @@
 	import L from 'leaflet';
 
 	export let latLngArray: L.LatLngExpression[];
+    export let colour: string = 'pink';
 
-	let polygon: L.Polygon | undefined;
-	let polygonElement: HTMLElement;
+	let polyline: L.Polyline | undefined;
+	let polylineElement: HTMLElement;
 
 	const { getMap }: { getMap: () => L.Map | undefined } = getContext('map');
 	const map = getMap();
 
 	setContext('layer', {
-		// L.Polygon inherits from L.Layer
-		getLayer: () => polygon
+		// L.Polyline inherits from L.Layer
+		getLayer: () => polyline
 	});
 
 	onMount(() => {
 		if (map) {
-			polygon = L.polygon(latLngArray, { color: 'blue', fillColor: 'blue', fillOpacity: 0.2, weight: 1 }).addTo(map);
+			polyline = L.polyline(latLngArray, { color: colour, fillOpacity: 1, weight: 3 }).addTo(map);
 		}
 	});
 
 	onDestroy(() => {
-		polygon?.remove();
-		polygon = undefined;
+		polyline?.remove();
+		polyline = undefined;
 	});
 </script>
 
-<div bind:this={polygonElement}>
-	{#if polygon}
+<div bind:this={polylineElement}>
+	{#if polyline}
 		<slot />
 	{/if}
 </div>

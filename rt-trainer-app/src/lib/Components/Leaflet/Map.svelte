@@ -7,14 +7,13 @@
 	import {
 		AirportsStore,
 		AirspacesStore,
-		AwaitingServerResponseStore,
 		CurrentScenarioPointStore,
 		NullRouteStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte';
 	import type { Pose } from '$lib/ts/ScenarioTypes';
-	import { convertMinutesToTimeString, getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
+	import { convertMinutesToTimeString } from '$lib/ts/utils';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
@@ -50,8 +49,6 @@
 	let nullRouteOverlay: HTMLDivElement;
 	let NullRouteTextBox: any;
 	let nullRoute: boolean = false;
-	let unnamedWaypointCount = 1;
-	let CUID = init({ length: 8 });
 
 	let map: L.Map | undefined;
 	let mapElement: HTMLDivElement;
@@ -599,8 +596,4 @@
 	{/if}
 </div>
 
-<style lang="postcss">
-	:global(.textarea) {
-		resize: none;
-	}
-</style>
+

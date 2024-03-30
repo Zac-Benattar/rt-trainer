@@ -30,7 +30,6 @@
 	let waypoints: Waypoint[] = [];
 
 	WaypointsStore.subscribe((value) => {
-		console.log('WaypointsStore.subscribe', value	)
 		waypoints = value;
 	});
 

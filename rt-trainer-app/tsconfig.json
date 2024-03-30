@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
+		"moduleResolution": "Bundler",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,

@@ -5,6 +5,7 @@
 		RouteDistanceStore,
 		RouteDurationStore,
 		SimDurationStore,
+		WaypointPointsMapStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -22,6 +23,9 @@
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
 	import { getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
+	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
+	import { Icon } from 'svelte-icons-pack';
+	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
 
 	const routeCUID = init({ length: 8 });
 
@@ -74,6 +78,11 @@
 		waypoints = value;
 	});
 
+	let waypointPoints: number[][] = [];
+	WaypointPointsMapStore.subscribe((value) => {
+		waypointPoints = value;
+	});
+
 	let routeDistanceMeters = 0;
 	RouteDistanceStore.subscribe((value) => {
 		routeDistanceMeters = value;
@@ -100,7 +109,6 @@
 	$: simDurationDisplay = simDurationSeconds / 60;
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
-		console.log(event.detail.latlng);
 		addWaypoint(
 			parseFloat(event.detail.latlng.lat.toFixed(8)),
 			parseFloat(event.detail.latlng.lng.toFixed(8))
@@ -115,8 +123,15 @@
 			waypoints.length
 		);
 		waypoints.push(waypoint);
-		console.log(waypoints);
 		WaypointsStore.set(waypoints);
+	}
+
+	function onWaypointDrag(e: any) {
+		const waypoint = waypoints.find((waypoint) => waypoint.id === e.detail.waypoint.id);
+		if (waypoint) {
+			waypoint.location = [e.detail.event.latlng.lng, e.detail.event.latlng.lat];
+			WaypointsStore.set(waypoints);
+		}
 	}
 </script>
 
@@ -130,15 +145,17 @@
 							latLng={[airport.coordinates[1], airport.coordinates[0]]}
 							width={30}
 							height={30}
+							aeroObject={airport}
+							draggable={false}
 						>
 							<!-- If the airport is also a waypoint draw it in red, else blue -->
 							{#if waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
-								<CirclePlusSolid color="red" size="sm" />
+								🛩️
 							{:else}
-								<CirclePlusOutline color="blue" size="sm" />
+								<Icon src={BsAirplaneFill} color='black' size='16'/>
 							{/if}
 
-							<Popup>{airport.name}</Popup>
+							<Popup><div>{airport.name}</div></Popup>
 						</Marker>
 					{/if}
 				{/each}
@@ -149,18 +166,40 @@
 					{/if}
 				{/each}
 
-				{#each waypoints as waypoint}
-					<Marker latLng={[waypoint.location[1], waypoint.location[0]]} width={30} height={30}>
+				{#each waypoints as waypoint (waypoint.index)}
+					<Marker
+						latLng={[waypoint.location[1], waypoint.location[0]]}
+						width={50}
+						height={50}
+						aeroObject={waypoint}
+						on:drag={onWaypointDrag}
+						draggable={true}
+					>
 						{#if waypoint.index == 0}
-							🛩️
+							<div class="text-2xl">🛩️</div>
 						{:else if waypoint.index == waypoints.length - 1}
-							🏁
+							<div class="text-2xl">🏁</div>
 						{:else}
-							🚩
+							<div class="text-2xl">🚩</div>
 						{/if}
 
-						<Popup>{waypoint.name}</Popup>
+						<Popup
+							><div class="flex flex-col">
+								<textarea class="textarea">{waypoint.name}</textarea><textarea class="textarea"
+									>{waypoint.location[0]}</textarea
+								><textarea class="textarea">{waypoint.location[1]}</textarea>
+							</div></Popup
+						>
 					</Marker>
+				{/each}
+
+				{#each waypointPoints as waypointPoint, index}
+					{#if index > 0}
+						<!-- Force redraw if either waypoint of the line changes location -->
+						{#key [waypointPoints[index - 1], waypointPoints[index]]}
+							<Polyline latLngArray={[waypointPoints[index - 1], waypointPoints[index]]} />
+						{/key}
+					{/if}
 				{/each}
 			</Map>
 		</div>
@@ -205,4 +244,7 @@
 </div>
 
 <style lang="postcss">
+	:global(.textarea) {
+		resize: none;
+	}
 </style>
