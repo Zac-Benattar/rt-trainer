@@ -26,8 +26,12 @@
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
+	import Control from '$lib/Components/Leaflet/Control.svelte';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 
 	const routeCUID = init({ length: 8 });
+
+	const modalStore = getModalStore();
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
@@ -42,6 +46,8 @@
 	let routeSeedClasses: string = '';
 
 	let unnamedWaypointCount = 1;
+
+	let blockingClick: boolean = false;
 
 	export let data: PageData;
 
@@ -109,9 +115,10 @@
 	$: simDurationDisplay = simDurationSeconds / 60;
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
+		if (blockingClick) return;
 		addWaypoint(
-			parseFloat(event.detail.latlng.lat.toFixed(8)),
-			parseFloat(event.detail.latlng.lng.toFixed(8))
+			+parseFloat(event.detail.latlng.lat.toFixed(6)),
+			+parseFloat(event.detail.latlng.lng.toFixed(6))
 		);
 	}
 
@@ -129,9 +136,65 @@
 	function onWaypointDrag(e: any) {
 		const waypoint = waypoints.find((waypoint) => waypoint.id === e.detail.waypoint.id);
 		if (waypoint) {
-			waypoint.location = [e.detail.event.latlng.lng, e.detail.event.latlng.lat];
+			waypoint.location = [
+				parseFloat(e.detail.event.latlng.lng.toFixed(6)),
+				parseFloat(e.detail.event.latlng.lat.toFixed(6))
+			];
 			WaypointsStore.set(waypoints);
 		}
+	}
+
+	function deleteWaypoint(waypoint: Waypoint) {
+		waypoints = waypoints.filter((w) => w.id !== waypoint.id);
+		waypoints.forEach((waypoint, index) => {
+			waypoint.index = index;
+		});
+		WaypointsStore.set(waypoints);
+	}
+
+	// TODO: Figure out how to only show save option when values have been changed
+	function saveWaypointEdit(waypoint: Waypoint) {
+		const nameElement = document.getElementById(
+			`waypoint-${waypoint.id}-name`
+		) as HTMLTextAreaElement;
+		const latStringElement = document.getElementById(
+			`waypoint-${waypoint.id}-lat`
+		) as HTMLTextAreaElement;
+		const lngStringElement = document.getElementById(
+			`waypoint-${waypoint.id}-lng`
+		) as HTMLTextAreaElement;
+		if (
+			nameElement &&
+			nameElement.value &&
+			latStringElement &&
+			parseFloat(latStringElement.value) &&
+			lngStringElement &&
+			parseFloat(lngStringElement.value)
+		) {
+			waypoint.name = nameElement.value;
+			waypoint.location[0] = +parseFloat(parseFloat(lngStringElement.value).toFixed(6));
+			waypoint.location[1] = +parseFloat(parseFloat(latStringElement.value).toFixed(6));
+			WaypointsStore.set(waypoints);
+		}
+	}
+
+	function onSaveRoute() {
+		blockingClick = true;
+
+		const modal: ModalSettings = {
+			type: 'component',
+			component: 'createRouteComponent',
+			response: (r: any) => {
+				console.log(r);
+				if (r) {
+					// TODO: Save route - maybe using a form for simplicity
+					console.log('save route');
+				} else {
+					blockingClick = false;
+				}
+			}
+		};
+		modalStore.trigger(modal);
 	}
 </script>
 
@@ -139,6 +202,14 @@
 	<div class="flex flex-col place-content-center sm:place-content-start w-full h-full">
 		<div class="flex flex-col xs:pr-3 w-full h-full">
 			<Map zoom={13} mode={MapMode.RoutePlan} on:click={onMapClick}>
+				<Control position="topleft">
+					<div>
+						<button class="btn variant-filled border text-sm" on:click={onSaveRoute}
+							>Save Route</button
+						>
+					</div>
+				</Control>
+
 				{#each airports as airport}
 					{#if showAllAirports || waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 						<Marker
@@ -148,11 +219,10 @@
 							aeroObject={airport}
 							draggable={false}
 						>
-							<!-- If the airport is also a waypoint draw it in red, else blue -->
 							{#if waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 								🛩️
 							{:else}
-								<Icon src={BsAirplaneFill} color='black' size='16'/>
+								<Icon src={BsAirplaneFill} color="black" size="16" />
 							{/if}
 
 							<Popup><div>{airport.name}</div></Popup>
@@ -185,9 +255,18 @@
 
 						<Popup
 							><div class="flex flex-col">
-								<textarea class="textarea">{waypoint.name}</textarea><textarea class="textarea"
-									>{waypoint.location[0]}</textarea
-								><textarea class="textarea">{waypoint.location[1]}</textarea>
+								<textarea id="waypoint-{waypoint.id}-lat" class="textarea">{waypoint.name}</textarea
+								><textarea class="textarea">{waypoint.location[0]}</textarea><textarea
+									id="waypoint-{waypoint.id}-lng"
+									class="textarea">{waypoint.location[1]}</textarea
+								>
+								<button
+									class="btn varient-filled hidden"
+									on:click={() => saveWaypointEdit(waypoint)}>Save</button
+								>
+								<button class="btn varient-filled" on:click={() => deleteWaypoint(waypoint)}
+									>Delete</button
+								>
 							</div></Popup
 						>
 					</Marker>
@@ -197,7 +276,12 @@
 					{#if index > 0}
 						<!-- Force redraw if either waypoint of the line changes location -->
 						{#key [waypointPoints[index - 1], waypointPoints[index]]}
-							<Polyline latLngArray={[waypointPoints[index - 1], waypointPoints[index]]} />
+							<Polyline
+								latLngArray={[waypointPoints[index - 1], waypointPoints[index]]}
+								colour="#FF69B4"
+								fillOpacity={1}
+								weight={7}
+							/>
 						{/key}
 					{/if}
 				{/each}
@@ -206,7 +290,7 @@
 		<div class="flex flex-row w-full h-20">
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
-					<div class="text-sm">Distance</div>
+					<div class="text-sm">Est. Distance</div>
 					<div class="text-xl">
 						{routeDistanceDisplay.toFixed(2)} nm
 					</div>

@@ -3,7 +3,9 @@
 	import L from 'leaflet';
 
 	export let latLngArray: L.LatLngExpression[];
-    export let colour: string = 'pink';
+	export let colour: string = '#FF69B4';
+	export let fillOpacity: number = 1;
+	export let weight: number = 3;
 
 	let polyline: L.Polyline | undefined;
 	let polylineElement: HTMLElement;
@@ -18,7 +20,11 @@
 
 	onMount(() => {
 		if (map) {
-			polyline = L.polyline(latLngArray, { color: colour, fillOpacity: 1, weight: 3 }).addTo(map);
+			polyline = L.polyline(latLngArray, {
+				color: colour,
+				fillOpacity: fillOpacity,
+				weight: weight
+			}).addTo(map);
 		}
 	});
 

@@ -22,6 +22,7 @@
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
 	import PrivacyPolicyModal from '$lib/Components/Modals/PrivacyPolicyModal.svelte';
+	import CreateRouteModal from '$lib/Components/Modals/CreateRouteModal.svelte';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
@@ -38,7 +39,8 @@
 
 	const modalRegistry: Record<string, ModalComponent> = {
 		// Set a unique modal ID, then pass the component reference
-		privacyPolicyComponent: { ref: PrivacyPolicyModal }
+		privacyPolicyComponent: { ref: PrivacyPolicyModal },
+		createRouteComponent: { ref: CreateRouteModal }
 	};
 
 	// Holds status of major navigation elements, to control visibility
