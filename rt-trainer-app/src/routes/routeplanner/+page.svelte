@@ -13,7 +13,12 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { ActionData } from './$types';
 	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
-	import { RefreshOutline, CirclePlusOutline, CirclePlusSolid } from 'flowbite-svelte-icons';
+	import {
+		RefreshOutline,
+		CirclePlusOutline,
+		CirclePlusSolid,
+		TrashBinOutline
+	} from 'flowbite-svelte-icons';
 	import { AirspacesStore } from '$lib/stores';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
@@ -28,6 +33,8 @@
 	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
 	import Control from '$lib/Components/Leaflet/Control.svelte';
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import axios from 'axios';
+	import { goto } from '$app/navigation';
 
 	const routeCUID = init({ length: 8 });
 
@@ -178,7 +185,7 @@
 		}
 	}
 
-	function onSaveRoute() {
+	function onSaveClick() {
 		blockingClick = true;
 
 		const modal: ModalSettings = {
@@ -187,14 +194,46 @@
 			response: (r: any) => {
 				console.log(r);
 				if (r) {
-					// TODO: Save route - maybe using a form for simplicity
-					console.log('save route');
+					routeName = r.routeName;
+					routeDescription = r.routeDescription;
+					saveRoute();
 				} else {
 					blockingClick = false;
 				}
 			}
 		};
 		modalStore.trigger(modal);
+	}
+
+	async function saveRoute() {
+		try {
+			const response = await axios.post('/api/routes', {
+				routeName: routeName,
+				routeDescription: routeDescription,
+				createdBy: data.userId,
+				waypoints: waypoints,
+				type: 0,
+				airspaceIds: airspaces.map((airspace) => {
+					return {
+						id: airspace.id
+					};
+				}),
+				airportIds: airports.map((airport) => {
+					return {
+						id: airport.id
+					};
+				})
+			});
+
+			if (response.data.result === 'success') {
+				goto(`/routes/${response.data.id}`);
+			} else {
+				blockingClick = false;
+				console.log('Error: ', response);
+			}
+		} catch (error: unknown) {
+			console.log('Error: ', error);
+		}
 	}
 </script>
 
@@ -204,7 +243,7 @@
 			<Map zoom={13} mode={MapMode.RoutePlan} on:click={onMapClick}>
 				<Control position="topleft">
 					<div>
-						<button class="btn variant-filled border text-sm" on:click={onSaveRoute}
+						<button class="btn variant-filled border text-sm" on:click={onSaveClick}
 							>Save Route</button
 						>
 					</div>
@@ -254,18 +293,23 @@
 						{/if}
 
 						<Popup
-							><div class="flex flex-col">
-								<textarea id="waypoint-{waypoint.id}-lat" class="textarea">{waypoint.name}</textarea
-								><textarea class="textarea">{waypoint.location[0]}</textarea><textarea
+							><div class="flex flex-col gap-2">
+								<textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
+									>{waypoint.name}</textarea
+								><textarea class="textarea" rows="1">{waypoint.location[0]}</textarea><textarea
 									id="waypoint-{waypoint.id}-lng"
-									class="textarea">{waypoint.location[1]}</textarea
+									class="textarea"
+									rows="1">{waypoint.location[1]}</textarea
 								>
 								<button
 									class="btn varient-filled hidden"
 									on:click={() => saveWaypointEdit(waypoint)}>Save</button
 								>
-								<button class="btn varient-filled" on:click={() => deleteWaypoint(waypoint)}
-									>Delete</button
+								<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
+									><div class="grid grid-cols-4 gap-2 w-full">
+										<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
+										<div class="col-span-3 col-start-2">Delete</div>
+									</div></button
 								>
 							</div></Popup
 						>

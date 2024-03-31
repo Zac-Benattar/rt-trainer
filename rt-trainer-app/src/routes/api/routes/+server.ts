@@ -5,7 +5,10 @@ import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { routeName, createdBy, waypointsObject, type, routeDescription, airspaces, airports } = await request.json();
+	const { routeName, routeDescription, createdBy, waypoints, type, airspaceIds, airportIds } =
+		await request.json();
+
+	console.log(routeName, createdBy, waypoints, type, routeDescription);
 
 	if (!routeName) {
 		return json({ error: 'No name provided' });
@@ -15,50 +18,56 @@ export async function POST({ request }) {
 		return json({ error: 'No createdBy provided' });
 	}
 
-	if (waypointsObject && waypointsObject.length > 0) {
-		for (let i = 0; i < waypointsObject.length; i++) {
-			if (!waypointsObject[i].name) {
-				return json({ error: `No name provided for waypoint point ${i}` });
-			}
-			if (waypointsObject[i].type == null || waypointsObject[i].type == undefined) {
-				return json({ error: `No type provided for waypoint point ${i}` });
-			}
-			if (!waypointsObject[i].lat) {
-				return json({ error: `No lat provided for waypoint point ${i}` });
-			}
-			if (!waypointsObject[i].long) {
-				return json({ error: `No long provided for waypoint point ${i}` });
-			}
-			if (routeDescription.length > 2000) {
-				return json({ error: 'Description too long. Max length 2000 chars.' });
-			}
+	if (routeDescription.length > 2000) {
+		return json({ error: 'Description too long. Max length 2000 chars.' });
+	}
+
+	if (!waypoints || waypoints.length == 0) {
+		return json({ error: 'No waypoints provided' });
+	}
+
+	for (let i = 0; i < waypoints.length; i++) {
+		if (!waypoints[i].name) {
+			return json({ error: `No name provided for waypoint ${i}` });
+		}
+		if (waypoints[i].type == null || waypoints[i].type == undefined) {
+			return json({ error: `No type provided for waypoint ${i}` });
+		}
+		if (!waypoints[i].location[1]) {
+			return json({ error: `No lat provided for waypoint ${i}` });
+		}
+		if (!waypoints[i].location[0]) {
+			return json({ error: `No long provided for waypoint ${i}` });
+		}
+		if (waypoints[i].index == null || waypoints[i].index == undefined) {
+			return json({ error: `No index provided for waypoint ${i}` });
 		}
 	}
 
-	const routeIdCreator = init({ length: 12 });
-	const routeId = routeIdCreator();
+	const CUID = init({ length: 12 });
+	const routeId = CUID();
 
 	await db.insert(routesTable).values({
 		id: routeId,
 		name: routeName,
 		type: type,
-		airspaces: JSON.stringify(airspaces),
-		airports: JSON.stringify(airports),
+		airspaceIds: JSON.stringify(airspaceIds),
+		airportIds: JSON.stringify(airportIds),
 		description: routeDescription,
 		createdBy: createdBy
 	});
 
 	await db.insert(waypointsTable).values(
-		waypointsObject.map((waypoint: Waypoint) => ({
+		waypoints.map((waypoint: Waypoint) => ({
 			index: waypoint.index,
 			type: waypoint.type,
 			name: waypoint.name,
 			description: waypoint.description,
-			latitude: waypoint.lat,
-			longitude: waypoint.long,
+			lat: waypoint.location[1],
+			lng: waypoint.location[0],
 			routeId: routeId
 		}))
 	);
 
-	return json({ result: 'Success' });
+	return json({ result: 'success', id: routeId});
 }

@@ -113,9 +113,6 @@
 		<div class="flex flex-col px-2 xs:pr-3">
 			<div class="h4 p-1">Route Preview</div>
 			<Map
-				enabled={true}
-				widthSmScreen={'600px'}
-				heightSmScreen={'500px'}
 				mode={MapMode.RoutePlan}
 			/>
 		</div>

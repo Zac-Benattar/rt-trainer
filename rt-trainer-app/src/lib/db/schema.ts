@@ -28,7 +28,7 @@ export const waypointsTable = pgTable('waypoint', {
 	name: varchar('name', { length: 100 }).notNull(),
 	description: varchar('description', { length: 2000 }),
 	lat: decimal('lat', { precision: 10, scale: 8 }).notNull(),
-	long: decimal('long', { precision: 10, scale: 8 }).notNull(),
+	lng: decimal('long', { precision: 10, scale: 8 }).notNull(),
 	routeId: varchar('route_id', { length: 12 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow()
@@ -38,6 +38,7 @@ export const waypointsRelations = relations(waypointsTable, ({ one }) => ({
 	route: one(routesTable, { fields: [waypointsTable.routeId], references: [routesTable.id] })
 }));
 
+// Eventually replace json with another table
 export const routesTable = pgTable('route', {
 	id: text('id').primaryKey().$defaultFn(shortCUID),
 	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
