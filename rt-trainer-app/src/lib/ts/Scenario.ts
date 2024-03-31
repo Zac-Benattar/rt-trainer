@@ -17,7 +17,6 @@ import { Type, plainToInstance } from 'class-transformer';
 import Airport from './AeronauticalClasses/Airport';
 import 'reflect-metadata';
 import Airspace from './AeronauticalClasses/Airspace';
-import { waypointsTable } from '$lib/db/schema';
 
 export default class Scenario {
 	id: string;
@@ -215,7 +214,7 @@ export function loadRouteData(routeData: RouteData): void {
 	// Reset all existing simulation stores and load the route data into the stores
 	ClearSimulationStores();
 	NullRouteStore.set(false);
-	WaypointsStore.set(routeData.waypoints);
+	WaypointsStore.set(routeData.waypoints.sort((a, b) => a.index - b.index));
 	AirspacesStore.set(routeData.airspaces);
 	AirportsStore.set(routeData.airports);
 }

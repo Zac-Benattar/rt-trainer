@@ -2,18 +2,7 @@ import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { simpleHash } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
-import {
-	airportDataToAirport,
-	airspaceDataToAirspace,
-	pushAirportDataToDatabase,
-	pushAirspaceDataToDatabase,
-	readAirportDataFromDB,
-	readAirportDataFromJSON,
-	readAirspaceDataFromDB,
-	readAirspaceDataFromJSON,
-	writeDataToJSON
-} from './OpenAIPHandler';
-import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
+import { getAllAirportData, getAllAirspaceData } from './OpenAIPHandler';
 import type { RouteData } from './Scenario';
 import * as turf from '@turf/turf';
 
@@ -23,42 +12,16 @@ export default class RouteGenerator {
 	): Promise<RouteData | undefined> {
 		const seed = simpleHash(seedString);
 
-		const airportsData: AirportData[] = await readAirportDataFromDB();
-		const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
+		const airports: Airport[] = await getAllAirportData();
+		const airspaces: Airspace[] = await getAllAirspaceData();
 
-		// Remove for production
-		// await writeDataToJSON();
-
-		// await pushAirportDataToDatabase();
-		// await pushAirspaceDataToDatabase();
-
-		// Add airspaces to list of valid airspaces for route
-		const allAirspaces: Airspace[] = [];
-		for (let i = 0; i < airspacesData.length; i++) {
-			const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
-			if (airspace.lowerLimit < 30) allAirspaces.push(airspace);
-		}
-
-		// Add airports to list of valid airports for takeoff/landing
-		const allValidAirports: Airport[] = [];
-		for (let i = 0; i < airportsData.length; i++) {
-			const airport: Airport = airportDataToAirport(airportsData[i]);
-
-			if (
-				(airport.type == 0 || airport.type == 2 || airport.type == 3 || airport.type == 9) &&
-				airport.frequencies &&
-				airport.frequencies.findIndex((x) => x.type == 4) == -1
-			) {
-				allValidAirports.push(airport);
-			}
-		}
+		// Todo: Filter out all invalid airports and airspaces
 
 		console.log(
-			`Total Valid Airports: ${allValidAirports.length} \nTotal Valid Airspaces: ${allAirspaces.length}`
+			`Total Valid Airports: ${airports.length} \nTotal Valid Airspaces: ${airspaces.length}`
 		);
 
 		const maxIterations = 100;
-		const numberOfValidAirports = allValidAirports.length;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
@@ -75,16 +38,17 @@ export default class RouteGenerator {
 			validRoute = true;
 
 			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
-			startAirport = allValidAirports[(seed * 7919 * (iterations + 1)) % numberOfValidAirports];
+			startAirport = airports[(seed * 7919 * (iterations + 1)) % airports.length];
 			if (startAirport.type == 3 || startAirport.type == 9) {
 				startAirportIsControlled = true;
 			}
 
 			// Get all valid MATZ from within 40km of start airport and not inside the ATZ of the start airport
-			const nearbyMATZs: Airspace[] = allAirspaces.filter(
+			const nearbyMATZs: Airspace[] = airspaces.filter(
 				(x) =>
 					x.type == 14 &&
-					turf.distance(startAirport.coordinates, x.centrePoint, { units: 'kilometers' }) < 40 &&
+					turf.distance(startAirport.coordinates, x.coordinates[0][0], { units: 'kilometers' }) <
+						40 &&
 					!x.pointInsideATZ((startAirport as Airport).coordinates)
 			);
 			if (nearbyMATZs.length == 0) {
@@ -105,9 +69,9 @@ export default class RouteGenerator {
 			const possibleDestinations = [];
 
 			// Turn this into a filter
-			for (let i = 0; i < allValidAirports.length; i++) {
-				const airport = allValidAirports[i];
-				const distance = turf.distance(chosenMATZ.centrePoint, airport.coordinates, {
+			for (let i = 0; i < airports.length; i++) {
+				const airport = airports[i];
+				const distance = turf.distance(chosenMATZ.coordinates[0][0], airport.coordinates, {
 					units: 'kilometers'
 				});
 
@@ -175,8 +139,8 @@ export default class RouteGenerator {
 				destinationAirport.coordinates
 			];
 			onRouteAirspace = [];
-			for (let i = 0; i < allAirspaces.length; i++) {
-				const airspace = allAirspaces[i];
+			for (let i = 0; i < airspaces.length; i++) {
+				const airspace = airspaces[i];
 				if (airspace.isIncludedInRoute(route)) {
 					if (airspace.type == 1 || (airspace.type == 14 && airspace != chosenMATZ)) {
 						validRoute = false;
@@ -204,8 +168,7 @@ export default class RouteGenerator {
 			startAirport.name,
 			startAirport.coordinates,
 			WaypointType.Aerodrome,
-			1,
-			undefined
+			1
 		);
 
 		if (!matzEntryPoint) throw new Error('MATZ entry point is undefined');
@@ -213,8 +176,7 @@ export default class RouteGenerator {
 			chosenMATZ.getDisplayName() + ' Entry',
 			matzEntryPoint,
 			WaypointType.NewAirspace,
-			2,
-			undefined
+			2
 		);
 
 		if (!matzExitPoint) throw new Error('MATZ exit point is undefined');
@@ -222,8 +184,7 @@ export default class RouteGenerator {
 			chosenMATZ.getDisplayName() + ' Exit',
 			matzExitPoint,
 			WaypointType.NewAirspace,
-			3,
-			undefined
+			3
 		);
 
 		if (destinationAirport == undefined) throw new Error('Destination airport is undefined');
@@ -231,8 +192,7 @@ export default class RouteGenerator {
 			destinationAirport?.name,
 			destinationAirport.coordinates,
 			WaypointType.Aerodrome,
-			4,
-			undefined
+			4
 		);
 
 		return {
@@ -243,13 +203,9 @@ export default class RouteGenerator {
 	}
 
 	public static async getAirspacesOnRouteFromWaypoints(waypoints: Waypoint[]): Promise<Airspace[]> {
-		const airspacesData: AirspaceData[] = readAirspaceDataFromJSON();
+		const airspaces: Airspace[] = await getAllAirspaceData();
 
-		const allAirspaces: Airspace[] = [];
-		for (let i = 0; i < airspacesData.length; i++) {
-			const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
-			allAirspaces.push(airspace);
-		}
+		// Todo: Filter out all invalid airspaces
 
 		const route: [number, number][] = [];
 		for (let i = 0; i < waypoints.length; i++) {
@@ -257,31 +213,13 @@ export default class RouteGenerator {
 		}
 
 		const onRouteAirspace: Airspace[] = [];
-		for (let i = 0; i < allAirspaces.length; i++) {
-			const airspace = allAirspaces[i];
+		for (let i = 0; i < airspaces.length; i++) {
+			const airspace = airspaces[i];
 			if (airspace.isIncludedInRoute(route)) {
 				onRouteAirspace.push(airspace);
 			}
 		}
 
 		return onRouteAirspace;
-	}
-
-	public static async getAirportDataFromWaypointsList(waypoints: Waypoint[]): Promise<Airport[]> {
-		const airportsData: AirportData[] = readAirportDataFromJSON();
-
-		const allAirports: Airport[] = [];
-		for (let i = 0; i < airportsData.length; i++) {
-			const airport: Airport = airportDataToAirport(airportsData[i]);
-			allAirports.push(airport);
-		}
-
-		const airports: Airport[] = [];
-		for (let i = 0; i < waypoints.length; i++) {
-			const airport = allAirports.find((x) => x.name == waypoints[i].name);
-			if (airport != undefined) airports.push(airport);
-		}
-
-		return airports;
 	}
 }

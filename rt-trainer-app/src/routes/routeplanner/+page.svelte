@@ -12,9 +12,7 @@
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
-	import {
-		TrashBinOutline
-	} from 'flowbite-svelte-icons';
+	import { TrashBinOutline } from 'flowbite-svelte-icons';
 	import { AirspacesStore } from '$lib/stores';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';

@@ -5,23 +5,16 @@ import type {
 	AirportReportingPointData,
 	AirspaceData
 } from './AeronauticalClasses/OpenAIPTypes';
-import { readFileSync, writeFileSync } from 'fs';
 import Airport from './AeronauticalClasses/Airport';
 import Runway from './AeronauticalClasses/Runway';
 import { Frequency } from './Frequency';
 import Airspace from './AeronauticalClasses/Airspace';
-import * as turf from '@turf/turf';
 
 export type AirportReportingPointDBData = {
 	name: string;
 	coordinates: [number, number];
 	compulsory: boolean;
 };
-
-export function checkDataUpToDate(): boolean {
-	// TODO
-	return true;
-}
 
 export async function getAllAirspaceData(): Promise<Airspace[]> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
@@ -33,58 +26,6 @@ export async function getAllAirportData(): Promise<Airport[]> {
 	const airportData = await getAllUKAirportsFromOpenAIP();
 	const airports = airportData.map((airportData) => airportDataToAirport(airportData));
 	return airports;
-}
-
-export async function writeDataToJSON(): Promise<void> {
-	const airportReportingPoints = await getAllUKAirportReportingPointsFromOpenAIP();
-
-	const airports = await getAllUKAirportsFromOpenAIP();
-
-	for (let i = 0; i < airportReportingPoints.length; i++) {
-		const associatedAirport = airports.find(
-			(airport) => airport._id === airportReportingPoints[i].airports[0]
-		);
-
-		if (!associatedAirport) {
-			console.log(
-				`No airport found for reporting point: ${airportReportingPoints[i].name} for airport: ${airportReportingPoints[i].airports[0]}`
-			);
-			continue;
-		}
-		if (!associatedAirport.reportingPoints) {
-			associatedAirport.reportingPoints = [];
-			associatedAirport?.reportingPoints.push({
-				name: airportReportingPoints[i].name,
-				coordinates: airportReportingPoints[i].point,
-				compulsory: airportReportingPoints[i].compulsory
-			});
-		} else {
-			associatedAirport.reportingPoints.push({
-				name: airportReportingPoints[i].name,
-				coordinates: airportReportingPoints[i].point,
-				compulsory: airportReportingPoints[i].compulsory
-			});
-		}
-	}
-
-	writeFileSync('src/lib/data/airports.json', JSON.stringify(airports, null, 2));
-
-	const airspaceData = await getAllUKAirspaceFromOpenAIP();
-
-	for (let i = 0; i < airspaceData.length; i++) {
-		airspaceData[i].centrePoint = turf.center(turf.polygon(airspaceData[i].geometry.coordinates))
-			.geometry.coordinates as [number, number];
-	}
-
-	writeFileSync('src/lib/data/airspaces.json', JSON.stringify(airspaceData, null, 2));
-}
-
-export function readAirportDataFromJSON(): AirportData[] {
-	return JSON.parse(readFileSync('src/lib/data/airports.json', 'utf8')) as AirportData[];
-}
-
-export function readAirspaceDataFromJSON(): AirspaceData[] {
-	return JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
 }
 
 export function airportDataToAirport(airportData: AirportData): Airport {
@@ -159,7 +100,6 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 		airspaceData.byNotam,
 		airspaceData.specialAgreement,
 		airspaceData.requestCompliance,
-		airspaceData.centrePoint,
 		airspaceData.geometry.coordinates,
 		airspaceData.country,
 		airspaceData.upperLimit.value,

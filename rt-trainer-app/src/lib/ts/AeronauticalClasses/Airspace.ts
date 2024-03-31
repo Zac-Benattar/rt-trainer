@@ -12,7 +12,6 @@ export default class Airspace {
 	public byNotam: boolean;
 	public specialAgreement: boolean;
 	public requestCompliance: boolean;
-	public centrePoint: [number, number];
 	public coordinates: [number, number][][];
 	public country: string;
 	public upperLimit: number;
@@ -32,7 +31,6 @@ export default class Airspace {
 		byNotam: boolean,
 		specialAgreement: boolean,
 		requestCompliance: boolean,
-		centrePoint: [number, number],
 		coordinates: [number, number][][],
 		country: string,
 		upperLimit: number,
@@ -51,7 +49,6 @@ export default class Airspace {
 		this.byNotam = byNotam;
 		this.specialAgreement = specialAgreement;
 		this.requestCompliance = requestCompliance;
-		this.centrePoint = centrePoint;
 		this.coordinates = coordinates;
 		this.country = country;
 		this.upperLimit = upperLimit;

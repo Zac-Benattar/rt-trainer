@@ -14,9 +14,10 @@
 		DotsHorizontalOutline
 	} from 'flowbite-svelte-icons';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { WaypointsStore } from '$lib/stores';
+	import { AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { flip } from 'svelte/animate';
+	import { loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
 
 	const drawerStore = getDrawerStore();
 
@@ -26,7 +27,20 @@
 
 	const shortCUID = init({ length: 8 });
 
-	let routeSeed: string = shortCUID();
+	let routeSeed: string = '';
+	let awaitingServerResponse = false;
+	AwaitingServerResponseStore.subscribe((value) => {
+		awaitingServerResponse = value;
+	});
+
+	$: {
+		if (routeSeed !== '') {
+			AwaitingServerResponseStore.set(true);
+			loadFRTOLRouteBySeed(routeSeed);
+			AwaitingServerResponseStore.set(false);
+		}
+	}
+
 	let waypoints: Waypoint[] = [];
 
 	WaypointsStore.subscribe((value) => {
@@ -92,6 +106,7 @@
 					</p>
 				</div>
 			{/if}
+			<!-- for some reason the key (waypoint.index) has duplicates when coming from the route generator -->
 			{#each waypoints as waypoint (waypoint.index)}
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
@@ -204,11 +219,14 @@
 									rows="1"
 									maxlength="20"
 									placeholder="Enter a seed"
+									bind:value={routeSeed}
 								/>
 								<button
 									type="button"
 									class="btn variant-filled w-10"
 									on:click={() => {
+										if (awaitingServerResponse) return;
+
 										routeSeed = shortCUID();
 
 										const element = document.getElementById('seed-input');
