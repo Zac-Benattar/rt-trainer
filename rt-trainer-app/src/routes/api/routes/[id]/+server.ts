@@ -1,7 +1,6 @@
 import { db } from '$lib/db/db';
 import { routesTable, waypointsTable } from '$lib/db/schema';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
-import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
 import type { RouteData } from '$lib/ts/Scenario';
 
 import { error, type RequestHandler } from '@sveltejs/kit';
@@ -15,7 +14,7 @@ export const GET: RequestHandler = async ({ params }) => {
 	}
 
 	// Get the route with its route points, ordered by route point index
-	const routeRow = await db.query.routes.findFirst({
+	const routeRow = await db.query.routesTable.findFirst({
 		where: eq(routesTable.id, id as string),
 		with: {
 			waypoints: {
@@ -33,7 +32,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		waypointsList.push(
 			new Waypoint(
 				waypoint.name,
-				[parseFloat(waypoint.long), parseFloat(waypoint.lat)],
+				[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
 				waypoint.type,
 				waypoint.index
 			)

@@ -38,7 +38,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	const scenarioRow = await db.query.scenarios.findFirst({
+	const scenarioRow = await db.query.scenariosTable.findFirst({
 		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
@@ -55,12 +55,12 @@ export const load: PageServerLoad = async (event) => {
 		};
 	}
 
-	const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
+	const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypointDetails) => {
 		return new Waypoint(
-			waypoint.name,
-			[parseFloat(waypoint.long), parseFloat(waypoint.lat)],
-			waypoint.type,
-			waypoint.index
+			waypointDetails.name,
+			[parseFloat(waypointDetails.lng), parseFloat(waypointDetails.lat)],
+			waypointDetails.type,
+			waypointDetails.index
 		);
 	});
 	waypointsList.sort((a, b) => a.index - b.index);

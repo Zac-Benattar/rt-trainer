@@ -27,7 +27,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		routeRow: await db.query.routes.findFirst({
+		routeRow: await db.query.routesTable.findFirst({
 			where: and(eq(routesTable.id, routeId), eq(routesTable.createdBy, userId)),
 			with: {
 				waypoints: {

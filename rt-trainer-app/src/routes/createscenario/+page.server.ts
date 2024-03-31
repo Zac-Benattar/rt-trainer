@@ -30,7 +30,7 @@ export const load: PageServerLoad = async (event) => {
 
 	// Return the user's recent routes where there is at least one waypoint
 	return {
-		userRecentRoutes: await db.query.routes.findMany({
+		userRecentRoutes: await db.query.routesTable.findMany({
 			columns: {
 				id: true,
 				name: true,
@@ -64,7 +64,7 @@ export const actions = {
 			return fail(400, { routeId, missing: true });
 		}
 
-		const route = await db.query.routes.findFirst({
+		const route = await db.query.routesTable.findFirst({
 			columns: {
 				id: true
 			},

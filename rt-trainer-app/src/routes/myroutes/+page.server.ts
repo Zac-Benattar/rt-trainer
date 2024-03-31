@@ -26,7 +26,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		userRoutes: await db.query.routes.findMany({
+		userRoutes: await db.query.routesTable.findMany({
 			columns: {
 				id: true,
 				name: true,

@@ -26,7 +26,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	return {
-		userScenarios: await db.query.scenarios.findMany({
+		userScenarios: await db.query.scenariosTable.findMany({
 			columns: {
 				id: true,
 				name: true,
