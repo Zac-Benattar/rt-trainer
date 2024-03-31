@@ -1,13 +1,14 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { AwaitingServerResponseStore, ClearSimulationStores } from '$lib/stores';
-	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import { ClearSimulationStores } from '$lib/stores';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import { loadRouteDataById } from '$lib/ts/Scenario';
+	import * as turf from '@turf/turf';
+	import L from 'leaflet';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -26,9 +27,17 @@
 
 	const updatedRouteToast: ToastSettings = { message: 'Updated Route' };
 
+	let bounds: L.LatLngBounds;
+
 	// Populate waypoints array and store
 	if (data.routeRow) {
 		loadRouteDataById(data.routeRow.id);
+
+		const bbox = turf.bbox(turf.lineString(data.routeRow.waypoints.map((waypoint) => [waypoint.lat, waypoint.lng])));
+		bounds = new L.LatLngBounds([
+			[bbox[1], bbox[0]],
+			[bbox[3], bbox[2]]
+		]);
 	}
 
 	function showConfirmDeleteModal() {
@@ -117,14 +126,9 @@
 			</form>
 		</div>
 
-		<div class="flex flex-col px-2 xs:pr-3">
+		<div class="flex flex-col px-2 xs:pr-3 w-full h-full">
 			<div class="h4 p-1">Route Preview</div>
-			<Map
-				enabled={true}
-				widthSmScreen={'600px'}
-				heightSmScreen={'500px'}
-				mode={MapMode.RoutePlan}
-			/>
+			<Map mode={MapMode.RoutePlan} view={[51, -1.4]} zoom={13} />
 		</div>
 	</div>
 </div>

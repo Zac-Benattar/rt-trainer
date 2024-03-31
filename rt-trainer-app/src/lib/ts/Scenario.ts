@@ -231,6 +231,7 @@ export async function fetchRouteDataById(routeId: string): Promise<RouteData | u
 				waypoints: response.data.waypoints.map((waypoint: Waypoint) =>
 					plainToInstance(Waypoint, waypoint)
 				),
+				// needs fixing
 				airspaces: response.data.airspaces.map((airspace: Airspace) =>
 					plainToInstance(Airspace, airspace)
 				),

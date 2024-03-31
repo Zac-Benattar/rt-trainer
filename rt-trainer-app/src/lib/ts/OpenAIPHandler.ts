@@ -87,42 +87,6 @@ export function readAirspaceDataFromJSON(): AirspaceData[] {
 	return JSON.parse(readFileSync('src/lib/data/airspaces.json', 'utf8')) as AirspaceData[];
 }
 
-// export async function readAirportDataFromDB(): Promise<AirportData[]> {
-// 	const airportData = await db.query.airportsJSON.findFirst({
-// 		columns: {
-// 			json: true
-// 		}
-// 	});
-
-// 	const airportDataJSON = JSON.parse(airportData?.json as string) as AirportData[];
-
-// 	return airportDataJSON;
-// }
-
-// export async function readAirspaceDataFromDB(): Promise<AirspaceData[]> {
-// 	const airspaceData = await db.query.airspacesJSON.findFirst({
-// 		columns: {
-// 			json: true
-// 		}
-// 	});
-
-// 	const airspaceDataJSON = JSON.parse(airspaceData?.json as string) as AirspaceData[];
-
-// 	return airspaceDataJSON;
-// }
-
-// // Dangerous functions --------------------------------------------
-// export async function pushAirportDataToDatabase(): Promise<void> {
-// 	const airportData = JSON.stringify(readAirportDataFromJSON());
-// 	await db.insert(airportsJSON).values({ json: airportData });
-// }
-
-// export async function pushAirspaceDataToDatabase(): Promise<void> {
-// 	const airspaceData = JSON.stringify(readAirspaceDataFromJSON());
-// 	await db.insert(airspacesJSON).values({ json: airspaceData });
-// }
-// // End of dangerous functions --------------------------------------------
-
 export function airportDataToAirport(airportData: AirportData): Airport {
 	return new Airport(
 		airportData._id,
@@ -208,17 +172,49 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	);
 }
 
-// export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
-// 	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
-// 	const airspaces = airspacesData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
-// 	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
-// }
+export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
+	try {
+		const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'x-openaip-client-id': OPENAIPKEY
+			},
+			params: {
+				ids: airspaceIds
+			}
+		});
 
-// export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
-// 	const airportsData: AirportData[] = await readAirportDataFromDB();
-// 	const airports = airportsData.map((airspaceData) => airportDataToAirport(airspaceData));
-// 	return airports.filter((airports) => airportIds.includes(airports.id));
-// }
+		console.log('Fetched airspaces from OpenAIP');
+
+		return response.data.items as Airspace[];
+	} catch (error: unknown) {
+		console.error('Error: ', error);
+	}
+
+	return [];
+}
+
+export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
+	try {
+		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
+			headers: {
+				'Content-Type': 'application/json',
+				'x-openaip-client-id': OPENAIPKEY
+			},
+			params: {
+				ids: airportIds
+			}
+		});
+
+		console.log('Fetched airports from OpenAIP');
+
+		return response.data.items as Airport[];
+	} catch (error: unknown) {
+		console.error('Error: ', error);
+	}
+
+	return [];
+}
 
 export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 	try {
@@ -261,25 +257,14 @@ export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 			}
 		});
 
-		const response2 = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
-			headers: {
-				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
-			},
-			params: {
-				page: 2,
-				country: 'GB',
-				icaoClass: [1, 2, 3, 4, 5, 6, 8],
-				onDemand: false,
-				onRequest: false,
-				byNotam: false,
-				sortBy: 'geometry.coordinates[0][0][0]'
-			}
-		});
+		if (response1.data.items.length === 0) {
+			console.log('No airspaces found on page 1');
+			return [];
+		}
 
 		console.log('Fetched all airspace from OpenAIP');
 
-		return [...response1.data.items, ...response2.data.items] as AirspaceData[];
+		return [...response1.data.items] as AirspaceData[];
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 	}

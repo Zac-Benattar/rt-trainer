@@ -11,8 +11,8 @@
 		<div class="flex flex-col px-2 xs:w-9/12 gap-2">
 			<span class="h3 p-1">Your Routes</span>
 
-			<button class="btn variant-filled font-bold" on:click={() => goto('/generateroute')}
-				>Generate A Route</button
+			<button class="btn variant-filled font-bold" on:click={() => goto('/routeplanner')}
+				>Create a Route</button
 			>
 
 			{#if data.userRoutes.length === 0}

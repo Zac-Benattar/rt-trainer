@@ -11,12 +11,8 @@
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import type { ActionData } from './$types';
 	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
 	import {
-		RefreshOutline,
-		CirclePlusOutline,
-		CirclePlusSolid,
 		TrashBinOutline
 	} from 'flowbite-svelte-icons';
 	import { AirspacesStore } from '$lib/stores';
@@ -47,32 +43,11 @@
 	let routeName: string = '';
 	let routeDescription: string = '';
 
-	let routeSeedDescription: string = 'This seed will be used to generate the route';
-
-	let routeNameClasses: string = '';
-	let routeSeedClasses: string = '';
-
 	let unnamedWaypointCount = 1;
 
 	let blockingClick: boolean = false;
 
 	export let data: PageData;
-
-	export let form: ActionData;
-
-	if (form?.RouteNameMissing) {
-		routeNameClasses = 'input-error';
-	}
-
-	if (form?.routeSeedMissing) {
-		routeSeedDescription = 'Seed is required. Perhaps use the example';
-		routeSeedClasses = 'input-error';
-	}
-
-	if (form?.routeGenerationError) {
-		routeSeedDescription = 'Invalid seed';
-		routeSeedClasses = 'input-error';
-	}
 
 	const airspaces: Airspace[] = [];
 	for (const airspace of data.airspaces) {

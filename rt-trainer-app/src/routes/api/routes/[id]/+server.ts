@@ -1,6 +1,7 @@
 import { db } from '$lib/db/db';
 import { routesTable, waypointsTable } from '$lib/db/schema';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
 import type { RouteData } from '$lib/ts/Scenario';
 
 import { error, type RequestHandler } from '@sveltejs/kit';
@@ -23,29 +24,31 @@ export const GET: RequestHandler = async ({ params }) => {
 		}
 	});
 
-	if (routeRow == null || routeRow == undefined) {
+	if (!routeRow) {
 		error(404, 'Route not found');
+	} else {
+		const waypointsList: Waypoint[] = [];
+		for (const waypoint of routeRow.waypoints) {
+			waypointsList.push(
+				new Waypoint(
+					waypoint.name,
+					[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
+					waypoint.type,
+					waypoint.index
+				)
+			);
+		}
+
+		const routeData: RouteData = {
+			waypoints: waypointsList,
+			airspaces: await getAirspacesFromIds(routeRow?.airspaceIds as string[]),
+			airports: await getAirportsFromIds(routeRow?.airportIds as string[])
+		};
+
+		return new Response(JSON.stringify(routeData));
 	}
 
-	const waypointsList: Waypoint[] = [];
-	for (const waypoint of routeRow.waypoints) {
-		waypointsList.push(
-			new Waypoint(
-				waypoint.name,
-				[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
-				waypoint.type,
-				waypoint.index
-			)
-		);
-	}
-
-	const routeData: RouteData = {
-		waypoints: waypointsList,
-		airspaces: await getAirspacesFromIds(routeRow?.airspaceIds as string[]),
-		airports: await getAirportsFromIds(routeRow?.airportIds as string[])
-	};
-
-	return new Response(JSON.stringify(routeData));
+	return new Response(JSON.stringify({ result: 'Unknown Error' }));
 };
 
 export async function DELETE({ params }) {

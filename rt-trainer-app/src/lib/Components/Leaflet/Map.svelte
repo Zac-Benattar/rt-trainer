@@ -18,7 +18,6 @@
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
-	import { init } from '@paralleldrive/cuid2';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
 
@@ -543,7 +542,6 @@
 					if (!waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
 						waypoints.push(
 							new Waypoint(
-								airport.id,
 								airport.name,
 								airport.coordinates,
 								WaypointType.Aerodrome,
