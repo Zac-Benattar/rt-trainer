@@ -8,15 +8,18 @@
 			<p class="p-2">
 				<b>RT Trainer</b> - A web based training platform for future pilots to learn
 				<a
+					class="anchor"
 					href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
 					>Radio Telephony (RT)</a
 				>
 				skills required to pass the CAA RT exam in order to obtain a
 				<a
+					class="anchor"
 					href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
 					>Flight Radiotelephony Operator's License (FRTOL)</a
 				>. More information about the licence and exam can be found on the
 				<a
+					class="anchor"
 					href="https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/"
 					>CAA's website</a
 				>.
@@ -24,22 +27,25 @@
 			<p class="p-2">
 				This website was created as part of Zac Benattar's third year computer science project. The
 				fronted was built using
-				<a href="https://svelte.dev/">Svelte</a> and the backend is a Vite webserver built using
-				<a href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
-				<a href="https://vercel.com/">Vercel</a>. A
-				<a href="https://planetscale.com/">Planetscale</a>
-				database is used for user data. This project was developed with assistance from the
-				<a href="http://www.southwarwickshireflyingschool.com">South Warwickshire Flying School</a>.
+				<a class="anchor" href="https://svelte.dev/">Svelte</a> and the backend is a Vite webserver
+				built using
+				<a class="anchor" href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
+				<a class="anchor" href="https://vercel.com/">Vercel</a>. A
+				<a class="anchor" href="https://vercel.com/docs/storage/vercel-postgres">Vercel Postgres</a>
+				database stores user data. This project was developed with assistance from the
+				<a class="anchor" href="http://www.southwarwickshireflyingschool.com"
+					>South Warwickshire Flying School</a
+				>.
 			</p>
 		</div>
 
 		<div class="p-1 h3">Contact</div>
 		<div class="px-3">
-			<p class="p-2">
-				<b>Developer</b> - Zac Benattar
-				<br />Contact me about issues you encounter, feature requests, or any other questions you
+			<div><b>Developer</b> - Zac Benattar</div>
+			<div class='px-3 text-'>
+				Please contact me about any issues you encounter, feature requests, or any other questions you
 				have at zbenattar@gmail.com
-			</p>
+			</div>
 		</div>
 
 		<div class="p-1 h3">Attributions</div>
@@ -47,24 +53,29 @@
 			<li class="py-2">
 				<div class="h4">Aeronatical Data</div>
 				<p>
-					All airport and airspace data comes from <a href="https://www.openaip.net/">OpenAIP</a>, a
-					free and up to date aeronautical information database for flight simulation and aviation.
-					The data is licensed under the
-					<a href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
+					All airport and airspace data comes from <a class="anchor" href="https://www.openaip.net/"
+						>OpenAIP</a
+					>, a free and up to date aeronautical information database for flight simulation and
+					aviation. The data is licensed under the
+					<a class="anchor" href="https://creativecommons.org/licenses/by-nc/4.0/">CC BY-NC 4.0</a> license.
 				</p>
 			</li>
 			<li class="py-2">
 				<div class="h4">Map</div>
 				<p>
-					The map component is provided by <a href="https://leafletjs.com/">Leaflet</a> and uses
-					<a href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is rendered using
-					<a href="https://www.mapbox.com/">Mapbox</a> tiles.
+					The map component is provided by <a class="anchor" href="https://leafletjs.com/"
+						>Leaflet</a
+					>
+					and uses
+					<a class="anchor" href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is
+					rendered using
+					<a class="anchor" href="https://www.mapbox.com/">Mapbox</a> tiles.
 				</p>
 			</li>
 			<li class="py-2">
 				<div class="h4">Images</div>
 				<p>
-					<a href="https://www.flaticon.com/free-icons/plane" title="plane icons"
+					<a class="anchor" href="https://www.flaticon.com/free-icons/plane" title="plane icons"
 						>Landing page plane icon by Freepik - Flaticon</a
 					>
 				</p>
@@ -72,10 +83,3 @@
 		</ul>
 	</div>
 </div>
-
-<style lang="postcss">
-	a {
-		color: #0000ff;
-		text-decoration: underline;
-	}
-</style>

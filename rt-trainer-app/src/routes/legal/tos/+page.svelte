@@ -21,7 +21,7 @@
 					<span class="h4">Privacy Policy</span><br /> Before you continue using our website we
 					advise you to read our privacy policy
 
-					<a href="http://rt-trainer.com/legal/pp">http://rt-trainer.com/legal/pp</a>
+					<a class='anchor' href="http://rt-trainer.com/legal/pp">http://rt-trainer.com/legal/pp</a>
 					regarding our user data collection. It will help you better understand our practices. Copyright
 					Content published on this website (digital downloads, images, texts, graphics, logos) is the
 					property of the Zac Benattar and/or his content creators and protected by international copyright
@@ -71,10 +71,3 @@
 		</article>
 	</div>
 </div>
-
-<style lang="postcss">
-	a {
-		color: #0000ff;
-		text-decoration: underline;
-	}
-</style>

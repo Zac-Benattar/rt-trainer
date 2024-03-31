@@ -228,6 +228,7 @@
 			if (response.data.result === 'success') {
 				goto(`/routes/${response.data.id}`);
 			} else {
+				// Add an error message modal
 				blockingClick = false;
 				console.log('Error: ', response);
 			}
