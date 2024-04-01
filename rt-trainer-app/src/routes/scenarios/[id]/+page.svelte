@@ -7,7 +7,6 @@
 		ScenarioStore,
 		WaypointsStore
 	} from '$lib/stores';
-	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
@@ -140,12 +139,7 @@
 
 		<div class="flex flex-col px-2 xs:pr-3">
 			<div class="h4 p-1">Scenario Preview</div>
-			<Map
-				enabled={true}
-				widthSmScreen={'600px'}
-				heightSmScreen={'440px'}
-				mode={MapMode.ScenarioPlan}
-			/>
+			<Map />
 
 			<div>
 				<div class="h4 p-1">Scenario Points</div>

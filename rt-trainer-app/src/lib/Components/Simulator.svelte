@@ -27,12 +27,11 @@
 		TutorialStore,
 		AltimeterStateStore
 	} from '$lib/stores';
-	import {
-		type TransponderState,
-		type AircraftDetails,
-		type RadioState,
-		type AltimeterState,
-		MapMode
+	import type {
+		TransponderState,
+		AircraftDetails,
+		RadioState,
+		AltimeterState
 	} from '$lib/ts/SimulatorTypes';
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
@@ -547,7 +546,9 @@
 
 		<Transponder />
 
-		<Map enabled={mapEnabled} mode={MapMode.Scenario} />
+		<div>
+			<Map />
+		</div>
 
 		<Altimeter />
 	</div>

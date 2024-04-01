@@ -4,14 +4,6 @@ export type RadioMode = 'OFF' | 'COM' | 'NAV';
 
 export type RadioDialMode = 'OFF' | 'SBY';
 
-export enum MapMode {
-	RoutePlan,
-	RoutePreview,
-	ScenarioPlan,
-	ScenarioPreview,
-	Scenario
-}
-
 /* The state of the radio. */
 export type RadioState = {
 	mode: RadioMode;

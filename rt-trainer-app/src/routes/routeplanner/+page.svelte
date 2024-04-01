@@ -2,6 +2,7 @@
 	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import {
 		AllAirportsStore,
+		ClearSimulationStores,
 		FilteredAirspacesStore,
 		OnRouteAirspacesStore,
 		RouteDistanceStore,
@@ -12,8 +13,6 @@
 	} from '$lib/stores';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { init } from '@paralleldrive/cuid2';
-	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
 	import { TrashBinOutline } from 'flowbite-svelte-icons';
 	import { AllAirspacesStore } from '$lib/stores';
 	import type { PageData } from './$types';
@@ -23,7 +22,7 @@
 	import Marker from '$lib/Components/Leaflet/Marker.svelte';
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
-	import { getNthPhoneticAlphabetLetter } from '$lib/ts/utils';
+	import { getNthPhoneticAlphabetLetter, wellesbourneMountfordCoords } from '$lib/ts/utils';
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
@@ -31,6 +30,8 @@
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
+
+	ClearSimulationStores();
 
 	const routeCUID = init({ length: 8 });
 
@@ -232,7 +233,7 @@
 <div class="flex flex-col place-content-center w-full h-full">
 	<div class="flex flex-col place-content-center sm:place-content-start w-full h-full">
 		<div class="flex flex-col xs:pr-3 w-full h-full">
-			<Map zoom={13} mode={MapMode.RoutePlan} on:click={onMapClick}>
+			<Map view={wellesbourneMountfordCoords} zoom={9} on:click={onMapClick}>
 				<Control position="topleft">
 					<div>
 						<button class="btn variant-filled border text-sm" on:click={onSaveClick}
@@ -263,7 +264,21 @@
 
 				{#each filteredAirspaces as airspace}
 					{#if showAllAirspaces}
-						<Polygon latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])} />
+						{#if airspace.type == 14}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'red'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{:else}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'blue'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{/if}
 					{/if}
 				{/each}
 

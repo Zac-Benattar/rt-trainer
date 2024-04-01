@@ -3,6 +3,10 @@
 	import L from 'leaflet';
 
 	export let latLngArray: L.LatLngExpression[];
+	export let color: string = 'blue';
+	export let fillColor: string | undefined = undefined;
+	export let fillOpacity: number = 0.2;
+	export let weight: number = 1;
 
 	let polygon: L.Polygon | undefined;
 	let polygonElement: HTMLElement;
@@ -17,7 +21,13 @@
 
 	onMount(() => {
 		if (map) {
-			polygon = L.polygon(latLngArray, { color: 'blue', fillColor: 'blue', fillOpacity: 0.2, weight: 1 }).addTo(map);
+			// if fill color undefined, set it to color
+			polygon = L.polygon(latLngArray, {
+				color: color,
+				fillColor: fillColor !== undefined ? fillColor : color,
+				fillOpacity: fillOpacity,
+				weight: weight
+			}).addTo(map);
 		}
 	});
 

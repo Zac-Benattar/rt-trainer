@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { ClearSimulationStores, WaypointPointsMapStore, WaypointsStore } from '$lib/stores';
-	import { MapMode } from '$lib/ts/SimulatorTypes';
+	import { ClearSimulationStores, OnRouteAirspacesStore, WaypointPointsMapStore, WaypointsStore } from '$lib/stores';
 	import type { PageData } from './$types';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
@@ -13,6 +12,9 @@
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
+	import { wellesbourneMountfordCoords } from '$lib/ts/utils';
+	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -56,6 +58,12 @@
 	let waypointPoints: number[][] = [];
 	WaypointPointsMapStore.subscribe((value) => {
 		waypointPoints = value;
+	});
+
+	const filteredAirspaces: Airspace[] = [];
+	OnRouteAirspacesStore.subscribe((value) => {
+		filteredAirspaces.length = 0;
+		filteredAirspaces.push(...value);
 	});
 
 	function showConfirmDeleteModal() {
@@ -148,7 +156,7 @@
 
 		<div class="flex flex-col px-2 xs:pr-3 w-[700px] h-[600px]">
 			<div class="h4 p-1">Route Preview</div>
-			<Map view={[51, -1.4]} zoom={13} {bounds}>
+			<Map view={wellesbourneMountfordCoords} zoom={9} {bounds}>
 				{#if data.routeRow}
 					{#each waypoints as waypoint (waypoint.index)}
 						<Marker
@@ -185,6 +193,24 @@
 								weight={7}
 							/>
 						{/key}
+					{/if}
+				{/each}
+
+				{#each filteredAirspaces as airspace}
+					{#if airspace.type == 14}
+						<Polygon
+							latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+							color={'red'}
+							fillOpacity={0.2}
+							weight={1}
+						/>
+					{:else}
+						<Polygon
+							latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+							color={'blue'}
+							fillOpacity={0.2}
+							weight={1}
+						/>
 					{/if}
 				{/each}
 			</Map>

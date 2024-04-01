@@ -2,6 +2,8 @@ import type { Position } from '@turf/turf';
 import type Airspace from './AeronauticalClasses/Airspace';
 import * as turf from '@turf/turf';
 
+export const wellesbourneMountfordCoords = [52.192, -1.614];
+
 export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
 
 // Simple hash function: hash * 31 + char
@@ -492,7 +494,11 @@ export function isInAirspace(point: Position, airspace: Airspace): boolean {
 	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
-export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace, upperLimitFL: number): boolean {
+export function isAirspaceIncludedInRoute(
+	route: Position[],
+	airspace: Airspace,
+	upperLimitFL: number
+): boolean {
 	if (route.length > 1) {
 		const routeLine = turf.lineString(route);
 		if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;

@@ -5,7 +5,6 @@
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { init } from '@paralleldrive/cuid2';
-	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import axios from 'axios';
 	import {
 		AllAirspacesStore,
@@ -156,8 +155,8 @@
 						>
 					</div>
 					<div class="text-sm opacity-50 p-1">
-						This seed will be used to generate the weather conditions, choose runways, determine
-						the emergency event, and affect other variables.
+						This seed will be used to generate the weather conditions, choose runways, determine the
+						emergency event, and affect other variables.
 					</div>
 				</div>
 
@@ -174,12 +173,7 @@
 
 		<div class="flex flex-col px-2 xs:pr-3">
 			<div class="h4 p-1">Scenario Preview</div>
-			<Map
-				enabled={true}
-				widthSmScreen={'600px'}
-				heightSmScreen={'500px'}
-				mode={MapMode.RoutePlan}
-			/>
+			<Map />
 		</div>
 	</div>
 </div>
