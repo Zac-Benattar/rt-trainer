@@ -126,7 +126,10 @@ export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspa
 
 		console.log('Fetched airspaces from OpenAIP');
 
-		return response.data.items as Airspace[];
+		const airspaces = response.data.items.map((airspaceData) =>
+			airspaceDataToAirspace(airspaceData)
+		);
+		return airspaces;
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 	}
@@ -148,7 +151,8 @@ export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[
 
 		console.log('Fetched airports from OpenAIP');
 
-		return response.data.items as Airport[];
+		const airports = response.data.items.map((airportData) => airportDataToAirport(airportData));
+		return airports;
 	} catch (error: unknown) {
 		console.error('Error: ', error);
 	}

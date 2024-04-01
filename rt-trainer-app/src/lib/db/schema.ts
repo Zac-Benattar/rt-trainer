@@ -29,6 +29,7 @@ export const waypointsTable = pgTable('waypoint', {
 	description: varchar('description', { length: 2000 }),
 	lat: decimal('lat', { precision: 10, scale: 8 }).notNull(),
 	lng: decimal('long', { precision: 10, scale: 8 }).notNull(),
+	referenceObjectId: text('reference_object_id'),
 	routeId: varchar('route_id', { length: 12 }).notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow()

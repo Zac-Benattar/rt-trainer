@@ -65,7 +65,8 @@ export async function POST({ request }) {
 			description: waypoint.description,
 			lat: waypoint.location[1],
 			lng: waypoint.location[0],
-			routeId: routeId
+			routeId: routeId,
+			referenceObjectId: waypoint.referenceObjectId
 		}))
 	);
 

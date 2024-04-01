@@ -46,7 +46,6 @@
 			[bbox[0], bbox[1]],
 			[bbox[2], bbox[3]]
 		]);
-		console.log('Bounds:', bounds);
 	}
 
 	const waypoints: Waypoint[] = [];

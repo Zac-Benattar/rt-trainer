@@ -6,7 +6,7 @@ import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { instanceToPlain } from 'class-transformer';
-import RouteGenerator from '$lib/ts/RouteGenerator';
+import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
@@ -16,38 +16,9 @@ export const load: PageServerLoad = async (event) => {
 	let callsign: string | null = null;
 	let aircraftType: string | null = null;
 
-	let userId: number = -1;
+	let userId: string = '-1';
 
 	if (!session?.user && scenarioId != 'demo') throw redirect(303, '/login');
-
-	// Demo code - eventually switch this out for hard coded stuff or redis or something
-	if (scenarioId == 'demo') {
-		const route = await RouteGenerator.generateFRTOLRouteFromSeed('demo');
-
-		if (route == null || route == undefined) {
-			return {
-				error: 'Could not generate demo route'
-			};
-		}
-
-		const scenario = await generateScenario(
-			'demo',
-			'Demo scenario',
-			'Free demo scenario',
-			'demo',
-			route.waypoints,
-			true
-		);
-
-		return {
-			scenario: instanceToPlain(scenario),
-			aircraftDetails: {
-				prefix: prefix,
-				callsign: callsign,
-				aircraftType: aircraftType
-			}
-		};
-	}
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const userRow = await db.query.users.findFirst({
@@ -68,7 +39,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	const scenarioRow = await db.query.scenarios.findFirst({
+	const scenarioRow = await db.query.scenariosTable.findFirst({
 		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
@@ -88,12 +59,21 @@ export const load: PageServerLoad = async (event) => {
 	const waypointsList: Waypoint[] = scenarioRow.routes.waypoints.map((waypoint) => {
 		return new Waypoint(
 			waypoint.name,
-			[parseFloat(waypoint.long), parseFloat(waypoint.lat)],
+			[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
 			waypoint.type,
-			waypoint.index
+			waypoint.index, 
+			waypoint.referenceObjectId ?? undefined
 		);
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
+
+	const airspaceIds = scenarioRow.routes?.airspaceIds ?? [];
+	
+	const airspaces: Airspace[] = await getAirspacesFromIds(airspaceIds);
+
+	const airportIds = scenarioRow.routes?.airportIds ?? [];
+
+	const airports: Airport[] = await getAirportsFromIds(airportIds);
 
 	const scenario = await generateScenario(
 		scenarioId,
@@ -101,6 +81,8 @@ export const load: PageServerLoad = async (event) => {
 		scenarioRow.description ?? '',
 		scenarioRow.seed,
 		waypointsList,
+		airspaces,
+		airports,
 		scenarioRow.hasEmergency
 	);
 

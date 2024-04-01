@@ -34,7 +34,8 @@ export const GET: RequestHandler = async ({ params }) => {
 					waypoint.name,
 					[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
 					waypoint.type,
-					waypoint.index
+					waypoint.index,
+					waypoint.referenceObjectId ?? undefined
 				)
 			);
 		}

@@ -6,6 +6,7 @@ import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { instanceToPlain } from 'class-transformer';
+import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
@@ -60,10 +61,19 @@ export const load: PageServerLoad = async (event) => {
 			waypointDetails.name,
 			[parseFloat(waypointDetails.lng), parseFloat(waypointDetails.lat)],
 			waypointDetails.type,
-			waypointDetails.index
+			waypointDetails.index,
+			waypointDetails.referenceObjectId ?? undefined
 		);
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
+
+	const airspaceIds = scenarioRow.routes?.airspaceIds ?? [];
+	
+	const airspaces: Airspace[] = await getAirspacesFromIds(airspaceIds);
+
+	const airportIds = scenarioRow.routes?.airportIds ?? [];
+
+	const airports: Airport[] = await getAirportsFromIds(airportIds);
 
 	const scenario = await generateScenario(
 		scenarioId,
@@ -71,6 +81,8 @@ export const load: PageServerLoad = async (event) => {
 		scenarioRow.description ?? '',
 		scenarioRow.seed,
 		waypointsList,
+		airspaces,
+		airports,
 		scenarioRow.hasEmergency
 	);
 

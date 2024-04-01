@@ -1,13 +1,6 @@
 import type Airport from './AeronauticalClasses/Airport';
 import type Airspace from './AeronauticalClasses/Airspace';
-import type { AirportData, AirspaceData } from './AeronauticalClasses/OpenAIPTypes';
 import type Waypoint from './AeronauticalClasses/Waypoint';
-import {
-	airportDataToAirport,
-	airspaceDataToAirspace,
-	readAirportDataFromDB,
-	readAirspaceDataFromDB
-} from './OpenAIPHandler';
 import Scenario from './Scenario';
 import type ScenarioPoint from './ScenarioPoints';
 import {
@@ -23,46 +16,32 @@ export async function generateScenario(
 	description: string,
 	seed: string,
 	waypoints: Waypoint[],
+	airspaces: Airspace[],
+	airports: Airport[],
 	hasEmergency: boolean
 ): Promise<Scenario> {
-	const airports: Airport[] = [];
-	const airspaces: Airspace[] = [];
+	if (!airspaces || airspaces.length === 0) {
+		throw new Error('No airspaces found');
+	}
+
+	if (!waypoints || waypoints.length === 0) {
+		throw new Error('No waypoints found');
+	}
+
 	const scenarioPoints: ScenarioPoint[] = [];
 
 	waypoints.sort((a, b) => a.index - b.index);
 
-	const airportsData: AirportData[] = await readAirportDataFromDB();
-	const airspacesData: AirspaceData[] = await readAirspaceDataFromDB();
-
-	// Add airports to list of valid airports for takeoff/landing
-	const allAirports: Airport[] = [];
-	for (let i = 0; i < airportsData.length; i++) {
-		if (
-			airportsData[i] &&
-			airportsData[i].name != undefined &&
-			airportsData[i].geometry.coordinates != undefined
-		) {
-			const airport: Airport = airportDataToAirport(airportsData[i]);
-			allAirports.push(airport);
-		}
-	}
-
-	// Add airspaces to list of valid airspaces for route
-	const allAirspaces: Airspace[] = [];
-	for (let i = 0; i < airspacesData.length; i++) {
-		const airspace: Airspace = airspaceDataToAirspace(airspacesData[i]);
-		if (airspace.lowerLimit < 30) allAirspaces.push(airspace);
-	}
-
-	const startAirport = allAirports.find((x) => x.name.includes(waypoints[0].name));
+	console.log(waypoints);
+	const startAirport = airports.find((x) => x.id === waypoints[0].referenceObjectId);
 	if (startAirport == undefined) {
 		throw new Error('Start airport not found');
 	}
 
 	airports.push(startAirport);
 
-	const endAirport = allAirports.find((x) =>
-		x.name.includes(waypoints[waypoints.length - 1].name.split(' ')[0])
+	const endAirport = airports.find(
+		(x) => x.id === waypoints[waypoints.length - 1].referenceObjectId
 	);
 	if (endAirport == undefined) {
 		throw new Error('End airport not found');
@@ -74,14 +53,7 @@ export async function generateScenario(
 	const route: [number, number][] = waypoints.map((x) => x.location);
 
 	// Collect all intersection points with airspaces
-	const intersectionPoints = findIntersections(route, allAirspaces);
-	for (let i = 0; i < intersectionPoints.length; i++) {
-		if (airspaces.findIndex((x) => x.id == intersectionPoints[i].airspaceId) == -1) {
-			airspaces.push(
-				allAirspaces.find((x) => x.id == intersectionPoints[i].airspaceId) as Airspace
-			);
-		}
-	}
+	const intersectionPoints = findIntersections(route, airspaces);
 
 	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, startAirport));
 

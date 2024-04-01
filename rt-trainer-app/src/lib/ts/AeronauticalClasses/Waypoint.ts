@@ -17,7 +17,7 @@ export default class Waypoint {
 		location: [number, number],
 		waypointType: WaypointType,
 		index: number,
-		id: string | undefined = undefined,
+		referenceObjectId: string | undefined = undefined,
 		description: string | undefined = undefined
 	) {
 		this.id = CUID();
@@ -25,7 +25,7 @@ export default class Waypoint {
 		this.location = location;
 		this.type = waypointType;
 		this.index = index;
-		if (id) this.referenceObjectId = id;
+		if (referenceObjectId) this.referenceObjectId = referenceObjectId;
 		if (description) this.description = description;
 	}
 }
