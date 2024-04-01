@@ -2,6 +2,7 @@
 	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import {
 		AllAirportsStore,
+		FilteredAirspacesStore,
 		OnRouteAirspacesStore,
 		RouteDistanceStore,
 		RouteDurationStore,
@@ -59,6 +60,14 @@
 		allAirspaces.push(plainToInstance(Airport, airport as Airport));
 	}
 	AllAirportsStore.set(allAirspaces);
+
+	const filteredAirspaces: Airspace[] = [];
+	FilteredAirspacesStore.subscribe((value) => {
+		filteredAirspaces.length = 0;
+		for (const airspace of value) {
+			filteredAirspaces.push(plainToInstance(Airspace, airspace as Airspace));
+		}
+	});
 
 	const onRouteAirspaces: Airspace[] = [];
 	OnRouteAirspacesStore.subscribe((value) => {
@@ -170,8 +179,6 @@
 	function onSaveClick() {
 		blockingClick = true;
 
-		console.log(onRouteAirspaces);
-
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'createRouteComponent',
@@ -197,7 +204,7 @@
 				createdBy: data.userId,
 				waypoints: waypoints,
 				type: 0,
-				airspaceIds: airspaces.map((airspace) => {
+				airspaceIds: onRouteAirspaces.map((airspace) => {
 					return {
 						id: airspace.id
 					};
@@ -254,7 +261,7 @@
 					{/if}
 				{/each}
 
-				{#each airspaces as airspace}
+				{#each filteredAirspaces as airspace}
 					{#if showAllAirspaces}
 						<Polygon latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])} />
 					{/if}

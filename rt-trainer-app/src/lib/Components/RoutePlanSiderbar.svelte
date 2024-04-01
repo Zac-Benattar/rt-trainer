@@ -23,6 +23,7 @@
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { flip } from 'svelte/animate';
 	import { loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
+	import { max } from 'drizzle-orm';
 
 	const drawerStore = getDrawerStore();
 
@@ -55,7 +56,9 @@
 	let distanceUnit: string = 'Nautical Miles';
 	let distanceInMeters: number = 0;
 	let minFL: number = 15;
+	minFlightLevelStore.set(minFL);
 	let maxFL: number = 30;
+	maxFlightLevelStore.set(maxFL);
 
 	$: {
 		minFL = Math.max(0, minFL);

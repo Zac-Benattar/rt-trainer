@@ -113,10 +113,7 @@ export const FilteredAirspacesStore = derived(
 	([$AllAirspacesStore, $MinFlightLevelStore, $MaxFlightLevelStore]) => {
 		const filteredAirspaces: Airspace[] = [];
 		$AllAirspacesStore.forEach((airspace) => {
-			if (
-				airspace.lowerLimitMin > $MinFlightLevelStore &&
-				airspace.upperLimitMax < $MaxFlightLevelStore
-			) {
+			if (airspace.lowerLimit <= $MaxFlightLevelStore) {
 				filteredAirspaces.push(airspace);
 			}
 		});
@@ -124,10 +121,11 @@ export const FilteredAirspacesStore = derived(
 	}
 );
 
-// Split into filtered (shown but filtered by flight levels etc...) and on route (filtered and on route) rather than just on route
 export const OnRouteAirspacesStore = derived(
 	[FilteredAirspacesStore, WaypointsStore],
 	([$FilteredAirspacesStore, $WaypointStore]) => {
+		if ($FilteredAirspacesStore.length === 0 || $WaypointStore.length === 0) return [];
+
 		const filteredAirspaces: Airspace[] = [];
 		$FilteredAirspacesStore.forEach((airspace) => {
 			if (airspace.isIncludedInRoute($WaypointStore.map((waypoint) => waypoint.location))) {
