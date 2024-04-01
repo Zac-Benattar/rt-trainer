@@ -58,11 +58,6 @@
 
 	export let mode: MapMode = MapMode.RoutePlan;
 
-	$: if (needsRerender) {
-		// updateMap();
-		needsRerender = false;
-	}
-
 	$: if (map) {
 		if (bounds) {
 			map.fitBounds(bounds);

@@ -68,14 +68,25 @@
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
 					data-sveltekit-preload-data="hover">Demo route</button
 				>
-				<button
-					on:click={() => {
-						ClearSimulationStores();
-						goto('/login');
-					}}
-					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
-					data-sveltekit-preload-data="hover">Sign in</button
-				>
+				{#if $page.data.session}
+					<button
+						on:click={() => {
+							ClearSimulationStores();
+							goto('/home');
+						}}
+						class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
+						data-sveltekit-preload-data="hover">Start practicing</button
+					>
+				{:else}
+					<button
+						on:click={() => {
+							ClearSimulationStores();
+							goto('/login');
+						}}
+						class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
+						data-sveltekit-preload-data="hover">Sign in</button
+					>
+				{/if}
 			</div>
 		</div>
 

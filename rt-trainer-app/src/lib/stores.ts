@@ -122,13 +122,18 @@ export const FilteredAirspacesStore = derived(
 );
 
 export const OnRouteAirspacesStore = derived(
-	[FilteredAirspacesStore, WaypointsStore],
-	([$FilteredAirspacesStore, $WaypointStore]) => {
+	[FilteredAirspacesStore, maxFlightLevelStore, WaypointsStore],
+	([$FilteredAirspacesStore, $MaxFlightLevelStore, $WaypointStore]) => {
 		if ($FilteredAirspacesStore.length === 0 || $WaypointStore.length === 0) return [];
 
 		const filteredAirspaces: Airspace[] = [];
 		$FilteredAirspacesStore.forEach((airspace) => {
-			if (airspace.isIncludedInRoute($WaypointStore.map((waypoint) => waypoint.location))) {
+			if (
+				airspace.isIncludedInRoute(
+					$WaypointStore.map((waypoint) => waypoint.location),
+					$MaxFlightLevelStore
+				)
+			) {
 				filteredAirspaces.push(airspace);
 			}
 		});

@@ -6,7 +6,9 @@ export type RadioDialMode = 'OFF' | 'SBY';
 
 export enum MapMode {
 	RoutePlan,
+	RoutePreview,
 	ScenarioPlan,
+	ScenarioPreview,
 	Scenario
 }
 

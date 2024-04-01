@@ -492,13 +492,13 @@ export function isInAirspace(point: Position, airspace: Airspace): boolean {
 	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
-export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace): boolean {
-	const routeLine = turf.lineString(route);
+export function isAirspaceIncludedInRoute(route: Position[], airspace: Airspace, upperLimitFL: number): boolean {
+	if (route.length > 1) {
+		const routeLine = turf.lineString(route);
+		if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
+	}
 
-	// If the lower limit is is above 3000ft, it is not included in the route as that is the maximum altitude of the route
-	if (airspace.lowerLimit > 30) return false;
-
-	if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
+	if (airspace.lowerLimit > upperLimitFL) return false;
 
 	for (let i = 0; i < route.length; i++) {
 		if (turf.booleanContains(turf.polygon(airspace.coordinates), turf.point(route[i]))) return true;

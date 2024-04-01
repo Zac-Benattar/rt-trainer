@@ -69,7 +69,7 @@ export default class Airspace {
 		return isInAirspace(point, this);
 	}
 
-	public isIncludedInRoute(route: [number, number][]): boolean {
-		return isAirspaceIncludedInRoute(route, this);
+	public isIncludedInRoute(route: [number, number][], upperLimitFL: number): boolean {
+		return isAirspaceIncludedInRoute(route, this, upperLimitFL);
 	}
 }
