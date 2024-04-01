@@ -102,9 +102,43 @@ export const RouteDurationStore = writable<number>(0);
 // todo
 export const SimDurationStore = writable<number>(0);
 
-export const AirspacesStore = writable<Airspace[]>([]);
+export const AllAirspacesStore = writable<Airspace[]>([]);
 
-export const AirportsStore = writable<Airport[]>([]);
+export const minFlightLevelStore = writable<number>(0);
+
+export const maxFlightLevelStore = writable<number>(0);
+
+export const FilteredAirspacesStore = derived(
+	[AllAirspacesStore, minFlightLevelStore, maxFlightLevelStore],
+	([$AllAirspacesStore, $MinFlightLevelStore, $MaxFlightLevelStore]) => {
+		const filteredAirspaces: Airspace[] = [];
+		$AllAirspacesStore.forEach((airspace) => {
+			if (
+				airspace.lowerLimitMin > $MinFlightLevelStore &&
+				airspace.upperLimitMax < $MaxFlightLevelStore
+			) {
+				filteredAirspaces.push(airspace);
+			}
+		});
+		return filteredAirspaces;
+	}
+);
+
+// Split into filtered (shown but filtered by flight levels etc...) and on route (filtered and on route) rather than just on route
+export const OnRouteAirspacesStore = derived(
+	[FilteredAirspacesStore, WaypointsStore],
+	([$FilteredAirspacesStore, $WaypointStore]) => {
+		const filteredAirspaces: Airspace[] = [];
+		$FilteredAirspacesStore.forEach((airspace) => {
+			if (airspace.isIncludedInRoute($WaypointStore.map((waypoint) => waypoint.location))) {
+				filteredAirspaces.push(airspace);
+			}
+		});
+		return filteredAirspaces;
+	}
+);
+
+export const AllAirportsStore = writable<Airport[]>([]);
 
 export const CurrentScenarioPointIndexStore = writable<number>(0);
 
@@ -188,8 +222,8 @@ export function ClearSimulationStores(): void {
 	ATCMessageStore.set('');
 	ScenarioStore.set(undefined);
 	WaypointsStore.set([]);
-	AirspacesStore.set([]);
-	AirportsStore.set([]);
+	AllAirspacesStore.set([]);
+	AllAirportsStore.set([]);
 	CurrentScenarioPointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

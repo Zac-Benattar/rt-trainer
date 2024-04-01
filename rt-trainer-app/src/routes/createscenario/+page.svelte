@@ -8,7 +8,7 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import axios from 'axios';
 	import {
-		AirspacesStore,
+		AllAirspacesStore,
 		AwaitingServerResponseStore,
 		ClearSimulationStores,
 		NullRouteStore,
@@ -62,7 +62,7 @@
 				}
 
 				WaypointsStore.set(waypoints);
-				AirspacesStore.set(airspaces);
+				AllAirspacesStore.set(airspaces);
 				AwaitingServerResponseStore.set(false);
 				NullRouteStore.set(false);
 			}

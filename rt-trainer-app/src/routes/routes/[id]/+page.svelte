@@ -33,7 +33,9 @@
 	if (data.routeRow) {
 		loadRouteDataById(data.routeRow.id);
 
-		const bbox = turf.bbox(turf.lineString(data.routeRow.waypoints.map((waypoint) => [waypoint.lat, waypoint.lng])));
+		const bbox = turf.bbox(
+			turf.lineString(data.routeRow.waypoints.map((waypoint) => [waypoint.lat, waypoint.lng]))
+		);
 		bounds = new L.LatLngBounds([
 			[bbox[1], bbox[0]],
 			[bbox[3], bbox[2]]
@@ -58,9 +60,11 @@
 	}
 </script>
 
-<div class="flex flex-col place-content-center">
-	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
-		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
+<div class="flex flex-col place-content-center w-full h-full">
+	<div
+		class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full"
+	>
+		<div class="flex flex-col px-2 w-[500px] gap-2">
 			<form
 				class="flex flex-col gap-1"
 				method="POST"
@@ -126,7 +130,7 @@
 			</form>
 		</div>
 
-		<div class="flex flex-col px-2 xs:pr-3 w-full h-full">
+		<div class="flex flex-col px-2 xs:pr-3 w-[700px] h-[600px]">
 			<div class="h4 p-1">Route Preview</div>
 			<Map mode={MapMode.RoutePlan} view={[51, -1.4]} zoom={13} />
 		</div>

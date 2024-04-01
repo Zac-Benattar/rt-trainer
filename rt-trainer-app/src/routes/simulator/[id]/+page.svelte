@@ -3,8 +3,8 @@
 	import { page } from '$app/stores';
 	import {
 		AircraftDetailsStore,
-		AirportsStore,
-		AirspacesStore,
+		AllAirportsStore,
+		AllAirspacesStore,
 		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
 		ScenarioStore,
@@ -86,8 +86,8 @@
 	scenario.currentPointIndex = startPointIndex;
 	ScenarioStore.set(scenario);
 	CurrentScenarioPointIndexStore.set(startPointIndex);
-	AirspacesStore.set(scenario.airspaces);
-	AirportsStore.set(scenario.airports);
+	AllAirspacesStore.set(scenario.airspaces);
+	AllAirportsStore.set(scenario.airports);
 	WaypointsStore.set(scenario.waypoints);
 	StartPointIndexStore.set(startPointIndex);
 	if (endPointIndex == -1) {

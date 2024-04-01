@@ -1,8 +1,8 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import {
-		AirportsStore,
-		AirspacesStore,
+		AllAirportsStore,
+		AllAirspacesStore,
 		ClearSimulationStores,
 		ScenarioStore,
 		WaypointsStore
@@ -25,8 +25,8 @@
 
 	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
 	ScenarioStore.set(scenario);
-	AirspacesStore.set(scenario.airspaces);
-	AirportsStore.set(scenario.airports);
+	AllAirspacesStore.set(scenario.airspaces);
+	AllAirportsStore.set(scenario.airports);
 	WaypointsStore.set(scenario.waypoints);
 
 	let scenarioName: string = scenario.name ?? 'Unnamed Scenario';

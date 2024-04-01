@@ -1,6 +1,6 @@
 import {
-	AirportsStore,
-	AirspacesStore,
+	AllAirportsStore,
+	AllAirspacesStore,
 	ClearSimulationStores,
 	CurrentScenarioPointIndexStore,
 	EndPointIndexStore,
@@ -215,8 +215,8 @@ export function loadRouteData(routeData: RouteData): void {
 	ClearSimulationStores();
 	NullRouteStore.set(false);
 	WaypointsStore.set(routeData.waypoints.sort((a, b) => a.index - b.index));
-	AirspacesStore.set(routeData.airspaces);
-	AirportsStore.set(routeData.airports);
+	AllAirspacesStore.set(routeData.airspaces);
+	AllAirportsStore.set(routeData.airports);
 }
 
 export async function fetchRouteDataById(routeId: string): Promise<RouteData | undefined> {
@@ -260,8 +260,8 @@ export async function loadRouteDataById(routeId: string): Promise<void> {
 	ClearSimulationStores();
 	NullRouteStore.set(false);
 	WaypointsStore.set(routeData.waypoints);
-	AirspacesStore.set(routeData.airspaces);
-	AirportsStore.set(routeData.airports);
+	AllAirspacesStore.set(routeData.airspaces);
+	AllAirportsStore.set(routeData.airports);
 }
 
 /**

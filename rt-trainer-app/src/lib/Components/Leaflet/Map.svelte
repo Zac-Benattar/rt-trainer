@@ -5,8 +5,8 @@
 	here they must be converted to [lat, long] for Leaflet to understand them correctly.
 	*/
 	import {
-		AirportsStore,
-		AirspacesStore,
+		AllAirportsStore,
+		AllAirspacesStore,
 		CurrentScenarioPointStore,
 		NullRouteStore,
 		WaypointsStore
@@ -80,12 +80,12 @@
 		}
 	});
 
-	AirspacesStore.subscribe((_airspaces) => {
+	AllAirspacesStore.subscribe((_airspaces) => {
 		airspaces = _airspaces;
 		needsRerender = true;
 	});
 
-	AirportsStore.subscribe((_airports) => {
+	AllAirportsStore.subscribe((_airports) => {
 		airports = _airports;
 		needsRerender = true;
 	});

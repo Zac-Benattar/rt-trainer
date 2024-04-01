@@ -1,7 +1,8 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import {
-		AirportsStore,
+		AllAirportsStore,
+		OnRouteAirspacesStore,
 		RouteDistanceStore,
 		RouteDurationStore,
 		SimDurationStore,
@@ -13,7 +14,7 @@
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import { fetchFRTOLRouteBySeed, loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
 	import { TrashBinOutline } from 'flowbite-svelte-icons';
-	import { AirspacesStore } from '$lib/stores';
+	import { AllAirspacesStore } from '$lib/stores';
 	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
@@ -51,13 +52,21 @@
 	for (const airspace of data.airspaces) {
 		airspaces.push(plainToInstance(Airspace, airspace as Airspace));
 	}
-	AirspacesStore.set(airspaces);
+	AllAirspacesStore.set(airspaces);
 
-	const airports: Airport[] = [];
+	const allAirspaces: Airport[] = [];
 	for (const airport of data.airports) {
-		airports.push(plainToInstance(Airport, airport as Airport));
+		allAirspaces.push(plainToInstance(Airport, airport as Airport));
 	}
-	AirportsStore.set(airports);
+	AllAirportsStore.set(allAirspaces);
+
+	const onRouteAirspaces: Airspace[] = [];
+	OnRouteAirspacesStore.subscribe((value) => {
+		onRouteAirspaces.length = 0;
+		for (const airspace of value) {
+			onRouteAirspaces.push(plainToInstance(Airspace, airspace as Airspace));
+		}
+	});
 
 	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((value) => {
@@ -161,6 +170,8 @@
 	function onSaveClick() {
 		blockingClick = true;
 
+		console.log(onRouteAirspaces);
+
 		const modal: ModalSettings = {
 			type: 'component',
 			component: 'createRouteComponent',
@@ -191,7 +202,7 @@
 						id: airspace.id
 					};
 				}),
-				airportIds: airports.map((airport) => {
+				airportIds: allAirspaces.map((airport) => {
 					return {
 						id: airport.id
 					};
@@ -223,7 +234,7 @@
 					</div>
 				</Control>
 
-				{#each airports as airport}
+				{#each allAirspaces as airport}
 					{#if showAllAirports || waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 						<Marker
 							latLng={[airport.coordinates[1], airport.coordinates[0]]}

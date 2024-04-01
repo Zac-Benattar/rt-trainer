@@ -14,7 +14,12 @@
 		DotsHorizontalOutline
 	} from 'flowbite-svelte-icons';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import { AwaitingServerResponseStore, WaypointsStore } from '$lib/stores';
+	import {
+		AwaitingServerResponseStore,
+		maxFlightLevelStore,
+		minFlightLevelStore,
+		WaypointsStore
+	} from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { flip } from 'svelte/animate';
 	import { loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
@@ -49,8 +54,18 @@
 
 	let distanceUnit: string = 'Nautical Miles';
 	let distanceInMeters: number = 0;
-	let minFL: number = 1500;
-	let maxFL: number = 3000;
+	let minFL: number = 15;
+	let maxFL: number = 30;
+
+	$: {
+		minFL = Math.max(0, minFL);
+		minFlightLevelStore.set(minFL);
+	}
+
+	$: {
+		maxFL = Math.max(minFL, maxFL);
+		maxFlightLevelStore.set(maxFL);
+	}
 
 	const distanceUnitsPopupCombobox: PopupSettings = {
 		event: 'click',
@@ -190,12 +205,12 @@
 			</div>
 
 			<div class="flex flex-col gap-1">
-				<div class="label">Minimum Flight Level (ft)</div>
+				<div class="label">Minimum Flight Level (100 ft)</div>
 				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={minFL} />
 			</div>
 
 			<div class="flex flex-col gap-1">
-				<div class="label">Maximum Flight Level (ft)</div>
+				<div class="label">Maximum Flight Level (100 ft)</div>
 				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={maxFL} />
 			</div>
 		</div>
