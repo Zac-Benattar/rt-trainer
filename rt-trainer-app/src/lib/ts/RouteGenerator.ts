@@ -6,6 +6,8 @@ import { getAllAirportData, getAllAirspaceData } from './OpenAIPHandler';
 import type { RouteData } from './Scenario';
 import * as turf from '@turf/turf';
 
+const maxFL = 30;
+
 export default class RouteGenerator {
 	public static async generateFRTOLRouteFromSeed(
 		seedString: string
@@ -141,7 +143,7 @@ export default class RouteGenerator {
 			onRouteAirspace = [];
 			for (let i = 0; i < airspaces.length; i++) {
 				const airspace = airspaces[i];
-				if (airspace.isIncludedInRoute(route)) {
+				if (airspace.isIncludedInRoute(route, maxFL)) {
 					if (airspace.type == 1 || (airspace.type == 14 && airspace != chosenMATZ)) {
 						validRoute = false;
 						break;
@@ -215,7 +217,7 @@ export default class RouteGenerator {
 		const onRouteAirspace: Airspace[] = [];
 		for (let i = 0; i < airspaces.length; i++) {
 			const airspace = airspaces[i];
-			if (airspace.isIncludedInRoute(route)) {
+			if (airspace.isIncludedInRoute(route, maxFL)) {
 				onRouteAirspace.push(airspace);
 			}
 		}

@@ -4,50 +4,9 @@
 	The coordinates used in the rest of the application are in the format [long, lat],
 	here they must be converted to [lat, long] for Leaflet to understand them correctly.
 	*/
-	import {
-		AllAirportsStore,
-		AllAirspacesStore,
-		CurrentScenarioPointStore,
-		NullRouteStore,
-		WaypointsStore
-	} from '$lib/stores';
 	import { createEventDispatcher, onDestroy, onMount, setContext, tick } from 'svelte';
-	import type { Pose } from '$lib/ts/ScenarioTypes';
-	import { convertMinutesToTimeString } from '$lib/ts/utils';
-	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
-	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
-	import { MapMode } from '$lib/ts/SimulatorTypes';
-	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import L from 'leaflet';
 	import 'leaflet/dist/leaflet.css';
-
-	let polyline_decorator: any;
-	let targetPose: Pose = {
-		position: [0, 0],
-		trueHeading: 0,
-		altitude: 0,
-		airSpeed: 0
-	};
-	let currentTime: string = '00:00';
-	let currentLocationMarker: any;
-	let waypoints: Waypoint[] = [];
-	let airspaces: Airspace[] = [];
-	let airports: Airport[] = [];
-	let markers: any[] = [];
-	let polygons: any[] = [];
-	let lines: any[] = [];
-	let needsRerender: boolean = false;
-
-	let planeIcon: any;
-	let airportIcon: any;
-	let airportSelectedIcon: any;
-	let flightInformarionObject: HTMLDivElement;
-	let FlightInformationClass: any;
-	let routeEditControlsObject: HTMLDivElement;
-	let routeEditControlsClass: any;
-	let nullRouteOverlay: HTMLDivElement;
-	let NullRouteTextBox: any;
-	let nullRoute: boolean = false;
 
 	let map: L.Map | undefined;
 	let mapElement: HTMLDivElement;
@@ -55,8 +14,6 @@
 	export let bounds: L.LatLngBounds | undefined = undefined;
 	export let view: L.LatLngExpression | undefined = [52.33, -1.42];
 	export let zoom: number | undefined = undefined;
-
-	export let mode: MapMode = MapMode.RoutePlan;
 
 	$: if (map) {
 		if (bounds) {
@@ -66,37 +23,13 @@
 		}
 	}
 
-	NullRouteStore.subscribe((_nullRoute) => {
-		nullRoute = _nullRoute;
-		if (nullRoute) {
-			waypoints = [];
-			airspaces = [];
-			needsRerender = true;
-		}
-	});
-
-	AllAirspacesStore.subscribe((_airspaces) => {
-		airspaces = _airspaces;
-		needsRerender = true;
-	});
-
-	AllAirportsStore.subscribe((_airports) => {
-		airports = _airports;
-		needsRerender = true;
-	});
-
-	WaypointsStore.subscribe((_waypoints) => {
-		waypoints = _waypoints;
-		needsRerender = true;
-	});
-
-	CurrentScenarioPointStore.subscribe((currentScenarioPoint) => {
-		if (currentScenarioPoint != null) {
-			targetPose = currentScenarioPoint.pose;
-			currentTime = convertMinutesToTimeString(currentScenarioPoint.timeAtPoint);
-			updatePose();
-		}
-	});
+	// CurrentScenarioPointStore.subscribe((currentScenarioPoint) => {
+	// 	if (currentScenarioPoint != null) {
+	// 		targetPose = currentScenarioPoint.pose;
+	// 		currentTime = convertMinutesToTimeString(currentScenarioPoint.timeAtPoint);
+	// 		updatePose();
+	// 	}
+	// });
 
 	// async function loadMap() {
 
@@ -202,354 +135,354 @@
 	// 		flightInformationOverlay = new FlightInformationTextBox({ position: 'topright' }).addTo(map);
 	// 	}
 
-	async function updateMap() {
-		if (map) {
-			await map;
+	// async function updateMap() {
+	// 	if (map) {
+	// 		await map;
 
-			if (nullRoute) {
-				console.log('null route');
-				NullRouteTextBox = L.Control.extend({
-					onAdd: function () {
-						var text = L.DomUtil.create('div');
-						text.id = 'heading_text';
-						text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
-						text.style.color = 'black';
-						text.style.backgroundColor = 'white';
-						text.innerHTML = '<p>Bad seed</p>';
-						return text;
-					}
-				});
+	// 		if (nullRoute) {
+	// 			console.log('null route');
+	// 			NullRouteTextBox = L.Control.extend({
+	// 				onAdd: function () {
+	// 					var text = L.DomUtil.create('div');
+	// 					text.id = 'heading_text';
+	// 					text.className = 'h6 px-2 py-1 rounded border-1 border-solid border-black';
+	// 					text.style.color = 'black';
+	// 					text.style.backgroundColor = 'white';
+	// 					text.innerHTML = '<p>Bad seed</p>';
+	// 					return text;
+	// 				}
+	// 			});
 
-				nullRouteOverlay = new NullRouteTextBox({ position: 'topright' }).addTo(map);
-			} else {
-				if (nullRouteOverlay) nullRouteOverlay.remove();
-			}
+	// 			nullRouteOverlay = new NullRouteTextBox({ position: 'topright' }).addTo(map);
+	// 		} else {
+	// 			if (nullRouteOverlay) nullRouteOverlay.remove();
+	// 		}
 
-			// map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
+	// 		// map.setView([targetPose.position[1], targetPose.position[0]], initialZoomLevel);
 
-			// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
-			// 	// bbox in terms of long, lat - flip them for the actual bounds in lat, long
-			// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
-			// 	const bounds = new L.LatLngBounds([
-			// 		[bbox[1], bbox[0]],
-			// 		[bbox[3], bbox[2]]
-			// 	]);
-			// 	map.fitBounds(bounds);
-			// }
+	// 		// if (mode == MapMode.RoutePlan && waypoints.length > 0) {
+	// 		// 	// bbox in terms of long, lat - flip them for the actual bounds in lat, long
+	// 		// 	const bbox = turf.bbox(turf.lineString(waypoints.map((waypoint) => waypoint.location)));
+	// 		// 	const bounds = new L.LatLngBounds([
+	// 		// 		[bbox[1], bbox[0]],
+	// 		// 		[bbox[3], bbox[2]]
+	// 		// 	]);
+	// 		// 	map.fitBounds(bounds);
+	// 		// }
 
-			await removeGeometry();
+	// 		await removeGeometry();
 
-			// Adds all waypoints to the map
-			waypoints.forEach((waypoint) => {
-				if (waypoint.type != WaypointType.Aerodrome) {
-					addWaypointMarker(waypoint);
-				}
-			});
+	// 		// Adds all waypoints to the map
+	// 		waypoints.forEach((waypoint) => {
+	// 			if (waypoint.type != WaypointType.Aerodrome) {
+	// 				addWaypointMarker(waypoint);
+	// 			}
+	// 		});
 
-			connectWaypoints();
+	// 		connectWaypoints();
 
-			drawAirspaces();
+	// 		drawAirspaces();
 
-			drawAirports();
+	// 		drawAirports();
 
-			//rotationAngle: targetPose.trueHeading / 2,
-			//rotationOrigin: 'center'
-			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
-				currentLocationMarker.remove();
+	// 		//rotationAngle: targetPose.trueHeading / 2,
+	// 		//rotationOrigin: 'center'
+	// 		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
+	// 			currentLocationMarker.remove();
 
-				// Updates the current location marker, done last to make sure it is on top
-				currentLocationMarker = L.marker(
-					new L.LatLng(targetPose.position[1], targetPose.position[0]),
-					{
-						icon: planeIcon
-					}
-				).addTo(map);
+	// 			// Updates the current location marker, done last to make sure it is on top
+	// 			currentLocationMarker = L.marker(
+	// 				new L.LatLng(targetPose.position[1], targetPose.position[0]),
+	// 				{
+	// 					icon: planeIcon
+	// 				}
+	// 			).addTo(map);
 
-				routeEditControlsObject.remove();
+	// 			routeEditControlsObject.remove();
 
-				routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
-			}
-		}
-	}
+	// 			routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
+	// 		}
+	// 	}
+	// }
 
 	// rotationAngle: targetPose.trueHeading / 2,
 	// rotationOrigin: 'center'
-	async function updatePose() {
-		if (map) {
-			await map;
+	// async function updatePose() {
+	// 	if (map) {
+	// 		await map;
 
-			map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), zoom);
+	// 		map.setView(new L.LatLng(targetPose.position[1], targetPose.position[0]), zoom);
 
-			if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
-				currentLocationMarker.remove();
+	// 		if (mode == MapMode.Scenario || mode == MapMode.ScenarioPlan) {
+	// 			currentLocationMarker.remove();
 
-				// Updates the current location marker, done last to make sure it is on top
-				currentLocationMarker = L.marker(
-					new L.LatLng(targetPose.position[1], targetPose.position[0]),
-					{
-						icon: planeIcon
-					}
-				).addTo(map);
+	// 			// Updates the current location marker, done last to make sure it is on top
+	// 			currentLocationMarker = L.marker(
+	// 				new L.LatLng(targetPose.position[1], targetPose.position[0]),
+	// 				{
+	// 					icon: planeIcon
+	// 				}
+	// 			).addTo(map);
 
-				routeEditControlsObject.remove();
+	// 			routeEditControlsObject.remove();
 
-				routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
-			}
-		}
-	}
+	// 			routeEditControlsObject = new FlightInformationClass({ position: 'topright' }).addTo(map);
+	// 		}
+	// 	}
+	// }
 
-	async function drawAirspaces() {
-		airspaces.forEach((airspace) => {
-			drawAirspace(airspace);
-		});
-	}
+	// async function drawAirspaces() {
+	// 	airspaces.forEach((airspace) => {
+	// 		drawAirspace(airspace);
+	// 	});
+	// }
 
-	async function drawAirports() {
-		airports.forEach((airport) => {
-			drawAirport(airport);
-		});
-	}
+	// async function drawAirports() {
+	// 	airports.forEach((airport) => {
+	// 		drawAirport(airport);
+	// 	});
+	// }
 
-	async function addWaypointMarker(_waypoint: Waypoint) {
-		if (map) {
-			const div = document.createElement('div');
-			div.innerHTML = `<br>${_waypoint.name}<br>`;
-			div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
+	// async function addWaypointMarker(_waypoint: Waypoint) {
+	// 	if (map) {
+	// 		const div = document.createElement('div');
+	// 		div.innerHTML = `<br>${_waypoint.name}<br>`;
+	// 		div.className = 'flex flex-col gap-2 bg-surface-500 text-white p-2 rounded-md shadow-md';
 
-			const nameTextarea = document.createElement('textarea');
-			nameTextarea.className = 'textarea';
-			nameTextarea.rows = 1;
-			nameTextarea.value = _waypoint.name;
-			div.appendChild(nameTextarea);
+	// 		const nameTextarea = document.createElement('textarea');
+	// 		nameTextarea.className = 'textarea';
+	// 		nameTextarea.rows = 1;
+	// 		nameTextarea.value = _waypoint.name;
+	// 		div.appendChild(nameTextarea);
 
-			const latTextarea = document.createElement('textarea');
-			latTextarea.className = 'textarea';
-			latTextarea.rows = 1;
-			latTextarea.value = _waypoint.location[1].toString();
-			div.appendChild(latTextarea);
+	// 		const latTextarea = document.createElement('textarea');
+	// 		latTextarea.className = 'textarea';
+	// 		latTextarea.rows = 1;
+	// 		latTextarea.value = _waypoint.location[1].toString();
+	// 		div.appendChild(latTextarea);
 
-			const longTextarea = document.createElement('textarea');
-			longTextarea.className = 'textarea';
-			longTextarea.rows = 1;
-			longTextarea.value = _waypoint.location[0].toString();
-			div.appendChild(longTextarea);
+	// 		const longTextarea = document.createElement('textarea');
+	// 		longTextarea.className = 'textarea';
+	// 		longTextarea.rows = 1;
+	// 		longTextarea.value = _waypoint.location[0].toString();
+	// 		div.appendChild(longTextarea);
 
-			const button = document.createElement('button');
-			button.innerHTML = 'Remove';
-			button.className = 'btn variant-filled';
-			button.onclick = () => {
-				waypoints = waypoints.filter((waypoint) => waypoint != _waypoint);
-				waypoints.forEach((waypoint, index) => {
-					waypoint.index = index;
-				});
-				WaypointsStore.set(waypoints);
-				needsRerender = true;
-			};
-			div.appendChild(button);
+	// 		const button = document.createElement('button');
+	// 		button.innerHTML = 'Remove';
+	// 		button.className = 'btn variant-filled';
+	// 		button.onclick = () => {
+	// 			waypoints = waypoints.filter((waypoint) => waypoint != _waypoint);
+	// 			waypoints.forEach((waypoint, index) => {
+	// 				waypoint.index = index;
+	// 			});
+	// 			WaypointsStore.set(waypoints);
+	// 			needsRerender = true;
+	// 		};
+	// 		div.appendChild(button);
 
-			const popupsettings = {
-				maxWidth: 500,
-				minWidth: 200,
-				className: 'popup'
-			};
+	// 		const popupsettings = {
+	// 			maxWidth: 500,
+	// 			minWidth: 200,
+	// 			className: 'popup'
+	// 		};
 
-			const myCustomColour = '#FF0000';
+	// 		const myCustomColour = '#FF0000';
 
-			const markerHtmlStyles = `
-  				background-color: ${myCustomColour};
-  				width: 2rem;
-  				height: 2rem;
-  				display: block;
-  				left: -1rem;
-  				top: -1rem;
-  				position: relative;
-  				border-radius: 2rem 2rem 0;
-  				transform: rotate(45deg);`;
+	// 		const markerHtmlStyles = `
+	// 			background-color: ${myCustomColour};
+	// 			width: 2rem;
+	// 			height: 2rem;
+	// 			display: block;
+	// 			left: -1rem;
+	// 			top: -1rem;
+	// 			position: relative;
+	// 			border-radius: 2rem 2rem 0;
+	// 			transform: rotate(45deg);`;
 
-			const icon = L.divIcon({
-				className: 'my-custom-pin',
-				iconAnchor: [0, 24],
-				popupAnchor: [0, -36],
-				html: `<span style="${markerHtmlStyles}" />`
-			});
+	// 		const icon = L.divIcon({
+	// 			className: 'my-custom-pin',
+	// 			iconAnchor: [0, 24],
+	// 			popupAnchor: [0, -36],
+	// 			html: `<span style="${markerHtmlStyles}" />`
+	// 		});
 
-			const marker = L.marker([_waypoint.location[1], _waypoint.location[0]], {
-				draggable: true,
-				icon: icon
-			})
-				.bindPopup(div, popupsettings)
-				.addTo(map);
+	// 		const marker = L.marker([_waypoint.location[1], _waypoint.location[0]], {
+	// 			draggable: true,
+	// 			icon: icon
+	// 		})
+	// 			.bindPopup(div, popupsettings)
+	// 			.addTo(map);
 
-			marker.on('dragend', (e: any) => {
-				_waypoint.location = [e.target.getLatLng().lng, e.target.getLatLng().lat];
-				WaypointsStore.set(waypoints);
-				needsRerender = true;
-			});
+	// 		marker.on('dragend', (e: any) => {
+	// 			_waypoint.location = [e.target.getLatLng().lng, e.target.getLatLng().lat];
+	// 			WaypointsStore.set(waypoints);
+	// 			needsRerender = true;
+	// 		});
 
-			markers.push(marker);
-		}
-	}
+	// 		markers.push(marker);
+	// 	}
+	// }
 
-	async function removeGeometry() {
-		if (map) {
-			await markers.forEach((marker) => {
-				map.removeLayer(marker);
-			});
-			markers = [];
-			await lines.forEach((line) => {
-				map.removeLayer(line);
-			});
-			lines = [];
-			await polygons.forEach((polygon) => {
-				map.removeLayer(polygon);
-			});
-			polygons = [];
-		}
-	}
+	// async function removeGeometry() {
+	// 	if (map) {
+	// 		await markers.forEach((marker) => {
+	// 			map.removeLayer(marker);
+	// 		});
+	// 		markers = [];
+	// 		await lines.forEach((line) => {
+	// 			map.removeLayer(line);
+	// 		});
+	// 		lines = [];
+	// 		await polygons.forEach((polygon) => {
+	// 			map.removeLayer(polygon);
+	// 		});
+	// 		polygons = [];
+	// 	}
+	// }
 
-	async function connectWaypoints() {
-		if (map) {
-			if (waypoints.length > 1) {
-				for (let i = 0; i < waypoints.length - 1; i++) {
-					const line = L.polyline(
-						[
-							[waypoints[i].location[1], waypoints[i].location[0]],
-							[waypoints[i + 1].location[1], waypoints[i + 1].location[0]]
-						],
-						{
-							color: '#ff1493',
-							weight: 5,
-							opacity: 1,
-							smoothFactor: 1
-						}
-					).addTo(map);
+	// async function connectWaypoints() {
+	// 	if (map) {
+	// 		if (waypoints.length > 1) {
+	// 			for (let i = 0; i < waypoints.length - 1; i++) {
+	// 				const line = L.polyline(
+	// 					[
+	// 						[waypoints[i].location[1], waypoints[i].location[0]],
+	// 						[waypoints[i + 1].location[1], waypoints[i + 1].location[0]]
+	// 					],
+	// 					{
+	// 						color: '#ff1493',
+	// 						weight: 5,
+	// 						opacity: 1,
+	// 						smoothFactor: 1
+	// 					}
+	// 				).addTo(map);
 
-					// const lineDecorator = L.polylineDecorator(line, {
-					// 	patterns: [
-					// 		// defines a pattern of 20px-wide dashes, repeated every 200px on the line
-					// 		{
-					// 			offset: 20,
-					// 			repeat: 200,
-					// 			symbol: L.Symbol.arrowHead({
-					// 				pixelSize: 20,
-					// 				pathOptions: {
-					// 					color: '#ff1493',
-					// 					fillOpacity: 1,
-					// 					weight: 0,
-					// 					smoothFactor: 1,
-					// 					opacity: 1
-					// 				}
-					// 			})
-					// 		}
-					// 	]
-					// }).addTo(map);
-					// lines.push(...[line, lineDecorator]);
-				}
-			}
-		}
-	}
+	// 				// const lineDecorator = L.polylineDecorator(line, {
+	// 				// 	patterns: [
+	// 				// 		// defines a pattern of 20px-wide dashes, repeated every 200px on the line
+	// 				// 		{
+	// 				// 			offset: 20,
+	// 				// 			repeat: 200,
+	// 				// 			symbol: L.Symbol.arrowHead({
+	// 				// 				pixelSize: 20,
+	// 				// 				pathOptions: {
+	// 				// 					color: '#ff1493',
+	// 				// 					fillOpacity: 1,
+	// 				// 					weight: 0,
+	// 				// 					smoothFactor: 1,
+	// 				// 					opacity: 1
+	// 				// 				}
+	// 				// 			})
+	// 				// 		}
+	// 				// 	]
+	// 				// }).addTo(map);
+	// 				// lines.push(...[line, lineDecorator]);
+	// 			}
+	// 		}
+	// 	}
+	// }
 
-	async function drawAirspace(airspace: Airspace) {
-		if (map) {
-			await map;
+	// async function drawAirspace(airspace: Airspace) {
+	// 	if (map) {
+	// 		await map;
 
-			if (airspace.type != 14) {
-				const airspacePolygon = L.polygon(
-					airspace.coordinates[0].map((point) => [point[1], point[0]]),
-					{ color: 'blue', fillColor: 'blue', fillOpacity: 0.2, weight: 1 }
-				)
-					.bindPopup(airspace.getDisplayName())
-					.addTo(map);
+	// 		if (airspace.type != 14) {
+	// 			const airspacePolygon = L.polygon(
+	// 				airspace.coordinates[0].map((point) => [point[1], point[0]]),
+	// 				{ color: 'blue', fillColor: 'blue', fillOpacity: 0.2, weight: 1 }
+	// 			)
+	// 				.bindPopup(airspace.getDisplayName())
+	// 				.addTo(map);
 
-				airspacePolygon.on('mouseover', function () {
-					airspacePolygon.openPopup();
-				});
+	// 			airspacePolygon.on('mouseover', function () {
+	// 				airspacePolygon.openPopup();
+	// 			});
 
-				airspacePolygon.on('mouseout', function () {
-					airspacePolygon.closePopup();
-				});
+	// 			airspacePolygon.on('mouseout', function () {
+	// 				airspacePolygon.closePopup();
+	// 			});
 
-				polygons.push(airspacePolygon);
-			} else if (airspace.type == 14) {
-				const airspacePolygon = L.polygon(
-					airspace.coordinates[0].map((point) => [point[1], point[0]]),
-					{ color: 'red' }
-				)
-					.bindPopup(airspace.getDisplayName())
-					.addTo(map);
+	// 			polygons.push(airspacePolygon);
+	// 		} else if (airspace.type == 14) {
+	// 			const airspacePolygon = L.polygon(
+	// 				airspace.coordinates[0].map((point) => [point[1], point[0]]),
+	// 				{ color: 'red' }
+	// 			)
+	// 				.bindPopup(airspace.getDisplayName())
+	// 				.addTo(map);
 
-				airspacePolygon.on('mouseover', function () {
-					airspacePolygon.openPopup();
-				});
+	// 			airspacePolygon.on('mouseover', function () {
+	// 				airspacePolygon.openPopup();
+	// 			});
 
-				airspacePolygon.on('mouseout', function () {
-					airspacePolygon.closePopup();
-				});
+	// 			airspacePolygon.on('mouseout', function () {
+	// 				airspacePolygon.closePopup();
+	// 			});
 
-				polygons.push(airspacePolygon);
-			}
-		}
-	}
+	// 			polygons.push(airspacePolygon);
+	// 		}
+	// 	}
+	// }
 
-	async function drawAirport(airport: Airport) {
-		if (map) {
-			await map;
+	// async function drawAirport(airport: Airport) {
+	// 	if (map) {
+	// 		await map;
 
-			// if the airport is already in the route, mark it as selected with a different icon
+	// 		// if the airport is already in the route, mark it as selected with a different icon
 
-			let icon = airportIcon;
-			if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
-				icon = airportSelectedIcon;
-			}
+	// 		let icon = airportIcon;
+	// 		if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
+	// 			icon = airportSelectedIcon;
+	// 		}
 
-			const airportMarker = L.marker([airport.coordinates[1], airport.coordinates[0]], {
-				icon: icon,
-				title: airport.name
-			})
-				.bindPopup(airport.name)
-				.addTo(map);
+	// 		const airportMarker = L.marker([airport.coordinates[1], airport.coordinates[0]], {
+	// 			icon: icon,
+	// 			title: airport.name
+	// 		})
+	// 			.bindPopup(airport.name)
+	// 			.addTo(map);
 
-			markers.push(airportMarker);
+	// 		markers.push(airportMarker);
 
-			airportMarker.on('mouseover', function () {
-				airportMarker.openPopup();
-			});
+	// 		airportMarker.on('mouseover', function () {
+	// 			airportMarker.openPopup();
+	// 		});
 
-			airportMarker.on('mouseout', function () {
-				airportMarker.closePopup();
-			});
+	// 		airportMarker.on('mouseout', function () {
+	// 			airportMarker.closePopup();
+	// 		});
 
-			airportMarker.on('click', function () {
-				if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
-					airportMarker.setIcon(airportIcon);
+	// 		airportMarker.on('click', function () {
+	// 			if (waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
+	// 				airportMarker.setIcon(airportIcon);
 
-					// remove the airport from the route
-					waypoints = waypoints.filter((waypoint) => waypoint.referenceObjectId != airport.id);
-					waypoints.forEach((waypoint, index) => {
-						waypoint.index = index;
-					});
-					WaypointsStore.set(waypoints);
-					needsRerender = true;
-				} else {
-					airportMarker.setIcon(airportSelectedIcon);
+	// 				// remove the airport from the route
+	// 				waypoints = waypoints.filter((waypoint) => waypoint.referenceObjectId != airport.id);
+	// 				waypoints.forEach((waypoint, index) => {
+	// 					waypoint.index = index;
+	// 				});
+	// 				WaypointsStore.set(waypoints);
+	// 				needsRerender = true;
+	// 			} else {
+	// 				airportMarker.setIcon(airportSelectedIcon);
 
-					// add the airport to the route if its not already in it
-					if (!waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
-						waypoints.push(
-							new Waypoint(
-								airport.name,
-								airport.coordinates,
-								WaypointType.Aerodrome,
-								waypoints.length
-							)
-						);
-						WaypointsStore.set(waypoints);
-						needsRerender = true;
-					}
-				}
-			});
-		}
-	}
+	// 				// add the airport to the route if its not already in it
+	// 				if (!waypoints.some((waypoint) => waypoint.referenceObjectId == airport.id)) {
+	// 					waypoints.push(
+	// 						new Waypoint(
+	// 							airport.name,
+	// 							airport.coordinates,
+	// 							WaypointType.Aerodrome,
+	// 							waypoints.length
+	// 						)
+	// 					);
+	// 					WaypointsStore.set(waypoints);
+	// 					needsRerender = true;
+	// 				}
+	// 			}
+	// 		});
+	// 	}
+	// }
 
 	const dispatch = createEventDispatcher();
 
@@ -588,5 +521,3 @@
 		<slot />
 	{/if}
 </div>
-
-

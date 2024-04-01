@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { ClearSimulationStores } from '$lib/stores';
+	import { ClearSimulationStores, WaypointPointsMapStore, WaypointsStore } from '$lib/stores';
 	import { MapMode } from '$lib/ts/SimulatorTypes';
 	import type { PageData } from './$types';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
@@ -9,6 +9,10 @@
 	import { loadRouteDataById } from '$lib/ts/Scenario';
 	import * as turf from '@turf/turf';
 	import L from 'leaflet';
+	import Marker from '$lib/Components/Leaflet/Marker.svelte';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import Popup from '$lib/Components/Leaflet/Popup.svelte';
+	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -37,10 +41,22 @@
 			turf.lineString(data.routeRow.waypoints.map((waypoint) => [waypoint.lat, waypoint.lng]))
 		);
 		bounds = new L.LatLngBounds([
-			[bbox[1], bbox[0]],
-			[bbox[3], bbox[2]]
+			[bbox[0], bbox[1]],
+			[bbox[2], bbox[3]]
 		]);
+		console.log('Bounds:', bounds);
 	}
+
+	const waypoints: Waypoint[] = [];
+	WaypointsStore.subscribe((value) => {
+		waypoints.length = 0;
+		waypoints.push(...value);
+	});
+
+	let waypointPoints: number[][] = [];
+	WaypointPointsMapStore.subscribe((value) => {
+		waypointPoints = value;
+	});
 
 	function showConfirmDeleteModal() {
 		const modal: ModalSettings = {
@@ -132,7 +148,46 @@
 
 		<div class="flex flex-col px-2 xs:pr-3 w-[700px] h-[600px]">
 			<div class="h4 p-1">Route Preview</div>
-			<Map mode={MapMode.RoutePlan} view={[51, -1.4]} zoom={13} />
+			<Map view={[51, -1.4]} zoom={13} {bounds}>
+				{#if data.routeRow}
+					{#each waypoints as waypoint (waypoint.index)}
+						<Marker
+							latLng={[waypoint.location[1], waypoint.location[0]]}
+							width={50}
+							height={50}
+							aeroObject={waypoint}
+						>
+							{#if waypoint.index == 0}
+								<div class="text-2xl">🛩️</div>
+							{:else if waypoint.index == waypoints.length - 1}
+								<div class="text-2xl">🏁</div>
+							{:else}
+								<div class="text-2xl">🚩</div>
+							{/if}
+
+							<Popup
+								><div class="flex flex-col gap-2">
+									<div>{waypoint.name}</div>
+								</div></Popup
+							></Marker
+						>
+					{/each}
+				{/if}
+
+				{#each waypointPoints as waypointPoint, index}
+					{#if index > 0}
+						<!-- Force redraw if either waypoint of the line changes location -->
+						{#key [waypointPoints[index - 1], waypointPoints[index]]}
+							<Polyline
+								latLngArray={[waypointPoints[index - 1], waypointPoints[index]]}
+								colour="#FF69B4"
+								fillOpacity={1}
+								weight={7}
+							/>
+						{/key}
+					{/if}
+				{/each}
+			</Map>
 		</div>
 	</div>
 </div>
