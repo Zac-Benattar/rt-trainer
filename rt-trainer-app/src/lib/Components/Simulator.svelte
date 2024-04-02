@@ -580,7 +580,7 @@
 		<Transponder />
 
 		<div
-			class="card p-2 rounded-md w-[400px] h-[452px] bg-surface-500 flex flex-row grow w-full h-full"
+			class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow"
 		>
 			<div class="w-full h-full">
 				<Map view={wellesbourneMountfordCoords} zoom={9}>
