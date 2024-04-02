@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
+	import 'leaflet/dist/leaflet.css';
 	import {
 		AllAirportsStore,
 		AllAirspacesStore,
