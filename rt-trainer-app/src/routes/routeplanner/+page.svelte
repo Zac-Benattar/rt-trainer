@@ -30,6 +30,7 @@
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
+	import { visibility } from '$lib/db/schema';
 
 	ClearSimulationStores();
 
@@ -188,7 +189,6 @@
 				if (r) {
 					routeName = r.routeName;
 					routeDescription = r.routeDescription;
-					console.log(onRouteAirspaces.map((airspace) => airspace.name));
 					saveRoute();
 				} else {
 					blockingClick = false;
@@ -203,6 +203,7 @@
 			const response = await axios.post('/api/routes', {
 				routeName: routeName,
 				routeDescription: routeDescription,
+				visibility: visibility.PRIVATE,
 				userID: data.userId,
 				waypoints: waypoints,
 				type: 0,

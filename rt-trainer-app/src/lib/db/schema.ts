@@ -13,6 +13,12 @@ import {
 	varchar
 } from 'drizzle-orm/pg-core';
 
+export enum visibility {
+	PRIVATE = 1,
+	UNLISTED = 2,
+	PUBLIC = 3
+}
+
 const shortCUID = init({ length: 12 });
 const longCUID = init({ length: 20 });
 
@@ -43,11 +49,12 @@ export const routesTable = pgTable('route', {
 	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
 	type: smallint('type').notNull(),
+	visibility: smallint('visibility').notNull(),
 	description: varchar('description', { length: 2000 }),
 	airspaceIds: text('airspace_ids'),
 	airportIds: text('airport_ids'),
 	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow()
 });
 
 export const routesRelations = relations(routesTable, ({ many }) => ({
@@ -59,14 +66,13 @@ export const scenariosTable = pgTable('scenario', {
 	id: text('id').primaryKey().$defaultFn(longCUID),
 	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 	name: varchar('name', { length: 100 }).notNull(),
+	visibility: smallint('visibility').notNull(),
 	description: varchar('description', { length: 2000 }),
 	route: text('route_id').references(() => routesTable.id, { onDelete: 'cascade' }),
-	seed: varchar('seed', { length: 20 })
-		.notNull()
-		.$defaultFn(shortCUID),
+	seed: varchar('seed', { length: 20 }).notNull().$defaultFn(shortCUID),
 	hasEmergency: boolean('has_emergency').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow()
 });
 
 export const scenariosRelations = relations(scenariosTable, ({ one }) => ({
