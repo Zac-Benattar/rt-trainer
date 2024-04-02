@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { and, eq } from 'drizzle-orm';
-import { scenariosTable, users } from '$lib/db/schema';
+import { scenariosTable, users, visibility } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -42,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenariosTable.findFirst({
-		where: and(eq(scenariosTable.userID, userId), eq(scenariosTable.id, scenarioId)),
+		where: eq(scenariosTable.id, scenarioId),
 		with: {
 			routes: {
 				with: {
@@ -51,6 +51,12 @@ export const load: PageServerLoad = async (event) => {
 			}
 		}
 	});
+
+	if (scenarioRow && userId != '-1' && scenarioRow.userID != userId && scenarioRow.visibility != visibility.PUBLIC) {
+		return {
+			error: 'Scenario not found'
+		};
+	}
 
 	if (scenarioRow == null || scenarioRow == undefined) {
 		return {
@@ -63,7 +69,7 @@ export const load: PageServerLoad = async (event) => {
 			waypoint.name,
 			[parseFloat(waypoint.lng), parseFloat(waypoint.lat)],
 			waypoint.type,
-			waypoint.index, 
+			waypoint.index,
 			waypoint.referenceObjectId ?? undefined
 		);
 	});

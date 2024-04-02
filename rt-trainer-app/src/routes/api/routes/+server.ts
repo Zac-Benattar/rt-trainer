@@ -5,11 +5,15 @@ import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { routeName, routeDescription, userID, waypoints, type, airspaceIDs, airportIDs } =
+	const { routeName, routeDescription, visibility,  userID, waypoints, type, airspaceIDs, airportIDs } =
 		await request.json();
 
 	if (!routeName) {
 		return json({ error: 'No name provided' });
+	}
+
+	if (!visibility) {
+		return json({ error: 'No visibility provided' });
 	}
 
 	if (!userID) {
@@ -49,6 +53,7 @@ export async function POST({ request }) {
 		id: routeId,
 		userID: userID,
 		name: routeName,
+		visibility: visibility,
 		type: type,
 		airspaceIds: airspaceIDs,
 		airportIds: airportIDs,
