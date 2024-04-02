@@ -40,7 +40,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenariosTable.findFirst({
-		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
+		where: and(eq(scenariosTable.userID, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
 				with: {

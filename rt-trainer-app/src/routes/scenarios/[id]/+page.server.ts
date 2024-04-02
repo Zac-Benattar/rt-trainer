@@ -7,6 +7,8 @@ import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 import { instanceToPlain } from 'class-transformer';
 import { getAirportsFromIds, getAirspacesFromIds } from '$lib/ts/OpenAIPHandler';
+import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 
 export const load: PageServerLoad = async (event) => {
 	const scenarioId = event.params.id;
@@ -40,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenariosTable.findFirst({
-		where: and(eq(scenariosTable.createdBy, userId), eq(scenariosTable.id, scenarioId)),
+		where: and(eq(scenariosTable.userID, userId), eq(scenariosTable.id, scenarioId)),
 		with: {
 			routes: {
 				with: {
@@ -67,11 +69,11 @@ export const load: PageServerLoad = async (event) => {
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
 
-	const airspaceIds = scenarioRow.routes?.airspaceIds ?? [];
-	
+	const airspaceIds: string[] = scenarioRow.routes?.airspaceIds?.split(',') ?? [];
+
 	const airspaces: Airspace[] = await getAirspacesFromIds(airspaceIds);
 
-	const airportIds = scenarioRow.routes?.airportIds ?? [];
+	const airportIds: string[] = scenarioRow.routes?.airportIds?.split(',') ?? [];
 
 	const airports: Airport[] = await getAirportsFromIds(airportIds);
 

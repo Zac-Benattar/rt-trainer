@@ -5,17 +5,15 @@ import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { routeName, routeDescription, createdBy, waypoints, type, airspaceIds, airportIds } =
+	const { routeName, routeDescription, userID, waypoints, type, airspaceIDs, airportIDs } =
 		await request.json();
-
-	console.log(routeName, createdBy, waypoints, type, routeDescription);
 
 	if (!routeName) {
 		return json({ error: 'No name provided' });
 	}
 
-	if (!createdBy) {
-		return json({ error: 'No createdBy provided' });
+	if (!userID) {
+		return json({ error: 'No userID provided' });
 	}
 
 	if (routeDescription.length > 2000) {
@@ -49,12 +47,12 @@ export async function POST({ request }) {
 
 	await db.insert(routesTable).values({
 		id: routeId,
+		userID: userID,
 		name: routeName,
 		type: type,
-		airspaceIds: JSON.stringify(airspaceIds),
-		airportIds: JSON.stringify(airportIds),
+		airspaceIds: airspaceIDs,
+		airportIds: airportIDs,
 		description: routeDescription,
-		createdBy: createdBy
 	});
 
 	await db.insert(waypointsTable).values(

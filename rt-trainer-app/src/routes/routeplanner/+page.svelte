@@ -188,6 +188,7 @@
 				if (r) {
 					routeName = r.routeName;
 					routeDescription = r.routeDescription;
+					console.log(onRouteAirspaces.map((airspace) => airspace.name));
 					saveRoute();
 				} else {
 					blockingClick = false;
@@ -202,19 +203,11 @@
 			const response = await axios.post('/api/routes', {
 				routeName: routeName,
 				routeDescription: routeDescription,
-				createdBy: data.userId,
+				userID: data.userId,
 				waypoints: waypoints,
 				type: 0,
-				airspaceIds: onRouteAirspaces.map((airspace) => {
-					return {
-						id: airspace.id
-					};
-				}),
-				airportIds: allAirspaces.map((airport) => {
-					return {
-						id: airport.id
-					};
-				})
+				airspaceIDs: onRouteAirspaces.map((airspace) => airspace.id),
+				airportNames: []
 			});
 
 			if (response.data.result === 'success') {

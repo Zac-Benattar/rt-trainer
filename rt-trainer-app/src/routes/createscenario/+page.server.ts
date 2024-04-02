@@ -42,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 					where: (waypoints, { gt }) => gt(waypoints.index, 0)
 				}
 			},
-			where: eq(routesTable.createdBy, userId),
+			where: eq(routesTable.userID, userId),
 			orderBy: [desc(routesTable.createdAt)],
 			limit: 20
 		})
@@ -79,12 +79,12 @@ export const actions = {
 
 		await db.insert(scenariosTable).values({
 			id: scenarioId,
+			userID: userId,
 			name: name,
 			description: description,
 			route: routeId,
 			seed: scenarioSeed,
 			hasEmergency: emergency,
-			createdBy: userId
 		});
 
 		throw redirect(303, `/scenarios/${scenarioId}`);

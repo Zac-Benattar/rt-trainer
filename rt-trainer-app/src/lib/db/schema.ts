@@ -5,7 +5,6 @@ import {
 	boolean,
 	decimal,
 	integer,
-	json,
 	pgTable,
 	primaryKey,
 	smallint,
@@ -20,7 +19,6 @@ const longCUID = init({ length: 20 });
 /**
  * Route data schema
  */
-
 export const waypointsTable = pgTable('waypoint', {
 	id: text('id').primaryKey().$defaultFn(shortCUID),
 	index: smallint('index').notNull(), // Holds the position of the point in the route
@@ -46,15 +44,13 @@ export const routesTable = pgTable('route', {
 	name: varchar('name', { length: 100 }).notNull(),
 	type: smallint('type').notNull(),
 	description: varchar('description', { length: 2000 }),
-	airspaceIds: json('airspaceIds').notNull(),
-	airportIds: json('airportIds').notNull(),
+	airspaceIds: text('airspace_ids'),
+	airportIds: text('airport_ids'),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
-	createdBy: text('created_by').references(() => users.id, { onDelete: 'cascade' })
 });
 
-export const routesRelations = relations(routesTable, ({ one, many }) => ({
-	users: one(users, { fields: [routesTable.createdBy], references: [users.id] }),
+export const routesRelations = relations(routesTable, ({ many }) => ({
 	scenarios: many(scenariosTable),
 	waypoints: many(waypointsTable)
 }));
@@ -71,11 +67,9 @@ export const scenariosTable = pgTable('scenario', {
 	hasEmergency: boolean('has_emergency').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
 	updatedAt: timestamp('updated_at').defaultNow(),
-	createdBy: varchar('created_by', { length: 255 }).notNull()
 });
 
 export const scenariosRelations = relations(scenariosTable, ({ one }) => ({
-	users: one(users, { fields: [scenariosTable.createdBy], references: [users.id] }),
 	routes: one(routesTable, { fields: [scenariosTable.route], references: [routesTable.id] })
 }));
 
@@ -94,10 +88,6 @@ export const users = pgTable('user', {
 	callsign: text('callsign').notNull().default('G-OFLY'),
 	aircraftType: text('aircraftType').notNull().default('Cessna 172')
 });
-
-export const usersRelations = relations(users, ({ many }) => ({
-	routes: many(routesTable)
-}));
 
 export const accounts = pgTable(
 	'account',

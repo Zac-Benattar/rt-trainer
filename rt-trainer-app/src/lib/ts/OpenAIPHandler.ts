@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { all } from 'axios';
 import { OPENAIPKEY } from '$env/static/private';
 import type {
 	AirportData,
@@ -112,52 +112,62 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	);
 }
 
+// Currently implemented badly
 export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
-	try {
-		const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
-			headers: {
-				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
-			},
-			params: {
-				ids: airspaceIds
-			}
-		});
+	const airspaces: Airspace[] = await getAllAirspaceData()
+	airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
+	return airspaces;
 
-		console.log('Fetched airspaces from OpenAIP');
+	// try {
+	// 	const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 			'x-openaip-client-id': OPENAIPKEY
+	// 		},
+	// 		params: {
+	// 			ids: airspaceIds
+	// 		}
+	// 	});
 
-		const airspaces = response.data.items.map((airspaceData) =>
-			airspaceDataToAirspace(airspaceData)
-		);
-		return airspaces;
-	} catch (error: unknown) {
-		console.error('Error: ', error);
-	}
+	// 	console.log('Fetched airspaces from OpenAIP');
 
-	return [];
+	// 	const airspaces = response.data.items.map((airspaceData) =>
+	// 		airspaceDataToAirspace(airspaceData)
+	// 	);
+	// 	return airspaces;
+	// } catch (error: unknown) {
+	// 	console.error('Error: ', error);
+	// }
+
+	// return [];
 }
 
-export async function getAirportsFromIds(airportIds: string[]): Promise<Airport[]> {
-	try {
-		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
-			headers: {
-				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
-			},
-			params: {
-				ids: airportIds
-			}
-		});
+// Currently implemented badly
+export async function getAirportsFromIds(airportNames: string[]): Promise<Airport[]> {
+	const airports: Airport[] = await getAllAirportData()
+	airports.filter((airport) => airportNames.includes(airport.name));
+	return airports;
 
-		console.log('Fetched airports from OpenAIP');
+	// try {
+	// 	const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
+	// 		headers: {
+	// 			'Content-Type': 'application/json',
+	// 			'x-openaip-client-id': OPENAIPKEY
+	// 		},
+	// 		params: {
+	// 			search: airportNames.join(' '),
+	// 		}
+	// 	});
 
-		const airports = response.data.items.map((airportData) => airportDataToAirport(airportData));
-		return airports;
-	} catch (error: unknown) {
-		console.error('Error: ', error);
-	}
+	// 	console.log('Fetched airports from OpenAIP');
 
-	return [];
+	// 	const airports = response.data.items.map((airportData) => airportDataToAirport(airportData));
+	// 	return airports;
+	// } catch (error: unknown) {
+	// 	console.error('Error: ', error);
+	// }
+
+	// return [];
 }
 
 export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
