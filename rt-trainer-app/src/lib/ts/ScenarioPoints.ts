@@ -18,7 +18,8 @@ import {
 	lerp,
 	getRandomFrequency,
 	getRandomSqwuakCode,
-	calculateDistanceAlongRoute
+	calculateDistanceAlongRoute,
+	getSeededTimeInMinutes
 } from './utils';
 import * as turf from '@turf/turf';
 import type Airport from './AeronauticalClasses/Airport';
@@ -815,8 +816,8 @@ export function getAirborneScenarioPoints(
 	waypoints: Waypoint[],
 	airspaces: Airspace[],
 	airspaceIntersectionPoints: Intersection[],
-	startAirport: Airport,
-	endAirport: Airport,
+	startAirport: Airport | undefined,
+	endAirport: Airport | undefined,
 	previousScenarioPoint: ScenarioPoint,
 	hasEmergency: boolean
 ): ScenarioPoint[] {
@@ -825,9 +826,16 @@ export function getAirborneScenarioPoints(
 	// Add events at each point
 	const scenarioPoints: ScenarioPoint[] = [];
 	const endStageIndexes: number[] = [];
-	let timeAtPreviousPoint = previousScenarioPoint.timeAtPoint;
-	let previousPosition = previousScenarioPoint.pose.position;
-	let previousDistanceAlongRoute = previousScenarioPoint.distanceAlongRoute;
+	let timeAtPreviousPoint: number;
+	let previousPosition: [number, number] = [0, 0];
+	if (previousScenarioPoint) {
+		timeAtPreviousPoint = previousScenarioPoint.timeAtPoint;
+		previousPosition = previousScenarioPoint.pose.position;
+	} else {
+		timeAtPreviousPoint = getSeededTimeInMinutes(seed, 780, 840);
+		previousPosition = waypoints[0].location;
+	}
+
 	const waypointCoords = waypoints.map((waypoint) => waypoint.location);
 	const waypointDistancesAlongRoute = waypoints.map((waypoint, index) => {
 		if (index == 0) return 0;
@@ -835,11 +843,9 @@ export function getAirborneScenarioPoints(
 	});
 
 	let startIntersection = 0;
-	if (previousScenarioPoint.stage == 'Announce Leaving Zone') startIntersection = 1;
+	if (previousScenarioPoint && previousScenarioPoint.stage == 'Announce Leaving Zone') startIntersection = 1;
 
 	for (let i = startIntersection; i < airspaceIntersectionPoints.length; i++) {
-
-
 		const distanceFromPrevPoint: number = turf.distance(
 			previousPosition,
 			airspaceIntersectionPoints[i].position,

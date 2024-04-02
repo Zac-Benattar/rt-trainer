@@ -4,7 +4,9 @@
 		AllAirportsStore,
 		AllAirspacesStore,
 		ClearSimulationStores,
+		OnRouteAirspacesStore,
 		ScenarioStore,
+		WaypointPointsMapStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import type { PageData } from './$types';
@@ -14,6 +16,14 @@
 	import { getToastStore } from '@skeletonlabs/skeleton';
 	import Scenario from '$lib/ts/Scenario';
 	import ScenarioPointPreviewListBox from '$lib/Components/ScenarioPointPreviewListBox.svelte';
+	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
+	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
+	import Popup from '$lib/Components/Leaflet/Popup.svelte';
+	import Marker from '$lib/Components/Leaflet/Marker.svelte';
+	import { wellesbourneMountfordCoords } from '$lib/ts/utils';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import * as turf from '@turf/turf';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -31,6 +41,33 @@
 	let scenarioName: string = scenario.name ?? 'Unnamed Scenario';
 	let scenarioDescription: string = scenario.description ?? '';
 	let scenarioSeed: string = scenario.seed ?? '';
+
+	const waypoints: Waypoint[] = [];
+	WaypointsStore.subscribe((value) => {
+		waypoints.length = 0;
+		waypoints.push(...value);
+	});
+
+	let waypointPoints: number[][] = [];
+	let bounds: L.LatLngBounds;
+	let bbox: number[] = [];
+	WaypointPointsMapStore.subscribe((value) => {
+		waypointPoints = value;
+
+		if (waypointPoints.length > 1) {
+			bbox = turf.bbox(turf.lineString(waypointPoints));
+			bounds = new L.LatLngBounds([
+				[bbox[0], bbox[1]],
+				[bbox[2], bbox[3]]
+			]);
+		}
+	});
+
+	const onRouteAirspaces: Airspace[] = [];
+	OnRouteAirspacesStore.subscribe((value) => {
+		onRouteAirspaces.length = 0;
+		onRouteAirspaces.push(...value);
+	});
 
 	let scenarioNameClasses: string = '';
 	let scenarioSeedClasses: string = '';
@@ -58,8 +95,8 @@
 	}
 </script>
 
-<div class="flex flex-col place-content-center">
-	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
+<div class="flex flex-col place-content-center w-full h-full">
+	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full">
 		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<form
 				class="flex flex-col gap-1"
@@ -137,11 +174,70 @@
 			</form>
 		</div>
 
-		<div class="flex flex-col px-2 xs:pr-3">
+		<div class="flex flex-col px-2 xs:pr-3 w-full h-full">
 			<div class="h4 p-1">Scenario Preview</div>
-			<Map />
+			<div class="w-full h-full">
+				<Map view={wellesbourneMountfordCoords} zoom={9} {bounds}>
+					{#if waypointPoints.length > 0}
+						{#each waypoints as waypoint (waypoint.index)}
+							<Marker
+								latLng={[waypoint.location[1], waypoint.location[0]]}
+								width={50}
+								height={50}
+								aeroObject={waypoint}
+							>
+								{#if waypoint.index == 0}
+									<div class="text-2xl">🛩️</div>
+								{:else if waypoint.index == waypoints.length - 1}
+									<div class="text-2xl">🏁</div>
+								{:else}
+									<div class="text-2xl">🚩</div>
+								{/if}
 
-			<div>
+								<Popup
+									><div class="flex flex-col gap-2">
+										<div>{waypoint.name}</div>
+									</div></Popup
+								></Marker
+							>
+						{/each}
+					{/if}
+
+					{#each waypointPoints as waypointPoint, index}
+						{#if index > 0}
+							<!-- Force redraw if either waypoint of the line changes location -->
+							{#key [waypointPoints[index - 1], waypointPoints[index]]}
+								<Polyline
+									latLngArray={[waypointPoints[index - 1], waypointPoints[index]]}
+									colour="#FF69B4"
+									fillOpacity={1}
+									weight={7}
+								/>
+							{/key}
+						{/if}
+					{/each}
+
+					{#each onRouteAirspaces as airspace}
+						{#if airspace.type == 14}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'red'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{:else}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'blue'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{/if}
+					{/each}
+				</Map>
+			</div>
+
+			<div class='w-full h-full'>
 				<div class="h4 p-1">Scenario Points</div>
 				<ScenarioPointPreviewListBox {scenario} />
 			</div>

@@ -65,10 +65,10 @@
 		}
 	});
 
-	const filteredAirspaces: Airspace[] = [];
+	const onRouteAirspaces: Airspace[] = [];
 	OnRouteAirspacesStore.subscribe((value) => {
-		filteredAirspaces.length = 0;
-		filteredAirspaces.push(...value);
+		onRouteAirspaces.length = 0;
+		onRouteAirspaces.push(...value);
 	});
 
 	async function handleRouteIdChange(event: Event) {
@@ -108,7 +108,7 @@
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->
 <div class="flex flex-col place-content-center w-full h-full">
-	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5">
+	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full">
 		{#if form?.notFound}<p class="error">Route not found</p>{/if}
 		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<div class="h3 p-1">Create a scenario</div>
@@ -249,7 +249,7 @@
 						{/if}
 					{/each}
 
-					{#each filteredAirspaces as airspace}
+					{#each onRouteAirspaces as airspace}
 						{#if airspace.type == 14}
 							<Polygon
 								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}

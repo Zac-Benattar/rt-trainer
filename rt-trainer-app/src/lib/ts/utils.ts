@@ -22,6 +22,10 @@ export function simpleHash(str: string): number {
 	return Math.abs(hash);
 }
 
+export function getSeededTimeInMinutes(seed: number, min: number, max: number): number {
+	return min + (seed % (max - min)) - max;
+}
+
 // Splits a number into two halves and pads them with zeros to make sure they are the same length
 export function splitAndPadNumber(input: number): [number, number] {
 	const numberString = input.toString();

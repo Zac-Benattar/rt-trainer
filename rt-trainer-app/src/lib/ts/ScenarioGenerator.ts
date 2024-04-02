@@ -32,30 +32,26 @@ export async function generateScenario(
 
 	waypoints.sort((a, b) => a.index - b.index);
 
-	console.log(waypoints);
 	const startAirport = airports.find((x) => x.id === waypoints[0].referenceObjectId);
-	if (startAirport == undefined) {
-		throw new Error('Start airport not found');
-	}
+	if (startAirport) {
 
-	airports.push(startAirport);
+		airports.push(startAirport);
+	}
 
 	const endAirport = airports.find(
 		(x) => x.id === waypoints[waypoints.length - 1].referenceObjectId
 	);
-	if (endAirport == undefined) {
-		throw new Error('End airport not found');
+	if (endAirport) {
+		airports.push(endAirport);
 	}
-
-	airports.push(endAirport);
-
 	// Get all airspace along the route
 	const route: [number, number][] = waypoints.map((x) => x.location);
 
 	// Collect all intersection points with airspaces
 	const intersectionPoints = findIntersections(route, airspaces);
 
-	scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, startAirport));
+	if (startAirport)
+		scenarioPoints.push(...getStartAirportScenarioPoints(seed, waypoints, airspaces, startAirport));
 
 	scenarioPoints.push(
 		...getAirborneScenarioPoints(
@@ -71,16 +67,17 @@ export async function generateScenario(
 		)
 	);
 
-	scenarioPoints.push(
-		...getEndAirportScenarioPoints(
-			scenarioPoints.length,
-			seed,
-			waypoints,
-			airspaces,
-			endAirport,
-			scenarioPoints[scenarioPoints.length - 1]
-		)
-	);
+	if (endAirport)
+		scenarioPoints.push(
+			...getEndAirportScenarioPoints(
+				scenarioPoints.length,
+				seed,
+				waypoints,
+				airspaces,
+				endAirport,
+				scenarioPoints[scenarioPoints.length - 1]
+			)
+		);
 
 	return new Scenario(
 		scenarioId,
