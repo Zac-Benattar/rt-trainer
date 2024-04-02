@@ -25,7 +25,10 @@
 		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
 		TutorialStore,
-		AltimeterStateStore
+		AltimeterStateStore,
+		WaypointPointsMapStore,
+		WaypointsStore,
+		OnRouteAirspacesStore
 	} from '$lib/stores';
 	import type {
 		TransponderState,
@@ -33,13 +36,23 @@
 		RadioState,
 		AltimeterState
 	} from '$lib/ts/SimulatorTypes';
-	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
+	import {
+		isCallsignStandardRegistration,
+		replaceWithPhoneticAlphabet,
+		wellesbourneMountfordCoords
+	} from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './SimulatorComponents/Altimeter.svelte';
 	import { updated } from '$app/stores';
 	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
+	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
+	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
+	import Popup from '$lib/Components/Leaflet/Popup.svelte';
+	import Marker from '$lib/Components/Leaflet/Marker.svelte';
+	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	// Simulator state and settings
 	export let scenarioId: string;
@@ -166,6 +179,25 @@
 
 	TutorialStore.subscribe((value) => {
 		tutorialEnabled = value;
+	});
+
+	const onRouteAirspaces: Airspace[] = [];
+	OnRouteAirspacesStore.subscribe((value) => {
+		onRouteAirspaces.length = 0;
+		onRouteAirspaces.push(...value);
+	});
+
+	const waypoints: Waypoint[] = [];
+	WaypointsStore.subscribe((value) => {
+		waypoints.length = 0;
+		waypoints.push(...value);
+	});
+
+	let waypointPoints: number[][] = [];
+	let bounds: L.LatLngBounds;
+	let bbox: number[] = [];
+	WaypointPointsMapStore.subscribe((value) => {
+		waypointPoints = value;
 	});
 
 	/**
@@ -546,8 +578,69 @@
 
 		<Transponder />
 
-		<div>
-			<Map />
+		<div
+			class="card p-2 rounded-md w-[400px] h-[452px] bg-surface-500 flex flex-row grow w-full h-full"
+		>
+			<div class="w-full h-full">
+				<Map view={wellesbourneMountfordCoords} zoom={9}>
+					{#if waypointPoints.length > 0}
+						{#each waypoints as waypoint (waypoint.index)}
+							<Marker
+								latLng={[waypoint.location[1], waypoint.location[0]]}
+								width={50}
+								height={50}
+								aeroObject={waypoint}
+							>
+								{#if waypoint.index == 0}
+									<div class="text-2xl">🛩️</div>
+								{:else if waypoint.index == waypoints.length - 1}
+									<div class="text-2xl">🏁</div>
+								{:else}
+									<div class="text-2xl">🚩</div>
+								{/if}
+
+								<Popup
+									><div class="flex flex-col gap-2">
+										<div>{waypoint.name}</div>
+									</div></Popup
+								></Marker
+							>
+						{/each}
+					{/if}
+
+					{#each waypointPoints as waypointPoint, index}
+						{#if index > 0}
+							<!-- Force redraw if either waypoint of the line changes location -->
+							{#key [waypointPoints[index - 1], waypointPoints[index]]}
+								<Polyline
+									latLngArray={[waypointPoints[index - 1], waypointPoints[index]]}
+									colour="#FF69B4"
+									fillOpacity={1}
+									weight={7}
+								/>
+							{/key}
+						{/if}
+					{/each}
+
+					{#each onRouteAirspaces as airspace}
+						{#if airspace.type == 14}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'red'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{:else}
+							<Polygon
+								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
+								color={'blue'}
+								fillOpacity={0.2}
+								weight={1}
+							/>
+						{/if}
+					{/each}
+				</Map>
+			</div>
 		</div>
 
 		<Altimeter />
