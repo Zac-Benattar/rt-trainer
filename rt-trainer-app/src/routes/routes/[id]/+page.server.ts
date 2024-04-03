@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { Visibility, routesTable, users } from '$lib/db/schema';
 
 let userId = '-1';
@@ -38,9 +38,7 @@ export const load: PageServerLoad = async (event) => {
 	// If route doesnt exist or user is not allowed to see it return same 'Route not found' message
 	if (
 		!routeRow ||
-		(routeRow &&
-			routeRow.userID != userId &&
-			routeRow.visibility === Visibility.PRIVATE)
+		(routeRow && routeRow.userID != userId && routeRow.visibility === Visibility.PRIVATE)
 	) {
 		return {
 			error: 'Route not found'
