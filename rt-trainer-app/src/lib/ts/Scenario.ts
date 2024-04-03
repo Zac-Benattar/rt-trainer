@@ -22,7 +22,6 @@ export default class Scenario {
 	id: string;
 	name: string;
 	description: string;
-
 	seed: string;
 
 	@Type(() => ScenarioPoint)
@@ -101,101 +100,11 @@ export function ResetCurrentRoutePointIndex(): void {
 	CurrentScenarioPointIndexStore.set(startPointIndex);
 }
 
-// /**
-//  * Fetches a scenario from the server by its id. Returns undefined if the scenario is not found.
-//  *
-//  * @param scenarioId
-//  * @returns Scenario | undefined
-//  */
-// export async function fetchScenarioById(scenarioId: string): Promise<Scenario | undefined> {
-// 	try {
-// 		const response = await axios.get(`/api/scenarios/${scenarioId}`);
-
-// 		if (response.data === undefined) {
-// 			return undefined;
-// 		} else {
-// 			return plainToInstance(Scenario, response.data as Scenario);
-// 		}
-// 	} catch (error: unknown) {
-// 		console.log('Error: ', error);
-// 	}
-// }
-
-// /**
-//  * Fetches the scenario info from the server where it is generated and loads it into the stores
-//  *
-//  * @remarks
-//  * Sets the null route store to true if the scenario is not found.
-//  * Sets end point index store to the last point in the route if it is set to -1 (default value).
-//  *
-//  * @returns Promise<void>
-//  */
-// export async function loadScenarioById(scenarioId: string): Promise<void> {
-// 	const scenario = await fetchScenarioById(scenarioId);
-
-// 	// Check the scenario was returned correctly
-// 	if (scenario == null || scenario == undefined) {
-// 		console.log('Failed to generate scenario');
-// 		NullRouteStore.set(true);
-// 		return;
-// 	}
-
-// 	// Reset all existing scenario stores and load the new scenario
-// 	ClearSimulationStores();
-// 	NullRouteStore.set(false);
-// 	ScenarioStore.set(scenario);
-
-// 	// By default end point index is set to -1 to indicate the user has not set the end of the route in the url
-// 	// So we need to set it to the last point in the route if it has not been set
-// 	if (endPointIndex == -1) {
-// 		EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
-// 	}
-// }
-
 export type RouteData = {
 	waypoints: Waypoint[];
 	airspaces: Airspace[];
 	airports: Airport[];
 };
-
-/**
- * Fetches a FRTOL route from the server where is is generated for this specific response.
- * Returns undefined if the route is not found.
- *
- * @param routeSeed - The seed for the route
- * @returns RouteData | undefined
- */
-export async function fetchFRTOLRouteBySeed(routeSeed: string): Promise<RouteData | undefined> {
-	try {
-		const response = await axios.get(`/generateroute/${routeSeed}`);
-
-		if (response.data === undefined || response.data == '') {
-			return undefined;
-		} else {
-			const routeData = {
-				waypoints: response.data.waypoints.map((waypoint: Waypoint) =>
-					plainToInstance(Waypoint, waypoint)
-				),
-				airspaces: response.data.airspaces.map((airspace: Airspace) =>
-					plainToInstance(Airspace, airspace)
-				),
-				airports: response.data.airports.map((airport: Airport) =>
-					plainToInstance(Airport, airport)
-				)
-			};
-			return routeData;
-		}
-	} catch (error: unknown) {
-		console.log('Error: ', error);
-	}
-}
-
-export async function loadFRTOLRouteBySeed(routeSeed: string): Promise<void> {
-	ClearSimulationStores();
-	const routeData = await fetchFRTOLRouteBySeed(routeSeed);
-	if (routeData) loadRouteData(routeData);
-	else NullRouteStore.set(true);
-}
 
 /**
  * Loads the given route data into the stores.

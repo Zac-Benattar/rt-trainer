@@ -86,7 +86,7 @@ export const WaypointPointsMapStore = derived(WaypointsStore, ($WaypointsStore) 
 	return $WaypointsStore.map((waypoint) => [waypoint.location[1], waypoint.location[0]]);
 });
 
-export const RouteDistanceStore = derived(WaypointsStore, ($RoutePointStore) => {
+export const RouteDistanceMetersStore = derived(WaypointsStore, ($RoutePointStore) => {
 	let distance = 0;
 	for (let i = 0; i < $RoutePointStore.length - 1; i++) {
 		const point1 = $RoutePointStore[i];
@@ -96,11 +96,7 @@ export const RouteDistanceStore = derived(WaypointsStore, ($RoutePointStore) => 
 	return distance;
 });
 
-// todo
-export const RouteDurationStore = writable<number>(0);
-
-// todo
-export const SimDurationStore = writable<number>(0);
+export const RouteDistanceDisplayUnitStore = writable<string>('Nautical Miles');
 
 export const AllAirspacesStore = writable<Airspace[]>([]);
 

@@ -9,21 +9,25 @@
 	import { init } from '@paralleldrive/cuid2';
 	import {
 		RefreshOutline,
-		CogOutline,
 		WandMagicSparklesOutline,
 		DotsHorizontalOutline
 	} from 'flowbite-svelte-icons';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import {
+		AllAirportsStore,
+		AllAirspacesStore,
 		AwaitingServerResponseStore,
 		maxFlightLevelStore,
 		minFlightLevelStore,
+		RouteDistanceDisplayUnitStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { flip } from 'svelte/animate';
-	import { loadFRTOLRouteBySeed } from '$lib/ts/Scenario';
-	import { max } from 'drizzle-orm';
+	import { loadRouteData } from '$lib/ts/Scenario';
+	import RouteGenerator from '$lib/ts/RouteGenerator';
+	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	const drawerStore = getDrawerStore();
 
@@ -41,20 +45,39 @@
 
 	$: {
 		if (routeSeed !== '') {
-			AwaitingServerResponseStore.set(true);
-			loadFRTOLRouteBySeed(routeSeed);
-			AwaitingServerResponseStore.set(false);
+			loadSeededRoute();
 		}
 	}
 
-	let waypoints: Waypoint[] = [];
+	async function loadSeededRoute() {
+		AwaitingServerResponseStore.set(true);
+		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
+			routeSeed,
+			airports,
+			airspaces
+		);
+		if (routeData) loadRouteData(routeData);
+		AwaitingServerResponseStore.set(false);
+	}
 
+	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((value) => {
 		waypoints = value;
 	});
 
+	let airports: Airport[] = [];
+	AllAirportsStore.subscribe((value) => {
+		airports = value;
+	});
+
+	let airspaces: Airspace[] = [];
+	AllAirspacesStore.subscribe((value) => {
+		airspaces = value;
+	});
+
 	let distanceUnit: string = 'Nautical Miles';
-	let distanceInMeters: number = 0;
+	$: RouteDistanceDisplayUnitStore.set(distanceUnit);
+
 	let minFL: number = 15;
 	minFlightLevelStore.set(minFL);
 	let maxFL: number = 30;

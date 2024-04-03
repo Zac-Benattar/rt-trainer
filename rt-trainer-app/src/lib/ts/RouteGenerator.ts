@@ -1,8 +1,9 @@
+// Clientside code - turf issues possibly resolved by downgrading to node 18 from node 20 on laptop
+
 import Waypoint, { WaypointType } from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import { simpleHash } from './utils';
 import type Airport from './AeronauticalClasses/Airport';
-import { getAllAirportData, getAllAirspaceData } from './OpenAIPHandler';
 import type { RouteData } from './Scenario';
 import * as turf from '@turf/turf';
 
@@ -10,19 +11,11 @@ const maxFL = 30;
 
 export default class RouteGenerator {
 	public static async generateFRTOLRouteFromSeed(
-		seedString: string
+		seedString: string,
+		airports: Airport[],
+		airspaces: Airspace[]
 	): Promise<RouteData | undefined> {
 		const seed = simpleHash(seedString);
-
-		const airports: Airport[] = await getAllAirportData();
-		const airspaces: Airspace[] = await getAllAirspaceData();
-
-		// Todo: Filter out all invalid airports and airspaces
-
-		console.log(
-			`Total Valid Airports: ${airports.length} \nTotal Valid Airspaces: ${airspaces.length}`
-		);
-
 		const maxIterations = 100;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
