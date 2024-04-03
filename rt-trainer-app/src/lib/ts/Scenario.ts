@@ -190,13 +190,6 @@ export async function fetchFRTOLRouteBySeed(routeSeed: string): Promise<RouteDat
 	}
 }
 
-export async function loadFRTOLRouteBySeed(routeSeed: string): Promise<void> {
-	ClearSimulationStores();
-	const routeData = await fetchFRTOLRouteBySeed(routeSeed);
-	if (routeData) loadRouteData(routeData);
-	else NullRouteStore.set(true);
-}
-
 /**
  * Loads the given route data into the stores.
  *

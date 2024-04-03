@@ -2,10 +2,11 @@
 	import Map from '$lib/Components/Leaflet/Map.svelte';
 	import {
 		AllAirportsStore,
+		AwaitingServerResponseStore,
 		ClearSimulationStores,
 		FilteredAirspacesStore,
 		OnRouteAirspacesStore,
-		RouteDistanceStore,
+		RouteDistanceMetersStore,
 		RouteDurationStore,
 		SimDurationStore,
 		WaypointPointsMapStore,
@@ -46,6 +47,11 @@
 	let routeDescription: string = '';
 
 	let unnamedWaypointCount = 1;
+
+	let awaitingServerResponse: boolean = false;
+	AwaitingServerResponseStore.subscribe((value) => {
+		awaitingServerResponse = value;
+	});
 
 	let blockingClick: boolean = false;
 
@@ -90,7 +96,7 @@
 	});
 
 	let routeDistanceMeters = 0;
-	RouteDistanceStore.subscribe((value) => {
+	RouteDistanceMetersStore.subscribe((value) => {
 		routeDistanceMeters = value;
 	});
 
@@ -104,18 +110,22 @@
 		simDurationSeconds = value;
 	});
 
-	// Todo
-	let airspaceIntersections = 0;
-
-	// Add logic to choose units
-	$: routeDistanceDisplay = routeDistanceMeters / 1852;
-
-	$: routeDurationDisplay = routeDurationSeconds / 60;
-
-	$: simDurationDisplay = simDurationSeconds / 60;
+	let routeDistanceDisplayUnit: string = 'Nautical Miles';
+	let routeDistanceDisplayValue: number = 0;
+	$: {
+		if (routeDistanceDisplayUnit == 'Nautical Miles') {
+			routeDistanceDisplayValue = routeDistanceMeters / 1852;
+		} else if (routeDistanceDisplayUnit == 'Miles') {
+			routeDistanceDisplayValue = routeDistanceMeters / 1609.344;
+		} else if (routeDistanceDisplayUnit == 'Kilometers') {
+			routeDistanceDisplayValue = routeDistanceMeters / 1000;
+		}
+	}
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
-		if (blockingClick) return;
+		// If user is clicking on the button controls or awaiting routegen ignore map click
+		if (blockingClick || awaitingServerResponse) return;
+
 		addWaypoint(
 			+parseFloat(event.detail.latlng.lat.toFixed(6)),
 			+parseFloat(event.detail.latlng.lng.toFixed(6))
@@ -337,34 +347,16 @@
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Est. Distance</div>
 					<div class="text-xl">
-						{routeDistanceDisplay.toFixed(2)} nm
+						{routeDistanceDisplayValue.toFixed(2)} nm
 					</div>
 				</div>
 			</div>
 			<div class="vr h-full border border-surface-800" />
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
-					<div class="text-sm">Est. Sim Duration</div>
+					<div class="text-sm">Unique Airspaces</div>
 					<div class="text-xl">
-						{simDurationDisplay} min
-					</div>
-				</div>
-			</div>
-			<div class="vr h-full border border-surface-800" />
-			<div class="flex flex-row place-content-center p-4">
-				<div class="flex flex-col place-content-center">
-					<div class="text-sm">Est. Flight Duration</div>
-					<div class="text-xl">
-						{routeDurationDisplay} min
-					</div>
-				</div>
-			</div>
-			<div class="vr h-full border border-surface-800" />
-			<div class="flex flex-row place-content-center p-4">
-				<div class="flex flex-col place-content-center">
-					<div class="text-sm">Airspace Crossings</div>
-					<div class="text-xl">
-						{airspaceIntersections}
+						{onRouteAirspaces.length}
 					</div>
 				</div>
 			</div>
