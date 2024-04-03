@@ -1,7 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { and, eq } from 'drizzle-orm';
-import { scenariosTable, users } from '$lib/db/schema';
+import { Visibility, scenariosTable, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -42,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenariosTable.findFirst({
-		where: and(eq(scenariosTable.userID, userId), eq(scenariosTable.id, scenarioId)),
+		where: eq(scenariosTable.userID, userId),
 		with: {
 			routes: {
 				with: {
@@ -52,9 +52,15 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
-	if (scenarioRow == null || scenarioRow == undefined) {
+	// If scenario doesnt exist or user is not allowed to see it return same 'Scenario not found' message
+	if (
+		!scenarioRow ||
+		(scenarioRow &&
+			scenarioRow.userID != userId &&
+			scenarioRow.visibility === Visibility.PRIVATE)
+	) {
 		return {
-			error: 'No scenario found'
+			error: 'Scenario not found'
 		};
 	}
 

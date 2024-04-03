@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { and, eq } from 'drizzle-orm';
-import { routesTable, users } from '$lib/db/schema';
+import { Visibility, routesTable, users } from '$lib/db/schema';
 
 let userId = '-1';
 
@@ -26,15 +26,29 @@ export const load: PageServerLoad = async (event) => {
 		}
 	}
 
-	return {
-		routeRow: await db.query.routesTable.findFirst({
-			where: and(eq(routesTable.id, routeId), eq(routesTable.userID, userId)),
-			with: {
-				waypoints: {
-					orderBy: (waypoints, { asc }) => [asc(waypoints.index)]
-				}
+	const routeRow = await db.query.routesTable.findFirst({
+		where: eq(routesTable.id, routeId),
+		with: {
+			waypoints: {
+				orderBy: (waypoints, { asc }) => [asc(waypoints.index)]
 			}
-		})
+		}
+	});
+
+	// If route doesnt exist or user is not allowed to see it return same 'Route not found' message
+	if (
+		!routeRow ||
+		(routeRow &&
+			routeRow.userID != userId &&
+			routeRow.visibility === Visibility.PRIVATE)
+	) {
+		return {
+			error: 'Route not found'
+		};
+	}
+
+	return {
+		routeRow: routeRow
 	};
 };
 

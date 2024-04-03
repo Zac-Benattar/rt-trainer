@@ -52,15 +52,15 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
-	if (scenarioRow && userId != '-1' && scenarioRow.userID != userId && scenarioRow.visibility != Visibility.PUBLIC) {
+	// If scenario doesnt exist or user is not allowed to see it return same 'Scenario not found' message
+	if (
+		!scenarioRow ||
+		(scenarioRow &&
+			scenarioRow.userID != userId &&
+			scenarioRow.visibility === Visibility.PRIVATE)
+	) {
 		return {
 			error: 'Scenario not found'
-		};
-	}
-
-	if (scenarioRow == null || scenarioRow == undefined) {
-		return {
-			error: 'No scenario found'
 		};
 	}
 
