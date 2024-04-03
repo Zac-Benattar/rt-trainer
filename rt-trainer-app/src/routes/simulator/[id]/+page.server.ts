@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { and, eq } from 'drizzle-orm';
-import { scenariosTable, users, visibility } from '$lib/db/schema';
+import { scenariosTable, users, Visibility } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
 import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -52,7 +52,7 @@ export const load: PageServerLoad = async (event) => {
 		}
 	});
 
-	if (scenarioRow && userId != '-1' && scenarioRow.userID != userId && scenarioRow.visibility != visibility.PUBLIC) {
+	if (scenarioRow && userId != '-1' && scenarioRow.userID != userId && scenarioRow.visibility != Visibility.PUBLIC) {
 		return {
 			error: 'Scenario not found'
 		};

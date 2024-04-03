@@ -13,7 +13,7 @@ import {
 	varchar
 } from 'drizzle-orm/pg-core';
 
-export enum visibility {
+export enum Visibility {
 	PRIVATE = 1,
 	UNLISTED = 2,
 	PUBLIC = 3

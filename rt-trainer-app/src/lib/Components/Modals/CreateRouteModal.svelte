@@ -55,7 +55,7 @@
 					placeholder="Enter some details about the route..."
 				/></label
 			><label class="label"
-				><span class="text-sm">visibility</span>
+				><span class="text-sm">Visibility</span>
 
 				{#each ['Public', 'Unlisted', 'Private'] as v}
 					<button
@@ -65,7 +65,9 @@
 						}}
 						on:keypress
 					>
-						{#if formData.visibility === v}(<span>(icon)</span>){/if}
+						{#if v === 'Public'}<span><GlobeOutline /></span>{:else if v === 'Unlisted'}<span
+								><LockOpenOutline /></span
+							>{:else if v === 'Private'}<span><LockOutline /></span>{/if}
 						<span>{v}</span>
 					</button>
 				{/each}

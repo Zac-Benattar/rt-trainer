@@ -2,7 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db/db';
 import { desc, eq } from 'drizzle-orm';
-import { routesTable, scenariosTable, users, visibility } from '$lib/db/schema';
+import { routesTable, scenariosTable, users, Visibility } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
 let userId: number = -1;
@@ -60,6 +60,14 @@ export const actions = {
 		const scenarioSeed =
 			data.get('scenarioSeed') == '' ? scenarioSeedCUID() : data.get('scenarioSeed');
 
+		const visibilityString = data.get('scenarioVisibility');
+		let scenarioVisibility: Visibility = Visibility.PRIVATE;
+		if (visibilityString === 'Unlisted') {
+			scenarioVisibility = Visibility.UNLISTED;
+		} else if (visibilityString === 'Public') {
+			scenarioVisibility = Visibility.PUBLIC;
+		}
+
 		if (routeId == null || routeId == undefined) {
 			return fail(400, { routeId, missing: true });
 		}
@@ -82,7 +90,7 @@ export const actions = {
 			userID: userId,
 			name: name,
 			description: description,
-			visibility: visibility.PRIVATE,
+			visibility: scenarioVisibility,
 			route: routeId,
 			seed: scenarioSeed,
 			hasEmergency: emergency

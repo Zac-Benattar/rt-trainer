@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { GlobeOutline, EditOutline, RefreshOutline } from 'flowbite-svelte-icons';
+	import { GlobeOutline, EditOutline, RefreshOutline, LockOpenOutline, LockOutline } from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { init } from '@paralleldrive/cuid2';
@@ -30,6 +30,7 @@
 	let selectedRouteId: string = '';
 	let scenarioSeed: string = scenarioSeedCUID();
 	let emergency: boolean = true;
+	let scenarioVisibility: string = 'Private';
 
 	let routesClass: string = '';
 
@@ -108,7 +109,9 @@
 
 <!-- Put a map on the right so the route can be previewed - maybe show where the emergency will be and other info -->
 <div class="flex flex-col place-content-center w-full h-full">
-	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full">
+	<div
+		class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full"
+	>
 		{#if form?.notFound}<p class="error">Route not found</p>{/if}
 		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<div class="h3 p-1">Create a scenario</div>
@@ -201,6 +204,26 @@
 						<p>Include Emergency</p>
 					</label>
 				</div>
+
+				<label class="label"
+					><span class="text-sm">Visibility</span>
+
+					<input class="hidden" bind:value={scenarioVisibility} name="scenarioVisibility" />
+					{#each ['Public', 'Unlisted', 'Private'] as v}
+						<button
+							class="chip {scenarioVisibility === v ? 'variant-filled' : 'variant-soft'}"
+							on:click={() => {
+								scenarioVisibility = v;
+							}}
+							on:keypress
+						>
+							{#if v === 'Public'}<span><GlobeOutline /></span>{:else if v === 'Unlisted'}<span
+									><LockOpenOutline /></span
+								>{:else if v === 'Private'}<span><LockOutline /></span>{/if}
+							<span>{v}</span>
+						</button>
+					{/each}
+				</label>
 
 				<button class="btn variant-filled">Create Scenario</button>
 			</form>

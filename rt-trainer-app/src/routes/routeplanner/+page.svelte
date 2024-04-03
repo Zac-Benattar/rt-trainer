@@ -29,7 +29,7 @@
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
-	import { visibility as visibility } from '$lib/db/schema';
+	import { Visibility as Visibility } from '$lib/db/schema';
 
 	ClearSimulationStores();
 
@@ -40,7 +40,7 @@
 
 	let routeName: string = '';
 	let routeDescription: string = '';
-	let routeVisibility: visibility = visibility.PRIVATE;
+	let routeVisibility: Visibility = Visibility.PRIVATE;
 
 	let unnamedWaypointCount = 1;
 
@@ -179,11 +179,11 @@
 					routeName = r.routeName;
 					routeDescription = r.routeDescription;
 					if (r.visibility == 'Private') {
-						routeVisibility = visibility.PRIVATE;
+						routeVisibility = Visibility.PRIVATE;
 					} else if (r.visibility == 'Unlisted') {
-						routeVisibility = visibility.UNLISTED;
+						routeVisibility = Visibility.UNLISTED;
 					} else if (r.visibility == 'Public') {
-						routeVisibility == visibility.PUBLIC;
+						routeVisibility == Visibility.PUBLIC;
 					}
 					saveRoute();
 				} else {
