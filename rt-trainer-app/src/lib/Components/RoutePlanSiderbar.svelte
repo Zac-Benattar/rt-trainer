@@ -1,6 +1,5 @@
 <script lang="ts">
 	import {
-		getDrawerStore,
 		ListBox,
 		ListBoxItem,
 		popup,
@@ -28,12 +27,6 @@
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
-	const drawerStore = getDrawerStore();
-
-	function drawerClose(): void {
-		drawerStore.close();
-	}
-
 	const shortCUID = init({ length: 8 });
 
 	let routeSeed: string = '';
@@ -53,7 +46,8 @@
 		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
 			routeSeed,
 			airports,
-			airspaces
+			airspaces,
+			maxFL
 		);
 		if (routeData) loadRouteData(routeData);
 		AwaitingServerResponseStore.set(false);

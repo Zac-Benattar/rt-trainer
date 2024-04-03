@@ -7,14 +7,24 @@ import type Airport from './AeronauticalClasses/Airport';
 import type { RouteData } from './Scenario';
 import * as turf from '@turf/turf';
 
-const maxFL = 30;
-
 export default class RouteGenerator {
 	public static async generateFRTOLRouteFromSeed(
 		seedString: string,
 		airports: Airport[],
-		airspaces: Airspace[]
+		airspaces: Airspace[],
+		maxFL: number
 	): Promise<RouteData | undefined> {
+		// Validate arguments
+		if (
+			seedString === '' ||
+			!airports ||
+			airports.length === 0 ||
+			!airspaces ||
+			airspaces.length === 0
+		) {
+			return undefined;
+		}
+
 		const seed = simpleHash(seedString);
 		const maxIterations = 100;
 		let startAirport: Airport | undefined;
@@ -32,7 +42,7 @@ export default class RouteGenerator {
 			iterations++;
 			validRoute = true;
 
-			// Get start airport. Based on seed times a prime times iterations + 1 to get different start airports each iteration
+			// Get start airport based on seed times a prime times iterations + 1 to get different start airports each iteration
 			startAirport = airports[(seed * 7919 * (iterations + 1)) % airports.length];
 			if (startAirport.type == 3 || startAirport.type == 9) {
 				startAirportIsControlled = true;
@@ -63,7 +73,7 @@ export default class RouteGenerator {
 			// Get airports within 100km of the chosen MATZ
 			const possibleDestinations = [];
 
-			// Turn this into a filter
+			// Could be turned into a filter
 			for (let i = 0; i < airports.length; i++) {
 				const airport = airports[i];
 				const distance = turf.distance(chosenMATZ.coordinates[0][0], airport.coordinates, {
@@ -195,26 +205,5 @@ export default class RouteGenerator {
 			airspaces: onRouteAirspace,
 			airports: [startAirport, destinationAirport]
 		};
-	}
-
-	public static async getAirspacesOnRouteFromWaypoints(waypoints: Waypoint[]): Promise<Airspace[]> {
-		const airspaces: Airspace[] = await getAllAirspaceData();
-
-		// Todo: Filter out all invalid airspaces
-
-		const route: [number, number][] = [];
-		for (let i = 0; i < waypoints.length; i++) {
-			route.push(waypoints[i].location);
-		}
-
-		const onRouteAirspace: Airspace[] = [];
-		for (let i = 0; i < airspaces.length; i++) {
-			const airspace = airspaces[i];
-			if (airspace.isIncludedInRoute(route, maxFL)) {
-				onRouteAirspace.push(airspace);
-			}
-		}
-
-		return onRouteAirspace;
 	}
 }
