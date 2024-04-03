@@ -6,6 +6,8 @@ import { Visibility, routesTable } from '$lib/db/schema';
 
 export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
+
+	// Add caching before removing this line
 	if (!session?.user) throw redirect(303, '/login');
 
 	return {
@@ -18,7 +20,7 @@ export const load: PageServerLoad = async (event) => {
 			},
 			where: eq(routesTable.visibility, Visibility.PUBLIC),
 			orderBy: [desc(routesTable.createdAt)],
-			limit: 50
+			limit: 25
 		})
 	};
 };
