@@ -98,15 +98,26 @@ export const RouteDistanceMetersStore = derived(WaypointsStore, ($RoutePointStor
 
 export const RouteDistanceDisplayUnitStore = writable<string>('Nautical Miles');
 
-export const AllAirspacesStore = writable<Airspace[]>([]);
+export const RouteDistanceDisplayStore = derived(
+	[RouteDistanceMetersStore, RouteDistanceDisplayUnitStore],
+	([$RouteDistanceMetersStore, $RouteDistanceDisplayUnitStore]) => {
+		if ($RouteDistanceDisplayUnitStore == 'Nautical Miles') {
+			return ($RouteDistanceMetersStore / 1852).toFixed(2) + ' nm';
+		} else if ($RouteDistanceDisplayUnitStore == 'Miles') {
+			return ($RouteDistanceMetersStore / 1609.344).toFixed(2) + ' mi';
+		} else {
+			return ($RouteDistanceMetersStore / 1000).toFixed(2) + ' km';
+		}
+	}
+);
 
-export const minFlightLevelStore = writable<number>(0);
+export const AllAirspacesStore = writable<Airspace[]>([]);
 
 export const maxFlightLevelStore = writable<number>(0);
 
 export const FilteredAirspacesStore = derived(
-	[AllAirspacesStore, minFlightLevelStore, maxFlightLevelStore],
-	([$AllAirspacesStore, $MinFlightLevelStore, $MaxFlightLevelStore]) => {
+	[AllAirspacesStore, maxFlightLevelStore],
+	([$AllAirspacesStore, $MaxFlightLevelStore]) => {
 		const filteredAirspaces: Airspace[] = [];
 		$AllAirspacesStore.forEach((airspace) => {
 			if (airspace.lowerLimit <= $MaxFlightLevelStore) {

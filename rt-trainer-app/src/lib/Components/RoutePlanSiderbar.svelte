@@ -18,7 +18,6 @@
 		AllAirspacesStore,
 		AwaitingServerResponseStore,
 		maxFlightLevelStore,
-		minFlightLevelStore,
 		RouteDistanceDisplayUnitStore,
 		WaypointsStore
 	} from '$lib/stores';
@@ -78,18 +77,11 @@
 	let distanceUnit: string = 'Nautical Miles';
 	$: RouteDistanceDisplayUnitStore.set(distanceUnit);
 
-	let minFL: number = 15;
-	minFlightLevelStore.set(minFL);
 	let maxFL: number = 30;
 	maxFlightLevelStore.set(maxFL);
 
 	$: {
-		minFL = Math.max(0, minFL);
-		minFlightLevelStore.set(minFL);
-	}
-
-	$: {
-		maxFL = Math.max(minFL, maxFL);
+		maxFL = Math.max(15, maxFL);
 		maxFlightLevelStore.set(maxFL);
 	}
 
@@ -231,13 +223,8 @@
 			</div>
 
 			<div class="flex flex-col gap-1">
-				<div class="label">Minimum Flight Level (100 ft)</div>
-				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={minFL} />
-			</div>
-
-			<div class="flex flex-col gap-1">
 				<div class="label">Maximum Flight Level (100 ft)</div>
-				<textarea id="fl-input" class="textarea" rows="1" maxlength="20" bind:value={maxFL} />
+				<textarea id="fl-input" class="textarea" rows="1" maxlength="4" bind:value={maxFL} />
 			</div>
 		</div>
 

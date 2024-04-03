@@ -6,9 +6,8 @@
 		ClearSimulationStores,
 		FilteredAirspacesStore,
 		OnRouteAirspacesStore,
+		RouteDistanceDisplayStore,
 		RouteDistanceMetersStore,
-		RouteDurationStore,
-		SimDurationStore,
 		WaypointPointsMapStore,
 		WaypointsStore
 	} from '$lib/stores';
@@ -100,27 +99,10 @@
 		routeDistanceMeters = value;
 	});
 
-	let routeDurationSeconds = 0;
-	RouteDurationStore.subscribe((value) => {
-		routeDurationSeconds = value;
+	let routeDistanceDisplayValue: string = '0 nm';
+	RouteDistanceDisplayStore.subscribe((value) => {
+		routeDistanceDisplayValue = value;
 	});
-
-	let simDurationSeconds = 0;
-	SimDurationStore.subscribe((value) => {
-		simDurationSeconds = value;
-	});
-
-	let routeDistanceDisplayUnit: string = 'Nautical Miles';
-	let routeDistanceDisplayValue: number = 0;
-	$: {
-		if (routeDistanceDisplayUnit == 'Nautical Miles') {
-			routeDistanceDisplayValue = routeDistanceMeters / 1852;
-		} else if (routeDistanceDisplayUnit == 'Miles') {
-			routeDistanceDisplayValue = routeDistanceMeters / 1609.344;
-		} else if (routeDistanceDisplayUnit == 'Kilometers') {
-			routeDistanceDisplayValue = routeDistanceMeters / 1000;
-		}
-	}
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
 		// If user is clicking on the button controls or awaiting routegen ignore map click
@@ -347,7 +329,7 @@
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Est. Distance</div>
 					<div class="text-xl">
-						{routeDistanceDisplayValue.toFixed(2)} nm
+						{routeDistanceDisplayValue}
 					</div>
 				</div>
 			</div>
