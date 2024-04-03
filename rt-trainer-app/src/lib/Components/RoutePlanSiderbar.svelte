@@ -30,7 +30,7 @@
 	const shortCUID = init({ length: 8 });
 
 	let routeSeed: string = '';
-	let awaitingServerResponse = false;
+	let awaitingServerResponse: boolean = false;
 	AwaitingServerResponseStore.subscribe((value) => {
 		awaitingServerResponse = value;
 	});
@@ -86,7 +86,7 @@
 		closeQuery: '.listbox-item'
 	};
 
-	const dragDuration = 200;
+	const dragDuration: number = 200;
 	let draggingWaypoint: Waypoint | undefined = undefined;
 	let animatingWaypoints = new Set();
 

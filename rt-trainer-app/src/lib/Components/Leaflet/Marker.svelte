@@ -39,6 +39,14 @@
 				dispatch('drag', { event: e, waypoint: aeroObject });
 				map?.invalidateSize();
 			});
+			marker?.on('mouseover', (e) => {
+				dispatch('mouseover', { event: e, waypoint: aeroObject });
+				marker?.openPopup(); // Probably should be moved to the page
+			});
+			marker?.on('mouseout', (e) => {
+				dispatch('mouseout', { event: e, waypoint: aeroObject });
+				marker?.closePopup(); // Probably should be moved to the page
+			});
 		}
 	});
 

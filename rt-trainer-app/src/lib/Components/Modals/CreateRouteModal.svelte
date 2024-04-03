@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getModalStore } from '@skeletonlabs/skeleton';
+	import { GlobeOutline, LockOpenOutline, LockOutline } from 'flowbite-svelte-icons';
 
 	const modalStore = getModalStore();
 
@@ -18,7 +19,8 @@
 	// Form Data
 	const formData = {
 		routeName: '',
-		routeDescription: ''
+		routeDescription: '',
+		visibility: 'Private'
 	};
 
 	function onFormSubmit() {
@@ -52,14 +54,31 @@
 					bind:value={formData.routeDescription}
 					placeholder="Enter some details about the route..."
 				/></label
-			>
+			><label class="label"
+				><span class="text-sm">visibility</span>
+
+				{#each ['Public', 'Unlisted', 'Private'] as v}
+					<button
+						class="chip {formData.visibility === v ? 'variant-filled' : 'variant-soft'}"
+						on:click={() => {
+							formData.visibility = v;
+						}}
+						on:keypress
+					>
+						{#if formData.visibility === v}(<span>(icon)</span>){/if}
+						<span>{v}</span>
+					</button>
+				{/each}
+			</label>
 		</form>
 		<footer class="flex flex-row gap-2 {parent.regionFooter}">
 			<button class="btn text-sm {parent.buttonNeutral}" on:click={parent.onClose}
 				>Edit Route</button
 			>
-			<button class="btn text-sm grow {parent.buttonPositive}" disabled={!validRouteName} on:click={onFormSubmit}
-				>Save to My Routes</button
+			<button
+				class="btn text-sm grow {parent.buttonPositive}"
+				disabled={!validRouteName}
+				on:click={onFormSubmit}>Save to My Routes</button
 			>
 		</footer>
 	</div>

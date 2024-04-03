@@ -12,7 +12,6 @@
 		WaypointsStore
 	} from '$lib/stores';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
-	import { init } from '@paralleldrive/cuid2';
 	import { TrashBinOutline } from 'flowbite-svelte-icons';
 	import { AllAirspacesStore } from '$lib/stores';
 	import type { PageData } from './$types';
@@ -30,20 +29,18 @@
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
-	import { visibility } from '$lib/db/schema';
+	import { visibility as visibility } from '$lib/db/schema';
 
 	ClearSimulationStores();
-
-	const routeCUID = init({ length: 8 });
 
 	const modalStore = getModalStore();
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
 
-	let routeSeed: string = routeCUID();
 	let routeName: string = '';
 	let routeDescription: string = '';
+	let routeVisibility: visibility = visibility.PRIVATE;
 
 	let unnamedWaypointCount = 1;
 
@@ -181,6 +178,13 @@
 				if (r) {
 					routeName = r.routeName;
 					routeDescription = r.routeDescription;
+					if (r.visibility == 'Private') {
+						routeVisibility = visibility.PRIVATE;
+					} else if (r.visibility == 'Unlisted') {
+						routeVisibility = visibility.UNLISTED;
+					} else if (r.visibility == 'Public') {
+						routeVisibility == visibility.PUBLIC;
+					}
 					saveRoute();
 				} else {
 					blockingClick = false;
@@ -195,7 +199,7 @@
 			const response = await axios.post('/api/routes', {
 				routeName: routeName,
 				routeDescription: routeDescription,
-				visibility: visibility.PRIVATE,
+				visibility: routeVisibility,
 				userID: data.userId,
 				waypoints: waypoints,
 				type: 0,
