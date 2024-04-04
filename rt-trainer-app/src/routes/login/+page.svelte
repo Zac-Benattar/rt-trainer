@@ -112,7 +112,7 @@
 							>
 							<svelte:fragment slot="content"
 								>Sorry about this. More sign in providers will be added soon. In the meanwhile you
-								can try the <a class="text-indigo-600" href="/scenario/demo">demo route</a> without signing
+								can try the <a class="text-indigo-600" href="/simulator/demo">demo route</a> without signing
 								in.</svelte:fragment
 							>
 						</AccordionItem>
