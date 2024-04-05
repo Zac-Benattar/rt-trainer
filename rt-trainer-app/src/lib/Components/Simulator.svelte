@@ -29,7 +29,8 @@
 		AltimeterStateStore,
 		WaypointPointsMapStore,
 		WaypointsStore,
-		OnRouteAirspacesStore
+		OnRouteAirspacesStore,
+		CurrentScenarioPointStore
 	} from '$lib/stores';
 	import type {
 		TransponderState,
@@ -37,11 +38,7 @@
 		RadioState,
 		AltimeterState
 	} from '$lib/ts/SimulatorTypes';
-	import {
-		isCallsignStandardRegistration,
-		replaceWithPhoneticAlphabet,
-		wellesbourneMountfordCoords
-	} from '$lib/ts/utils';
+	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
@@ -199,6 +196,19 @@
 	let bbox: number[] = [];
 	WaypointPointsMapStore.subscribe((value) => {
 		waypointPoints = value;
+	});
+
+	let position: number[] = [0, 0];
+	let displayHeading: number = 0;
+	let altitude: number = 0;
+	let airSpeed: number = 0;
+
+	CurrentScenarioPointStore.subscribe((value) => {
+		console.log('Current Position: ', value?.pose.position);
+		position = value?.pose.position.reverse() ?? [0, 0];
+		displayHeading = value?.pose.trueHeading ? value?.pose.trueHeading - 45 : 0;
+		altitude = value?.pose.altitude ?? 0;
+		airSpeed = value?.pose.airSpeed ?? 0;
 	});
 
 	/**
@@ -579,9 +589,7 @@
 
 		<Transponder />
 
-		<div
-			class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow"
-		>
+		<div class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow">
 			<div class="w-full h-full">
 				<Map view={scenario?.getCurrentPoint().pose.position.reverse()} zoom={9}>
 					{#if waypointPoints.length > 0}
@@ -641,22 +649,17 @@
 						{/if}
 					{/each}
 
-					{#if scenario?.getCurrentPoint().pose}
-						<Marker
-							latLng={scenario?.getCurrentPoint().pose.position}
-							width={50}
-							height={50}
-							rotation={scenario?.getCurrentPoint().pose.trueHeading - 225}
-						>
+					{#key position}
+						<Marker latLng={position} width={50} height={50} rotation={displayHeading}>
 							<div class="text-2xl">🛩️</div>
 
 							<Popup
-									><div class="flex flex-col gap-2">
-										<div>{scenario?.getCurrentPoint().pose.position}</div>
-									</div></Popup
-								>
+								><div class="flex flex-col gap-2">
+									<div>{position}</div>
+								</div></Popup
+							>
 						</Marker>
-					{/if}
+					{/key}
 				</Map>
 			</div>
 		</div>

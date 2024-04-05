@@ -11,7 +11,7 @@
 	export let height: number;
 	export let rotation: number = 0;
 	export let latLng: L.LatLngExpression;
-	export let aeroObject: Waypoint | Airport | undefined;
+	export let aeroObject: Waypoint | Airport | undefined = undefined;
 	export let draggable: boolean = false;
 	export let iconAnchor: L.Point = L.point(width / 2 - 8, height / 2 - 8);
 

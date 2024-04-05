@@ -72,9 +72,9 @@ export const ATCMessageStore = writable<string>('');
 // Scenario/route stores
 export const ScenarioStore = writable<Scenario | undefined>(undefined);
 
-export const RoutePointStore = derived(ScenarioStore, ($RouteStore) => {
-	if ($RouteStore) {
-		return $RouteStore.scenarioPoints;
+export const ScenarioPointsStore = derived(ScenarioStore, ($ScenarioStore) => {
+	if ($ScenarioStore) {
+		return $ScenarioStore.scenarioPoints;
 	} else {
 		return [];
 	}

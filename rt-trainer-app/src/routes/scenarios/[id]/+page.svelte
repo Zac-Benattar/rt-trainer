@@ -4,6 +4,7 @@
 		AllAirportsStore,
 		AllAirspacesStore,
 		ClearSimulationStores,
+		CurrentScenarioPointStore,
 		OnRouteAirspacesStore,
 		ScenarioStore,
 		WaypointPointsMapStore,
@@ -24,6 +25,7 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import * as turf from '@turf/turf';
+	import L from 'leaflet';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -46,6 +48,19 @@
 	WaypointsStore.subscribe((value) => {
 		waypoints.length = 0;
 		waypoints.push(...value);
+	});
+
+	let position: number[] = [0, 0];
+	let displayHeading: number = 0;
+	let altitude: number = 0;
+	let airSpeed: number = 0;
+
+	CurrentScenarioPointStore.subscribe((value) => {
+		console.log('Current Position: ', value?.pose.position);
+		position = value?.pose.position.reverse() ?? [0, 0];
+		displayHeading = value?.pose.trueHeading ? value?.pose.trueHeading - 45 : 0;
+		altitude = value?.pose.altitude ?? 0;
+		airSpeed = value?.pose.airSpeed ?? 0;
 	});
 
 	let waypointPoints: number[][] = [];
@@ -96,7 +111,9 @@
 </script>
 
 <div class="flex flex-col place-content-center w-full h-full">
-	<div class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full">
+	<div
+		class="flex flex-col sm:flex-row p-3 place-content-center sm:place-content-start gap-5 w-full h-full"
+	>
 		<div class="flex flex-col px-2 grow sm:max-w-xl gap-2">
 			<form
 				class="flex flex-col gap-1"
@@ -234,10 +251,22 @@
 							/>
 						{/if}
 					{/each}
+
+					{#key position}
+						<Marker latLng={position} width={50} height={50} rotation={displayHeading}>
+							<div class="text-2xl">🛩️</div>
+
+							<Popup
+								><div class="flex flex-col gap-2">
+									<div>{position}</div>
+								</div></Popup
+							>
+						</Marker>
+					{/key}
 				</Map>
 			</div>
 
-			<div class='w-full h-full'>
+			<div class="w-full h-full">
 				<div class="h4 p-1">Scenario Points</div>
 				<ScenarioPointPreviewListBox {scenario} />
 			</div>
