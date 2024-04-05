@@ -3,14 +3,17 @@
 <script lang="ts">
 	import { onMount, onDestroy, getContext, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
+	import 'leaflet-rotatedmarker';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 
 	export let width: number;
 	export let height: number;
+	export let rotation: number = 0;
 	export let latLng: L.LatLngExpression;
 	export let aeroObject: Waypoint | Airport | undefined;
 	export let draggable: boolean = false;
+	export let iconAnchor: L.Point = L.point(width / 2 - 8, height / 2 - 8);
 
 	const dispatch = createEventDispatcher();
 
@@ -31,9 +34,14 @@
 				html: markerElement,
 				className: 'map-marker',
 				iconSize: L.point(width, height),
-				iconAnchor: L.point(width / 2 - 8, height / 2)
+				iconAnchor: iconAnchor // problematic for rotated markers - export as a prop
 			});
-			marker = L.marker(latLng, { icon }).addTo(map);
+			marker = L.marker(latLng, {
+				icon,
+				rotationAngle: rotation,
+				rotationOrigin: 'center center'
+			}).addTo(map);
+
 			if (draggable) marker.dragging?.enable();
 			marker?.on('drag', (e) => {
 				dispatch('drag', { event: e, waypoint: aeroObject });

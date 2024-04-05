@@ -583,7 +583,7 @@
 			class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow"
 		>
 			<div class="w-full h-full">
-				<Map view={wellesbourneMountfordCoords} zoom={9}>
+				<Map view={scenario?.getCurrentPoint().pose.position.reverse()} zoom={9}>
 					{#if waypointPoints.length > 0}
 						{#each waypoints as waypoint (waypoint.index)}
 							<Marker
@@ -640,6 +640,23 @@
 							/>
 						{/if}
 					{/each}
+
+					{#if scenario?.getCurrentPoint().pose}
+						<Marker
+							latLng={scenario?.getCurrentPoint().pose.position}
+							width={50}
+							height={50}
+							rotation={scenario?.getCurrentPoint().pose.trueHeading - 225}
+						>
+							<div class="text-2xl">🛩️</div>
+
+							<Popup
+									><div class="flex flex-col gap-2">
+										<div>{scenario?.getCurrentPoint().pose.position}</div>
+									</div></Popup
+								>
+						</Marker>
+					{/if}
 				</Map>
 			</div>
 		</div>

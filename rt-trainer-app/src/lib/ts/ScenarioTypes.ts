@@ -1,5 +1,3 @@
-import type { Position } from "@turf/turf";
-
 export enum EmergencyType {
 	None = 'None',
 	EngineFailure = 'Engine Failure',
@@ -8,7 +6,7 @@ export enum EmergencyType {
 
 /* Represents location, heading altitude and airSpeed of the aircraft. Term borrowed from robotics */
 export type Pose = {
-    position: Position;
+    position: [number, number];
 	trueHeading: number;
 	altitude: number;
 	airSpeed: number;
