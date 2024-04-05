@@ -56,7 +56,6 @@
 	let airSpeed: number = 0;
 
 	CurrentScenarioPointStore.subscribe((value) => {
-		console.log('Current Position: ', value?.pose.position);
 		position = value?.pose.position.reverse() ?? [0, 0];
 		displayHeading = value?.pose.trueHeading ? value?.pose.trueHeading - 45 : 0;
 		altitude = value?.pose.altitude ?? 0;

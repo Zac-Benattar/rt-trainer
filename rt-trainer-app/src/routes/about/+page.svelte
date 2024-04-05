@@ -1,12 +1,16 @@
 <script lang="ts">
+	import type { PageData } from './$types';
+
+	export let data: PageData;
 </script>
 
 <div class="flex flex-row place-content-center h-full w-full">
 	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
 		<div class="p-1 h2">About</div>
 		<div class="px-3">
+			<p>RT-Trainer version {data.packageVersion}</p>
 			<p class="p-2">
-				<b>RT Trainer</b> - A web based training platform for future pilots to learn
+				RT Trainer is a web based training platform for future pilots to learn
 				<a
 					class="anchor"
 					href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
@@ -42,9 +46,9 @@
 		<div class="p-1 h3">Contact</div>
 		<div class="px-3">
 			<div><b>Developer</b> - Zac Benattar</div>
-			<div class='px-3 text-'>
-				Please contact me about any issues you encounter, feature requests, or any other questions you
-				have at zbenattar@gmail.com
+			<div class="px-3 text-">
+				Please contact me about any issues you encounter, feature requests, or any other questions
+				you have at zbenattar@gmail.com
 			</div>
 		</div>
 
@@ -75,8 +79,12 @@
 			<li class="py-2">
 				<div class="h4">Images</div>
 				<p>
-					<a class="anchor" href="https://www.flaticon.com/free-icons/plane" title="plane icons"
-						>Landing page plane icon by Freepik - Flaticon</a
+					Landing page plane svg by <a
+						class="anchor"
+						href="https://www.flaticon.com/free-icons/plane"
+						title="plane icons"
+					>
+						Freepik</a
 					>
 				</p>
 			</li>

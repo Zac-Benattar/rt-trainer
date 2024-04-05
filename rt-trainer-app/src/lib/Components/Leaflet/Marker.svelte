@@ -34,7 +34,7 @@
 				html: markerElement,
 				className: 'map-marker',
 				iconSize: L.point(width, height),
-				iconAnchor: iconAnchor // problematic for rotated markers - export as a prop
+				iconAnchor: iconAnchor
 			});
 			marker = L.marker(latLng, {
 				icon,
