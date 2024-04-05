@@ -273,44 +273,46 @@
 				{/each}
 
 				{#each waypoints as waypoint (waypoint.index)}
-					<Marker
-						latLng={[waypoint.location[1], waypoint.location[0]]}
-						width={50}
-						height={50}
-						aeroObject={waypoint}
-						on:drag={onWaypointDrag}
-						draggable={true}
-					>
-						{#if waypoint.index == 0}
-							<div class="text-2xl">🛩️</div>
-						{:else if waypoint.index == waypoints.length - 1}
-							<div class="text-2xl">🏁</div>
-						{:else}
-							<div class="text-2xl">🚩</div>
-						{/if}
-
-						<Popup
-							><div class="flex flex-col gap-2">
-								<textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
-									>{waypoint.name}</textarea
-								><textarea class="textarea" rows="1">{waypoint.location[0]}</textarea><textarea
-									id="waypoint-{waypoint.id}-lng"
-									class="textarea"
-									rows="1">{waypoint.location[1]}</textarea
-								>
-								<button
-									class="btn varient-filled hidden"
-									on:click={() => saveWaypointEdit(waypoint)}>Save</button
-								>
-								<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
-									><div class="grid grid-cols-4 gap-2 w-full">
-										<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
-										<div class="col-span-3 col-start-2">Delete</div>
-									</div></button
-								>
-							</div></Popup
+					{#key waypoint.id}
+						<Marker
+							latLng={[waypoint.location[1], waypoint.location[0]]}
+							width={50}
+							height={50}
+							aeroObject={waypoint}
+							on:drag={onWaypointDrag}
+							draggable={true}
 						>
-					</Marker>
+							{#if waypoint.index == 0}
+								<div class="text-2xl">🛩️</div>
+							{:else if waypoint.index == waypoints.length - 1}
+								<div class="text-2xl">🏁</div>
+							{:else}
+								<div class="text-2xl">🚩</div>
+							{/if}
+
+							<Popup
+								><div class="flex flex-col gap-2">
+									<textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
+										>{waypoint.name}</textarea
+									><textarea class="textarea" rows="1">{waypoint.location[0]}</textarea><textarea
+										id="waypoint-{waypoint.id}-lng"
+										class="textarea"
+										rows="1">{waypoint.location[1]}</textarea
+									>
+									<button
+										class="btn varient-filled hidden"
+										on:click={() => saveWaypointEdit(waypoint)}>Save</button
+									>
+									<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
+										><div class="grid grid-cols-4 gap-2 w-full">
+											<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
+											<div class="col-span-3 col-start-2">Delete</div>
+										</div></button
+									>
+								</div></Popup
+							>
+						</Marker>
+					{/key}
 				{/each}
 
 				{#each waypointPoints as waypointPoint, index}
