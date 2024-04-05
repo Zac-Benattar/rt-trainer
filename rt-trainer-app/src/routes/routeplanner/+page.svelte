@@ -59,11 +59,11 @@
 	}
 	AllAirspacesStore.set(airspaces);
 
-	const allAirspaces: Airport[] = [];
+	const airports: Airport[] = [];
 	for (const airport of data.airports) {
-		allAirspaces.push(plainToInstance(Airport, airport as Airport));
+		airports.push(plainToInstance(Airport, airport as Airport));
 	}
-	AllAirportsStore.set(allAirspaces);
+	AllAirportsStore.set(airports);
 
 	const filteredAirspaces: Airspace[] = [];
 	FilteredAirspacesStore.subscribe((value) => {
@@ -117,6 +117,18 @@
 			[lng, lat],
 			WaypointType.Fix,
 			waypoints.length
+		);
+		waypoints.push(waypoint);
+		WaypointsStore.set(waypoints);
+	}
+
+	function addAirportWaypoint(airport: Airport) {
+		const waypoint = new Waypoint(
+			airport.name,
+			airport.coordinates,
+			WaypointType.Airport,
+			waypoints.length,
+			airport.id
 		);
 		waypoints.push(waypoint);
 		WaypointsStore.set(waypoints);
@@ -232,7 +244,7 @@
 					</div>
 				</Control>
 
-				{#each allAirspaces as airport}
+				{#each airports as airport}
 					{#if showAllAirports || waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 						<Marker
 							latLng={[airport.coordinates[1], airport.coordinates[0]]}
@@ -240,10 +252,18 @@
 							height={30}
 							aeroObject={airport}
 							draggable={false}
+							on:click={(e) => {
+								e.preventDefault();
+								addAirportWaypoint(e.detail.aeroObject);
+							}}
+							on:mouseover={(e) => {
+								e.detail.marker.openPopup();
+							}}
+							on:mouseout={(e) => {
+								e.detail.marker.closePopup();
+							}}
 						>
-							{#if waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
-								🛩️
-							{:else}
+							{#if !waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 								<Icon src={BsAirplaneFill} color="black" size="16" />
 							{/if}
 
@@ -260,14 +280,50 @@
 								color={'red'}
 								fillOpacity={0.2}
 								weight={1}
-							/>
+								aeroObject={airspace}
+								on:click={(e) => {
+									e.preventDefault();
+									addWaypoint(
+										+parseFloat(e.detail.event.latlng.lat.toFixed(6)),
+										+parseFloat(e.detail.event.latlng.lng.toFixed(6))
+									);
+								}}
+								on:mouseover={(e) => {
+									e.detail.polygon.openPopup();
+								}}
+								on:mouseout={(e) => {
+									e.detail.polygon.closePopup();
+								}}
+							>
+								<Popup>
+									<div>{airspace.name} MATZ</div>
+								</Popup>
+							</Polygon>
 						{:else}
 							<Polygon
 								latLngArray={airspace.coordinates[0].map((point) => [point[1], point[0]])}
 								color={'blue'}
 								fillOpacity={0.2}
 								weight={1}
-							/>
+								aeroObject={airspace}
+								on:click={(e) => {
+									e.preventDefault();
+									addWaypoint(
+										+parseFloat(e.detail.event.latlng.lat.toFixed(6)),
+										+parseFloat(e.detail.event.latlng.lng.toFixed(6))
+									);
+								}}
+								on:mouseover={(e) => {
+									e.detail.polygon.openPopup();
+								}}
+								on:mouseout={(e) => {
+									e.detail.polygon.closePopup();
+								}}
+							>
+								<Popup>
+									<div>{airspace.name}</div>
+								</Popup></Polygon
+							>
 						{/if}
 					{/if}
 				{/each}
@@ -282,10 +338,10 @@
 							on:drag={onWaypointDrag}
 							draggable={true}
 						>
-							{#if waypoint.index == 0}
-								<div class="text-2xl">🛩️</div>
-							{:else if waypoint.index == waypoints.length - 1}
+							{#if waypoint.index == waypoints.length - 1}
 								<div class="text-2xl">🏁</div>
+							{:else if waypoint.type == WaypointType.Airport}
+								<div class="text-2xl">🛫</div>
 							{:else}
 								<div class="text-2xl">🚩</div>
 							{/if}

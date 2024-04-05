@@ -51,6 +51,7 @@
 	import Marker from '$lib/Components/Leaflet/Marker.svelte';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	// Simulator state and settings
 	export let scenarioId: string;
@@ -598,11 +599,20 @@
 								width={50}
 								height={50}
 								aeroObject={waypoint}
+								on:click={(e) => {
+									e.preventDefault();
+								}}
+								on:mouseover={(e) => {
+									e.detail.marker.openPopup();
+								}}
+								on:mouseout={(e) => {
+									e.detail.marker.closePopup();
+								}}
 							>
-								{#if waypoint.index == 0}
-									<div class="text-2xl">🛩️</div>
-								{:else if waypoint.index == waypoints.length - 1}
+								{#if waypoint.index == waypoints.length - 1}
 									<div class="text-2xl">🏁</div>
+								{:else if waypoint.type == WaypointType.Airport}
+									<div class="text-2xl">🛫</div>
 								{:else}
 									<div class="text-2xl">🚩</div>
 								{/if}
@@ -637,6 +647,15 @@
 								color={'red'}
 								fillOpacity={0.2}
 								weight={1}
+								on:click={(e) => {
+									e.preventDefault();
+								}}
+								on:mouseover={(e) => {
+									e.detail.polygon.openPopup();
+								}}
+								on:mouseout={(e) => {
+									e.detail.polygon.closePopup();
+								}}
 							/>
 						{:else}
 							<Polygon
@@ -644,6 +663,15 @@
 								color={'blue'}
 								fillOpacity={0.2}
 								weight={1}
+								on:click={(e) => {
+									e.preventDefault();
+								}}
+								on:mouseover={(e) => {
+									e.detail.polygon.openPopup();
+								}}
+								on:mouseout={(e) => {
+									e.detail.polygon.closePopup();
+								}}
 							/>
 						{/if}
 					{/each}

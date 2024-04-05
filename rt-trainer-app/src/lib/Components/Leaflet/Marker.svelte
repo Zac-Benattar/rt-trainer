@@ -44,14 +44,17 @@
 
 			if (draggable) marker.dragging?.enable();
 			marker?.on('drag', (e) => {
-				dispatch('drag', { event: e, waypoint: aeroObject });
+				dispatch('drag', { event: e, aeroObject: aeroObject, marker: marker});
 				map?.invalidateSize();
 			});
+			marker?.on('click', (e) => {
+				dispatch('click', { event: e, aeroObject: aeroObject, marker: marker });
+			});
 			marker?.on('mouseover', (e) => {
-				dispatch('mouseover', { event: e, waypoint: aeroObject });
+				dispatch('mouseover', { event: e, aeroObject: aeroObject, marker: marker });
 			});
 			marker?.on('mouseout', (e) => {
-				dispatch('mouseout', { event: e, waypoint: aeroObject });
+				dispatch('mouseout', { event: e, aeroObject: aeroObject, marker: marker });
 			});
 		}
 	});

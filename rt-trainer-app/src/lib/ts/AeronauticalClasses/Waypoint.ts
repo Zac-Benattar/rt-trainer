@@ -31,7 +31,7 @@ export default class Waypoint {
 }
 
 export enum WaypointType {
-	Aerodrome, // For use when not in the air
+	Airport, // For use when not in the air
 	NDB, // Non-directional beacon - helps with positioning
 	VOR, // VHF Omnidirectional Range station - helps with positioning
 	Fix, // Arbitrary well know easy to spot visual point e.g. a road junction or reservoir

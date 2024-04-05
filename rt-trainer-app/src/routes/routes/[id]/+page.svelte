@@ -1,6 +1,11 @@
 <script lang="ts">
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { ClearSimulationStores, OnRouteAirspacesStore, WaypointPointsMapStore, WaypointsStore } from '$lib/stores';
+	import {
+		ClearSimulationStores,
+		OnRouteAirspacesStore,
+		WaypointPointsMapStore,
+		WaypointsStore
+	} from '$lib/stores';
 	import type { PageData } from './$types';
 	import { getModalStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
 	import { enhance } from '$app/forms';
@@ -15,6 +20,7 @@
 	import { wellesbourneMountfordCoords } from '$lib/ts/utils';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	const toastStore = getToastStore();
 	const modalStore = getModalStore();
@@ -163,11 +169,20 @@
 							width={50}
 							height={50}
 							aeroObject={waypoint}
+							on:click={(e) => {
+								e.preventDefault();
+							}}
+							on:mouseover={(e) => {
+								e.detail.marker.openPopup();
+							}}
+							on:mouseout={(e) => {
+								e.detail.marker.closePopup();
+							}}
 						>
-							{#if waypoint.index == 0}
-								<div class="text-2xl">🛩️</div>
-							{:else if waypoint.index == waypoints.length - 1}
+							{#if waypoint.index == waypoints.length - 1}
 								<div class="text-2xl">🏁</div>
+							{:else if waypoint.type == WaypointType.Airport}
+								<div class="text-2xl">🛫</div>
 							{:else}
 								<div class="text-2xl">🚩</div>
 							{/if}
@@ -202,6 +217,15 @@
 							color={'red'}
 							fillOpacity={0.2}
 							weight={1}
+							on:click={(e) => {
+								e.preventDefault();
+							}}
+							on:mouseover={(e) => {
+								e.detail.polygon.openPopup();
+							}}
+							on:mouseout={(e) => {
+								e.detail.polygon.closePopup();
+							}}
 						/>
 					{:else}
 						<Polygon
@@ -209,6 +233,15 @@
 							color={'blue'}
 							fillOpacity={0.2}
 							weight={1}
+							on:click={(e) => {
+								e.preventDefault();
+							}}
+							on:mouseover={(e) => {
+								e.detail.polygon.openPopup();
+							}}
+							on:mouseout={(e) => {
+								e.detail.polygon.closePopup();
+							}}
 						/>
 					{/if}
 				{/each}

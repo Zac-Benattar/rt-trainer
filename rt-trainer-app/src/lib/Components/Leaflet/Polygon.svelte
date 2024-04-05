@@ -1,12 +1,16 @@
 <script lang="ts">
-	import { onMount, onDestroy, getContext, setContext } from 'svelte';
+	import { onMount, onDestroy, getContext, setContext, createEventDispatcher } from 'svelte';
 	import L from 'leaflet';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
 	export let latLngArray: L.LatLngExpression[];
+	export let aeroObject: Airspace | undefined = undefined;
 	export let color: string = 'blue';
 	export let fillColor: string | undefined = undefined;
 	export let fillOpacity: number = 0.2;
 	export let weight: number = 1;
+
+	const dispatch = createEventDispatcher();
 
 	let polygon: L.Polygon | undefined;
 	let polygonElement: HTMLElement;
@@ -28,6 +32,15 @@
 				fillOpacity: fillOpacity,
 				weight: weight
 			}).addTo(map);
+			polygon?.on('click', (e) => {
+				dispatch('click', { event: e, waypoint: aeroObject, polygon: polygon });
+			});
+			polygon?.on('mouseover', (e) => {
+				dispatch('mouseover', { event: e, waypoint: aeroObject, polygon: polygon });
+			});
+			polygon?.on('mouseout', (e) => {
+				dispatch('mouseout', { event: e, waypoint: aeroObject, polygon: polygon});
+			});
 		}
 	});
 
