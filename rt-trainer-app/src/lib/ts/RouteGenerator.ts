@@ -173,7 +173,7 @@ export default class RouteGenerator {
 			startAirport.name,
 			startAirport.coordinates,
 			WaypointType.Aerodrome,
-			1
+			0
 		);
 
 		if (!matzEntryPoint) throw new Error('MATZ entry point is undefined');
@@ -181,7 +181,7 @@ export default class RouteGenerator {
 			chosenMATZ.getDisplayName() + ' Entry',
 			matzEntryPoint,
 			WaypointType.NewAirspace,
-			2
+			1
 		);
 
 		if (!matzExitPoint) throw new Error('MATZ exit point is undefined');
@@ -189,7 +189,7 @@ export default class RouteGenerator {
 			chosenMATZ.getDisplayName() + ' Exit',
 			matzExitPoint,
 			WaypointType.NewAirspace,
-			3
+			2
 		);
 
 		if (destinationAirport == undefined) throw new Error('Destination airport is undefined');
@@ -197,7 +197,7 @@ export default class RouteGenerator {
 			destinationAirport?.name,
 			destinationAirport.coordinates,
 			WaypointType.Aerodrome,
-			4
+			3
 		);
 
 		return {

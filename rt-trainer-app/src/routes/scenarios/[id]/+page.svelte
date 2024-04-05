@@ -196,26 +196,28 @@
 				<Map view={wellesbourneMountfordCoords} zoom={9} {bounds}>
 					{#if waypointPoints.length > 0}
 						{#each waypoints as waypoint (waypoint.index)}
-							<Marker
-								latLng={[waypoint.location[1], waypoint.location[0]]}
-								width={50}
-								height={50}
-								aeroObject={waypoint}
-							>
-								{#if waypoint.index == 0}
-									<div class="text-2xl">🛩️</div>
-								{:else if waypoint.index == waypoints.length - 1}
-									<div class="text-2xl">🏁</div>
-								{:else}
-									<div class="text-2xl">🚩</div>
-								{/if}
+							{#key waypoint.index}
+								<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+								>
+									{#if waypoint.index == 0}
+										<div class="text-2xl">🛩️</div>
+									{:else if waypoint.index == waypoints.length - 1}
+										<div class="text-2xl">🏁</div>
+									{:else}
+										<div class="text-2xl">🚩</div>
+									{/if}
 
-								<Popup
-									><div class="flex flex-col gap-2">
-										<div>{waypoint.name}</div>
-									</div></Popup
-								></Marker
-							>
+									<Popup
+										><div class="flex flex-col gap-2">
+											<div>{waypoint.name}</div>
+										</div></Popup
+									></Marker
+								>
+							{/key}
 						{/each}
 					{/if}
 
