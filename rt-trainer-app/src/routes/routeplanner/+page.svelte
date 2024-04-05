@@ -173,8 +173,8 @@
 			parseFloat(lngStringElement.value)
 		) {
 			waypoint.name = nameElement.value;
-			waypoint.location[0] = +parseFloat(parseFloat(lngStringElement.value).toFixed(6));
-			waypoint.location[1] = +parseFloat(parseFloat(latStringElement.value).toFixed(6));
+			waypoint.location[1] = +parseFloat(parseFloat(lngStringElement.value).toFixed(6));
+			waypoint.location[0] = +parseFloat(parseFloat(latStringElement.value).toFixed(6));
 			WaypointsStore.set(waypoints);
 		}
 	}
@@ -330,44 +330,73 @@
 
 				{#each waypoints as waypoint (waypoint.index)}
 					{#key waypoint.id}
-						<Marker
-							latLng={[waypoint.location[1], waypoint.location[0]]}
-							width={50}
-							height={50}
-							aeroObject={waypoint}
-							on:drag={onWaypointDrag}
-							draggable={true}
-						>
-							{#if waypoint.index == waypoints.length - 1}
-								<div class="text-2xl">🏁</div>
-							{:else if waypoint.type == WaypointType.Airport}
-								<div class="text-2xl">🛫</div>
-							{:else}
-								<div class="text-2xl">🚩</div>
-							{/if}
+						{#key waypoint.location}
+							{#if waypoint.type == WaypointType.Airport}<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+								>
+									{#if waypoint.index == waypoints.length - 1}
+										<div class="text-2xl">🏁</div>
+									{:else}
+										<div class="text-2xl">🛫</div>
+									{/if}
 
-							<Popup
-								><div class="flex flex-col gap-2">
-									<textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
-										>{waypoint.name}</textarea
-									><textarea class="textarea" rows="1">{waypoint.location[0]}</textarea><textarea
-										id="waypoint-{waypoint.id}-lng"
-										class="textarea"
-										rows="1">{waypoint.location[1]}</textarea
+									<Popup
+										><div class="flex flex-col gap-2">
+											<div class="flex flex-col gap-2">
+												<div id="waypoint-{waypoint.id}-name">{waypoint.name}</div>
+												<div id="waypoint-{waypoint.id}-lat">{waypoint.location[0]}</div>
+												<div id="waypoint-{waypoint.id}-lng">{waypoint.location[1]}</div>
+											</div>
+
+											<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
+												><div class="grid grid-cols-4 gap-2 w-full">
+													<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
+													<div class="col-span-3 col-start-2">Delete</div>
+												</div></button
+											>
+										</div></Popup
 									>
-									<button
-										class="btn varient-filled hidden"
-										on:click={() => saveWaypointEdit(waypoint)}>Save</button
+								</Marker>{:else}
+								<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+									on:drag={onWaypointDrag}
+									draggable={true}
+								>
+									{#if waypoint.index == waypoints.length - 1}
+										<div class="text-2xl">🏁</div>
+									{:else}
+										<div class="text-2xl">🚩</div>
+									{/if}
+
+									<Popup
+										><div class="flex flex-col gap-2">
+											<textarea id="waypoint-{waypoint.id}-name" class="textarea" rows="1"
+												>{waypoint.name}</textarea
+											><textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
+												>{waypoint.location[0]}</textarea
+											><textarea id="waypoint-{waypoint.id}-lng" class="textarea" rows="1"
+												>{waypoint.location[1]}</textarea
+											>
+											<button class="btn varient-filled" on:click={() => saveWaypointEdit(waypoint)}
+												>Save</button
+											>
+											<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
+												><div class="grid grid-cols-4 gap-2 w-full">
+													<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
+													<div class="col-span-3 col-start-2">Delete</div>
+												</div></button
+											>
+										</div></Popup
 									>
-									<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
-										><div class="grid grid-cols-4 gap-2 w-full">
-											<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
-											<div class="col-span-3 col-start-2">Delete</div>
-										</div></button
-									>
-								</div></Popup
-							>
-						</Marker>
+								</Marker>
+							{/if}
+						{/key}
 					{/key}
 				{/each}
 
