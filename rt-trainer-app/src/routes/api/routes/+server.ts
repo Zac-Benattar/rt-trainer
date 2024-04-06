@@ -5,7 +5,7 @@ import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { routeName, routeDescription, visibility,  userID, waypoints, type, airspaceIDs, airportIDs } =
+	const { routeName, routeDescription, visibility, userId, waypoints, type, airspaceIDs, airportIDs } =
 		await request.json();
 
 	if (!routeName) {
@@ -16,8 +16,8 @@ export async function POST({ request }) {
 		return json({ error: 'No visibility provided' });
 	}
 
-	if (!userID) {
-		return json({ error: 'No userID provided' });
+	if (!userId) {
+		return json({ error: 'No userId provided' });
 	}
 
 	if (routeDescription.length > 2000) {
@@ -51,7 +51,7 @@ export async function POST({ request }) {
 
 	await db.insert(routesTable).values({
 		id: routeId,
-		userID: userID,
+		userId: userId,
 		name: routeName,
 		visibility: visibility,
 		type: type,

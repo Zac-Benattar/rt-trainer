@@ -25,28 +25,12 @@ const longCUID = init({ length: 20 });
 /**
  * Route data schema
  */
-export const waypointsTable = pgTable('waypoint', {
-	id: text('id').primaryKey().$defaultFn(shortCUID),
-	index: smallint('index').notNull(), // Holds the position of the point in the route
-	type: smallint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
-	name: varchar('name', { length: 100 }).notNull(),
-	description: varchar('description', { length: 2000 }),
-	lat: decimal('lat', { precision: 10, scale: 8 }).notNull(),
-	lng: decimal('long', { precision: 10, scale: 8 }).notNull(),
-	referenceObjectId: text('reference_object_id'),
-	routeId: varchar('route_id', { length: 12 }).notNull(),
-	createdAt: timestamp('created_at').defaultNow(),
-	updatedAt: timestamp('updated_at').defaultNow()
-});
 
-export const waypointsRelations = relations(waypointsTable, ({ one }) => ({
-	route: one(routesTable, { fields: [waypointsTable.routeId], references: [routesTable.id] })
-}));
-
-// Eventually replace json with another table
 export const routesTable = pgTable('route', {
 	id: text('id').primaryKey().$defaultFn(shortCUID),
-	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	userId: text('user_id')
+		.references(() => users.id, { onDelete: 'cascade' })
+		.notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
 	type: smallint('type').notNull(),
 	visibility: smallint('visibility').notNull(),
@@ -57,6 +41,26 @@ export const routesTable = pgTable('route', {
 	updatedAt: timestamp('updated_at').defaultNow()
 });
 
+export const waypointsTable = pgTable('waypoint', {
+	id: text('id').primaryKey().$defaultFn(shortCUID),
+	name: varchar('name', { length: 100 }).notNull(),
+	routeId: text('route_id')
+		.references(() => routesTable.id, { onDelete: 'cascade' })
+		.notNull(),
+	index: smallint('index').notNull(), // Holds the position of the point in the route
+	type: smallint('type').notNull(), // Type of route point e.g. cross between MATZ and ATZ, etc.
+	description: varchar('description', { length: 2000 }),
+	lat: decimal('lat', { precision: 10, scale: 8 }).notNull(),
+	lng: decimal('long', { precision: 10, scale: 8 }).notNull(),
+	referenceObjectId: text('reference_object_id'),
+	createdAt: timestamp('created_at').defaultNow(),
+	updatedAt: timestamp('updated_at').defaultNow()
+});
+
+export const waypointsRelations = relations(waypointsTable, ({ one }) => ({
+	route: one(routesTable, { fields: [waypointsTable.routeId], references: [routesTable.id] })
+}));
+
 export const routesRelations = relations(routesTable, ({ many }) => ({
 	scenarios: many(scenariosTable),
 	waypoints: many(waypointsTable)
@@ -64,11 +68,15 @@ export const routesRelations = relations(routesTable, ({ many }) => ({
 
 export const scenariosTable = pgTable('scenario', {
 	id: text('id').primaryKey().$defaultFn(longCUID),
-	userID: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+	userId: text('user_id')
+		.references(() => users.id, { onDelete: 'cascade' })
+		.notNull(),
 	name: varchar('name', { length: 100 }).notNull(),
+	routeId: text('route_id')
+		.references(() => routesTable.id, { onDelete: 'cascade' })
+		.notNull(),
 	visibility: smallint('visibility').notNull(),
 	description: varchar('description', { length: 2000 }),
-	route: text('route_id').references(() => routesTable.id, { onDelete: 'cascade' }),
 	seed: varchar('seed', { length: 20 }).notNull().$defaultFn(shortCUID),
 	hasEmergency: boolean('has_emergency').notNull(),
 	createdAt: timestamp('created_at').defaultNow(),
@@ -76,7 +84,7 @@ export const scenariosTable = pgTable('scenario', {
 });
 
 export const scenariosRelations = relations(scenariosTable, ({ one }) => ({
-	routes: one(routesTable, { fields: [scenariosTable.route], references: [routesTable.id] })
+	routes: one(routesTable, { fields: [scenariosTable.routeId], references: [routesTable.id] })
 }));
 
 /**

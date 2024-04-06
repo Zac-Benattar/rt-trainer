@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { Visibility, scenariosTable, users } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
@@ -42,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 	}
 
 	const scenarioRow = await db.query.scenariosTable.findFirst({
-		where: eq(scenariosTable.userID, userId),
+		where: eq(scenariosTable.userId, userId),
 		with: {
 			routes: {
 				with: {
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
 	// If scenario doesnt exist or user is not allowed to see it return same 'Scenario not found' message
 	if (
 		!scenarioRow ||
-		(scenarioRow && scenarioRow.userID != userId && scenarioRow.visibility === Visibility.PRIVATE)
+		(scenarioRow && scenarioRow.userId != userId && scenarioRow.visibility === Visibility.PRIVATE)
 	) {
 		return {
 			error: 'Scenario not found'

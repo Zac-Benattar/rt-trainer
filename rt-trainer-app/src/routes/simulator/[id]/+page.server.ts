@@ -55,7 +55,7 @@ export const load: PageServerLoad = async (event) => {
 	// If scenario doesnt exist or user is not allowed to see it return same 'Scenario not found' message
 	if (
 		!scenarioRow ||
-		(scenarioRow && scenarioRow.userID != userId && scenarioRow.visibility === Visibility.PRIVATE)
+		(scenarioRow && scenarioRow.userId != userId && scenarioRow.visibility === Visibility.PRIVATE)
 	) {
 		return {
 			error: 'Scenario not found'

@@ -5,7 +5,7 @@ import { desc, eq } from 'drizzle-orm';
 import { routesTable, scenariosTable, users, Visibility } from '$lib/db/schema';
 import { init } from '@paralleldrive/cuid2';
 
-let userId: number = -1;
+let userId: string = '-1';
 const scenarioSeedCUID = init({ length: 6 });
 const scenarioCUID = init({ length: 12 });
 
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async (event) => {
 	const session = await event.locals.auth();
 	if (!session?.user) throw redirect(303, '/login');
 
-	userId = -1;
+	userId = '-1';
 
 	if (session?.user?.email != undefined && session?.user?.email != null) {
 		const row = await db.query.users.findFirst({
@@ -42,7 +42,7 @@ export const load: PageServerLoad = async (event) => {
 					where: (waypoints, { gt }) => gt(waypoints.index, 0)
 				}
 			},
-			where: eq(routesTable.userID, userId),
+			where: eq(routesTable.userId, userId),
 			orderBy: [desc(routesTable.createdAt)],
 			limit: 20
 		})
@@ -87,11 +87,11 @@ export const actions = {
 
 		await db.insert(scenariosTable).values({
 			id: scenarioId,
-			userID: userId,
+			userId: userId,
 			name: name,
 			description: description,
 			visibility: scenarioVisibility,
-			route: routeId,
+			routeId: routeId,
 			seed: scenarioSeed,
 			hasEmergency: emergency
 		});

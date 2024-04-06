@@ -33,7 +33,7 @@ export const load: PageServerLoad = async (event) => {
 				description: true,
 				createdAt: true
 			},
-			where: eq(scenariosTable.userID, userId),
+			where: eq(scenariosTable.userId, userId),
 			orderBy: [desc(scenariosTable.createdAt)],
 			limit: 50
 		})

@@ -38,7 +38,7 @@ export const load: PageServerLoad = async (event) => {
 	// If route doesnt exist or user is not allowed to see it return same 'Route not found' message
 	if (
 		!routeRow ||
-		(routeRow && routeRow.userID != userId && routeRow.visibility === Visibility.PRIVATE)
+		(routeRow && routeRow.userId != userId && routeRow.visibility === Visibility.PRIVATE)
 	) {
 		return {
 			error: 'Route not found'

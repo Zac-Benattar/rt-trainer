@@ -212,7 +212,7 @@
 				routeName: routeName,
 				routeDescription: routeDescription,
 				visibility: routeVisibility,
-				userID: data.userId,
+				userId: data.userId,
 				waypoints: waypoints,
 				type: 0,
 				airspaceIDs: onRouteAirspaces.map((airspace) => airspace.id),
