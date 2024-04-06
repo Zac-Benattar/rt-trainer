@@ -5,6 +5,7 @@ import { METORData, METORDataSample } from './METORData';
 import 'reflect-metadata';
 import type { AirportReportingPointDBData } from '../OpenAIPHandler';
 import * as turf from '@turf/turf';
+import { getRandomFrequency, simpleHash } from '../utils';
 
 /* Airport data. */
 export default class Airport {
@@ -179,27 +180,36 @@ export default class Airport {
 		if (groundOrInformationFrequency == undefined) {
 			groundOrInformationFrequency = this.getAGFrequency();
 		}
+		if (groundOrInformationFrequency == undefined) {
+			groundOrInformationFrequency = new Frequency(
+				getRandomFrequency(simpleHash(this.id), this.id),
+				9,
+				'Ground',
+				9,
+				true
+			);
+		}
 		return groundOrInformationFrequency;
 	}
 
 	public getGroundFrequency(): Frequency | undefined {
-		return this.frequencies.find((frequency) => frequency.type == 9);
+		return this.frequencies?.find((frequency) => frequency.type == 9);
 	}
 
 	public getInformationFrequency(): Frequency | undefined {
-		return this.frequencies.find((frequency) => frequency.type == 15 || frequency.type == 10);
+		return this.frequencies?.find((frequency) => frequency.type == 15 || frequency.type == 10);
 	}
 
 	public getAGFrequency(): Frequency | undefined {
-		return this.frequencies.find((frequency) => frequency.type == 17);
+		return this.frequencies?.find((frequency) => frequency.type == 17);
 	}
 
 	public getTowerFrequency(): Frequency | undefined {
-		return this.frequencies.find((frequency) => frequency.type == 14);
+		return this.frequencies?.find((frequency) => frequency.type == 14);
 	}
 
 	public getApproachFrequency(): Frequency | undefined {
-		return this.frequencies.find((frequency) => frequency.type == 0);
+		return this.frequencies?.find((frequency) => frequency.type == 0);
 	}
 
 	public getATISLetter(seed: number): string {

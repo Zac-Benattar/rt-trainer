@@ -33,17 +33,11 @@ export async function generateScenario(
 	waypoints.sort((a, b) => a.index - b.index);
 
 	const startAirport = airports.find((x) => x.id === waypoints[0].referenceObjectId);
-	if (startAirport) {
-
-		airports.push(startAirport);
-	}
 
 	const endAirport = airports.find(
 		(x) => x.id === waypoints[waypoints.length - 1].referenceObjectId
 	);
-	if (endAirport) {
-		airports.push(endAirport);
-	}
+
 	// Get all airspace along the route
 	const route: [number, number][] = waypoints.map((x) => x.location);
 

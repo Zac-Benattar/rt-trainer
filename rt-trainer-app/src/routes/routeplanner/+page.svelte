@@ -81,6 +81,8 @@
 		}
 	});
 
+	const onRouteAirports: Airport[] = [];
+
 	let waypoints: Waypoint[] = [];
 	WaypointsStore.subscribe((value) => {
 		waypoints = value;
@@ -132,6 +134,8 @@
 		);
 		waypoints.push(waypoint);
 		WaypointsStore.set(waypoints);
+
+		onRouteAirports.push(airport);
 	}
 
 	function onWaypointDrag(e: any) {
@@ -146,6 +150,13 @@
 	}
 
 	function deleteWaypoint(waypoint: Waypoint) {
+		if (waypoint.type === WaypointType.Airport) {
+			onRouteAirports.splice(
+				onRouteAirports.findIndex((airport) => airport.id === waypoint.referenceObjectId),
+				1
+			);
+		}
+
 		waypoints = waypoints.filter((w) => w.id !== waypoint.id);
 		waypoints.forEach((waypoint, index) => {
 			waypoint.index = index;
@@ -215,8 +226,8 @@
 				userId: data.userId,
 				waypoints: waypoints,
 				type: 0,
-				airspaceIDs: onRouteAirspaces.map((airspace) => airspace.id),
-				airportNames: []
+				airspaceIds: onRouteAirspaces.map((airspace) => airspace.id),
+				airportIds: onRouteAirports.map((airport) => airport.id)
 			});
 
 			if (response.data.result === 'success') {

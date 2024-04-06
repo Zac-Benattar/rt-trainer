@@ -5,7 +5,7 @@ import { json } from '@sveltejs/kit';
 import { init } from '@paralleldrive/cuid2';
 
 export async function POST({ request }) {
-	const { routeName, routeDescription, visibility, userId, waypoints, type, airspaceIDs, airportIDs } =
+	const { routeName, routeDescription, visibility, userId, waypoints, type, airspaceIds, airportIds } =
 		await request.json();
 
 	if (!routeName) {
@@ -55,8 +55,8 @@ export async function POST({ request }) {
 		name: routeName,
 		visibility: visibility,
 		type: type,
-		airspaceIds: airspaceIDs,
-		airportIds: airportIDs,
+		airspaceIds: airspaceIds,
+		airportIds: airportIds,
 		description: routeDescription,
 	});
 

@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { scenariosTable, users, Visibility } from '$lib/db/schema';
 import { db } from '$lib/db/db';
 import { generateScenario } from '$lib/ts/ScenarioGenerator';
@@ -73,11 +73,13 @@ export const load: PageServerLoad = async (event) => {
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
 
-	const airspaceIds: string[] = scenarioRow.routes?.airspaceIds?.split(',') ?? [];
+	const airspaceIds: string[] =
+		scenarioRow.routes?.airspaceIds?.replace(/[^a-zA-Z0-9,]/g, '').split(',') ?? [];
 
 	const airspaces: Airspace[] = await getAirspacesFromIds(airspaceIds);
 
-	const airportIds: string[] = scenarioRow.routes?.airportIds?.split(',') ?? [];
+	const airportIds: string[] =
+		scenarioRow.routes?.airportIds?.replace(/[^a-zA-Z0-9,]/g, '').split(',') ?? [];
 
 	const airports: Airport[] = await getAirportsFromIds(airportIds);
 
