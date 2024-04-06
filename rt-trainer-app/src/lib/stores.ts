@@ -150,6 +150,8 @@ export const OnRouteAirspacesStore = derived(
 
 export const AllAirportsStore = writable<Airport[]>([]);
 
+export const OnRouteAirportsStore = writable<Airport[]>([]);
+
 export const CurrentScenarioPointIndexStore = writable<number>(0);
 
 function createStartPointIndexStore() {

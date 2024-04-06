@@ -9,7 +9,7 @@
 		<div class="p-1 h2">About</div>
 		<div class="px-3">
 			<p class="p-2">
-				RT Trainer is a web based training platform for future pilots to learn
+				RT Trainer is a web based practice platform for future pilots learning the
 				<a
 					class="anchor"
 					href="https://publicapps.caa.co.uk/modalapplication.aspx?catid=1&appid=11&mode=detail&id=6973"
@@ -35,7 +35,7 @@
 				<a class="anchor" href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
 				<a class="anchor" href="https://vercel.com/">Vercel</a>. A
 				<a class="anchor" href="https://vercel.com/docs/storage/vercel-postgres">Vercel Postgres</a>
-				database stores user data. This project was developed with assistance from the
+				database stores all user data. This project was developed with assistance from the
 				<a class="anchor" href="http://www.southwarwickshireflyingschool.com"
 					>South Warwickshire Flying School</a
 				>.

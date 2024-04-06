@@ -394,8 +394,8 @@ export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
 	return code.toString();
 }
 
-export function getRandomFrequency(seed: number, airspaceId: string): string {
-	const idHash = simpleHash(airspaceId);
+export function getRandomFrequency(seed: number, objectId: string): string {
+	const idHash = simpleHash(objectId);
 	const frequency =
 		118 + ((9130427071 * seed * idHash) % 20) + '.' + ((seed * idHash) % 20) * 0.025;
 	return frequency;

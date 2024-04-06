@@ -114,60 +114,14 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 
 // Currently implemented badly
 export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
-	const airspaces: Airspace[] = await getAllAirspaceData()
-	airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
-	return airspaces;
-
-	// try {
-	// 	const response = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 			'x-openaip-client-id': OPENAIPKEY
-	// 		},
-	// 		params: {
-	// 			ids: airspaceIds
-	// 		}
-	// 	});
-
-	// 	console.log('Fetched airspaces from OpenAIP');
-
-	// 	const airspaces = response.data.items.map((airspaceData) =>
-	// 		airspaceDataToAirspace(airspaceData)
-	// 	);
-	// 	return airspaces;
-	// } catch (error: unknown) {
-	// 	console.error('Error: ', error);
-	// }
-
-	// return [];
+	const airspaces: Airspace[] = await getAllAirspaceData();
+	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
 }
 
 // Currently implemented badly
 export async function getAirportsFromIds(airportNames: string[]): Promise<Airport[]> {
-	const airports: Airport[] = await getAllAirportData()
-	airports.filter((airport) => airportNames.includes(airport.name));
-	return airports;
-
-	// try {
-	// 	const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
-	// 		headers: {
-	// 			'Content-Type': 'application/json',
-	// 			'x-openaip-client-id': OPENAIPKEY
-	// 		},
-	// 		params: {
-	// 			search: airportNames.join(' '),
-	// 		}
-	// 	});
-
-	// 	console.log('Fetched airports from OpenAIP');
-
-	// 	const airports = response.data.items.map((airportData) => airportDataToAirport(airportData));
-	// 	return airports;
-	// } catch (error: unknown) {
-	// 	console.error('Error: ', error);
-	// }
-
-	// return [];
+	const airports: Airport[] = await getAllAirportData();
+	return airports.filter((airport) => airportNames.includes(airport.id));
 }
 
 export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {

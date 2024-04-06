@@ -73,11 +73,13 @@ export const load: PageServerLoad = async (event) => {
 	});
 	waypointsList.sort((a, b) => a.index - b.index);
 
-	const airspaceIds: string[] = scenarioRow.routes?.airspaceIds?.split(',') ?? [];
+	const airspaceIds: string[] =
+		scenarioRow.routes?.airspaceIds?.replace(/[^a-zA-Z0-9,]/g, '').split(',') ?? [];
 
 	const airspaces: Airspace[] = await getAirspacesFromIds(airspaceIds);
 
-	const airportIds: string[] = scenarioRow.routes?.airportIds?.split(',') ?? [];
+	const airportIds: string[] =
+		scenarioRow.routes?.airportIds?.replace(/[^a-zA-Z0-9,]/g, '').split(',') ?? [];
 
 	const airports: Airport[] = await getAirportsFromIds(airportIds);
 
