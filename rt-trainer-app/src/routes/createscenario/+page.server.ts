@@ -60,12 +60,12 @@ export const actions = {
 		const scenarioSeed =
 			data.get('scenarioSeed') == '' ? scenarioSeedCUID() : data.get('scenarioSeed');
 
-		const visibilityString = data.get('scenarioVisibility');
-		let scenarioVisibility: Visibility = Visibility.PRIVATE;
-		if (visibilityString === 'Unlisted') {
-			scenarioVisibility = Visibility.UNLISTED;
-		} else if (visibilityString === 'Public') {
-			scenarioVisibility = Visibility.PUBLIC;
+		const visibilityString = data.get('radio-visibility');
+		let visibility: Visibility = Visibility.PRIVATE;
+		if (visibilityString == null || visibilityString == undefined) {
+			return fail(400, { visibilityString, missing: true });
+		} else {
+			visibility = parseInt(visibilityString.toString());
 		}
 
 		if (routeId == null || routeId == undefined) {
@@ -90,7 +90,7 @@ export const actions = {
 			userId: userId,
 			name: name,
 			description: description,
-			visibility: scenarioVisibility,
+			visibility: visibility,
 			routeId: routeId,
 			seed: scenarioSeed,
 			hasEmergency: emergency

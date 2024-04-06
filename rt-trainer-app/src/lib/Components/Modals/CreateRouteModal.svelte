@@ -1,6 +1,6 @@
 <script lang="ts">
+	import { Visibility } from '$lib/db/schema';
 	import { getModalStore } from '@skeletonlabs/skeleton';
-	import { GlobeOutline, LockOpenOutline, LockOutline } from 'flowbite-svelte-icons';
 
 	const modalStore = getModalStore();
 
@@ -20,7 +20,7 @@
 	const formData = {
 		routeName: '',
 		routeDescription: '',
-		visibility: 'Private'
+		routeVisibility: Visibility.PRIVATE
 	};
 
 	function onFormSubmit() {
@@ -29,7 +29,7 @@
 	}
 
 	// Base Classes
-	const cBase = 'card p-4 w-96 shadow-xl space-y-4';
+	const cBase = 'card p-4 w-[430px] shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'space-y-4 rounded-container-token';
 </script>
@@ -55,22 +55,59 @@
 					placeholder="Enter some details about the route..."
 				/></label
 			><label class="label"
-				><span class="text-sm">Visibility</span>
+				><span class="h4 p-1">Visibility</span>
 
-				{#each ['Public', 'Unlisted', 'Private'] as v}
-					<button
-						class="chip {formData.visibility === v ? 'variant-filled' : 'variant-soft'}"
-						on:click={() => {
-							formData.visibility = v;
-						}}
-						on:keypress
-					>
-						{#if v === 'Public'}<span><GlobeOutline /></span>{:else if v === 'Unlisted'}<span
-								><LockOpenOutline /></span
-							>{:else if v === 'Private'}<span><LockOutline /></span>{/if}
-						<span>{v}</span>
-					</button>
-				{/each}
+				<div class="input-group input-group-divider grid-cols-[auto_1fr_auto]">
+					<div class="w-full">
+						<div class="flex items-center">
+							<input
+								id="horizontal-list-radio-visibility-public"
+								class="radio"
+								type="radio"
+								name="radio-visibility"
+								value="3"
+								on:click={() => (formData.routeVisibility = Visibility.PUBLIC)}
+							/>
+							<label
+								for="horizontal-list-radio-visibility-public"
+								class="w-full py-3 ms-2 text-sm font-medium">Public</label
+							>
+						</div>
+					</div>
+					<div class="w-full">
+						<div class="flex items-center">
+							<input
+								id="horizontal-list-radio-visibility-unlisted"
+								class="radio"
+								type="radio"
+								name="radio-visibility"
+								value="2"
+								on:click={() => (formData.routeVisibility = Visibility.UNLISTED)}
+							/>
+							<label
+								for="horizontal-list-radio-visibility-unlisted"
+								class="w-full py-3 ms-2 text-sm font-medium">Unlisted</label
+							>
+						</div>
+					</div>
+					<div class="w-full">
+						<div class="flex items-center">
+							<input
+								id="horizontal-list-radio-visibility-private"
+								class="radio"
+								type="radio"
+								name="radio-visibility"
+								value="1"
+								checked
+								on:click={() => (formData.routeVisibility = Visibility.PRIVATE)}
+							/>
+							<label
+								for="horizontal-list-radio-visibility-private"
+								class="w-full py-3 ms-2 text-sm font-medium">Private</label
+							>
+						</div>
+					</div>
+				</div>
 			</label>
 		</form>
 		<footer class="flex flex-row gap-2 {parent.regionFooter}">

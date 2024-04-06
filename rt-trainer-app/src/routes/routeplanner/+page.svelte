@@ -201,13 +201,7 @@
 				if (r) {
 					routeName = r.routeName;
 					routeDescription = r.routeDescription;
-					if (r.visibility == 'Private') {
-						routeVisibility = Visibility.PRIVATE;
-					} else if (r.visibility == 'Unlisted') {
-						routeVisibility = Visibility.UNLISTED;
-					} else if (r.visibility == 'Public') {
-						routeVisibility == Visibility.PUBLIC;
-					}
+					routeVisibility = r.routeVisibility;
 					saveRoute();
 				} else {
 					blockingClick = false;

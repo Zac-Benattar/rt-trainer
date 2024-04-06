@@ -1,7 +1,11 @@
 <script lang="ts">
 	import type { ActionData, PageData } from './$types';
 	import Map from '$lib/Components/Leaflet/Map.svelte';
-	import { GlobeOutline, EditOutline, RefreshOutline, LockOpenOutline, LockOutline } from 'flowbite-svelte-icons';
+	import {
+		GlobeOutline,
+		EditOutline,
+		RefreshOutline,
+	} from 'flowbite-svelte-icons';
 	import { ListBox, ListBoxItem } from '@skeletonlabs/skeleton';
 	import { goto } from '$app/navigation';
 	import { init } from '@paralleldrive/cuid2';
@@ -30,7 +34,6 @@
 	let selectedRouteId: string = '';
 	let scenarioSeed: string = scenarioSeedCUID();
 	let emergency: boolean = true;
-	let scenarioVisibility: string = 'Private';
 
 	let routesClass: string = '';
 
@@ -198,7 +201,7 @@
 					</div>
 				</div>
 
-				<div>
+				<div class="p-1">
 					<label class="flex items-center space-x-2 mb-3">
 						<input class="checkbox" type="checkbox" name="hasEmergency" checked={emergency} />
 						<p>Include Emergency</p>
@@ -206,26 +209,59 @@
 				</div>
 
 				<label class="label"
-					><span class="text-sm">Visibility</span>
+					><span class="h4 p-1">Visibility</span>
 
-					<input class="hidden" bind:value={scenarioVisibility} name="scenarioVisibility" />
-					{#each ['Public', 'Unlisted', 'Private'] as v}
-						<button
-							class="chip {scenarioVisibility === v ? 'variant-filled' : 'variant-soft'}"
-							on:click={() => {
-								scenarioVisibility = v;
-							}}
-							on:keypress
-						>
-							{#if v === 'Public'}<span><GlobeOutline /></span>{:else if v === 'Unlisted'}<span
-									><LockOpenOutline /></span
-								>{:else if v === 'Private'}<span><LockOutline /></span>{/if}
-							<span>{v}</span>
-						</button>
-					{/each}
+					<div class="input-group input-group-divider grid-cols-[auto_1fr_auto]">
+						<div class="w-full">
+							<div class="flex items-center">
+								<input
+									id="horizontal-list-radio-visibility-public"
+									class="radio"
+									type="radio"
+									name="radio-visibility"
+									value="3"
+								/>
+								<label
+									for="horizontal-list-radio-visibility-public"
+									class="w-full py-3 ms-2 text-sm font-medium">Public</label
+								>
+							</div>
+						</div>
+						<div class="w-full">
+							<div class="flex items-center">
+								<input
+									id="horizontal-list-radio-visibility-unlisted"
+									class="radio"
+									type="radio"
+									name="radio-visibility"
+									value="2"
+								/>
+								<label
+									for="horizontal-list-radio-visibility-unlisted"
+									class="w-full py-3 ms-2 text-sm font-medium">Unlisted</label
+								>
+							</div>
+						</div>
+						<div class="w-full">
+							<div class="flex items-center">
+								<input
+									id="horizontal-list-radio-visibility-private"
+									class="radio"
+									type="radio"
+									name="radio-visibility"
+									value="1"
+									checked
+								/>
+								<label
+									for="horizontal-list-radio-visibility-private"
+									class="w-full py-3 ms-2 text-sm font-medium">Private</label
+								>
+							</div>
+						</div>
+					</div>
 				</label>
 
-				<button class="btn variant-filled">Create Scenario</button>
+				<button class="btn variant-filled mt-4">Create Scenario</button>
 			</form>
 		</div>
 
