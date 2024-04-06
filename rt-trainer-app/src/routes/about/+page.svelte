@@ -8,7 +8,6 @@
 	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
 		<div class="p-1 h2">About</div>
 		<div class="px-3">
-			<p>RT-Trainer version {data.packageVersion}</p>
 			<p class="p-2">
 				RT Trainer is a web based training platform for future pilots to learn
 				<a
@@ -41,6 +40,16 @@
 					>South Warwickshire Flying School</a
 				>.
 			</p>
+		</div>
+
+		<div>
+			<div class="p-1 h3">Most recent GitHub commit</div>
+			<div class="p-3">
+				<div class="p-3 card pre">
+					<div class="">{data.commitDate}</div>
+					<div class="">{data.commitMessage}</div>
+				</div>
+			</div>
 		</div>
 
 		<div class="p-1 h3">Contact</div>
