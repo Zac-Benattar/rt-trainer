@@ -1,4 +1,38 @@
 \chapter{Design}
 \label{ch:design}
 
-In this chapter, we describe the overall design of our solution to the problem identified in \ref{ch:introduction}, building on work described in \ref{ch:background}.
+\section{Application Architecture}
+
+\subsection{Format}
+While there is no reason (except requirement 3) why RT-Trainer couldn't take the form of a native app which a user would need to install on their own machine, providing its features in the form of a web-app has the advantage of a greater ease of access. The user simply needs to connect to a web-server through their browser by typing in a URL for a service hosting the software, a task that almost all internet users can achieve, even on operating systems (OSs) where software installation is not possible or highly restricted. This removes the need to write the same software multiple times to target multiple system architectures or needing to deal with wrapper libraries. While the access to device hardware and operating system is far more restrictive for web-apps, for a simple and lightweight application such as RT-Trainer, these restrictions are not problematic. 
+
+An alternative to both browser accessed and native apps is the Progressive Web App (PWA). Acting effectively as a web-app with a wrapper layer giving it similar OS access as a native app, PWAs have seen popularity with developers looking to build cross platform apps without needing OS specific knowledge. The format of a PWA would allow RT-Trainer to potentially reach more users, given that many users of mobile devices primarily access the internet through apps rather than a browser. Support for PWAs has recently been removed from Apple's IOS and OSX following a dispute between Apple and Epic over revenue splits for its App Store. 
+
+\subsection{Database}
+In order to store users' scenarios and progress data a database was determined to be required. Other forms of persistent storage were considered but essentially would have achieved the same task but with significant downsides. An SQL style database is the most common for storing user data on web-apps, and many managed or low code solutions can be used for free or minimal cost. Common SQL style Database Management Systems (DBMSs) used heavily in industry include MySQL, PostgreSQL and SQLite. The main consideration relevant to this project is Geospatial data support. Spatial data is indexed differently to non-spatial data, which can be sorted linearly (e.g. alphabetically). More advanced indexing strategies are required for performant geospatial queries than general purpose DBMSs. Though RT-Trainer was unlikely to require many large geospatial queries to meet its specification, support for spatial queries was an important factor in choosing the DBMS. It was decided that due to its well documented and open source PostGIS library, PostgreSQL was chosen as the DBMS for this project.
+
+\subsection{Client-Server Model}
+It was decided that for this project a mostly frontend based web-app accessed through a browser would be sufficient to meet the specification. The data requirements of the system yield multiple options for web-app behaviour with respect to fetching and processing data. While at least some UI code must run on the user's device, variable amounts of background processing can be left to the web-server. Functionality such as direct database access is uncommon and can be unsafe to perform client-side, but processes unique to RT-Trainer could be run on either the server or client. Given that most of the processing RT-Trainer must perform is not particularly processor intensive, it was decided that a large percentage of processing would be performed client-side. This includes processes which are heavily related to the UI such as rendering maps, and generating routes. The server can then be primarily used for database access and remaining heavier processing, alongside serving pages.
+
+Perceived responsiveness was a major factor in the design of the system. Users of the modern internet come to expect a similarly responsive experience from all websites they access, whether they are highly optimised platforms with teams of engineers behind them, or the site of a small business with a lone developer. If a site doesn't load as fast as the user expects, they are likely to reload the page or cancel the page load altogether, under the assumption that something has gone wrong \cite{}. Though the resources of a whole team of engineers was not available for this project, many of the technologies used to optimise the load times of the most accessed websites on the internet are available.
+
+\subsubsection{Server Side Rendering}
+Server Side Rendering (SSR) is a technology which involves pages being converted to pure HTML by the web-server rather than the client. In a traditional client side rendered web-page, the base HTML of the page is generally insufficient to provide the browser all of the information required to render the page correctly. In order to provide complex pages such as a list of recent posts on a social media site, the web-page must include JavaScript to define how to fetch and display the posts. SSR on the other hand processes this JavaScript code into its HTML equivalent before sending the page, meaning only HTML needs to be sent to the client, instead of HTML and JavaScript code\cite{}. The removal of this task leads to faster page load times for the client, and hence a higher change the user will remain on the website\cite{}. In order for the page to support interactivity however, some JavaScript code must be sent to the user in a process called hydration. This is where the browser requests chunks of JavaScript code when its functionality is required, injecting them into the page when needed. This technology requires optimisation by the server when the code for the web-page is bundled, but after bundling there are few downsides other than increased complexity, which is usually abstracted away by the web framework used to develop the app.
+
+% Talk about serverless, edge and other DESIGN related considerations of technologies
+
+\section{Scenarios and Routes}
+% Talk about the choices made to have both scenarios and routes
+% Talk about how scenarios are designed/how routes are generated in a high level - leave rest to implementation
+
+\section{User Interface}
+
+The expected userbase for RT-Trainer are student pilots in the UK looking to gain confidence with using the radio while flying, in particular in order to pass the FRTOL exam. Considering this, and the fact that many pilots use app based flight planning and flight information systems already, aspects of the user interface were designed to use their prior knowledge and assumptions to require minimal learning time to operate. The remaining less application specific webpages such as the homepage and 'My Scenarios' page were influenced by other web-apps with similar design requirements, notably Strava's create route page provided a basis for the layout for the app's create route page.
+
+\subsection{Storyboard}
+
+The flow of the UI is outlined below in a storyboard. Excluding the navigation sidebar which is present on relevant pages and links to the user's homepage, routes and scenarios pages, the page specific UI flows are as shown. Modal based UI elements are not shown but are used on the create route and create scenario pages.
+
+% Include storyboard of user interactions with the system
+
+\subsection{Skeuomorphic Design}

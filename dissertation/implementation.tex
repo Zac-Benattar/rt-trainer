@@ -2,3 +2,136 @@
 \label{ch:implementation}
 
 In this chapter, we describe the implementation of the design we described in \ref{ch:design}. You should \textbf{not} describe every line of code in your implementation. Instead, you should focus on the interesting aspects of the implementation: that is, the most challenging parts that would not be obvious to an average Computer Scientist. Include diagrams, short code snippets, etc. for illustration. 
+
+\section{Technology}
+\label{se:tech}
+\subsection{Front-end Framework}
+\label{sse:frontendframework}
+While not strictly necessary to provide the raw HTML and JavaScript to the client required to render modern web pages, most web developers choose to use a frontend framework to simplify and speed up development. Despite being yet another technology for a developer to learn, they provide a malleable and streamlined structure to write JavaScript code in such that the developer can focus on the features that users care about, and not the foundations of their web-app. A selection of the most commonly used frameworks in production environments today were considered, as well as some select frameworks which scored highly on the admired and desired scale(s). The data comes from the most recent StackOverflow developer survey. These were React.js \textit{(most popular, most desired)}, Node.js \textit{(2nd most popular, 2nd most desired)}, Angular \textit{(5th most popular)}, Next.js \textit{(4th most desired)} and Svelte \textit{(2nd most admired)}\cite{StackOverflow2023Survey}.
+
+Svelte, despite being the newest and least mature of the shortlist, was selected for this project due to its development aims of solving various problems present in the more established frameworks. For example state management in Svelte is handled through stores, which act as global states, and component states. Many React developers for example rely on external libraries for global state management if they don't want to pass states along the entire component hierarchy across their application. Svelte has a sister library SvelteKit which acts as the web server framework, with first class support from many hosting providers, it supports SSR with no configuration and can be run in a serverless configuration. Svelte is a compiled framework, doing away with the virtual DOM, a runtime intermediate representation of the actual DOM used by React and other popular frameworks. This virtual DOM causes React to perform most of its processor intensive tasks at runtime, which Svelte instead performs at compile time, giving improved page load times and minimal layout shift \cite{virtual-dom-overhead}.
+
+Svelte, similarly to many other front-end frameworks is component based. Components consist of HTML, CSS and JavaScript and allow the same code to be instantiated multiple times giving great code re-usability. Much like HTML elements, components have properties, or props, which can be passed to the component in its opening tag. This allows a parent component to pass data to its children, and styling to be modified easily. Components also have behaviours defined by JavaScript functions, giving them the ability to modify their state and DOM. The use of components provides similar benefits to the use of classes in Object Oriented Programming (OOP), with a visual layer on top in the form of HTML. The code for most of the pages in RT-Trainer are comprised of HTML with components where appropriate to reduce the amount of code which needs to copied between pages.
+
+\subsection{Hosting}
+\label{sse:hosting}
+Firstly, the choice to host the system rather than just simply provide its code to potential users allows users to simply access a webserver hosting the system similarly to any other website they access on the internet. The obvious benefit of this is the benefit of web apps themselves - ease of access, hence hosting was used for this project. This does require the system to run on physical hardware, hence use computational resources. Luckily many web-hosting platforms offer free or "hobby" plans where usage is restricted but the features most "hobby" projects would require. These "hobby" plans act as a sort of free trial of features while the website doesn't exceed its resource limits, at which point the system is rate limited, stopped entirely or automatically upgraded to a paid plan. The latter type is uncommon and services which operate under this policy have not been considered. Similar plans exist for managed database platforms, logging platforms, and many other commonly used systems for developers, and hence have been used where appropriate such as a managed database (see section \ref{sse:database}). Justification of the use of other free plans is not made henceforth.
+
+Various hosting providers offer minimal-configuration SvelteKit hosting, but the leading provider offering the most features is Vercel, which was chosen as the host of RT-Trainer. Many of the core contributors and the creator of Svelte were hired by Vercel to continue their work on Svelte, hence there is a clear commitment to supporting the framework into the future. Vercel offers a hobby plan for hosting, and numerous additional services with monthly limits at no charge such as a managed Postgres instance, various analytical tools and continuous deployment \cite{vercel-hobby-plan}. The limits imposed on the usage of the service were deemed as unlikely to be exceeded, but in that event, migration to another hosting provider with a free tier would have been a simple process.
+
+\subsection{Database}
+\label{sse:database}
+As mentioned in the implementation section \ref{ch:implementation}, PostgreSQL was the chosen style of SQL database for storing user data (routes, scenarios). While many managed database providers offer PostgreSQL services, the provider with the most well documented and generous hobby plan was Planetscale. Although its DBMS supports only MySQL, not PostgreSQL, the original requirement for full geospatial data support was found to be unnecessary by this point in the project. The only geospatial data stored in the database was user generated waypoints, with all other aeronautical data fetched on demand from the OpenAIP API \ref{se:openaip}. Waypoint coordinates were stored as latitude and longitude in separate numeric type columns. Its limits of 10GB storage per month, 100 million row reads per month and 10 million row writes per month were deemed as unlikely to be exceeded.
+
+Following an email from Planetscale indicating that they would retire the hobby plan on the 8th of April, weeks away from the project's final deadline, all data was migrated. Due to the limited time remaining in the project, the choice was made to move the data to Vercel's managed Postgres system as this would be quick to integrate into the project already hosted on Vercel. Due to the use of DrizzleORM (see  section \ref{ssse:drizzle}) this migration was very quick.
+
+\subsection{Supporting Libraries}
+\label{sse:libraries}
+As a means of accelerating development by reducing the amount of new code required to develop RT-Trainer, a number of libraries were used to support the new code written as part of this project. In general, they are all well documented, open-source, and actively maintained. Notable libraries are listed in this section, along with a description of their uses within RT-Trainer.
+
+\subsubsection{Vite}
+\label{ssse:vite}
+It would have been possible to run SvelteKit's build step every time a minor change was made to the codebase, however with Vite, this was not required. Vite is a frontend build tool which supports Hot Module Replacement (HMR), allowing changes to be almost instantly present in the development server without running a slow, from scratch build command.
+
+\subsubsection{Tailwind CSS}
+\label{ssse:tailwind}
+Tailwind is a CSS framework which simplifies the process of writing bespoke CSS, instead opting for a well design set of classes which can be added to the class of an HTML tag. For example \texttt{font-medium} works as shorthand for \texttt{\{font-weight: 500;\}}. The use of Tailwind meant minimal external CSS had to be written, instead placing the styling in the same place as the structure, where it could be though about at the same time, as the two concerns are managed easier together. Separation of concerns is a well know concept in the field of software engineering, but when it comes to the frontend, Tailwind finds a good balance of abstraction to not require it's separation from the UI structure.
+
+\subsubsection{Skeleton UI}
+\label{ssse:skeleton}
+Skeleton provided both a basic shell app to build off of in a standardised way, but also a extensible library of UI components designed with usability in mind. Whenever a specific UI component was needed, Skeleton provided either the entire component pre-made, or the means to create it using a combination of its existing components. The use of a UI library meant that minimal time was spent working on aesthetic interfaces which users would appreciate, but are not the reason they are using the system. This is important, as poor UI design can turn potential users away \cite{}. Skeleton is built using Tailwind, and adds many more classes to Tailwind's base collection which meant that complex and aesthetic styling of components took just a couple of classes to create.
+
+\subsubsection{Leaflet.js}
+\label{ssse:leafletjs}
+Performant and interactive maps are complex. Add the constraint of rendering in the browser and now you have very few libraries available. Leaflet is the leading open source option, with more than 11 years of updates, the minimal problems encountered were solved by finding a relevant blog post. The Leaflet library was very important to this project, with its map being used in more than half of the pages on the web-server.
+
+\subsubsection{Turf.js}
+\label{ssse:turfjs}
+Turf simplified and standardised the geospatial computing required for features such as detecting airspace intersections and generating points some distance along a line. Originally all such methods were written from scratch using formulas found online, but minor mistakes lead to major bugs, so Turf was used to avoid these problems and improve the performance of route generation.
+
+\subsubsection{DrizzleORM}
+\label{ssse:drizzle}
+While writing SQL queries is fairly simple for an application such as RT-Trainer, it would have taken a non-trivial amount of the project's duration to write, test and troubleshoot the required SQL queries. Object Relational Mapping tools exist to reduce the time developers spend dealing with the SQL model of their application's data, and allow them to interact with the data in a model much closer to that of their chosen language and framework. To this effect, DrizzleORM was used to abstract the database for the project and allow a greater focus on the novel features of RT-Trainer. Drizzle was chosen specifically for its edge-function support and DrizzleKit client which allowed easy management of rows and tables during development.
+
+\subsubsection{Auth.js}
+\label{ssse:authjs}
+Logins, authentication and user data is a very important aspect of any system to get right. Auth.js is the industry standard open-source authentication library for Next.js, SvelteKit and Express, with many more frameworks supported. With OAuth support built in, RT-Trainer didn't need to store any usernames and passwords, instead login via OAuth providers was sufficient. Providing OAuth, where a user logs in via another account e.g. Google, Facebook, Microsoft is common in modern websites. It removes the risk related to sending passwords over the internet, or even storing them in RAM, and hence relies on the generally stronger security policies of the OAuth providers. Auth.js provides a suggested code snippet for use with DrizzleORM, endorsed by the maintainers of both libraries, which has been used in RT-Trainer to further reduce the risk of security vulnerabilities.
+
+\subsubsection{Other Notable Libraries}
+\label{se:otherlibraries}
+In addition to the previously mentioned libraries, various other libraries used are listed below with a description of their use within RT-Trainer:
+\begin{itemize}
+    \item GeoJSON.js - Provided the language support for the types used by Turf.js \cite{GeoJSONNPM}.
+    \item Axios - Provided a simple interface and boilerplate for API fetching \cite{AxiosNPM}.
+    \item Leaflet.RotatedMarker - An extension for Leaflet.js allowing the rotating of markers, used to rotate the current location icon to the correct angle for the current point in flight \cite{LeafletRotatedMarkerNPM}.
+    \item Svelte Icons Pack - A Svelte component based implementation of Flowbite's open source icon pack \cite{FlowbiteIcons}\cite{FlowbiteSvelteIconsNPM}. Used to improve usability by providing familiar controls to users.
+    \item Vercel Web Analytics - Vercel's cookie-free analytical tool for monitoring site access metrics \cite{VercelWebAnalyticsNPM}.
+    \item Dotenv - Support for \texttt{.env} files for easy API and other secret key management. Various APIs used by the system require API keys or other secrets; Dotenv interfaces with Vite to ensure they are accessible, and only to the server \cite{DotenvNPM}.
+\end{itemize}
+
+\section{Map Component}
+\label{se:map}
+
+Students taking the RT oral exam would be provided with a complete and detailed flight plan for their mock flight, hence the map component was designed in such a way to support sub-components which can be easily added. The leaflet library is fairly old when it comes to JavaScript libraries, and hence doesn't provide a component based API for use in modern frameworks, hence creating a component based Leaflet map was required. A tutorial by software consultancy firm Shipbit gave a good starting point for this, and was built on to support more features. This structural change came late in the project, after time was lost previously due to minor changes to the map code breaking other map features, but the change in structure roughly halved the code needed by the map while retaining all features. Other issues were encountered with the Leaflet library, including its use of coordinates in \texttt{(latitude, longitude)} form, rather than the GeoJSON standard \texttt{(longitude, latitude)} used by most modern geospatial libraries, including Turf.js \cite{GeoJSONRFC}.
+
+The map effectively works by internally connecting the Leaflet library code to a Svelte component, which has a slot tag. Slot tags allow other components to be nested within the original component, for example a marker component within a map component. This map component would interface with the leaflet library, but be bound to the its svelte component, such that creating a marker Svelte component with some properties would create a marker on the Leaflet map with those properties. This is how most libraries which are not component based UI libraries already, are turned into components in Svelte, and other component based frameworks. By keeping all frontend libraries component based in a codebase, complexity is reduced as the only way to display something is via a component, thus interactions are generally simple to understand.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.25\linewidth]{document-resources//images/map-leaflet-variables.png}
+    \includegraphics[width=0.25\linewidth]{document-resources//images/map-svelte-component-rough.png}
+    \includegraphics[width=0.25\linewidth]{document-resources//images/map-onmount.png}
+    \caption{Svelte code for map component showing slot tag and binding property tied to underlying Leaflet map. \texttt{onMount} connects the Leaflet map to the component, and \texttt{onDestroy} removes it when the component is destroyed in order to correctly handle resources, reducing the chance of a memory leak.}
+    \label{fig:map-svelte-component}
+\end{figure}
+
+To support the drawing of a flight path, airspaces, airports, headings, and other requirements of the flight plan, marker, polyline (straight lines connecting a sequence of points), polygon, popup and control components were developed in a similar way to the component based map. Each component has a slot, just like the map. For the polyline, polygon and marker these are used to add popups, and for the popup and control components, the slot is used to add Svelte components such as to design a specific popup. 
+
+\section{Routes}
+\label{se:routes}
+\subsection{Route Generation}
+\label{sse:routegen}
+
+Route generation requires fetching data required to construct a route, and computing a route close enough to an exam route to be useful to users. Initially this was all performed by a separate webserver, written in Rust, with the result sent to the frontend. Although this was very performant, the exact process of route generation had not been finalised, and was expected to undergo many changes as more was learned about both the constraints of exam routes, and the design of the frontend. Due to this, when returning to the project after taking a break to complete other coursework over the winter break, all rust code was ported to TypeScript and made part of what was initially the frontend webserver. TypeScript proved much better for quickly iterating versions, given that it doesn't have a slow compilation time, has access to many more libraries and can be run with syntactic errors. 
+
+% Actual technical shit about the route gen
+
+\subsection{Route Planner}
+\label{sse:routeplanner}
+
+The first hosted version of RT-Trainer featured only the route generator, and no manual route planner, as this was the original design. However, late into the project, it became clear that the usefulness of the system would be greatly improved by its inclusion, and that most of the groundwork had already been completed to support it. 
+
+The route planner is in the form of a page mostly taken up by a map component, featuring all relevant UK airports and airspaces, and an information sidebar and footer. The sidebar features a summary of the route waypoints, with the ability to change names, delete or drag to re-order. The sidebar also features controls to change distance unit, maximum flight level and a way to invoke the route generator based on a seed the user can input. Finally, the footer shows the estimated route distance and number of airspaces included on-route.
+
+A user creates a route by clicking anywhere on the map to define a waypoint. If an airport is clicked, it is marked as a waypoint, meaning that the scenario generator can later down the line use the data on the airport to properly generate scenario points for takeoff or landing. Clicking anywhere else will create an airborne waypoint, modelled as being at the maximum flight level for the route, e.g. 3000ft or FL30. Waypoints are connected in order by straight lines, which is standard for flight planning software \cite{SkyDemon}\cite{SkyVector}, and feature an icon which can be dragged to a new location (as long as the waypoint is not at an airport). Clicking on a waypoint shows a popup giving the user the ability to change its name, latitude and longitude, or to delete it entirely. Edit controls are not shown for airport waypoints.
+
+When the ``Save Route" button is clicked, a modal appears requiring the user to input a name and set route visibility, and gives the option to add a route description. The visibility option determines whether other users should be able to view the route, and how they will find it. \texttt{Public} allows the route to show up in the public routes list, \texttt{Unlisted} routes are only accessible by accessing its URL, and \texttt{Private} routes can only be seen by the creator themselves (the default option). Once submitted the route is saved to the database via an API call to the \texttt{/route} endpoint. As long as this API post request is successfully validated, a route with its details is pushed to the database, followed by its waypoints with foreign keys linking back to the route. References to the airports and airspaces along the route are also stored, meaning the system need not load all and determine which it actually needs to display every time the route must be shown, instead it can simply fetch only those which are needed.
+
+\section{Scenario Generation}
+\label{se:scenariogen}
+
+\subsection{Scenario Points}
+\label{sse:scenariopoints}
+
+\subsection{Weather Model}
+\label{sse:metormodel}
+
+\section{Simulator}
+\label{se:sim}
+
+\subsection{Input and Output}
+\label{sse:inputoutput}
+
+\subsection{Radio and Transponder}
+\label{sse:radiotransponder}
+
+\subsection{Altimeter}
+\label{sse:altimeter}
+
+\section{Radio Call Parsing}
+\label{se:parsing}
+% Feedback
+
+\section{Authentication and Authorisation}
+\label{se:authauthor}
+% Which pages are protected, why and how
