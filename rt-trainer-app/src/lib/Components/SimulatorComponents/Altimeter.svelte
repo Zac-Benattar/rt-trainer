@@ -58,7 +58,7 @@
 		mounted = true;
 	});
 
-	// Remeber to credit Peter Shmulevich: https://codepen.io/pshmulevich/pen/YMxbNv
+	// HTML, most CSS and SVGs by Peter Shmulevich on CodePen: https://codepen.io/pshmulevich/pen/YMxbNv
 </script>
 
 <div

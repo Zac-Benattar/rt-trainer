@@ -75,27 +75,52 @@
 			</li>
 			<li class="py-2">
 				<div class="h4">Map</div>
-				<p>
-					The map component is provided by <a class="anchor" href="https://leafletjs.com/"
-						>Leaflet</a
-					>
-					and uses
-					<a class="anchor" href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The map is
-					rendered using
-					<a class="anchor" href="https://www.mapbox.com/">Mapbox</a> tiles.
-				</p>
+				<ul>
+					<li>
+						<p>
+							The map component is provided by <a class="anchor" href="https://leafletjs.com/"
+								>Leaflet</a
+							>
+							and uses
+							<a class="anchor" href="https://www.openstreetmap.org/">OpenStreetMap</a> data. The
+							map is rendered using
+							<a class="anchor" href="https://www.mapbox.com/">Mapbox</a> tiles.
+						</p>
+					</li>
+					<li>
+						<p>
+							The component based form of the map was inspired by <a
+								class="anchor"
+								href="https://www.youtube.com/watch?v=JFctWXEzFZw">ShipBit's YouTube video.</a
+							>
+						</p>
+					</li>
+				</ul>
+			</li>
+			<li class="py-2">
+				<div class="h4">Code Snippets</div>
+				<ul>
+					<li>
+						<p>
+							Altimeter design by <a class="anchor" href="https://codepen.io/pshmulevich/pen/YMxbNv"
+								>Peter Shmulevich</a
+							>
+						</p>
+					</li>
+				</ul>
 			</li>
 			<li class="py-2">
 				<div class="h4">Images</div>
-				<p>
-					Landing page plane svg by <a
-						class="anchor"
-						href="https://www.flaticon.com/free-icons/plane"
-						title="plane icons"
-					>
-						Freepik</a
-					>
-				</p>
+				<ul>
+					<li>
+						<p>
+							Landing page plane svg by <a
+								class="anchor"
+								href="https://www.flaticon.com/free-icons/plane">Freepik</a
+							>
+						</p>
+					</li>
+				</ul>
 			</li>
 		</ul>
 	</div>

@@ -72,7 +72,7 @@ export default class Airport {
 		this.frequencies = frequencies;
 		// All airports should have coordinates and elevation but for some reason one is always undefined so this gets around it
 		if (coordinates != undefined && elevation != undefined) {
-			this.metorData = this.generateMETORData(coordinates[0], coordinates[1], elevation);
+			this.metorData = this.generateMETORData(coordinates[1], elevation);
 		} else {
 			this.metorData = new METORData(180, 10, 8, 1013.25, 0.1, 15, 5, 12, 3);
 		}
@@ -216,9 +216,9 @@ export default class Airport {
 		return String.fromCharCode(65 + (seed % 26));
 	}
 
-	protected generateMETORData(long: number, lat: number, elevation: number): METORData {
+	protected generateMETORData(lat: number, elevation: number): METORData {
 		const avgWindDirection = 180;
-		const meanWindSpeed = 8 + Math.pow(long + 2, 4) * 0.5;
+		const meanWindSpeed = 15;
 		const stdWindSpeed = 8;
 		const meanPressure = 1013.25 * Math.pow(1 - (6.5 * elevation) / 288150, 5.255); // Formula from https://rechneronline.de/physics/air-pressure-altitude.php
 		const stdPressure = 0.5;

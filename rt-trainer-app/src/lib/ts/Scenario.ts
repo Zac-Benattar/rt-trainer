@@ -102,8 +102,8 @@ export function ResetCurrentRoutePointIndex(): void {
 
 export type RouteData = {
 	waypoints: Waypoint[];
-	airspaces: Airspace[];
 	airports: Airport[];
+	airspaces: Airspace[];
 };
 
 /**

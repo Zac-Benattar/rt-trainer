@@ -1,22 +1,14 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-
 	export let DisplayOn: boolean = false;
 	export let mode: string = 'COM';
 	export let activeFrequency: number = 123.17;
 	export let standbyFrequency: number = 126.41;
 	export let tertiaryFrequency: number = 177.2;
 
-	let mounted: boolean = false;
-
 	$: showDisplayText = DisplayOn ? 'displayon' : 'displayoff';
 	$: if (!DisplayOn) {
 		mode = 'COM';
 	}
-
-	onMount(() => {
-		mounted = true;
-	});
 </script>
 
 <div
