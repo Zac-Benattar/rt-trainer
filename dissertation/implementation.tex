@@ -1,17 +1,9 @@
 \chapter{Implementation}
 \label{ch:implementation}
 
-In this chapter, we describe the implementation of the design we described in \ref{ch:design}. You should \textbf{not} describe every line of code in your implementation. Instead, you should focus on the interesting aspects of the implementation: that is, the most challenging parts that would not be obvious to an average Computer Scientist. Include diagrams, short code snippets, etc. for illustration. 
-
 \section{Technology}
 \label{se:tech}
-\subsection{Front-end Framework}
-\label{sse:frontendframework}
-While not strictly necessary to provide the raw HTML and JavaScript to the client required to render modern web pages, most web developers choose to use a frontend framework to simplify and speed up development. Despite being yet another technology for a developer to learn, they provide a malleable and streamlined structure to write JavaScript code in such that the developer can focus on the features that users care about, and not the foundations of their web-app. A selection of the most commonly used frameworks in production environments today were considered, as well as some select frameworks which scored highly on the admired and desired scale(s). The data comes from the most recent StackOverflow developer survey. These were React.js \textit{(most popular, most desired)}, Node.js \textit{(2nd most popular, 2nd most desired)}, Angular \textit{(5th most popular)}, Next.js \textit{(4th most desired)} and Svelte \textit{(2nd most admired)}\cite{StackOverflow2023Survey}.
-
-Svelte, despite being the newest and least mature of the shortlist, was selected for this project due to its development aims of solving various problems present in the more established frameworks. For example state management in Svelte is handled through stores, which act as global states, and component states. Many React developers for example rely on external libraries for global state management if they don't want to pass states along the entire component hierarchy across their application. Svelte has a sister library SvelteKit which acts as the web server framework, with first class support from many hosting providers, it supports SSR with no configuration and can be run in a serverless configuration. Svelte is a compiled framework, doing away with the virtual DOM, a runtime intermediate representation of the actual DOM used by React and other popular frameworks. This virtual DOM causes React to perform most of its processor intensive tasks at runtime, which Svelte instead performs at compile time, giving improved page load times and minimal layout shift \cite{virtual-dom-overhead}.
-
-Svelte, similarly to many other front-end frameworks is component based. Components consist of HTML, CSS and JavaScript and allow the same code to be instantiated multiple times giving great code re-usability. Much like HTML elements, components have properties, or props, which can be passed to the component in its opening tag. This allows a parent component to pass data to its children, and styling to be modified easily. Components also have behaviours defined by JavaScript functions, giving them the ability to modify their state and DOM. The use of components provides similar benefits to the use of classes in Object Oriented Programming (OOP), with a visual layer on top in the form of HTML. The code for most of the pages in RT-Trainer are comprised of HTML with components where appropriate to reduce the amount of code which needs to copied between pages.
+While the design of the system specifies many architectural choices and sets out certain requirements for the implementation of the system, it leaves many options when it comes to the specific technologies used to create RT-Trainer. This section introduces and justifies the most important technologies used in RT-Trainer.
 
 \subsection{Hosting}
 \label{sse:hosting}
@@ -21,9 +13,9 @@ Various hosting providers offer minimal-configuration SvelteKit hosting, but the
 
 \subsection{Database}
 \label{sse:database}
-As mentioned in the implementation section \ref{ch:implementation}, PostgreSQL was the chosen style of SQL database for storing user data (routes, scenarios). While many managed database providers offer PostgreSQL services, the provider with the most well documented and generous hobby plan was Planetscale. Although its DBMS supports only MySQL, not PostgreSQL, the original requirement for full geospatial data support was found to be unnecessary by this point in the project. The only geospatial data stored in the database was user generated waypoints, with all other aeronautical data fetched on demand from the OpenAIP API \ref{se:openaip}. Waypoint coordinates were stored as latitude and longitude in separate numeric type columns. Its limits of 10GB storage per month, 100 million row reads per month and 10 million row writes per month were deemed as unlikely to be exceeded.
+As mentioned in the implementation section \ref{ch:implementation}, PostgreSQL was the chosen style of SQL database for storing user data (routes, scenarios). While many managed database providers offer PostgreSQL services, the provider with the most well documented and generous hobby plan was Planetscale. Although its DBMS supports only MySQL, not PostgreSQL, the original requirement for full geospatial data support was found to be unnecessary by this point in the project. The only geospatial data stored in the database was user generated waypoints, with all other aeronautical data fetched on demand from the OpenAIP API (see section \ref{se:aerodata}). Waypoint coordinates were stored as latitude and longitude in separate numeric type columns. Its limits of 10GB storage per month, 100 million row reads per month and 10 million row writes per month were deemed as unlikely to be exceeded.
 
-Following an email from Planetscale indicating that they would retire the hobby plan on the 8th of April, weeks away from the project's final deadline, all data was migrated. Due to the limited time remaining in the project, the choice was made to move the data to Vercel's managed Postgres system as this would be quick to integrate into the project already hosted on Vercel. Due to the use of DrizzleORM (see  section \ref{ssse:drizzle}) this migration was very quick.
+Following an email from Planetscale indicating that they would retire the hobby plan on the 8th of April, weeks away from the project's final deadline, all data was migrated. Due to the limited time remaining in the project, the choice was made to move the data to Vercel's managed Postgres system as this would be quick to integrate into the project already hosted on Vercel. Due to the use of DrizzleORM (see section \ref{ssse:drizzle}) this migration was very quick.
 
 \subsection{Supporting Libraries}
 \label{sse:libraries}
@@ -65,9 +57,38 @@ In addition to the previously mentioned libraries, various other libraries used 
     \item Axios - Provided a simple interface and boilerplate for API fetching \cite{AxiosNPM}.
     \item Leaflet.RotatedMarker - An extension for Leaflet.js allowing the rotating of markers, used to rotate the current location icon to the correct angle for the current point in flight \cite{LeafletRotatedMarkerNPM}.
     \item Svelte Icons Pack - A Svelte component based implementation of Flowbite's open source icon pack \cite{FlowbiteIcons}\cite{FlowbiteSvelteIconsNPM}. Used to improve usability by providing familiar controls to users.
-    \item Vercel Web Analytics - Vercel's cookie-free analytical tool for monitoring site access metrics \cite{VercelWebAnalyticsNPM}.
+    \item Vercel Web Analytics - Vercel's cookie-free analytical tool for monitoring site access metrics \cite{VercelWebAnalyiticsNPM}.
     \item Dotenv - Support for \texttt{.env} files for easy API and other secret key management. Various APIs used by the system require API keys or other secrets; Dotenv interfaces with Vite to ensure they are accessible, and only to the server \cite{DotenvNPM}.
 \end{itemize}
+
+\section{Aeronautical Data}
+\label{se:aerodata}
+
+% In order to have realistic data, need to get it from a decent source
+Providing useful flight practice required using real world aeronautical data. Fortunately NATS distributes various Aeronautical Information Products (AIPs) on behalf of the UK Civil Aviation Authority \cite{NATS-Datasets}, which are for use in official charts and real world flight software. These files are published in a selection of CSV, XLS and XML formats once per month. Free APIs exist which provide endpoints for this data in a JSON format, which is more appropriate for RT-Trainer. OpenAIP is a community contribution based, Attribution-NonCommercial licensed AIP database with various tools and endpoints for accessing up-to-date flight planning data.
+
+When a user accesses a page which requires data from OpenAIP, SvelteKit fetches the data from OpenAIP using Axios and passes it to the client in the \texttt{pageData} object, an optional object which can be included with any page in SvelteKit. This means that SvelteKit waits for the fetch to complete before sending the client the page. Filters are used to speed up the fetch, for example filtering to airspaces relevant for low altitude VFR flight, and all queries are filtered to only UK airspace, as OpenAIP is not limited to just the UK. While there is a wide selection of filters, there is no way to filter by a set of names, IDs or any other identifier. This causes certain fetches to take significantly longer than needed. When accessing a route that a user has created, the airports and airspaces along the route are known, and thus RT-Trainer only needs the data for these route features from OpenAIP. Despite this, it instead has to fetch all potential airports and airspaces and filter them after by ID. On a fast internet connection this is noticeable, and on slower connections causes some pages to take multiple seconds to load. Potential fixes are discussed in the conclusion chapter \ref{ch:conclusions}, but this issue has been left unresolved as meeting remaining system requirements has been the main priority.
+
+The fetch process for the airspaces of a route takes the following steps:
+
+\begin{itemize}
+    \item Fetch required airspace IDs from the route's database row
+    \item Construct a get request to https://api.core.openaip.net/api/airspaces using Axios with the OpenAIP access token injected from the \texttt{.env} file into the header, and filtered with parameters as follows:
+    \begin{itemize}
+        \item \texttt{country = `GB'}
+        \item \texttt{iacoClass = [1, 2, 3, 4, 5, 6, 8]} (classes relevant for VFR)
+        \item \texttt{onDemand = false}
+        \item \texttt{onRequest = false}
+        \item \texttt{byNotam = false}
+    \end{itemize}
+    \item Submit the request
+    \item Receive the response
+    \item If response is valid, cast the response data to AirspaceData objects (simple class with all of the same properties as the JSON data from OpenAIP so that types can be used)
+    \item Filter the list of AirspaceData objects to contain only required airspaces
+    \item Construct the remaining AirspaceData objects to Airspace objects, which have functions as well as data
+\end{itemize}
+
+% Include postman screenshot of a test - blur out api keys!
 
 \section{Map Component}
 \label{se:map}
@@ -85,10 +106,12 @@ The map effectively works by internally connecting the Leaflet library code to a
     \label{fig:map-svelte-component}
 \end{figure}
 
-To support the drawing of a flight path, airspaces, airports, headings, and other requirements of the flight plan, marker, polyline (straight lines connecting a sequence of points), polygon, popup and control components were developed in a similar way to the component based map. Each component has a slot, just like the map. For the polyline, polygon and marker these are used to add popups, and for the popup and control components, the slot is used to add Svelte components such as to design a specific popup. 
+To support the drawing of a flight path, airspaces, airports, headings, and other requirements of the flight plan, marker, polyline (straight lines connecting a sequence of points), polygon, popup and control components were developed in a similar way to the component based map. Each component has a slot tag, just like the map. For the polyline, polygon and marker these are used to add popups, and for the popup and control components, the slot is used to add further Svelte components such as HTML to show current heading. 
 
 \section{Routes}
 \label{se:routes}
+As mentioned in the design section, a route is a sequence of waypoints and is created by a user, with the ability to then be used in a scenario. Internally, a route in RT-Trainer is simply defined as a \texttt{RouteData} object, comprising a list of waypoints, airports and airspaces.
+
 \subsection{Route Generation}
 \label{sse:routegen}
 
@@ -105,7 +128,7 @@ The route planner is in the form of a page mostly taken up by a map component, f
 
 A user creates a route by clicking anywhere on the map to define a waypoint. If an airport is clicked, it is marked as a waypoint, meaning that the scenario generator can later down the line use the data on the airport to properly generate scenario points for takeoff or landing. Clicking anywhere else will create an airborne waypoint, modelled as being at the maximum flight level for the route, e.g. 3000ft or FL30. Waypoints are connected in order by straight lines, which is standard for flight planning software \cite{SkyDemon}\cite{SkyVector}, and feature an icon which can be dragged to a new location (as long as the waypoint is not at an airport). Clicking on a waypoint shows a popup giving the user the ability to change its name, latitude and longitude, or to delete it entirely. Edit controls are not shown for airport waypoints.
 
-When the ``Save Route" button is clicked, a modal appears requiring the user to input a name and set route visibility, and gives the option to add a route description. The visibility option determines whether other users should be able to view the route, and how they will find it. \texttt{Public} allows the route to show up in the public routes list, \texttt{Unlisted} routes are only accessible by accessing its URL, and \texttt{Private} routes can only be seen by the creator themselves (the default option). Once submitted the route is saved to the database via an API call to the \texttt{/route} endpoint. As long as this API post request is successfully validated, a route with its details is pushed to the database, followed by its waypoints with foreign keys linking back to the route. References to the airports and airspaces along the route are also stored, meaning the system need not load all and determine which it actually needs to display every time the route must be shown, instead it can simply fetch only those which are needed.
+When the ``Save Route" button is clicked, a modal appears requiring the user to input a name and set the route visibility, and gives the option to add a route description. The visibility option determines whether other users should be able to view the route, and how they will find it. \texttt{Public} allows the route to show up in the public routes list, \texttt{Unlisted} routes are only accessible by accessing its URL, and \texttt{Private} routes can only be seen by the creator themselves (the default option). Once submitted the route is saved to the database via an API call to the \texttt{/route} endpoint. As long as this API post request is successfully validated, a route with its details is pushed to the database, followed by its waypoints with foreign keys linking back to the route. References to the airports and airspaces along the route are also stored, meaning the system need not load all and determine which it actually needs to display every time the route must be shown, instead it can simply fetch only those which are needed.
 
 \section{Scenario Generation}
 \label{se:scenariogen}
@@ -115,18 +138,39 @@ When the ``Save Route" button is clicked, a modal appears requiring the user to 
 
 \subsection{Weather Model}
 \label{sse:metormodel}
+An important detail included in many radio calls is the current pressure. As well as this, certain radio calls also contain other weather details, hence a suitable realistic weather model was developed in order to provide this data for radio call generation. A seeded normal distribution was used to generate the required values whenever required, and the mean and standard deviation of the random variables is determined entirely by the seed.
+
+Each airport has a METOR data sample associated, which is created when the airport object is instantiated. The mean and standard deviation values for each variable are determined by the latitude, longitude and elevation of the airport.
+% The calculation should be improved before writing this lol, its super crude and writing much about it will be a mess. It needs validating via testing. Could ask chatgpt for a better one
+
+First the seed is used to determine the season. This ensures that there can be variance between points along the route where meteorological data is required, while keeping the values close enough to be believable. 
 
 \section{Simulator}
 \label{se:sim}
 
-\subsection{Input and Output}
+\subsection{Input and Output Radio Calls}
 \label{sse:inputoutput}
 
 \subsection{Radio and Transponder}
 \label{sse:radiotransponder}
+% Remember that the design will have been discussed already in the design section
+The radio and transponder are Svelte components with various sub-components, properties and functions to allow them to mimic their real life counterparts. For example, various dial components were created, which allow a user to click on a side of the dial for it to turn either clockwise or anticlockwise, with these turn events being subscribed to by the parent component, in order to adjust a value displayed. By these means a user can change the frequencies of the radio and transponder in a way similar to real life. By using the JavaScript \texttt{setInterval} function, clicking and holding down on one side of a dial will continuously turn it, triggering the relevant rotate event more and more frequently the longer it is held. Combining this with non-held clicks, both speed and accuracy can be achieved when adjusting frequencies, while keeping the interactions similar to real life dials.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{document-resources//images/dial-turn-code.png}
+    \caption{Enter Caption}
+    \label{fig:enter-label}
+\end{figure}
+
+Seven segment display components were developed to act as displays for the frequency of both the radio and transponder, which stylistically are effectively a glowing seven segment font. Displaying the correct values however required a lot more work. Due to the way computers store numbers, the numerical frequency cannot not be displayed directly, given that the number $118.300$ would be displayed as $118.3$. Partially for redundancy in often poorly readable radio calls, the full frequency, including proceeding or trailing zeros should be stated. Real life radios and transponders reflect this by always displaying the same number of digits. Therefore a string version of the frequency is displayed for the radio display, and a digit array, displayed digit by digit, is used for the transponder display, as its workings are slightly different. The transponder's dial adjust the frequency of only the selected digit, with buttons to move the digit selector. This design means that numeric values can be directly displayed.
 
 \subsection{Altimeter}
 \label{sse:altimeter}
+
+The altimeter was a suggestion by the project's client, who proposed that it replace the kneeboard which was simply a note taking text box in the same position on the page. An important part of VFR flight is the calibration of the altimeter, which is based on the current pressure reading. The further from the correct pressure the altimeter is set, the more inaccurate its readings become. Therefore the integration of the altimeter allows users to practice setting the current pressure reading when it is given to them in a radio call, in order to get the correct current altitude.
+
+The HTML, CSS and SVG images which make up the visuals of the altimeter were published by Peter Shmulevich under the MIT license \cite{altimeter-codepen}.
 
 \section{Radio Call Parsing}
 \label{se:parsing}
