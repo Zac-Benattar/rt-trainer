@@ -1,5 +1,5 @@
 # RT-Trainer
-This project comprises a web based training platform for future pilots to learn radio telephony (RT) skills required to pass the CAA RT exam in order to obtain a Flight Radiotelephony Operator's License (FRTOL). More information about the licence and exam can be found on the [CAA's website](https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/). It was initially developed as my third year project for my CS degree at Warwick.
+This project comprises a web based training platform for future pilots to learn radio telephony (RT) skills required to pass the CAA RT exam in order to obtain a Flight Radiotelephony Operator's License (FRTOL). More information about the licence and exam can be found on the [CAA's website](https://www.caa.co.uk/general-aviation/pilot-licences/flight-radio-telephony-operator-licence/). It was initially developed as part of [Zac Benattar's](https://github.com/Zac-Benattar) dissertation project.
 ## The repository
 This repository is inspired by a starter pack repository of resources for CS310 and other, similar modules written by Warwick alumni Michael B. Gale (https://github.com/mbg/cs310). It initially comprised of:
 - LaTeX templates for the project specification, progress report, and dissertation.
