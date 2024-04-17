@@ -53,7 +53,7 @@
 
 	// Reactive Classes
 	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/login')) {
-		// If on homepage hide sidebar and ways to access it as user is not logged in
+		// If on homepage hide sidebar and ways to access it
 		showTopAppBar = true;
 		showNavigation = false;
 		showRoutePlanSidebar = false;
@@ -77,7 +77,6 @@
 		classesSidebar = 'w-0 lg:w-80';
 		burgerButton = 'lg:hidden';
 	} else {
-		// Otherwise user is logged in and sidebar can be shown
 		showTopAppBar = true;
 		showNavigation = true;
 		showRoutePlanSidebar = false;

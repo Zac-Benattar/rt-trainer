@@ -315,3 +315,6 @@ Cargo.lock
 
 # Lock files for god knows what maybe libre office?
 *#
+
+# Vercel
+.vercel
