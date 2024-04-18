@@ -11,8 +11,11 @@
 		AllAirportsStore,
 		AllAirspacesStore,
 		AwaitingServerResponseStore,
+		ClearSimulationStores,
+		HasEmergencyEventsStore,
 		maxFlightLevelStore,
 		RouteDistanceDisplayUnitStore,
+		ScenarioSeedStore,
 		WaypointsStore
 	} from '$lib/stores';
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
@@ -22,10 +25,30 @@
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
+	ClearSimulationStores();
+
+	// Random seed generation function
 	const shortCUID = init({ length: 8 });
 
+	// Scenario data
 	let scenarioSeed: string = shortCUID();
-	let routeSeed: string = '';
+	ScenarioSeedStore.set(scenarioSeed); // Set initial value
+	let hasEmergencyEvents: boolean = true;
+	HasEmergencyEventsStore.set(hasEmergencyEvents); // Set initial value
+
+	// Route data
+	let routeSeed: string = ''; // Only used for seeding the route generator
+	let waypoints: Waypoint[] = []; // Stores all the waypoints in the route
+
+	// Aeronautical data
+	let airports: Airport[] = [];
+	let airspaces: Airspace[] = [];
+
+	// Route preferences
+	let distanceUnit: string = 'Nautical Miles';
+	let maxFL: number = 30;
+
+	// Blocking new inputs during route generation
 	let awaitingServerResponse: boolean = false;
 	AwaitingServerResponseStore.subscribe((value) => {
 		awaitingServerResponse = value;
@@ -36,6 +59,36 @@
 			loadSeededRoute();
 		}
 	}
+
+	$: ScenarioSeedStore.set(scenarioSeed);
+
+	$: HasEmergencyEventsStore.set(hasEmergencyEvents);
+
+	$: RouteDistanceDisplayUnitStore.set(distanceUnit);
+
+	$: {
+		maxFL = Math.max(15, maxFL);
+		maxFlightLevelStore.set(maxFL);
+	}
+
+	WaypointsStore.subscribe((value) => {
+		waypoints = value;
+	});
+
+	AllAirportsStore.subscribe((value) => {
+		airports = value;
+	});
+
+	AllAirspacesStore.subscribe((value) => {
+		airspaces = value;
+	});
+
+	const distanceUnitsPopupCombobox: PopupSettings = {
+		event: 'click',
+		target: 'distance-unit-popup',
+		placement: 'bottom',
+		closeQuery: '.listbox-item'
+	};
 
 	async function loadSeededRoute() {
 		AwaitingServerResponseStore.set(true);
@@ -49,47 +102,14 @@
 		AwaitingServerResponseStore.set(false);
 	}
 
-	let waypoints: Waypoint[] = [];
-	WaypointsStore.subscribe((value) => {
-		waypoints = value;
-	});
-
-	let airports: Airport[] = [];
-	AllAirportsStore.subscribe((value) => {
-		airports = value;
-	});
-
-	let airspaces: Airspace[] = [];
-	AllAirspacesStore.subscribe((value) => {
-		airspaces = value;
-	});
-
-	let distanceUnit: string = 'Nautical Miles';
-	$: RouteDistanceDisplayUnitStore.set(distanceUnit);
-
-	let maxFL: number = 30;
-	maxFlightLevelStore.set(maxFL);
-
-	$: {
-		maxFL = Math.max(15, maxFL);
-		maxFlightLevelStore.set(maxFL);
-	}
-
-	const distanceUnitsPopupCombobox: PopupSettings = {
-		event: 'click',
-		target: 'distance-unit-popup',
-		placement: 'bottom',
-		closeQuery: '.listbox-item'
-	};
-
 	const dragDuration: number = 200;
 	let draggingWaypoint: Waypoint | undefined = undefined;
 	let animatingWaypoints = new Set();
 
-	function swapWith(waypoint: Waypoint) {
+	function swapWith(waypoint: Waypoint): void {
 		if (draggingWaypoint === waypoint || animatingWaypoints.has(waypoint)) return;
 		animatingWaypoints.add(waypoint);
-		setTimeout(() => animatingWaypoints.delete(waypoint), dragDuration);
+		setTimeout((): boolean => animatingWaypoints.delete(waypoint), dragDuration);
 		const cardAIndex = waypoints.indexOf(draggingWaypoint);
 		const cardBIndex = waypoints.indexOf(waypoint);
 		waypoints[cardAIndex] = waypoint;
@@ -224,7 +244,13 @@
 			</div>
 
 			<label class="flex items-center space-x-2">
-				<input id="emergency-events-checkbox" class="checkbox" type="checkbox" checked />
+				<input
+					id="emergency-events-checkbox"
+					class="checkbox"
+					type="checkbox"
+					checked
+					on:change={() => (hasEmergencyEvents = !hasEmergencyEvents)}
+				/>
 				<p>Emergency Events</p>
 			</label>
 		</div>

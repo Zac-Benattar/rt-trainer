@@ -17,7 +17,6 @@
 		CurrentTargetStore,
 		ScenarioStore,
 		AircraftDetailsStore,
-		GenerationParametersStore,
 		SpeechOutputEnabledStore,
 		ExpectedUserMessageStore,
 		CurrentTargetFrequencyStore,
@@ -125,11 +124,6 @@
 
 	LiveFeedbackStore.subscribe((value) => {
 		liveFeedback = value;
-	});
-
-	GenerationParametersStore.subscribe((value) => {
-		seed = value.seed;
-		hasEmergency = value.hasEmergency;
 	});
 
 	AircraftDetailsStore.subscribe((value) => {

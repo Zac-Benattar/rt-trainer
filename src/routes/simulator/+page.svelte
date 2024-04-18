@@ -13,13 +13,40 @@
 		WaypointsStore
 	} from '$lib/stores';
 	import type Scenario from '$lib/ts/Scenario';
+	import { goto } from '$app/navigation';
 
 	// Get the slug
 	const { id } = $page.params;
 
+	let seed: string = '';
+	let hasEmergencies: boolean = false;
 	let callsign: string = 'G-OFLY';
 	let prefix: string = 'STUDENT';
 	let aircraftType: string = 'Cessna 172';
+
+	// Check whether the seed is specified
+	const seedString: string | null = $page.url.searchParams.get('seed');
+	if (seedString != null && seedString != '') {
+		seed = seedString;
+	} else {
+		console.log('No seed specified');
+		alert('No seed specified');
+		goto('/');
+	}
+
+	// Check whether the hasEmergency is specified
+	const hasEmergencyString: string | null = $page.url.searchParams.get('hasEmergency');
+	if (hasEmergencyString != null) {
+		hasEmergencies = hasEmergencyString === 'true';
+	}
+
+	// Get waypoints from the URL's JSON.stringify form
+	const waypointsString: string | null = $page.url.searchParams.get('waypoints');
+	if (waypointsString != null) {
+		const waypointsArray: string[] = JSON.parse(waypointsString);
+		const waypoints = waypointsArray.map((waypoint) => JSON.parse(waypoint));
+		console.log(waypoints);
+	}
 
 	// Check whether the callsign is specified
 	const callsignString: string | null = $page.url.searchParams.get('callsign');
@@ -72,7 +99,7 @@
 	let tutorial: boolean = false;
 	const tutorialString: string | null = $page.url.searchParams.get('tutorial');
 	if (tutorialString != null) {
-		tutorial = tutorialString === 'True';
+		tutorial = tutorialString === 'true';
 	}
 
 	const scenario: Scenario = null;

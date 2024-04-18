@@ -1,11 +1,6 @@
 import type Feedback from './Feedback';
 import type { EmergencyType } from './ScenarioTypes';
 
-export type GenerationParameters = {
-	seed: string;
-	hasEmergency: boolean;
-};
-
 /* List of mistakes made by the user and the response from the radio target */
 export class ServerResponse {
 	feedbackDataJSON: string;

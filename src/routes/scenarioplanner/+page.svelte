@@ -3,12 +3,12 @@
 	import {
 		AllAirportsStore,
 		AwaitingServerResponseStore,
-		ClearSimulationStores,
 		FilteredAirspacesStore,
-		GenerationParametersStore,
+		HasEmergencyEventsStore,
 		OnRouteAirspacesStore,
 		RouteDistanceDisplayStore,
 		RouteDistanceMetersStore,
+		ScenarioSeedStore,
 		WaypointPointsMapStore,
 		WaypointsStore
 	} from '$lib/stores';
@@ -29,20 +29,9 @@
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
 	import type { AirportData, AirspaceData } from '$lib/ts/AeronauticalClasses/OpenAIPTypes';
-	import type { GenerationParameters } from '$lib/ts/ServerClientTypes';
-
-	ClearSimulationStores();
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
-
-	let generationParameters: GenerationParameters = {
-		seed: '',
-		hasEmergency: true
-	};
-	GenerationParametersStore.subscribe((value) => {
-		generationParameters = value;
-	});
 
 	let unnamedWaypointCount = 1;
 
@@ -266,11 +255,21 @@
 			}
 		}
 
+		let scenarioSeed: string = '';
+		ScenarioSeedStore.subscribe((value) => {
+			scenarioSeed = value;
+		});
+
+		let hasEmergencies: boolean = false;
+		HasEmergencyEventsStore.subscribe((value) => {
+			hasEmergencies = value;
+		});
+
 		const scenarioURLString: string =
-			'/simulator/seed=' +
-			generationParameters.seed +
-			'&hasEmergency=' +
-			generationParameters.hasEmergency +
+			'/simulator?seed=' +
+			scenarioSeed +
+			'&hasEmergencies=' +
+			hasEmergencies +
 			'&waypoints=' +
 			JSON.stringify(waypoints) +
 			'&airports=' +

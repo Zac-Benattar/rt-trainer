@@ -1,5 +1,4 @@
 import { derived, writable } from 'svelte/store';
-import type { GenerationParameters } from './ts/ServerClientTypes';
 import type {
 	AircraftDetails,
 	AltimeterState,
@@ -12,11 +11,6 @@ import type Airspace from './ts/AeronauticalClasses/Airspace';
 import type Waypoint from './ts/AeronauticalClasses/Waypoint';
 import type Airport from './ts/AeronauticalClasses/Airport';
 import * as turf from '@turf/turf';
-
-const initialGenerationParameters: GenerationParameters = {
-	seed: '',
-	hasEmergency: false
-};
 
 const initialAircraftDetails: AircraftDetails = {
 	prefix: 'STUDENT',
@@ -45,9 +39,9 @@ const initialAltimeterState: AltimeterState = {
 
 export const AircraftDetailsStore = writable<AircraftDetails>(initialAircraftDetails);
 
-export const GenerationParametersStore = writable<GenerationParameters>(
-	initialGenerationParameters
-);
+export const ScenarioSeedStore = writable<string>('');
+
+export const HasEmergencyEventsStore = writable<boolean>(false);
 
 export const SpeechInputEnabledStore = writable<boolean>(false);
 
@@ -223,7 +217,8 @@ export const AwaitingServerResponseStore = writable<boolean>(false);
 
 export function ClearSimulationStores(): void {
 	AircraftDetailsStore.set(initialAircraftDetails);
-	GenerationParametersStore.set(initialGenerationParameters);
+	ScenarioSeedStore.set('');
+	HasEmergencyEventsStore.set(false);
 	SpeechInputEnabledStore.set(false);
 	SpeechOutputEnabledStore.set(false);
 	LiveFeedbackStore.set(false);
