@@ -52,7 +52,7 @@
 						goto('/routeplanner');
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-surface"
-					data-sveltekit-preload-data="hover">Start practicing</button
+					data-sveltekit-preload-data="hover">Create a scenario</button
 				>
 			</div>
 		</div>

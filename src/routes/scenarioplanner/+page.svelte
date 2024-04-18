@@ -26,21 +26,13 @@
 	import { Icon } from 'svelte-icons-pack';
 	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
 	import Control from '$lib/Components/Leaflet/Control.svelte';
-	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
-	import { Visibility as Visibility } from '$lib/db/schema';
 
 	ClearSimulationStores();
 
-	const modalStore = getModalStore();
-
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
-
-	let routeName: string = '';
-	let routeDescription: string = '';
-	let routeVisibility: Visibility = Visibility.PRIVATE;
 
 	let unnamedWaypointCount = 1;
 
@@ -193,47 +185,7 @@
 	function onSaveClick() {
 		blockingClick = true;
 
-		const modal: ModalSettings = {
-			type: 'component',
-			component: 'createRouteComponent',
-			response: (r: any) => {
-				console.log(r);
-				if (r) {
-					routeName = r.routeName;
-					routeDescription = r.routeDescription;
-					routeVisibility = r.routeVisibility;
-					saveRoute();
-				} else {
-					blockingClick = false;
-				}
-			}
-		};
-		modalStore.trigger(modal);
-	}
-
-	async function saveRoute() {
-		try {
-			const response = await axios.post('/api/routes', {
-				routeName: routeName,
-				routeDescription: routeDescription,
-				visibility: routeVisibility,
-				userId: data.userId,
-				waypoints: waypoints,
-				type: 0,
-				airspaceIds: onRouteAirspaces.map((airspace) => airspace.id),
-				airportIds: onRouteAirports.map((airport) => airport.id)
-			});
-
-			if (response.data.result === 'success') {
-				goto(`/routes/${response.data.id}`);
-			} else {
-				// Add an error message modal
-				blockingClick = false;
-				console.log('Error: ', response);
-			}
-		} catch (error: unknown) {
-			console.log('Error: ', error);
-		}
+		// Check for route validity, then redirect to scenario page
 	}
 </script>
 
