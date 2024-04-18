@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
 	import { createEventDispatcher } from 'svelte';
+	import { GithubSolid } from 'flowbite-svelte-icons';
 	export let burgerButton: string;
 	export let enabled: boolean;
 
@@ -40,6 +41,14 @@
 
 		<svelte:fragment slot="trail">
 			<LightSwitch />
+			<a
+				class="btn btn-icon"
+				href="https://github.com/Zac-Benattar/rt-trainer"
+				target="_blank"
+				rel="noreferrer"
+			>
+				<GithubSolid size="xl" />
+			</a>
 		</svelte:fragment>
 	</AppBar>
 {:else}

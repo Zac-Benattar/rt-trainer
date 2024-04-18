@@ -118,7 +118,9 @@
 		<hr />
 	</div>
 
-	<div class="sidebar-contents-container overflow-auto px-3 pb-2">
+	<div
+		class="snap-y scroll-py-4 snap-mandatory scroll-smooth sidebar-contents-container overflow-auto px-3 pb-2"
+	>
 		<div class="flex flex-col gap-2 p-2">
 			<div><strong>Route Waypoints</strong></div>
 			{#if waypoints.length == 0}
