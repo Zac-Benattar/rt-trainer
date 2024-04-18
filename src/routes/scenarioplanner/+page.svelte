@@ -42,6 +42,11 @@
 
 	let blockingClick: boolean = false;
 
+	async function fetchAirports() {
+		const response = await axios.get('/api/airports');
+		AllAirportsStore.set(response.data);
+	}
+
 	const airports: Airport[] = [];
 	AllAirportsStore.subscribe((value) => {
 		airports.length = 0;
@@ -49,6 +54,21 @@
 			airports.push(plainToInstance(Airport, airport as Airport));
 		}
 	});
+	if (airports.length === 0) fetchAirports();
+
+	async function fetchAirspaces() {
+		const response = await axios.get('/api/airspaces');
+		AllAirspacesStore.set(response.data);
+	}
+
+	const airspaces: Airspace[] = [];
+	AllAirspacesStore.subscribe((value) => {
+		airspaces.length = 0;
+		for (const airspace of value) {
+			airspaces.push(plainToInstance(Airspace, airspace as Airspace));
+		}
+	});
+	if (airspaces.length === 0) fetchAirspaces();
 
 	const filteredAirspaces: Airspace[] = [];
 	FilteredAirspacesStore.subscribe((value) => {
@@ -65,6 +85,8 @@
 			onRouteAirspaces.push(plainToInstance(Airspace, airspace as Airspace));
 		}
 	});
+
+	$: durationEstimate = onRouteAirports.length * 8 + onRouteAirspaces.length * 5;
 
 	const onRouteAirports: Airport[] = [];
 
@@ -181,7 +203,7 @@
 		// Check for route validity, then redirect to scenario page with the scenario data in the URL
 		// May need to look into URL shortening for this, which would basically be a lookup table of scenario data
 		// and a short URL that redirects to the full URL/fetches the scenario data if using own DB/key-value store
-	
+
 		blockingClick = false;
 	}
 </script>
@@ -371,6 +393,7 @@
 			</Map>
 		</div>
 		<div class="flex flex-row w-full h-20">
+			<div class="vr h-full border border-surface-800" />
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Est. Distance</div>
@@ -385,6 +408,15 @@
 					<div class="text-sm">Unique Airspaces</div>
 					<div class="text-xl">
 						{onRouteAirspaces.length}
+					</div>
+				</div>
+			</div>
+			<div class="vr h-full border border-surface-800" />
+			<div class="flex flex-row place-content-center p-4">
+				<div class="flex flex-col place-content-center">
+					<div class="text-sm">Est. Scenario Duration</div>
+					<div class="text-xl">
+						{durationEstimate} mins
 					</div>
 				</div>
 			</div>

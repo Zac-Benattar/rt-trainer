@@ -112,18 +112,6 @@ export function airspaceDataToAirspace(airspaceData: AirspaceData): Airspace {
 	);
 }
 
-// Currently implemented badly
-export async function getAirspacesFromIds(airspaceIds: string[]): Promise<Airspace[]> {
-	const airspaces: Airspace[] = await getAllAirspaceData();
-	return airspaces.filter((airspace) => airspaceIds.includes(airspace.id));
-}
-
-// Currently implemented badly
-export async function getAirportsFromIds(airportNames: string[]): Promise<Airport[]> {
-	const airports: Airport[] = await getAllAirportData();
-	return airports.filter((airport) => airportNames.includes(airport.id));
-}
-
 export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 	try {
 		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
