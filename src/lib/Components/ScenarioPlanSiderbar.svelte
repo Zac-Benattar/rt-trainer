@@ -1,10 +1,5 @@
 <script lang="ts">
-	import {
-		ListBox,
-		ListBoxItem,
-		popup,
-		type PopupSettings
-	} from '@skeletonlabs/skeleton';
+	import { ListBox, ListBoxItem, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	import { init } from '@paralleldrive/cuid2';
 	import {
 		RefreshOutline,
@@ -29,6 +24,7 @@
 
 	const shortCUID = init({ length: 8 });
 
+	let scenarioSeed: string = shortCUID();
 	let routeSeed: string = '';
 	let awaitingServerResponse: boolean = false;
 	AwaitingServerResponseStore.subscribe((value) => {
@@ -108,15 +104,14 @@
 <div class="sidebar-container flex flex-col grow py-0 gap-1 overflow-clip">
 	<div class="flex flex-col sticky top-0 p-3 bg-surface-900 z-50">
 		<div class="flex flex-row ml-[-14px]">
-			<strong><a href="/home" class="btn text-xl sm:text-2xl uppercase">RT Trainer</a></strong>
-			<div class="flex flex-col place-content-center"><b>Route Planner</b></div>
+			<strong><a href="/" class="btn text-xl sm:text-2xl uppercase">RT Trainer</a></strong>
 		</div>
 
 		<div class="flex flex-row mt-[-10px] ml-[6px] pb-2 pb-4">
 			<ol class="flex flex-row gap-2">
-				<li class="crumb"><a class="anchor" href="/myroutes">My Routes</a></li>
+				<li class="crumb"><a class="anchor" href="/">Home</a></li>
 				<li class="crumb-separator" aria-hidden>/</li>
-				<li class="">New</li>
+				<li class="">Scenario Planner</li>
 			</ol>
 		</div>
 
@@ -127,9 +122,11 @@
 		<div class="flex flex-col gap-2 p-2">
 			<div><strong>Route Waypoints</strong></div>
 			{#if waypoints.length == 0}
-				<div class="p-1">
-					<p class="text-slate-600">
-						Add a waypoint by clicking on an airport or any other spot on the map.
+				<div class="px-1">
+					<p class="text-slate-600 text-sm">
+						Add a waypoint by clicking on an airport or any other spot on the map. Or use the <b
+							>Auto-generate</b
+						> Tool below.
 					</p>
 				</div>
 			{/if}
@@ -194,13 +191,57 @@
 
 		<div class="flex flex-col gap-2 p-2">
 			<div>
+				<strong>Scenario Settings</strong>
+			</div>
+			<div class="flex flex-col gap-1">
+				<div class="label text-sm">Scenario Seed</div>
+				<div class="flex flex-row gap-2">
+					<textarea
+						id="scenario-seed-input"
+						class="textarea"
+						rows="1"
+						maxlength="20"
+						placeholder="Enter a seed"
+						bind:value={scenarioSeed}
+					/>
+					<button
+						type="button"
+						class="btn variant-filled w-10"
+						on:click={() => {
+							if (awaitingServerResponse) return;
+
+							scenarioSeed = shortCUID();
+
+							const element = document.getElementById('scenario-seed-input');
+							if (element) {
+								element.value = routeSeed;
+							}
+						}}><RefreshOutline /></button
+					>
+				</div>
+			</div>
+
+			<label class="flex items-center space-x-2">
+				<input id="emergency-events-checkbox" class="checkbox" type="checkbox" checked />
+				<p>Emergency Events</p>
+			</label>
+		</div>
+
+		<div class="flex flex-col gap-2 p-2">
+			<div>
 				<strong>Preferences</strong>
 			</div>
 			<div>
-				<button class="btn textarea w-full justify-between" use:popup={distanceUnitsPopupCombobox}>
-					<span class="ml-[-6px]">{distanceUnit ?? 'Distance Unit'}</span>
-					<span>↓</span>
-				</button>
+				<div class="flex flex-col gap-1">
+					<div class="label text-sm">Distance Units</div>
+					<button
+						class="btn textarea w-full justify-between"
+						use:popup={distanceUnitsPopupCombobox}
+					>
+						<span class="ml-[-6px]">{distanceUnit ?? 'Distance Unit'}</span>
+						<span>↓</span>
+					</button>
+				</div>
 
 				<div class="card shadow-xl w-[250px] py-2" data-popup="distance-unit-popup">
 					<ListBox rounded="rounded-none">
@@ -217,7 +258,7 @@
 			</div>
 
 			<div class="flex flex-col gap-1">
-				<div class="label">Maximum Flight Level (100 ft)</div>
+				<div class="label text-sm">Maximum Flight Level (100 ft)</div>
 				<textarea id="fl-input" class="textarea" rows="1" maxlength="4" bind:value={maxFL} />
 			</div>
 		</div>
@@ -236,7 +277,7 @@
 							<div class="label">Route Seed</div>
 							<div class="flex flex-row gap-2">
 								<textarea
-									id="seed-input"
+									id="route-seed-input"
 									class="textarea"
 									rows="1"
 									maxlength="20"
@@ -251,7 +292,7 @@
 
 										routeSeed = shortCUID();
 
-										const element = document.getElementById('seed-input');
+										const element = document.getElementById('route-seed-input');
 										if (element) {
 											element.value = routeSeed;
 										}

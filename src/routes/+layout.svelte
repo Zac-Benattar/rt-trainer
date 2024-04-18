@@ -13,7 +13,7 @@
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import Navigation from '$lib/Components/NAVSidebar.svelte';
-	import RoutePlanSiderbar from '$lib/Components/RoutePlanSiderbar.svelte';
+	import ScenarioPlanSiderbar from '$lib/Components/ScenarioPlanSiderbar.svelte';
 	import { dev } from '$app/environment';
 	import { inject } from '@vercel/analytics';
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
@@ -42,7 +42,7 @@
 	let burgerButton: string;
 
 	// Reactive Classes
-	$: if ($page.url.pathname === '/' || $page.url.pathname.includes('/login')) {
+	$: if ($page.url.pathname === '/') {
 		// If on homepage hide sidebar and ways to access it
 		showTopAppBar = true;
 		showNavigation = false;
@@ -58,7 +58,7 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg';
-	} else if ($page.url.pathname.includes('/routeplanner')) {
+	} else if ($page.url.pathname.includes('/scenarioplanner')) {
 		// If on route planner page hide sidebar and show burger button
 		showTopAppBar = false;
 		showNavigation = false;
@@ -92,7 +92,7 @@
 <!-- Navigatiton Drawer -->
 <Drawer width="w-64">
 	{#if showRoutePlanSidebar}
-		<RoutePlanSiderbar />
+		<ScenarioPlanSiderbar />
 	{:else if showNavigation}
 		<h2 class="p-4">Navigation</h2>
 		<hr />
@@ -116,7 +116,7 @@
 		{#if showNavigation}
 			<Navigation />
 		{:else if showRoutePlanSidebar}
-			<RoutePlanSiderbar />
+			<ScenarioPlanSiderbar />
 		{/if}
 	</svelte:fragment>
 	<svelte:fragment slot="pageFooter">

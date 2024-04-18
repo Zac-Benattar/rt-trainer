@@ -14,7 +14,6 @@
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { TrashBinOutline } from 'flowbite-svelte-icons';
 	import { AllAirspacesStore } from '$lib/stores';
-	import type { PageData } from './$types';
 	import { plainToInstance } from 'class-transformer';
 	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import Airport from '$lib/ts/AeronauticalClasses/Airport';
@@ -43,19 +42,13 @@
 
 	let blockingClick: boolean = false;
 
-	export let data: PageData;
-
-	const airspaces: Airspace[] = [];
-	for (const airspace of data.airspaces) {
-		airspaces.push(plainToInstance(Airspace, airspace as Airspace));
-	}
-	AllAirspacesStore.set(airspaces);
-
 	const airports: Airport[] = [];
-	for (const airport of data.airports) {
-		airports.push(plainToInstance(Airport, airport as Airport));
-	}
-	AllAirportsStore.set(airports);
+	AllAirportsStore.subscribe((value) => {
+		airports.length = 0;
+		for (const airport of value) {
+			airports.push(plainToInstance(Airport, airport as Airport));
+		}
+	});
 
 	const filteredAirspaces: Airspace[] = [];
 	FilteredAirspacesStore.subscribe((value) => {
@@ -182,10 +175,14 @@
 		}
 	}
 
-	function onSaveClick() {
+	function onPracticeClick() {
 		blockingClick = true;
 
-		// Check for route validity, then redirect to scenario page
+		// Check for route validity, then redirect to scenario page with the scenario data in the URL
+		// May need to look into URL shortening for this, which would basically be a lookup table of scenario data
+		// and a short URL that redirects to the full URL/fetches the scenario data if using own DB/key-value store
+	
+		blockingClick = false;
 	}
 </script>
 
@@ -195,8 +192,9 @@
 			<Map view={wellesbourneMountfordCoords} zoom={9} on:click={onMapClick}>
 				<Control position="topleft">
 					<div>
-						<button class="btn variant-filled border text-sm" on:click={onSaveClick}
-							>Save Route</button
+						<button
+							class="btn text-black bg-white border-2 border-neutral-800/30 text-sm"
+							on:click={onPracticeClick}>Practice</button
 						>
 					</div>
 				</Control>

@@ -12,17 +12,14 @@
 		TutorialStore,
 		WaypointsStore
 	} from '$lib/stores';
-	import type { PageData } from './$types';
-	import Scenario from '$lib/ts/Scenario';
-	import { plainToInstance } from 'class-transformer';
-	export let data: PageData;
+	import type Scenario from '$lib/ts/Scenario';
 
 	// Get the slug
 	const { id } = $page.params;
 
-	let callsign: string = data.aircraftDetails?.callsign ?? 'G-OFLY';
-	let prefix: string = data.aircraftDetails?.prefix ?? 'STUDENT';
-	let aircraftType: string = data.aircraftDetails?.aircraftType ?? 'Cessna 172';
+	let callsign: string = 'G-OFLY';
+	let prefix: string = 'STUDENT';
+	let aircraftType: string = 'Cessna 172';
 
 	// Check whether the callsign is specified
 	const callsignString: string | null = $page.url.searchParams.get('callsign');
@@ -78,11 +75,7 @@
 		tutorial = tutorialString === 'True';
 	}
 
-	if (data.scenario == null) {
-		throw new Error('Scenario data is not available');
-	}
-
-	const scenario = plainToInstance(Scenario, data.scenario as Scenario);
+	const scenario: Scenario = null;
 	scenario.currentPointIndex = startPointIndex;
 	ScenarioStore.set(scenario);
 	CurrentScenarioPointIndexStore.set(startPointIndex);
