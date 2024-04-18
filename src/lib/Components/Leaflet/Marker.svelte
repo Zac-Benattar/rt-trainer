@@ -56,6 +56,9 @@
 			marker?.on('mouseout', (e) => {
 				dispatch('mouseout', { event: e, aeroObject: aeroObject, marker: marker });
 			});
+			marker?.on('mouseup', (e) => {
+				dispatch('mouseup', { event: e, aeroObject: aeroObject, marker: marker });
+			});
 		}
 	});
 

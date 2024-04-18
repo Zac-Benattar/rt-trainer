@@ -27,6 +27,7 @@
 	import Control from '$lib/Components/Leaflet/Control.svelte';
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
+	import type { AirportData, AirspaceData } from '$lib/ts/AeronauticalClasses/OpenAIPTypes';
 
 	ClearSimulationStores();
 
@@ -34,6 +35,8 @@
 	let showAllAirspaces: boolean = true;
 
 	let unnamedWaypointCount = 1;
+
+	let draggedWaypoint: Waypoint | undefined;
 
 	let awaitingServerResponse: boolean = false;
 	AwaitingServerResponseStore.subscribe((value) => {
@@ -44,7 +47,11 @@
 
 	async function fetchAirports() {
 		const response = await axios.get('/api/airports');
-		AllAirportsStore.set(response.data);
+
+		// Turn into instances of Airport class and set in store
+		AllAirportsStore.set(
+			response.data.map((airport: AirportData) => plainToInstance(Airport, airport as AirportData))
+		);
 	}
 
 	const airports: Airport[] = [];
@@ -58,7 +65,13 @@
 
 	async function fetchAirspaces() {
 		const response = await axios.get('/api/airspaces');
-		AllAirspacesStore.set(response.data);
+
+		// Turn into instances of Airspace class and set in store
+		AllAirspacesStore.set(
+			response.data.map((airspace: AirspaceData) =>
+				plainToInstance(Airspace, airspace as AirspaceData)
+			)
+		);
 	}
 
 	const airspaces: Airspace[] = [];
@@ -146,13 +159,20 @@
 	}
 
 	function onWaypointDrag(e: any) {
-		const waypoint = waypoints.find((waypoint) => waypoint.id === e.detail.waypoint.id);
-		if (waypoint) {
-			waypoint.location = [
-				parseFloat(e.detail.event.latlng.lng.toFixed(6)),
-				parseFloat(e.detail.event.latlng.lat.toFixed(6))
-			];
-			WaypointsStore.set(waypoints);
+		const waypoint = waypoints.find((waypoint) => waypoint.id === e.detail.aeroObject.id);
+		draggedWaypoint = waypoint;
+	}
+
+	function onWaypointMouseUp(e: any) {
+		const waypoint = waypoints.find((waypoint) => waypoint.id === e.detail.aeroObject.id);
+		if (draggedWaypoint == waypoint) {
+			if (waypoint) {
+				waypoint.location = [
+					parseFloat(e.detail.event.latlng.lng.toFixed(6)),
+					parseFloat(e.detail.event.latlng.lat.toFixed(6))
+				];
+				WaypointsStore.set(waypoints);
+			}
 		}
 	}
 
@@ -343,6 +363,7 @@
 									height={50}
 									aeroObject={waypoint}
 									on:drag={onWaypointDrag}
+									on:mouseup={onWaypointMouseUp}
 									draggable={true}
 								>
 									{#if waypoint.index == waypoints.length - 1}
