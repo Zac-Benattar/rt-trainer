@@ -14,7 +14,7 @@ import type Airport from './ts/AeronauticalClasses/Airport';
 import * as turf from '@turf/turf';
 
 const initialGenerationParameters: GenerationParameters = {
-	seed: '0',
+	seed: '',
 	hasEmergency: false
 };
 

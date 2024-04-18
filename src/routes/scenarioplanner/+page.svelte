@@ -5,6 +5,7 @@
 		AwaitingServerResponseStore,
 		ClearSimulationStores,
 		FilteredAirspacesStore,
+		GenerationParametersStore,
 		OnRouteAirspacesStore,
 		RouteDistanceDisplayStore,
 		RouteDistanceMetersStore,
@@ -28,11 +29,20 @@
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
 	import type { AirportData, AirspaceData } from '$lib/ts/AeronauticalClasses/OpenAIPTypes';
+	import type { GenerationParameters } from '$lib/ts/ServerClientTypes';
 
 	ClearSimulationStores();
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
+
+	let generationParameters: GenerationParameters = {
+		seed: '',
+		hasEmergency: true
+	};
+	GenerationParametersStore.subscribe((value) => {
+		generationParameters = value;
+	});
 
 	let unnamedWaypointCount = 1;
 
@@ -125,7 +135,12 @@
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
 		// If user is clicking on the button controls or awaiting routegen ignore map click
-		if (blockingClick || awaitingServerResponse) return;
+		if (awaitingServerResponse) return;
+
+		if (blockingClick) {
+			blockingClick = false;
+			return;
+		}
 
 		addWaypoint(
 			+parseFloat(event.detail.latlng.lat.toFixed(6)),
@@ -224,7 +239,44 @@
 		// May need to look into URL shortening for this, which would basically be a lookup table of scenario data
 		// and a short URL that redirects to the full URL/fetches the scenario data if using own DB/key-value store
 
-		blockingClick = false;
+		// Check for at least 2 waypoints
+		if (waypoints.length < 2) {
+			alert('Please add at least 2 waypoints to create a scenario.');
+			return;
+		}
+
+		// Check for no more than 2 airports
+		if (onRouteAirports.length > 2) {
+			alert(
+				'Please add no more than 2 airports to create a scenario. More airports are not yet supported.'
+			);
+			return;
+		}
+
+		// Ensure airports are at the start or end of the route
+		if (onRouteAirports.length > 0) {
+			if (
+				waypoints[0].type !== WaypointType.Airport &&
+				waypoints[waypoints.length - 1].type !== WaypointType.Airport
+			) {
+				alert(
+					'Please ensure airports are at the start or end of the route. Airports at other points of the route are not yet supported.'
+				);
+				return;
+			}
+		}
+
+		const scenarioURLString: string =
+			'/simulator/seed=' +
+			generationParameters.seed +
+			'&hasEmergency=' +
+			generationParameters.hasEmergency +
+			'&waypoints=' +
+			JSON.stringify(waypoints) +
+			'&airports=' +
+			JSON.stringify(onRouteAirports);
+
+		goto(scenarioURLString);
 	}
 </script>
 
