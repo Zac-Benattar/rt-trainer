@@ -218,6 +218,7 @@ export const TutorialStore = writable<boolean>(false);
 // System status stores
 export const NullRouteStore = writable<boolean>(false);
 
+// Server response stores - for blocking repeated server requests
 export const AwaitingServerResponseStore = writable<boolean>(false);
 
 export function ClearSimulationStores(): void {
@@ -234,8 +235,6 @@ export function ClearSimulationStores(): void {
 	ATCMessageStore.set('');
 	ScenarioStore.set(undefined);
 	WaypointsStore.set([]);
-	AllAirspacesStore.set([]);
-	AllAirportsStore.set([]);
 	CurrentScenarioPointIndexStore.set(0);
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);

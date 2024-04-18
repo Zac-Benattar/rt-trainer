@@ -33,12 +33,14 @@
 				<a class="anchor" href="https://svelte.dev/">Svelte</a> and the backend is a Vite webserver
 				built using
 				<a class="anchor" href="https://kit.svelte.dev/">SvelteKit</a>. The website is hosted by
-				<a class="anchor" href="https://vercel.com/">Vercel</a>. A
-				<a class="anchor" href="https://vercel.com/docs/storage/vercel-postgres">Vercel Postgres</a>
-				database stores all user data. This project was developed with assistance from the
+				<a class="anchor" href="https://vercel.com/">Vercel</a>. This project was developed with
+				assistance from the
 				<a class="anchor" href="http://www.southwarwickshireflyingschool.com"
 					>South Warwickshire Flying School</a
-				>.
+				>. The project is open source and can be found on
+				<a class="anchor" href="https://github.com/Zac-Benattar/rt-trainer">GitHub</a>. The project
+				is licensed under the
+				<a class="anchor" href="https://opensource.org/licenses/MIT">MIT License</a>.
 			</p>
 		</div>
 
