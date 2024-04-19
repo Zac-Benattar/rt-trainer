@@ -7,10 +7,13 @@ import type {
 } from './ts/SimulatorTypes';
 import type RadioCall from './ts/RadioCall';
 import type Scenario from './ts/Scenario';
-import type Airspace from './ts/AeronauticalClasses/Airspace';
+import Airspace from './ts/AeronauticalClasses/Airspace';
 import type Waypoint from './ts/AeronauticalClasses/Waypoint';
-import type Airport from './ts/AeronauticalClasses/Airport';
+import Airport from './ts/AeronauticalClasses/Airport';
 import * as turf from '@turf/turf';
+import axios from 'axios';
+import type { AirportData, AirspaceData } from './ts/AeronauticalClasses/OpenAIPTypes';
+import { plainToInstance } from 'class-transformer';
 
 const initialAircraftDetails: AircraftDetails = {
 	prefix: 'STUDENT',
@@ -234,4 +237,24 @@ export function ClearSimulationStores(): void {
 	EndPointIndexStore.set(0);
 	TutorialStore.set(false);
 	NullRouteStore.set(false);
+}
+
+export async function fetchAirspaces() {
+	const response = await axios.get('/api/airspaces');
+
+	// Turn into instances of Airspace class and set in store
+	AllAirspacesStore.set(
+		response.data.map((airspace: AirspaceData) =>
+			plainToInstance(Airspace, airspace as AirspaceData)
+		)
+	);
+}
+
+export async function fetchAirports() {
+	const response = await axios.get('/api/airports');
+
+	// Turn into instances of Airport class and set in store
+	AllAirportsStore.set(
+		response.data.map((airport: AirportData) => plainToInstance(Airport, airport as AirportData))
+	);
 }

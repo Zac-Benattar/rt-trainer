@@ -8,7 +8,9 @@
 		Drawer,
 		getDrawerStore,
 		storePopup,
-		Toast
+		Toast,
+		Modal,
+		type ModalComponent
 	} from '@skeletonlabs/skeleton';
 	import { page } from '$app/stores';
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
@@ -19,6 +21,7 @@
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
+	import NoScenarioDataModal from '$lib/Components/Modals/QuickCreateScenarioModal.svelte';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();
@@ -32,6 +35,11 @@
 	function drawerOpen(): void {
 		drawerStore.open({});
 	}
+
+	const modalRegistry: Record<string, ModalComponent> = {
+		// Set a unique modal ID, then pass the component reference
+		quickLoadScenarioDataComponent: { ref: NoScenarioDataModal }
+	};
 
 	// Holds status of major navigation elements, to control visibility
 	let showTopAppBar: boolean = true;
@@ -100,6 +108,8 @@
 		<Navigation />
 	{/if}
 </Drawer>
+
+<Modal components={modalRegistry} />
 
 <Toast />
 

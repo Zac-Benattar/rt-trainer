@@ -26,7 +26,7 @@ export default class RouteGenerator {
 		}
 
 		const seed = simpleHash(seedString);
-		const maxIterations = 100;
+		const maxIterations = 1000;
 		let startAirport: Airport | undefined;
 		let startAirportIsControlled: boolean = false;
 		let destinationAirport;
@@ -172,7 +172,7 @@ export default class RouteGenerator {
 		const startWaypoint: Waypoint = new Waypoint(
 			startAirport.name,
 			startAirport.coordinates,
-			WaypointType.Aerodrome,
+			WaypointType.Airport,
 			0
 		);
 
@@ -196,7 +196,7 @@ export default class RouteGenerator {
 		const endWaypoint: Waypoint = new Waypoint(
 			destinationAirport?.name,
 			destinationAirport.coordinates,
-			WaypointType.Aerodrome,
+			WaypointType.Airport,
 			3
 		);
 

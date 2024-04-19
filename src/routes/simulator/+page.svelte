@@ -5,38 +5,49 @@
 		AircraftDetailsStore,
 		AllAirportsStore,
 		AllAirspacesStore,
+		AwaitingServerResponseStore,
 		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
 		ScenarioStore,
 		StartPointIndexStore,
 		TutorialStore,
-		WaypointsStore
+		WaypointsStore,
+		fetchAirspaces
 	} from '$lib/stores';
 	import type Scenario from '$lib/ts/Scenario';
-	import { goto } from '$app/navigation';
 	import type { WaypointURLObject } from '$lib/ts/ScenarioTypes';
 	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
+	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+	import { loadRouteData } from '$lib/ts/Scenario';
+	import RouteGenerator from '$lib/ts/RouteGenerator';
+
+	const modalStore = getModalStore();
 
 	// Get the slug
 	const { id } = $page.params;
 
+	// Scenario settings
 	let seed: string = '';
 	let hasEmergencies: boolean = false;
 	let callsign: string = 'G-OFLY';
-	let prefix: string = 'STUDENT';
+	let prefix: string = '';
 	let aircraftType: string = 'Cessna 172';
 
+	//
+	let criticalDataMissing: boolean = false;
+
+	// Scenario objects
 	let waypoints: Waypoint[] = [];
 	let airportIDs: string[] = [];
 
-	// Check whether the seed is specified
+	// Check whether the seed is specified - if not then warn user
 	const seedString: string | null = $page.url.searchParams.get('seed');
 	if (seedString != null && seedString != '') {
 		seed = seedString;
 	} else {
-		console.log('No seed specified');
-		alert('No seed specified');
-		goto('/');
+		criticalDataMissing = true;
 	}
 
 	// Check whether the hasEmergency is specified
@@ -59,12 +70,17 @@
 					waypoint.referenceObjectId
 				)
 		);
+		WaypointsStore.set(waypoints);
+	} else {
+		criticalDataMissing = true;
 	}
 
 	// Get airports from the URL's JSON.stringify form
 	const airportsString: string | null = $page.url.searchParams.get('airports');
 	if (airportsString != null) {
 		airportIDs = airportsString.split(',');
+	} else {
+		criticalDataMissing = true;
 	}
 
 	// Check whether the callsign is specified
@@ -121,19 +137,75 @@
 		tutorial = tutorialString === 'true';
 	}
 
-	const scenario: Scenario = null;
-	scenario.currentPointIndex = startPointIndex;
+	if (criticalDataMissing) {
+		// Set a short timeout then trigger modal to load scenario data
+		setTimeout(() => {
+			const modal: ModalSettings = {
+				type: 'component',
+				component: 'quickLoadScenarioDataComponent',
+				response: (r: any) => {
+					if (r) {
+						loadScenarioWithSeededRoute(r.routeData);
+						seed = r.scenarioSeed;
+						hasEmergencies = r.hasEmergencies;
+					}
+				}
+			};
+			modalStore.trigger(modal);
+		}, 1000);
+	}
+
+	async function loadSeededRoute(seed: string) {
+		AwaitingServerResponseStore.set(true);
+		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
+			seed,
+			airports,
+			airspaces,
+			30
+		);
+		if (routeData) loadRouteData(routeData);
+		else {
+			throw new Error('Failed to load route data');
+		}
+		AwaitingServerResponseStore.set(false);
+	}
+
+	async function loadScenarioWithSeededRoute(routeSeed: string) {
+		await loadSeededRoute(routeSeed);
+
+		console.log(waypoints);
+
+		loadScenario();
+	}
+
+	async function loadScenario() {
+		throw new Error('Not implemented');
+	}
+
+	let scenario: Scenario | undefined = undefined;
+
+	// Load stores if not populated
+
+	let airspaces: Airspace[] = [];
+	AllAirspacesStore.subscribe((value) => {
+		airspaces = value;
+	});
+	if (airspaces.length === 0) fetchAirspaces();
+
+	let airports: Airport[] = [];
+	AllAirportsStore.subscribe((value) => {
+		airports = value;
+	});
+
 	ScenarioStore.set(scenario);
 	CurrentScenarioPointIndexStore.set(startPointIndex);
-	AllAirspacesStore.set(scenario.airspaces);
-	AllAirportsStore.set(scenario.airports);
-	WaypointsStore.set(scenario.waypoints);
 	StartPointIndexStore.set(startPointIndex);
-	if (endPointIndex == -1) {
-		EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
-	} else {
-		EndPointIndexStore.set(endPointIndex);
-	}
+	// // For when scenario is generated
+	// if (endPointIndex == -1) {
+	// 	EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
+	// } else {
+	// 	EndPointIndexStore.set(endPointIndex);
+	// }
 	TutorialStore.set(tutorial);
 	AircraftDetailsStore.set({
 		callsign: callsign,

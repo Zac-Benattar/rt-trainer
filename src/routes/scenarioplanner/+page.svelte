@@ -10,13 +10,15 @@
 		RouteDistanceMetersStore,
 		ScenarioSeedStore,
 		WaypointPointsMapStore,
-		WaypointsStore
+		WaypointsStore,
+		fetchAirports,
+		fetchAirspaces
 	} from '$lib/stores';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { TrashBinOutline } from 'flowbite-svelte-icons';
 	import { AllAirspacesStore } from '$lib/stores';
 	import { plainToInstance } from 'class-transformer';
-	import Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import Marker from '$lib/Components/Leaflet/Marker.svelte';
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
@@ -44,15 +46,6 @@
 
 	let blockingClick: boolean = false;
 
-	async function fetchAirports() {
-		const response = await axios.get('/api/airports');
-
-		// Turn into instances of Airport class and set in store
-		AllAirportsStore.set(
-			response.data.map((airport: AirportData) => plainToInstance(Airport, airport as AirportData))
-		);
-	}
-
 	const airports: Airport[] = [];
 	AllAirportsStore.subscribe((value) => {
 		airports.length = 0;
@@ -62,40 +55,20 @@
 	});
 	if (airports.length === 0) fetchAirports();
 
-	async function fetchAirspaces() {
-		const response = await axios.get('/api/airspaces');
-
-		// Turn into instances of Airspace class and set in store
-		AllAirspacesStore.set(
-			response.data.map((airspace: AirspaceData) =>
-				plainToInstance(Airspace, airspace as AirspaceData)
-			)
-		);
-	}
-
-	const airspaces: Airspace[] = [];
+	let airspaces: Airspace[] = [];
 	AllAirspacesStore.subscribe((value) => {
-		airspaces.length = 0;
-		for (const airspace of value) {
-			airspaces.push(plainToInstance(Airspace, airspace as Airspace));
-		}
+		airspaces = value;
 	});
 	if (airspaces.length === 0) fetchAirspaces();
 
-	const filteredAirspaces: Airspace[] = [];
+	let filteredAirspaces: Airspace[] = [];
 	FilteredAirspacesStore.subscribe((value) => {
-		filteredAirspaces.length = 0;
-		for (const airspace of value) {
-			filteredAirspaces.push(plainToInstance(Airspace, airspace as Airspace));
-		}
+		filteredAirspaces = value;
 	});
 
-	const onRouteAirspaces: Airspace[] = [];
+	let onRouteAirspaces: Airspace[] = [];
 	OnRouteAirspacesStore.subscribe((value) => {
-		onRouteAirspaces.length = 0;
-		for (const airspace of value) {
-			onRouteAirspaces.push(plainToInstance(Airspace, airspace as Airspace));
-		}
+		onRouteAirspaces = value;
 	});
 
 	$: durationEstimate = onRouteAirports.length * 8 + onRouteAirspaces.length * 5;
