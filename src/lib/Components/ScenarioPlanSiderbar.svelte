@@ -21,7 +21,7 @@
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import { flip } from 'svelte/animate';
 	import { loadRouteData } from '$lib/ts/Scenario';
-	import RouteGenerator from '$lib/ts/RouteGenerator';
+	import { generateFRTOLRouteFromSeed } from '$lib/ts/RouteGeneration';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 
@@ -92,7 +92,7 @@
 
 	async function loadSeededRoute() {
 		AwaitingServerResponseStore.set(true);
-		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
+		const routeData = await generateFRTOLRouteFromSeed(
 			routeSeed,
 			airports,
 			airspaces,

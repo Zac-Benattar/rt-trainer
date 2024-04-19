@@ -5,9 +5,10 @@
 		AircraftDetailsStore,
 		AllAirportsStore,
 		AllAirspacesStore,
-		AwaitingServerResponseStore,
 		CurrentScenarioPointIndexStore,
 		EndPointIndexStore,
+		OnRouteAirportsStore,
+		OnRouteAirspacesStore,
 		ScenarioStore,
 		StartPointIndexStore,
 		TutorialStore,
@@ -21,8 +22,7 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
 	import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
-	import { loadRouteData } from '$lib/ts/Scenario';
-	import RouteGenerator from '$lib/ts/RouteGenerator';
+	import { generateScenario } from '$lib/ts/ScenarioGenerator';
 
 	const modalStore = getModalStore();
 
@@ -145,11 +145,27 @@
 	});
 	if (airspaces.length === 0) fetchAirspaces();
 
+	let onRouteAirspaces: Airspace[] = [];
+	OnRouteAirspacesStore.subscribe((value) => {
+		onRouteAirspaces = value;
+	});
+
 	let airports: Airport[] = [];
 	AllAirportsStore.subscribe((value) => {
 		airports = value;
 	});
 	if (airports.length === 0) fetchAirports();
+
+	let onRouteAirports: Airport[] = [];
+	OnRouteAirportsStore.subscribe((value) => {
+		onRouteAirports = value;
+	});
+
+	WaypointsStore.subscribe((value) => {
+		waypoints = value;
+	});
+
+	let scenario: Scenario | undefined = undefined;
 
 	if (criticalDataMissing) {
 		// Set a short timeout then trigger modal to load scenario data
@@ -159,9 +175,9 @@
 				component: 'quickLoadScenarioDataComponent',
 				response: (r: any) => {
 					if (r) {
-						loadScenarioWithSeededRoute(r.routeSeed);
 						seed = r.scenarioSeed;
 						hasEmergencies = r.hasEmergencies;
+						loadScenario();
 					}
 				}
 			};
@@ -169,45 +185,22 @@
 		}, 1000);
 	}
 
-	async function loadSeededRoute(seed: string) {
-		AwaitingServerResponseStore.set(true);
+	function loadScenario() {
+		scenario = generateScenario(seed, waypoints, onRouteAirports, onRouteAirspaces, hasEmergencies);
 
-		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
-			seed,
-			airports,
-			airspaces,
-			30
-		);
-		if (routeData) loadRouteData(routeData);
-		else {
-			throw new Error('Failed to load route data');
+		ScenarioStore.set(scenario);
+
+		if (endPointIndex == -1) {
+			EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
+		} else {
+			EndPointIndexStore.set(endPointIndex);
 		}
-		AwaitingServerResponseStore.set(false);
 	}
-
-	async function loadScenarioWithSeededRoute(routeSeed: string) {
-		await loadSeededRoute(routeSeed);
-
-		console.log(waypoints);
-
-		loadScenario();
-	}
-
-	async function loadScenario() {
-		throw new Error('Not implemented');
-	}
-
-	let scenario: Scenario | undefined = undefined;
 
 	ScenarioStore.set(scenario);
 	CurrentScenarioPointIndexStore.set(startPointIndex);
 	StartPointIndexStore.set(startPointIndex);
-	// // For when scenario is generated
-	// if (endPointIndex == -1) {
-	// 	EndPointIndexStore.set(scenario.scenarioPoints.length - 1);
-	// } else {
-	// 	EndPointIndexStore.set(endPointIndex);
-	// }
+
 	TutorialStore.set(tutorial);
 	AircraftDetailsStore.set({
 		callsign: callsign,

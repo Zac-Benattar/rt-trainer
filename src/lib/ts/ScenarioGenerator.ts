@@ -10,16 +10,13 @@ import {
 } from './ScenarioPoints';
 import { findIntersections } from './utils';
 
-export async function generateScenario(
-	scenarioId: string,
-	name: string,
-	description: string,
+export function generateScenario(
 	seed: string,
 	waypoints: Waypoint[],
-	airspaces: Airspace[],
 	airports: Airport[],
+	airspaces: Airspace[],
 	hasEmergency: boolean
-): Promise<Scenario> {
+): Scenario {
 	if (!airspaces || airspaces.length === 0) {
 		throw new Error('No airspaces found');
 	}
@@ -74,10 +71,7 @@ export async function generateScenario(
 		);
 
 	return new Scenario(
-		scenarioId,
-		name,
-		description,
-		seed.toString(),
+		seed,
 		waypoints,
 		airspaces,
 		airports,

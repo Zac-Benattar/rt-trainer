@@ -1,4 +1,9 @@
 <script lang="ts">
+	import { AllAirportsStore, AllAirspacesStore, fetchAirports, fetchAirspaces } from '$lib/stores';
+	import type Airport from '$lib/ts/AeronauticalClasses/Airport';
+	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
+	import { generateFRTOLRouteFromSeed } from '$lib/ts/RouteGeneration';
+	import { loadRouteData } from '$lib/ts/Scenario';
 	import { init } from '@paralleldrive/cuid2';
 	import { getModalStore } from '@skeletonlabs/skeleton';
 
@@ -9,6 +14,19 @@
 	let validSettings: boolean = false;
 
 	const shortCUID = init({ length: 8 });
+
+	// Load stores if not populated
+	let airspaces: Airspace[] = [];
+	AllAirspacesStore.subscribe((value) => {
+		airspaces = value;
+	});
+	if (airspaces.length === 0) fetchAirspaces();
+
+	let airports: Airport[] = [];
+	AllAirportsStore.subscribe((value) => {
+		airports = value;
+	});
+	if (airports.length === 0) fetchAirports();
 
 	$: if (
 		formData.scenarioSeed &&
@@ -31,8 +49,18 @@
 	};
 
 	function onFormSubmit() {
-		if ($modalStore[0].response) $modalStore[0].response(formData);
-		modalStore.close();
+		if ($modalStore[0].response) {
+			// Check route generated correctly
+			const routeData = generateFRTOLRouteFromSeed(formData.routeSeed, airports, airspaces, 30);
+			if (routeData) {
+				loadRouteData(routeData);
+				$modalStore[0].response(formData);
+				modalStore.close();
+			} else {
+				// Show error - this is temp - should turn the seed input red and give an error message
+				alert('Route generation failed');
+			}
+		}
 	}
 
 	// Base Classes
