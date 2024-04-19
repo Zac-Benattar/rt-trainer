@@ -64,7 +64,7 @@ export const UserMessageStore = writable<string>('');
 
 export const ExpectedUserMessageStore = writable<string>('');
 
-export const ATCMessageStore = writable<string>('');
+export const MostRecentlyReceivedMessageStore = writable<string>('');
 
 // Scenario/route stores
 export const ScenarioStore = writable<Scenario | undefined>(undefined);
@@ -182,12 +182,12 @@ export const EndPointIndexStore = createEndPointIndexStore();
 
 export const CurrentScenarioPointStore = derived(
 	[ScenarioStore, CurrentScenarioPointIndexStore],
-	([$ScenarioStore, $CurrentRoutePointStore]) => {
+	([$ScenarioStore, $CurrentScenarioPointStore]) => {
 		if ($ScenarioStore) {
 			if ($ScenarioStore.scenarioPoints.length > 0) {
 				$ScenarioStore.currentPointIndex = Math.max(
 					0,
-					Math.min($CurrentRoutePointStore, $ScenarioStore.scenarioPoints.length - 1)
+					Math.min($CurrentScenarioPointStore, $ScenarioStore.scenarioPoints.length - 1)
 				);
 				return $ScenarioStore.getCurrentPoint();
 			}
@@ -195,8 +195,22 @@ export const CurrentScenarioPointStore = derived(
 	}
 );
 
-export const CurrentTargetStore = derived(CurrentScenarioPointStore, ($CurrentRoutePointStore) => {
-	return $CurrentRoutePointStore?.updateData.currentTarget || '';
+export const CurrentUpdateDataStore = derived(
+	CurrentScenarioPointStore,
+	($CurrentScenarioPointStore) => {
+		return $CurrentScenarioPointStore?.updateData;
+	}
+);
+
+export const CurrentScenarioContextStore = derived(
+	CurrentScenarioPointStore,
+	($CurrentScenarioPointStore) => {
+		return $CurrentScenarioPointStore?.updateData.currentStatus || '';
+	}
+);
+
+export const CurrentTargetStore = derived(CurrentUpdateDataStore, ($CurrentUpdateDataStore) => {
+	return $CurrentUpdateDataStore?.currentTarget || '';
 });
 
 export const CurrentTargetFrequencyStore = derived(
@@ -230,7 +244,7 @@ export function ClearSimulationStores(): void {
 	AltimeterStateStore.set(initialAltimeterState);
 	UserMessageStore.set('');
 	ExpectedUserMessageStore.set('');
-	ATCMessageStore.set('');
+	MostRecentlyReceivedMessageStore.set('');
 	ScenarioStore.set(undefined);
 	WaypointsStore.set([]);
 	CurrentScenarioPointIndexStore.set(0);

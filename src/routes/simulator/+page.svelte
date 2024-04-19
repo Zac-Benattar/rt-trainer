@@ -26,9 +26,6 @@
 
 	const modalStore = getModalStore();
 
-	// Get the slug
-	const { id } = $page.params;
-
 	// Scenario settings
 	let seed: string = '';
 	let hasEmergencies: boolean = false;
@@ -36,7 +33,7 @@
 	let prefix: string = '';
 	let aircraftType: string = 'Cessna 172';
 
-	//
+	// Flag to check if critical data is missing and the user must be prompted to enter it
 	let criticalDataMissing: boolean = false;
 
 	// Scenario objects
@@ -214,5 +211,5 @@
 </script>
 
 <div class="flex" style="justify-content: center;">
-	<Simulator scenarioId={id} />
+	<Simulator />
 </div>

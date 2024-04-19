@@ -65,14 +65,18 @@ export function getParkedInitialControlledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentStatus: `You are currently parked at ${airport.getShortName()}, you should contact ${name} on ${freq}`,
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -84,14 +88,21 @@ export function getParkedMadeContactControlledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentStatus: `You are currently parked at 
+			${airport.getShortName()}
+			you have made contact with
+			${name} on ${freq}, you should request taxi clearance.`,
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -103,14 +114,18 @@ export function getParkedInitialUncontrolledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentStatus: `You are currently parked at ${airport.getShortName()}, you should contact ${name} on ${freq}`,
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -122,14 +137,21 @@ export function getParkedMadeContactUncontrolledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentStatus: `You are currently parked at 
+			${airport.getShortName()}
+			you have made contact with
+			${name} on ${freq}, you should request taxi clearance.`,
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -920,6 +942,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.RequestFrequencyChange,
 				preIntersectionPose,
 				{
+					currentStatus: `You are currently flying in ${currentAirspace.name}, you should request a frequency change to ${currentFreq}`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,

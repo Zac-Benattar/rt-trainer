@@ -1,13 +1,14 @@
 <script lang="ts">
 	import {
 		CurrentTargetStore,
-		ATCMessageStore,
+		MostRecentlyReceivedMessageStore,
 		SpeechOutputEnabledStore,
-		CurrentTargetFrequencyStore
+		CurrentTargetFrequencyStore,
+		CurrentScenarioContextStore
 	} from '$lib/stores';
 	import { SlideToggle, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	let currentTarget: string;
-	let currentTargetFrequency: string = '0.00';
+	let currentTargetFrequency: string = '000.000';
 	let readRecievedCalls: boolean = false;
 
 	CurrentTargetStore.subscribe((value) => {
@@ -18,10 +19,15 @@
 		currentTargetFrequency = value;
 	});
 
-	let atcMessage: string;
+	let mostRecentlyRecievedMessage: string;
 
-	ATCMessageStore.subscribe((value) => {
-		atcMessage = value;
+	MostRecentlyReceivedMessageStore.subscribe((value) => {
+		mostRecentlyRecievedMessage = value;
+	});
+
+	let currentContext: string;
+	CurrentScenarioContextStore.subscribe((value) => {
+		currentContext = value;
 	});
 
 	$: SpeechOutputEnabledStore.set(readRecievedCalls);
@@ -36,33 +42,12 @@
 <div
 	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow {$$props.class}"
 >
-	<div class="grow flex justify-self-stretch">
-		<textarea
-			class="textarea bg-surface-500 text-secondary-50 call-output"
-			id="call-output"
-			name="call-output"
-			disabled
-			rows="3"
-			cols="50"
-			maxlength="100"
-			placeholder="Radio messages will appear here.">{atcMessage}</textarea
-		>
+	<div class="border-0 card grow flex justify-self-stretch px-2 py-1.5 gap-2">
+		<div>{currentContext}</div>
+		<div>{mostRecentlyRecievedMessage}</div>
 	</div>
 
 	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
-		<div class="flex grow">
-			<textarea
-				class="textarea bg-secondary-500-50 text-secondary-50 call-target-output"
-				id="call-target-output"
-				name="call-target-output"
-				disabled
-				rows="2"
-				cols="50"
-				maxlength="25"
-				placeholder="Current Radio Target.">{currentTarget} {currentTargetFrequency}</textarea
-			>
-		</div>
-
 		<div class="toggle px-2 shrink-0">
 			<div class="flex flex-col py-2">
 				<SlideToggle
@@ -74,7 +59,7 @@
 						readRecievedCalls = !readRecievedCalls;
 					}}
 					><div class="[&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
-						Read Aloud
+						Read Aloud Recieved Calls
 					</div>
 				</SlideToggle>
 				<div

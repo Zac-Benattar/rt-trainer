@@ -22,6 +22,7 @@ export type CallParsingContext = {
 
 /* The state data recieved from the server after parsing. Used to update the simulator frontend. */
 export type SimulatorUpdateData = {
+	currentStatus: string;
 	callsignModified: boolean;
 	squark: boolean;
 	currentTarget: string  | undefined;
