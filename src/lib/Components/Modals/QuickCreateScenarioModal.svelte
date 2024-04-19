@@ -34,10 +34,10 @@
 		formData.routeSeed &&
 		formData.routeSeed.length > 0
 	) {
-		// enable save button
+		// Enable save button
 		validSettings = true;
 	} else {
-		// disable save button
+		// Disable save button
 		validSettings = false;
 	}
 
@@ -58,29 +58,45 @@
 				modalStore.close();
 			} else {
 				// Show error - this is temp - should turn the seed input red and give an error message
-				alert('Route generation failed');
+				validSettings = false;
 			}
 		}
 	}
 
 	// Base Classes
-	const cBase = 'card p-4 w-[430px] shadow-xl space-y-4';
+	const cBase = 'card p-4 w-modal-slim shadow-xl space-y-4';
 	const cHeader = 'text-2xl font-bold';
 	const cForm = 'space-y-4 rounded-container-token';
+
+	// Reactive classes
+	let cRouteSeedInput = '';
+	let cRouteSeedInputErrorMessage = 'hidden';
+	$: {
+		if (validSettings) {
+			cRouteSeedInput = '';
+			cRouteSeedInputErrorMessage = 'hidden';
+		} else {
+			cRouteSeedInput = 'input-error';
+			cRouteSeedInputErrorMessage = '';
+		}
+	}
 </script>
 
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>Create Scenario</header>
+	<div class={cBase}>
+		<header class={cHeader}>Quickly create a Scenario</header>
 		<form class="modal-form {cForm}">
 			<label class="label"
 				><span class="text-sm">Route Seed (required)</span>
 				<input
-					class="input"
+					class="input {cRouteSeedInput}"
 					type="text"
 					bind:value={formData.routeSeed}
 					placeholder="My Route"
-				/></label
+				/>
+				<div class="text-sm text-red-500 {cRouteSeedInputErrorMessage}">
+					Route generation sometimes fails, please try another seed.
+				</div></label
 			><label class="label"
 				><span class="text-sm">Scenario Seed (required)</span>
 				<input
@@ -100,6 +116,9 @@
 					/>
 					<p>Emergency Events</p>
 				</label>
+				<div class="text-sm text-slate-500">
+					Engine failure, other aircraft in distress, etc...
+				</div>
 			</label>
 		</form>
 		<footer class="flex flex-row justify-between {parent.regionFooter}">
@@ -114,6 +133,3 @@
 		</footer>
 	</div>
 {/if}
-
-<style lang="postcss">
-</style>
