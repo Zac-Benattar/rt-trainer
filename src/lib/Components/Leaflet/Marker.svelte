@@ -44,7 +44,7 @@
 
 			if (draggable) marker.dragging?.enable();
 			marker?.on('drag', (e) => {
-				dispatch('drag', { event: e, aeroObject: aeroObject, marker: marker});
+				dispatch('drag', { event: e, aeroObject: aeroObject, marker: marker });
 				map?.invalidateSize();
 			});
 			marker?.on('click', (e) => {
@@ -65,7 +65,6 @@
 	onDestroy(() => {
 		marker?.remove();
 		marker = undefined;
-		map?.invalidateSize();
 	});
 </script>
 
