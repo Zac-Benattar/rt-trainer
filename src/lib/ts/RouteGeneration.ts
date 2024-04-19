@@ -153,7 +153,7 @@ export function generateFRTOLRouteFromSeed(
 		}
 		onRouteAirspace.push(chosenMATZ);
 
-		if (onRouteAirspace.length > 4) {
+		if (onRouteAirspace.length > 5 || onRouteAirspace.length < 2) {
 			validRoute = false;
 			continue;
 		}

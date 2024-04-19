@@ -16,15 +16,16 @@ export type AirportReportingPointDBData = {
 	compulsory: boolean;
 };
 
-export async function getAllAirspaceData(): Promise<Airspace[]> {
+export async function getAllValidAirspaceData(): Promise<Airspace[]> {
 	const airspaceData = await getAllUKAirspaceFromOpenAIP();
 	const airspaces = airspaceData.map((airspaceData) => airspaceDataToAirspace(airspaceData));
 	return airspaces;
 }
 
-export async function getAllAirportData(): Promise<Airport[]> {
+export async function getAllValidAirportData(): Promise<Airport[]> {
 	const airportData = await getAllUKAirportsFromOpenAIP();
 	const airports = airportData.map((airportData) => airportDataToAirport(airportData));
+	airports.filter((airport) => airport.runways && airport.runways.length > 0);
 	return airports;
 }
 

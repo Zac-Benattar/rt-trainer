@@ -53,6 +53,7 @@
 			// Check route generated correctly
 			const routeData = generateFRTOLRouteFromSeed(formData.routeSeed, airports, airspaces, 30);
 			if (routeData) {
+				// Eventually check the scenario itself can be generated, for now just pass the route data and let the page handle it
 				loadRouteData(routeData);
 				$modalStore[0].response(formData);
 				modalStore.close();
@@ -95,7 +96,7 @@
 					placeholder="My Route"
 				/>
 				<div class="text-sm text-red-500 {cRouteSeedInputErrorMessage}">
-					Route generation sometimes fails, please try another seed.
+					Route generation failed, please try another seed.
 				</div></label
 			><label class="label"
 				><span class="text-sm">Scenario Seed (required)</span>
@@ -116,9 +117,7 @@
 					/>
 					<p>Emergency Events</p>
 				</label>
-				<div class="text-sm text-slate-500">
-					Engine failure, other aircraft in distress, etc...
-				</div>
+				<div class="text-sm text-slate-500">Engine failure, other aircraft in distress, etc...</div>
 			</label>
 		</form>
 		<footer class="flex flex-row justify-between {parent.regionFooter}">

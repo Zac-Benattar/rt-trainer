@@ -187,7 +187,18 @@
 	}
 
 	function loadScenario() {
-		scenario = generateScenario(seed, waypoints, onRouteAirports, onRouteAirspaces, hasEmergencies);
+		try {
+			scenario = generateScenario(
+				seed,
+				waypoints,
+				onRouteAirports,
+				onRouteAirspaces,
+				hasEmergencies
+			);
+		} catch (e) {
+			console.error(e);
+			return;
+		}
 
 		ScenarioStore.set(scenario);
 
