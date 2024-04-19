@@ -41,10 +41,10 @@
 				<button
 					on:click={() => {
 						ClearSimulationStores();
-						goto('/simulator/demo?tutorial=true');
+						goto('/simulator/?tutorial=true');
 					}}
 					class="btn md:btn-lg w-full md:w-fit variant-filled-primary"
-					data-sveltekit-preload-data="hover">Demo route</button
+					data-sveltekit-preload-data="hover">Quick route</button
 				>
 				<button
 					on:click={() => {

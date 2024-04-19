@@ -235,7 +235,6 @@ export function ClearSimulationStores(): void {
 	WaypointsStore.set([]);
 	CurrentScenarioPointIndexStore.set(0);
 	EndPointIndexStore.set(0);
-	TutorialStore.set(false);
 	NullRouteStore.set(false);
 }
 
