@@ -61,7 +61,7 @@
 	} else if ($page.url.pathname.includes('/simulator') || $page.url.pathname.includes('/results')) {
 		// If on scenario page hide sidebar and show burger button
 		showTopAppBar = true;
-		showNavigation = false;
+		showNavigation = true;
 		showRoutePlanSidebar = false;
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
