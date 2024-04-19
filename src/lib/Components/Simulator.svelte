@@ -51,6 +51,7 @@
 	import type Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
+	import L from 'leaflet';
 
 	// Simulator state and settings
 	export let scenarioId: string;
@@ -588,35 +589,60 @@
 				<Map view={scenario?.getCurrentPoint().pose.position} zoom={9}>
 					{#if waypointPoints.length > 0}
 						{#each waypoints as waypoint (waypoint.index)}
-							<Marker
-								latLng={[waypoint.location[1], waypoint.location[0]]}
-								width={50}
-								height={50}
-								aeroObject={waypoint}
-								on:click={(e) => {
-									e.preventDefault();
-								}}
-								on:mouseover={(e) => {
-									e.detail.marker.openPopup();
-								}}
-								on:mouseout={(e) => {
-									e.detail.marker.closePopup();
-								}}
-							>
-								{#if waypoint.index == waypoints.length - 1}
-									<div class="text-2xl">🏁</div>
-								{:else if waypoint.type == WaypointType.Airport}
-									<div class="text-2xl">🛫</div>
-								{:else}
-									<div class="text-2xl">🚩</div>
-								{/if}
+							{#if waypoint.index == waypoints.length - 1 || waypoint.type == WaypointType.Airport}
+								<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+									on:click={(e) => {
+										e.preventDefault();
+									}}
+									on:mouseover={(e) => {
+										e.detail.marker.openPopup();
+									}}
+									on:mouseout={(e) => {
+										e.detail.marker.closePopup();
+									}}
+								>
+									{#if waypoint.index == waypoints.length - 1}
+										<div class="text-2xl">🏁</div>
+									{:else if waypoint.type == WaypointType.Airport}
+										<div class="text-2xl">🛫</div>
+									{/if}
 
-								<Popup
-									><div class="flex flex-col gap-2">
-										<div>{waypoint.name}</div>
-									</div></Popup
-								></Marker
-							>
+									<Popup
+										><div class="flex flex-col gap-2">
+											<div>{waypoint.name}</div>
+										</div></Popup
+									></Marker
+								>
+							{:else}
+								<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+									iconAnchor={L.point(8, 26)}
+									on:click={(e) => {
+										e.preventDefault();
+									}}
+									on:mouseover={(e) => {
+										e.detail.marker.openPopup();
+									}}
+									on:mouseout={(e) => {
+										e.detail.marker.closePopup();
+									}}
+								>
+									<div class="text-2xl">🚩</div>
+
+									<Popup
+										><div class="flex flex-col gap-2">
+											<div>{waypoint.name}</div>
+										</div></Popup
+									></Marker
+								>
+							{/if}
 						{/each}
 					{/if}
 
@@ -671,12 +697,7 @@
 					{/each}
 
 					{#key position}
-						<Marker
-							latLng={position}
-							width={50}
-							height={50}
-							rotation={displayHeading}
-						>
+						<Marker latLng={position} width={50} height={50} rotation={displayHeading}>
 							<div class="text-2xl">🛩️</div>
 
 							<Popup
