@@ -12,6 +12,7 @@
 		StartPointIndexStore,
 		TutorialStore,
 		WaypointsStore,
+		fetchAirports,
 		fetchAirspaces
 	} from '$lib/stores';
 	import type Scenario from '$lib/ts/Scenario';
@@ -137,6 +138,19 @@
 		tutorial = tutorialString === 'true';
 	}
 
+	// Load stores if not populated
+	let airspaces: Airspace[] = [];
+	AllAirspacesStore.subscribe((value) => {
+		airspaces = value;
+	});
+	if (airspaces.length === 0) fetchAirspaces();
+
+	let airports: Airport[] = [];
+	AllAirportsStore.subscribe((value) => {
+		airports = value;
+	});
+	if (airports.length === 0) fetchAirports();
+
 	if (criticalDataMissing) {
 		// Set a short timeout then trigger modal to load scenario data
 		setTimeout(() => {
@@ -145,7 +159,7 @@
 				component: 'quickLoadScenarioDataComponent',
 				response: (r: any) => {
 					if (r) {
-						loadScenarioWithSeededRoute(r.routeData);
+						loadScenarioWithSeededRoute(r.routeSeed);
 						seed = r.scenarioSeed;
 						hasEmergencies = r.hasEmergencies;
 					}
@@ -157,6 +171,7 @@
 
 	async function loadSeededRoute(seed: string) {
 		AwaitingServerResponseStore.set(true);
+
 		const routeData = await RouteGenerator.generateFRTOLRouteFromSeed(
 			seed,
 			airports,
@@ -183,19 +198,6 @@
 	}
 
 	let scenario: Scenario | undefined = undefined;
-
-	// Load stores if not populated
-
-	let airspaces: Airspace[] = [];
-	AllAirspacesStore.subscribe((value) => {
-		airspaces = value;
-	});
-	if (airspaces.length === 0) fetchAirspaces();
-
-	let airports: Airport[] = [];
-	AllAirportsStore.subscribe((value) => {
-		airports = value;
-	});
 
 	ScenarioStore.set(scenario);
 	CurrentScenarioPointIndexStore.set(startPointIndex);
