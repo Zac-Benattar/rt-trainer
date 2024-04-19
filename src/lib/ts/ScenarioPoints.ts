@@ -65,14 +65,18 @@ export function getParkedInitialControlledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentContext: `You are currently parked at ${airport.getShortName()}, you should contact ${name} on ${freq}`,
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -84,14 +88,21 @@ export function getParkedMadeContactControlledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentContext: `You are currently parked at 
+			${airport.getShortName()}
+			you have made contact with
+			${name} on ${freq}, you should request taxi clearance.`,
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -103,14 +114,18 @@ export function getParkedInitialUncontrolledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentContext: `You are currently parked at ${airport.getShortName()}, you should contact ${name} on ${freq}`,
 		callsignModified: false, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -122,14 +137,21 @@ export function getParkedMadeContactUncontrolledUpdateData(
 	airport: Airport
 ): SimulatorUpdateData {
 	let name = airport.getParkedFrequency()?.name;
+	const freq = airport.getParkedFrequency()?.value;
+
+	// Edge case for INFO frequencies
 	if (airport.getParkedFrequency()?.name == 'INFO') {
 		name = airport.getShortName() + ' Information';
 	}
 	return {
+		currentContext: `You are currently parked at 
+			${airport.getShortName()}
+			you have made contact with
+			${name} on ${freq}, you should request taxi clearance.`,
 		callsignModified: true, // States whether callsign has been modified by ATC, e.g. shortened
 		squark: false,
 		currentTarget: name,
-		currentTargetFrequency: airport.getParkedFrequency()?.value,
+		currentTargetFrequency: freq,
 		currentTransponderFrequency: '7000',
 		currentPressure: 1013,
 		emergency: EmergencyType.None
@@ -920,6 +942,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.RequestFrequencyChange,
 				preIntersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you should request a frequency change to ${currentFreq}`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -939,6 +962,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.AcknowledgeApproval,
 				preIntersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you have been approved to change frequency to ${currentFreq}, you should acknowledge this.`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -967,6 +991,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.ContactNewFrequency,
 				preIntersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you should contact the new frequency ${newFreq}`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -986,6 +1011,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.PassMessage,
 				preIntersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you should pass your message to the new frequency ${newFreq}`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -1005,6 +1031,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.Squawk,
 				preIntersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you should squawk the correct code`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -1024,6 +1051,7 @@ export function getAirborneScenarioPoints(
 				ChangeZoneStage.ReadbackApproval,
 				intersectionPose,
 				{
+					currentContext: `You are currently flying in ${currentAirspace.name}, you have been approved to change frequency to ${newFreq}, you should acknowledge this.`,
 					callsignModified: false,
 					squark: false,
 					currentTarget: currentAirspace.name,
@@ -1099,6 +1127,7 @@ export function getAirborneScenarioPoints(
 			PanPanStage.DeclareEmergency,
 			emergencyPose,
 			{
+				currentContext: `You are currently flying in ${scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget}, you should declare an emergency of type ${emergencyType}`,
 				callsignModified: false,
 				squark: false,
 				currentTarget: scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget,
@@ -1118,6 +1147,7 @@ export function getAirborneScenarioPoints(
 			PanPanStage.WilcoInstructions,
 			emergencyPose,
 			{
+				currentContext: `You are currently flying in ${scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget}, you should acknowledge the emergency instructions`,
 				callsignModified: false,
 				squark: false,
 				currentTarget: scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget,
@@ -1137,6 +1167,7 @@ export function getAirborneScenarioPoints(
 			PanPanStage.CancelPanPan,
 			emergencyPose,
 			{
+				currentContext: `You are currently flying in ${scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget}, you have resolved your emergency, you should cancel the emergency call`,
 				callsignModified: false,
 				squark: false,
 				currentTarget: scenarioPoints[emergencyScenarioPointIndex].updateData.currentTarget,

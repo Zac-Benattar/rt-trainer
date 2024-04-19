@@ -396,9 +396,13 @@ export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
 
 export function getRandomFrequency(seed: number, objectId: string): string {
 	const idHash = simpleHash(objectId);
-	const frequency =
-		118 + ((9130427071 * seed * idHash) % 20) + '.' + ((seed * idHash) % 20) * 0.025;
-	return frequency;
+	const prePointFrequency = (118 + ((7759 * seed * idHash) % 20)).toString();
+	let afterPointFreq = (((7757 * seed * idHash) % 30) * 30).toString();
+	if (afterPointFreq.length < 3) {
+		afterPointFreq = afterPointFreq.padEnd(3, '0');
+	}
+
+	return `${prePointFrequency}.${afterPointFreq}`;
 }
 
 /**

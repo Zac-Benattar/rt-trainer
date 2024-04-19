@@ -13,7 +13,7 @@
 		RadioStateStore,
 		TransponderStateStore,
 		UserMessageStore,
-		ATCMessageStore,
+		MostRecentlyReceivedMessageStore,
 		CurrentTargetStore,
 		ScenarioStore,
 		AircraftDetailsStore,
@@ -29,7 +29,8 @@
 		WaypointPointsMapStore,
 		WaypointsStore,
 		OnRouteAirspacesStore,
-		CurrentScenarioPointStore
+		CurrentScenarioPointStore,
+		CurrentScenarioContextStore
 	} from '$lib/stores';
 	import type {
 		TransponderState,
@@ -54,7 +55,6 @@
 	import L from 'leaflet';
 
 	// Simulator state and settings
-	export let scenarioId: string;
 	let seed: string;
 	let hasEmergency: boolean;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
@@ -70,9 +70,9 @@
 	let endPointIndex: number = 0;
 	let failedAttempts: number = 0;
 	let currentRadioCall: RadioCall;
+	let currentSimConext: string;
 
 	// Page settings
-	let mapEnabled = true;
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
 	let readRecievedCalls: boolean = false;
 	let liveFeedback: boolean = false;
@@ -147,8 +147,12 @@
 		userMessage = value;
 	});
 
-	ATCMessageStore.subscribe((value) => {
+	MostRecentlyReceivedMessageStore.subscribe((value) => {
 		atcMessage = value;
+	});
+
+	CurrentScenarioContextStore.subscribe((value) => {
+		currentSimConext = value;
 	});
 
 	CurrentScenarioPointIndexStore.subscribe((value) => {
@@ -360,19 +364,19 @@
 			// Make ATC respond with say again and do not advance the simulator
 			if (callsignMentioned) {
 				if (isCallsignStandardRegistration(aircraftDetails.callsign)) {
-					ATCMessageStore.set(
+					MostRecentlyReceivedMessageStore.set(
 						aircraftDetails.prefix +
 							' ' +
 							replaceWithPhoneticAlphabet(aircraftDetails.callsign) +
 							' Say Again'
 					);
 				} else {
-					ATCMessageStore.set(
+					MostRecentlyReceivedMessageStore.set(
 						aircraftDetails.prefix + ' ' + aircraftDetails.callsign + ' Say Again'
 					);
 				}
 			} else {
-				ATCMessageStore.set('Station Calling, Say Again Your Callsign');
+				MostRecentlyReceivedMessageStore.set('Station Calling, Say Again Your Callsign');
 			}
 
 			return false;
@@ -475,7 +479,7 @@
 				body: 'Do you want view your feedback?',
 				response: (r: boolean) => {
 					if (r) {
-						goto('/scenario/' + scenarioId + '/results/');
+						goto('/scenario/results/');
 					}
 				}
 			};
@@ -489,7 +493,7 @@
 			value++;
 			return value;
 		});
-		ATCMessageStore.set(serverResponse.responseCall);
+		MostRecentlyReceivedMessageStore.set(serverResponse.responseCall);
 	}
 
 	function onStepHandler(e: {
@@ -702,7 +706,11 @@
 
 							<Popup
 								><div class="flex flex-col gap-2">
-									<div>{position}</div>
+									<div>
+										<!-- Lat, Long format -->
+										<div>{position[1].toFixed(6)}</div>
+										<div>{position[0].toFixed(6)}</div>
+									</div>
 								</div></Popup
 							>
 						</Marker>
@@ -712,5 +720,15 @@
 		</div>
 
 		<Altimeter />
+
+		<div class="w-full flex flex-row flex-wrap gap-5 p-2 text-slate-500">
+			<div>
+				Your callsign: {aircraftDetails.prefix}
+				{aircraftDetails.callsign}
+			</div>
+			<div>
+				Your aircraft type: {aircraftDetails.aircraftType}
+			</div>
+		</div>
 	</div>
 </div>
