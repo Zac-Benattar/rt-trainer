@@ -84,7 +84,7 @@
 
 {#if $modalStore[0]}
 	<div class={cBase}>
-		<header class={cHeader}>Quickly create a Scenario</header>
+		<header class={cHeader}>Quick create a Scenario</header>
 		<form class="modal-form {cForm}">
 			<label class="label"
 				><span class="text-sm">Route Seed (required)</span>

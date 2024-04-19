@@ -170,7 +170,8 @@ export function generateFRTOLRouteFromSeed(
 		startAirport.name,
 		startAirport.coordinates,
 		WaypointType.Airport,
-		0
+		0,
+		startAirport.id
 	);
 
 	if (!matzEntryPoint) throw new Error('MATZ entry point is undefined');
@@ -194,7 +195,8 @@ export function generateFRTOLRouteFromSeed(
 		destinationAirport?.name,
 		destinationAirport.coordinates,
 		WaypointType.Airport,
-		3
+		3,
+		destinationAirport.id
 	);
 
 	return {

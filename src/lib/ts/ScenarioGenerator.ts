@@ -27,8 +27,6 @@ export function generateScenario(
 
 	const scenarioPoints: ScenarioPoint[] = [];
 
-	waypoints.sort((a, b) => a.index - b.index);
-
 	const startAirport = airports.find((x) => x.id === waypoints[0].referenceObjectId);
 
 	const endAirport = airports.find(

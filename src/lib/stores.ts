@@ -147,7 +147,21 @@ export const OnRouteAirspacesStore = derived(
 
 export const AllAirportsStore = writable<Airport[]>([]);
 
-export const OnRouteAirportsStore = writable<Airport[]>([]);
+export const OnRouteAirportsStore = derived(
+	[AllAirportsStore, WaypointsStore],
+	([$AllAirportsStore, $WaypointStore]) => {
+		if ($AllAirportsStore.length === 0 || $WaypointStore.length === 0) return [];
+
+		const onRouteAirports: Airport[] = [];
+		$AllAirportsStore.forEach((airport) => {
+			const waypoint = $WaypointStore.find((x) => x.referenceObjectId === airport.id);
+			if (waypoint) {
+				onRouteAirports.push(airport);
+			}
+		});
+		return onRouteAirports;
+	}
+);
 
 export const CurrentScenarioPointIndexStore = writable<number>(0);
 
