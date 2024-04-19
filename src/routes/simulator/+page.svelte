@@ -185,6 +185,10 @@
 		}, 1000);
 	}
 
+	$: if (!criticalDataMissing && airports.length > 0 && airspaces.length > 0) {
+		loadScenario();
+	}
+
 	function loadScenario() {
 		scenario = generateScenario(seed, waypoints, onRouteAirports, onRouteAirspaces, hasEmergencies);
 
