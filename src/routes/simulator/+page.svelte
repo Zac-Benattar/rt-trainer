@@ -14,6 +14,8 @@
 	} from '$lib/stores';
 	import type Scenario from '$lib/ts/Scenario';
 	import { goto } from '$app/navigation';
+	import type { WaypointURLObject } from '$lib/ts/ScenarioTypes';
+	import Waypoint from '$lib/ts/AeronauticalClasses/Waypoint';
 
 	// Get the slug
 	const { id } = $page.params;
@@ -23,6 +25,9 @@
 	let callsign: string = 'G-OFLY';
 	let prefix: string = 'STUDENT';
 	let aircraftType: string = 'Cessna 172';
+
+	let waypoints: Waypoint[] = [];
+	let airportIDs: string[] = [];
 
 	// Check whether the seed is specified
 	const seedString: string | null = $page.url.searchParams.get('seed');
@@ -43,9 +48,23 @@
 	// Get waypoints from the URL's JSON.stringify form
 	const waypointsString: string | null = $page.url.searchParams.get('waypoints');
 	if (waypointsString != null) {
-		const waypointsArray: string[] = JSON.parse(waypointsString);
-		const waypoints = waypointsArray.map((waypoint) => JSON.parse(waypoint));
-		console.log(waypoints);
+		const waypointsDataArray: WaypointURLObject[] = JSON.parse(waypointsString);
+		waypoints = waypointsDataArray.map(
+			(waypoint) =>
+				new Waypoint(
+					waypoint.name,
+					waypoint.location,
+					waypoint.type,
+					waypoint.index,
+					waypoint.referenceObjectId
+				)
+		);
+	}
+
+	// Get airports from the URL's JSON.stringify form
+	const airportsString: string | null = $page.url.searchParams.get('airports');
+	if (airportsString != null) {
+		airportIDs = airportsString.split(',');
 	}
 
 	// Check whether the callsign is specified

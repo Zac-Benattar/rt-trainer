@@ -1,3 +1,12 @@
+export interface WaypointURLObject {
+    id: string;
+    type: number;
+    location: [number, number];
+    index: number;
+    name: string;
+    referenceObjectId?: string;
+}
+
 export enum EmergencyType {
 	None = 'None',
 	EngineFailure = 'Engine Failure',

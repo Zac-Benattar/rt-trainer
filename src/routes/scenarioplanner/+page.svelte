@@ -273,7 +273,7 @@
 			'&waypoints=' +
 			JSON.stringify(waypoints) +
 			'&airports=' +
-			JSON.stringify(onRouteAirports);
+			onRouteAirports.map((airport) => airport.id).toString();
 
 		goto(scenarioURLString);
 	}
