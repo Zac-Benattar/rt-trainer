@@ -843,7 +843,8 @@ export function getAirborneScenarioPoints(
 	});
 
 	let startIntersection = 0;
-	if (previousScenarioPoint && previousScenarioPoint.stage == 'Announce Leaving Zone') startIntersection = 1;
+	if (previousScenarioPoint && previousScenarioPoint.stage == 'Announce Leaving Zone')
+		startIntersection = 1;
 
 	for (let i = startIntersection; i < airspaceIntersectionPoints.length; i++) {
 		const distanceFromPrevPoint: number = turf.distance(
@@ -1049,8 +1050,7 @@ export function getAirborneScenarioPoints(
 
 	if (hasEmergency && scenarioPoints.length > 0) {
 		// Add emergency before a random waypoint on the route
-		const emergencyScenarioPointIndex =
-			endStageIndexes[(seed % (endStageIndexes.length - 1))] - 1;
+		const emergencyScenarioPointIndex = endStageIndexes[seed % (endStageIndexes.length - 1)] - 1;
 
 		// Get a random emergency type which is not none
 		const emergencyTypeIndex = seed % (Object.keys(EmergencyType).length - 1);

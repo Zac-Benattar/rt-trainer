@@ -585,7 +585,7 @@
 
 		<div class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow">
 			<div class="w-full h-full">
-				<Map view={scenario?.getCurrentPoint().pose.position.reverse()} zoom={9}>
+				<Map view={scenario?.getCurrentPoint().pose.position} zoom={9}>
 					{#if waypointPoints.length > 0}
 						{#each waypoints as waypoint (waypoint.index)}
 							<Marker
@@ -671,7 +671,12 @@
 					{/each}
 
 					{#key position}
-						<Marker latLng={position} width={50} height={50} rotation={displayHeading}>
+						<Marker
+							latLng={position}
+							width={50}
+							height={50}
+							rotation={displayHeading}
+						>
 							<div class="text-2xl">🛩️</div>
 
 							<Popup
