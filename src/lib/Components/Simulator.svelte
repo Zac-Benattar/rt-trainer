@@ -579,9 +579,9 @@
 		{/if}
 
 		<div class="flex flex-col place-content-evenly sm:grid sm:grid-cols-2 gap-5">
-			<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
-
 			<MessageOutput />
+
+			<MessageInput {speechRecognitionSupported} on:submit={handleSubmit} />
 		</div>
 
 		<Radio />

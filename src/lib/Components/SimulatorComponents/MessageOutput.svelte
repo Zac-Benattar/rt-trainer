@@ -28,6 +28,9 @@
 	let currentContext: string;
 	CurrentScenarioContextStore.subscribe((value) => {
 		currentContext = value;
+		if (currentContext === '') {
+			currentContext = 'Context for your current point in the scenario will appear here';
+		}
 	});
 
 	$: SpeechOutputEnabledStore.set(readRecievedCalls);
