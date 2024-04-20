@@ -1,8 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { updated } from '$app/stores';
 	import SvgDisplay from '$lib/Components/SVGDisplay.svelte';
 	import { ClearSimulationStores } from '$lib/stores';
 </script>
+
+{#if $updated}
+	<div class="toast">
+		<p>
+			A new version of the app is available
+
+			<button on:click={() => location.reload()}> Reload the page </button>
+		</p>
+	</div>
+{/if}
 
 <div class="container mx-auto max-w-screen-lg p-5 tracking-wide">
 	<div class="grid grid-cols-1 md:grid-cols-12 gap-5">

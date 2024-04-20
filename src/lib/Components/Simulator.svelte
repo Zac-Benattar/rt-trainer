@@ -43,7 +43,6 @@
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './SimulatorComponents/Altimeter.svelte';
-	import { updated } from '$app/stores';
 	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
@@ -518,16 +517,6 @@
 		}
 	});
 </script>
-
-{#if $updated}
-	<div class="toast">
-		<p>
-			A new version of the app is available
-
-			<button on:click={() => location.reload()}> Reload the page </button>
-		</p>
-	</div>
-{/if}
 
 <div class="w-full max-w-screen-lg p-5">
 	<div class="flex flex-row place-content-center gap-5 flex-wrap">
