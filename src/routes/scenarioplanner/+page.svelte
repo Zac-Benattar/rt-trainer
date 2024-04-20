@@ -31,6 +31,7 @@
 	import axios from 'axios';
 	import { goto } from '$app/navigation';
 	import type { AirportData, AirspaceData } from '$lib/ts/AeronauticalClasses/OpenAIPTypes';
+	import L from 'leaflet';
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
@@ -380,7 +381,7 @@
 											>
 										</div></Popup
 									>
-								</Marker>{:else}
+								</Marker>{:else if waypoint.index == waypoints.length - 1}
 								<Marker
 									latLng={[waypoint.location[1], waypoint.location[0]]}
 									width={50}
@@ -390,11 +391,40 @@
 									on:mouseup={onWaypointMouseUp}
 									draggable={true}
 								>
-									{#if waypoint.index == waypoints.length - 1}
-										<div class="text-2xl">🏁</div>
-									{:else}
-										<div class="text-2xl">🚩</div>
-									{/if}
+									<div class="text-2xl">🏁</div>
+
+									<Popup
+										><div class="flex flex-col gap-2">
+											<textarea id="waypoint-{waypoint.id}-name" class="textarea" rows="1"
+												>{waypoint.name}</textarea
+											><textarea id="waypoint-{waypoint.id}-lat" class="textarea" rows="1"
+												>{waypoint.location[0]}</textarea
+											><textarea id="waypoint-{waypoint.id}-lng" class="textarea" rows="1"
+												>{waypoint.location[1]}</textarea
+											>
+											<button class="btn varient-filled" on:click={() => saveWaypointEdit(waypoint)}
+												>Save</button
+											>
+											<button class="btn variant-filled" on:click={() => deleteWaypoint(waypoint)}
+												><div class="grid grid-cols-4 gap-2 w-full">
+													<div class="col-span-1 col-start-1"><TrashBinOutline /></div>
+													<div class="col-span-3 col-start-2">Delete</div>
+												</div></button
+											>
+										</div></Popup
+									>
+								</Marker>
+							{:else}<Marker
+									latLng={[waypoint.location[1], waypoint.location[0]]}
+									width={50}
+									height={50}
+									aeroObject={waypoint}
+									iconAnchor={L.point(8, 26)}
+									on:drag={onWaypointDrag}
+									on:mouseup={onWaypointMouseUp}
+									draggable={true}
+								>
+									<div class="text-2xl">🚩</div>
 
 									<Popup
 										><div class="flex flex-col gap-2">
