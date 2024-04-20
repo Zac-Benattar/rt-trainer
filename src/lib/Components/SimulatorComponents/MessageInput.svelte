@@ -110,7 +110,7 @@
 	</div>
 
 	<div class="flex flex-row flex-wrap gap-x-1 pb-1 place-content-evenly lg:flex-nowrap">
-		<div class="flex flex-col py-2">
+		<div class="flex flex-col py-2 [&>*]:pointer-events-none" use:popup={feedbackTooltip}>
 			<SlideToggle
 				id="enable-live-feedback"
 				name="slider-label"
@@ -120,7 +120,7 @@
 				on:click={() => {
 					liveFeedback = !liveFeedback;
 				}}
-				><div class="[&>*]:pointer-events-none" use:popup={feedbackTooltip}>Feedback</div>
+				><div class="flex flex-col place-content-center">Feedback</div>
 			</SlideToggle>
 		</div>
 		<div class="card p-4 variant-filled-secondary z-[3]" data-popup="feedbackPopupHover">
@@ -129,7 +129,10 @@
 		</div>
 
 		{#if speechRecognitionSupported}
-			<div class="flex flex-col py-2">
+			<div
+				class="flex flex-col py-2 [&>*]:pointer-events-none"
+				use:popup={speechRecognitionExperimentalWarningTooltip}
+			>
 				<SlideToggle
 					id="enable-voice-input"
 					name="slider-label"
@@ -146,12 +149,7 @@
 							});
 						}
 					}}
-					><div
-						class="[&>*]:pointer-events-none"
-						use:popup={speechRecognitionExperimentalWarningTooltip}
-					>
-						Voice Input
-					</div>
+					><div>Voice Input</div>
 				</SlideToggle>
 			</div>
 			<div
@@ -162,7 +160,10 @@
 				<div class="arrow variant-filled-secondary" />
 			</div>
 		{:else}
-			<div class="flex flex-col py-2">
+			<div
+				class="flex flex-col py-2 [&>*]:pointer-events-none"
+				use:popup={speechRecognitionNotSupportedTooltip}
+			>
 				<SlideToggle
 					id="enable-voice-input"
 					name="slider-label"
@@ -170,9 +171,7 @@
 					active="bg-primary-500"
 					size="sm"
 					disabled
-					><div class="[&>*]:pointer-events-none" use:popup={speechRecognitionNotSupportedTooltip}>
-						Voice Input
-					</div>
+					><div>Voice Input</div>
 				</SlideToggle>
 			</div>
 			<div

@@ -43,16 +43,19 @@
 </script>
 
 <div
-	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow {$$props.class}"
+	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-1 bg-surface-500 text-white grow {$$props.class}"
 >
-	<div class="border-0 card grow flex justify-self-stretch px-2 py-1.5 gap-2">
+	<div class="border-0 card grow flex flex-col justify-self-stretch px-2 py-1.5 gap-2">
 		<div>{currentContext}</div>
 		<div>{mostRecentlyRecievedMessage}</div>
 	</div>
 
 	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
 		<div class="toggle px-2 shrink-0">
-			<div class="flex flex-col py-2">
+			<div
+				class="flex flex-col py-2 [&>*]:pointer-events-none"
+				use:popup={audioMessagesInfoTooltip}
+			>
 				<SlideToggle
 					id="enabled-audio-messages"
 					name="slider-label"
@@ -61,14 +64,9 @@
 					on:click={() => {
 						readRecievedCalls = !readRecievedCalls;
 					}}
-					><div class="[&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
-						Read Aloud Recieved Calls
-					</div>
+					><div>Read Aloud Recieved Calls</div>
 				</SlideToggle>
-				<div
-					class="card p-4 variant-filled-secondary z-[3]"
-					data-popup="audioMessagesInfoPopupHover"
-				>
+				<div class="card p-4 variant-filled-secondary z-[3]" data-popup="audioMessagesInfoPopupHover">
 					<p>Audio messages read aloud when you recieve a call from ATC or another aircraft.</p>
 					<div class="arrow variant-filled-secondary" />
 				</div>

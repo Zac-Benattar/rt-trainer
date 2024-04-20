@@ -1,12 +1,18 @@
 <script lang="ts">
-	import { ListBox, ListBoxItem, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+	import {
+		ListBox,
+		ListBoxItem,
+		popup,
+		type PopupSettings,
+		Accordion,
+		AccordionItem
+	} from '@skeletonlabs/skeleton';
 	import { init } from '@paralleldrive/cuid2';
 	import {
 		RefreshOutline,
 		WandMagicSparklesOutline,
 		DotsHorizontalOutline
 	} from 'flowbite-svelte-icons';
-	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
 	import {
 		AllAirportsStore,
 		AllAirspacesStore,
@@ -92,12 +98,7 @@
 
 	async function loadSeededRoute() {
 		AwaitingServerResponseStore.set(true);
-		const routeData = await generateFRTOLRouteFromSeed(
-			routeSeed,
-			airports,
-			airspaces,
-			maxFL
-		);
+		const routeData = await generateFRTOLRouteFromSeed(routeSeed, airports, airspaces, maxFL);
 		if (routeData) loadRouteData(routeData);
 		AwaitingServerResponseStore.set(false);
 	}
