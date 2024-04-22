@@ -521,7 +521,7 @@
 <div class="w-full max-w-screen-lg p-5">
 	<div class="flex flex-row place-content-center gap-5 flex-wrap">
 		{#if tutorialEnabled && !tutorialComplete}
-			<div class="card p-3 rounded-lg sm:w-7/12 sm:mx-10">
+			<div class="card bg-primary-900 text-white p-3 rounded-lg sm:w-7/12 sm:mx-10">
 				<Stepper on:complete={onCompleteHandler} on:step={onStepHandler}>
 					<Step>
 						<svelte:fragment slot="header">Get Started!</svelte:fragment>
