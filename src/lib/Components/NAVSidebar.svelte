@@ -10,7 +10,7 @@
 
 <nav class="list-nav p-4">
 	<ul>
-		<li><a href="/home" on:click={drawerClose}>Home</a></li>
+		<li><a href="/" on:click={drawerClose}>Home</a></li>
 		<li><a href="/simulator" on:click={drawerClose}>Quick Scenario</a></li>
 		<li><a href="/scenarioplanner" on:click={drawerClose}>Scenario Planner</a></li>
 		<li><a href="/about" on:click={drawerClose}>About</a></li>
