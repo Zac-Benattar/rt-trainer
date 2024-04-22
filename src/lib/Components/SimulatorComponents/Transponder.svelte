@@ -149,7 +149,7 @@
 </script>
 
 <div
-	class="transponder-container flex flex-row card gap-2 bg-gray-200 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
+	class="flex flex-row card gap-2 bg-neutral-600 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
 >
 	<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
 
@@ -178,10 +178,6 @@
 </div>
 
 <style lang="postcss">
-	.transponder-container {
-		background-color: rgb(65, 65, 65);
-	}
-
 	.display-panel {
 		max-width: 600px;
 		min-width: 200px;

@@ -62,7 +62,7 @@
 </script>
 
 <div
-	class="altimeter-container flex flex-row place-content-center p-1.5 rounded-md grow h-full sm:max-w-lg sm:max-h-lg bg-surface-500 text-white"
+	class="card flex flex-row place-content-center p-1.5 rounded-md grow h-full sm:max-w-lg sm:max-h-lg bg-neutral-600 text-white"
 >
 	<div class="dial-container sm:mb-10">
 		<img
@@ -105,10 +105,6 @@
 </div>
 
 <style lang="postcss">
-	.altimeter-container {
-		background-color: rgb(65, 65, 65);
-	}
-
 	.dial-container {
 		position: relative;
 		max-width: 400px;

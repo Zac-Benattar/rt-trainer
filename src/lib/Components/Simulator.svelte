@@ -577,7 +577,7 @@
 
 		<Transponder />
 
-		<div class="card p-2 rounded-md w-[420px] h-[452px] bg-surface-500 flex flex-row grow">
+		<div class="card p-2 rounded-md w-[420px] h-[452px] bg-neutral-600 flex flex-row grow">
 			<div class="w-full h-full">
 				<Map view={scenario?.getCurrentPoint().pose.position} zoom={9}>
 					{#if waypointPoints.length > 0}
@@ -710,7 +710,7 @@
 
 		<Altimeter />
 
-		<div class="w-full flex flex-row flex-wrap gap-5 p-2 text-slate-500">
+		<div class="w-full flex flex-row flex-wrap gap-5 p-2 text-neutral-600/50">
 			<div>
 				Your callsign: {aircraftDetails.prefix}
 				{aircraftDetails.callsign}

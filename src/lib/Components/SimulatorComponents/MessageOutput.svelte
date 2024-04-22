@@ -43,14 +43,14 @@
 </script>
 
 <div
-	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-1 bg-surface-500 text-white grow {$$props.class}"
+	class="p-1.5 card rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-1 bg-neutral-600 text-white grow {$$props.class}"
 >
-	<div class="border-0 card grow flex flex-col justify-self-stretch px-2 py-1.5 gap-2">
+	<div class="border-0 card bg-neutral-700 grow flex flex-col justify-self-stretch px-2 py-1.5 gap-2">
 		<div>{currentContext}</div>
 		<div>{mostRecentlyReceivedMessage}</div>
 	</div>
 
-	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
+	<div class="flex flex-row gap-x-1 flex-wrap">
 		<div class="toggle px-2 shrink-0">
 			<div
 				class="flex flex-col py-2 [&>*]:pointer-events-none"

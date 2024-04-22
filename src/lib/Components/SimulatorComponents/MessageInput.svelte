@@ -95,11 +95,11 @@
 </script>
 
 <div
-	class="p-1.5 rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-surface-500 text-white grow {$$props.class}"
+	class="p-1.5 card rounded-md max-w-lg min-h-72 flex flex-col grid-cols-1 gap-2 bg-neutral-600 text-white grow {$$props.class}"
 >
 	<div class="grow flex justify-self-stretch">
 		<textarea
-			class="textarea bg-secondary-500-50 text-secondary-50 bg-surface-500"
+			class="textarea bg-neutral-700"
 			id="call-input"
 			name="call-input"
 			rows="4"
