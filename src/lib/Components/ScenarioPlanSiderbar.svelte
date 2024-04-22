@@ -122,8 +122,8 @@
 	}
 </script>
 
-<div class="sidebar-container flex flex-col grow py-0 gap-1 overflow-clip">
-	<div class="flex flex-col sticky top-0 p-3 bg-surface-900 z-50">
+<div class="sidebar-container flex flex-col grow py-0 overflow-clip">
+	<div class="flex flex-col sticky top-0 p-3 z-50 bg-surface-100 dark:bg-surface-900">
 		<div class="flex flex-row ml-[-14px]">
 			<strong><a href="/" class="btn text-xl sm:text-2xl uppercase">RT Trainer</a></strong>
 		</div>
@@ -140,13 +140,13 @@
 	</div>
 
 	<div
-		class="snap-y scroll-py-4 snap-mandatory scroll-smooth sidebar-contents-container overflow-auto px-3 pb-2"
+		class="overflow-auto px-3 pb-2"
 	>
-		<div class="flex flex-col gap-2 p-2">
+		<div class="flex flex-col gap-2 px-2">
 			<div><strong>Route Waypoints</strong></div>
 			{#if waypoints.length == 0}
 				<div class="px-1">
-					<p class="text-slate-600 text-sm">
+					<p class="text-slate-600 dark:text-slate-400 text-sm">
 						Add a waypoint by clicking on an airport or any other spot on the map. Or use the <b
 							>Auto-generate</b
 						> Tool below.

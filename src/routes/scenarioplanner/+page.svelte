@@ -15,7 +15,7 @@
 		fetchAirspaces
 	} from '$lib/stores';
 	import Waypoint, { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
-	import { TrashBinOutline } from 'flowbite-svelte-icons';
+	import { TrashBinOutline, PlayOutline } from 'flowbite-svelte-icons';
 	import { AllAirspacesStore } from '$lib/stores';
 	import { plainToInstance } from 'class-transformer';
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
@@ -27,25 +27,23 @@
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import { Icon } from 'svelte-icons-pack';
 	import { BsAirplaneFill } from 'svelte-icons-pack/bs';
-	import Control from '$lib/Components/Leaflet/Control.svelte';
-	import axios from 'axios';
 	import { goto } from '$app/navigation';
-	import type { AirportData, AirspaceData } from '$lib/ts/AeronauticalClasses/OpenAIPTypes';
 	import L from 'leaflet';
+	import { LightSwitch } from '@skeletonlabs/skeleton';
 
 	let showAllAirports: boolean = true;
 	let showAllAirspaces: boolean = true;
 
-	let unnamedWaypointCount = 1;
+	let unnamedWaypointCount: number = 1;
 
 	let draggedWaypoint: Waypoint | undefined;
+
+	let startButtonDisabled: boolean = true;
 
 	let awaitingServerResponse: boolean = false;
 	AwaitingServerResponseStore.subscribe((value) => {
 		awaitingServerResponse = value;
 	});
-
-	let blockingClick: boolean = false;
 
 	const airports: Airport[] = [];
 	AllAirportsStore.subscribe((value) => {
@@ -97,13 +95,8 @@
 	});
 
 	function onMapClick(event: CustomEvent<{ latlng: { lat: number; lng: number } }>) {
-		// If user is clicking on the button controls or awaiting routegen ignore map click
+		// If user is awaiting routegen ignore map click
 		if (awaitingServerResponse) return;
-
-		if (blockingClick) {
-			blockingClick = false;
-			return;
-		}
 
 		addWaypoint(
 			+parseFloat(event.detail.latlng.lat.toFixed(6)),
@@ -195,9 +188,23 @@
 		}
 	}
 
-	function onPracticeClick() {
-		blockingClick = true;
+	$: {
+		// Waypoints must be at least 2 to create a scenario
+		// onRouteAirports must be at most 2 to create a scenario
+		// Airports, if there are any, must be at the start or end of the route
+		// awaitingServerResponse must be false (no route generation in progress)
+		startButtonDisabled =
+			waypoints.length < 2 ||
+			onRouteAirports.length > 2 ||
+			onRouteAirports.length == 1 && (waypoints[0].type !== WaypointType.Airport &&
+			waypoints[waypoints.length - 1].type !== WaypointType.Airport) ||
+			(onRouteAirports.length == 2 &&
+				waypoints[0].type !== WaypointType.Airport &&
+				waypoints[waypoints.length - 1].type !== WaypointType.Airport) ||
+			awaitingServerResponse;
+	}
 
+	function onPracticeClick() {
 		// Check for route validity, then redirect to scenario page with the scenario data in the URL
 		// May need to look into URL shortening for this, which would basically be a lookup table of scenario data
 		// and a short URL that redirects to the full URL/fetches the scenario data if using own DB/key-value store
@@ -257,15 +264,6 @@
 	<div class="flex flex-col place-content-center sm:place-content-start w-full h-full">
 		<div class="flex flex-col xs:pr-3 w-full h-full">
 			<Map view={wellesbourneMountfordCoords} zoom={9} on:click={onMapClick}>
-				<Control position="topleft">
-					<div>
-						<button
-							class="btn text-black bg-white border-2 border-neutral-800/30 text-sm"
-							on:click={onPracticeClick}>Practice</button
-						>
-					</div>
-				</Control>
-
 				{#each airports as airport}
 					{#if showAllAirports || waypoints.some((waypoint) => waypoint.referenceObjectId === airport.id)}
 						<Marker
@@ -468,7 +466,6 @@
 			</Map>
 		</div>
 		<div class="flex flex-row w-full h-20">
-			<div class="vr h-full border border-surface-800" />
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Est. Distance</div>
@@ -477,7 +474,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="vr h-full border border-surface-800" />
+			<div class="vr h-full border border-surface-200 dark:border-surface-700" />
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Unique Airspaces</div>
@@ -486,7 +483,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="vr h-full border border-surface-800" />
+			<div class="vr h-full border border-surface-200 dark:border-surface-700" />
 			<div class="flex flex-row place-content-center p-4">
 				<div class="flex flex-col place-content-center">
 					<div class="text-sm">Est. Scenario Duration</div>
@@ -494,6 +491,18 @@
 						{durationEstimate} mins
 					</div>
 				</div>
+			</div>
+
+			<div class="flex flex-row place-content-end grow p-2 gap-3">
+				<div class="flex flex-col place-content-center">
+					<button
+						class="h-10 btn variant-filled text-sm"
+						disabled={startButtonDisabled}
+						on:click={onPracticeClick}><span><PlayOutline /></span><span>Start</span></button
+					>
+				</div>
+
+				<div class="flex flex-col place-content-center"><LightSwitch /></div>
 			</div>
 		</div>
 	</div>

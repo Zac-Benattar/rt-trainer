@@ -9,7 +9,7 @@
 	import { SlideToggle, popup, type PopupSettings } from '@skeletonlabs/skeleton';
 	let currentTarget: string;
 	let currentTargetFrequency: string = '000.000';
-	let readRecievedCalls: boolean = false;
+	let readReceivedCalls: boolean = false;
 
 	CurrentTargetStore.subscribe((value) => {
 		currentTarget = value;
@@ -19,10 +19,10 @@
 		currentTargetFrequency = value;
 	});
 
-	let mostRecentlyRecievedMessage: string;
+	let mostRecentlyReceivedMessage: string;
 
 	MostRecentlyReceivedMessageStore.subscribe((value) => {
-		mostRecentlyRecievedMessage = value;
+		mostRecentlyReceivedMessage = value;
 	});
 
 	let currentContext: string;
@@ -33,7 +33,7 @@
 		}
 	});
 
-	$: SpeechOutputEnabledStore.set(readRecievedCalls);
+	$: SpeechOutputEnabledStore.set(readReceivedCalls);
 
 	const audioMessagesInfoTooltip: PopupSettings = {
 		event: 'hover',
@@ -47,7 +47,7 @@
 >
 	<div class="border-0 card grow flex flex-col justify-self-stretch px-2 py-1.5 gap-2">
 		<div>{currentContext}</div>
-		<div>{mostRecentlyRecievedMessage}</div>
+		<div>{mostRecentlyReceivedMessage}</div>
 	</div>
 
 	<div class="flex flex-row gap-x-1 bg-surface-500 flex-wrap">
@@ -62,12 +62,12 @@
 					active="bg-primary-500"
 					size="sm"
 					on:click={() => {
-						readRecievedCalls = !readRecievedCalls;
+						readReceivedCalls = !readReceivedCalls;
 					}}
-					><div>Read Aloud Recieved Calls</div>
+					><div>Read Aloud Received Calls</div>
 				</SlideToggle>
 				<div class="card p-4 variant-filled-secondary z-[3]" data-popup="audioMessagesInfoPopupHover">
-					<p>Audio messages read aloud when you recieve a call from ATC or another aircraft.</p>
+					<p>Audio messages read aloud when you receive a call from ATC or another aircraft.</p>
 					<div class="arrow variant-filled-secondary" />
 				</div>
 			</div>
