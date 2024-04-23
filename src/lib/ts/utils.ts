@@ -2,7 +2,7 @@ import type { Position } from '@turf/turf';
 import type Airspace from './AeronauticalClasses/Airspace';
 import * as turf from '@turf/turf';
 
-export const wellesbourneMountfordCoords = [52.192, -1.614];
+export const wellesbourneMountfordCoords: [number, number] = [52.192, -1.614];
 
 export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
 
@@ -15,11 +15,10 @@ export function simpleHash(str: string): number {
 	}
 
 	for (let i = 0; i < str.length; i++) {
-		const char = str.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
+		hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
 	}
 
-	return Math.abs(hash);
+	return Math.abs(hash >>> 0);
 }
 
 export function getSeededTimeInMinutes(seed: number, min: number, max: number): number {
@@ -41,16 +40,16 @@ export function seededNormalDistribution(
 	mean: number,
 	standardDeviation: number
 ): number {
-	// Generate two 'random' numbers from seed for the Box-Muller transform
+	// Generate two pseudo-random numbers from seed for the Box-Muller transform
 	const [v1, v2] = splitAndPadNumber(simpleHash(seedString));
-	const u1 = 1 / v1;
-	const u2 = 1 / v2;
+	const u1: number = 1 / v1;
+	const u2: number = 1 / v2;
 
 	// Box-Muller transform
-	const z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+	const z0: number = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
 
 	// Scale and shift to get the desired mean and standard deviation
-	const result = z0 * standardDeviation + mean;
+	const result: number = z0 * standardDeviation + mean;
 
 	return result;
 }
@@ -103,7 +102,7 @@ export function swapDigitsWithWords(inputString: string): string {
 		'9': 'Nine '
 	};
 
-	const result = inputString
+	const result: string = inputString
 		.split('')
 		.map((char) => {
 			if (/\d/.test(char)) {
@@ -160,11 +159,11 @@ export function numberToPhoneticString(number: number, precision: number): strin
 		'9': 'Niner'
 	};
 
-	const stringNumber = number.toFixed(precision);
+	const stringNumber: string = number.toFixed(precision);
 	let result: string = '';
 
 	for (let i = 0; i < stringNumber.length; i++) {
-		const char = stringNumber[i];
+		const char: string = stringNumber[i];
 
 		if (/[0-9]/.test(char)) {
 			result += phoneticNumbers[char] + ' ';
@@ -233,7 +232,7 @@ export function replacePhoneticAlphabetWithChars(str: string): string {
 
 export function getNthPhoneticAlphabetLetter(n: number): string {
 	// The phonetic alphabet is 26 letters long
-	const index = (n - 1) % 26;
+	const index: number = (n - 1) % 26;
 
 	return replaceWithPhoneticAlphabet(String.fromCharCode(65 + index));
 }
@@ -285,13 +284,13 @@ export function replaceWithPhoneticAlphabet(text: string) {
 
 	let result = '';
 	for (let i = 0; i < upperText.length; i++) {
-		const char = upperText[i];
+		const char: string = upperText[i];
 
 		if (/[A-Z]/.test(char)) {
-			const natoWord = phoneticAlphabet[char];
+			const natoWord: string = phoneticAlphabet[char];
 			result += natoWord + ' ';
 		} else if (/[0-9]/.test(char)) {
-			const natoNumber = phoneticNumbers[char];
+			const natoNumber: string = phoneticNumbers[char];
 			result += natoNumber + ' ';
 		} else if (char === '-') {
 			// Ignore hyphens
@@ -307,8 +306,8 @@ export function replaceWithPhoneticAlphabet(text: string) {
 }
 
 export function generateRandomURLValidString(length: number) {
-	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	let randomString = '';
+	const charset: string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	let randomString: string = '';
 
 	for (let i = 0; i < length; i++) {
 		const randomIndex = Math.floor(Math.random() * charset.length);
@@ -330,45 +329,17 @@ export function getCompassDirectionFromHeading(heading: number) {
 		'North West'
 	];
 
-	const index = Math.round(heading / 45) % 8;
+	const index: number = Math.round(heading / 45) % 8;
 
 	return compassDirections[index];
 }
 
-export function stringDecimalLatitudeToNumber(str: string): number | null {
-	const regex = /^(\d+\.?\d*)[NS]$/;
-
-	const match = str.match(regex);
-
-	if (match) {
-		const decimalPointAdded = match[1].slice(0, 2) + '.' + match[1].slice(2, match[1].length);
-		const latitudeValue = parseFloat(decimalPointAdded);
-
-		if (!isNaN(latitudeValue)) {
-			return str.endsWith('N') ? latitudeValue : -latitudeValue;
-		}
-	}
-
-	return null; // Return null if the input string doesn't match the expected format
-}
-
-export function stringDecimalLongitudeToNumber(str: string): number | null {
-	const regex = /^(\d+\.?\d*)[EW]$/;
-
-	const match = str.slice(2, str.length).match(regex);
-
-	if (match) {
-		const decimalPointAdded = match[1].slice(0, 1) + '.' + match[1].slice(2, match[1].length);
-		const latitudeValue = parseFloat(decimalPointAdded);
-
-		if (!isNaN(latitudeValue)) {
-			return str.endsWith('E') ? latitudeValue : -latitudeValue;
-		}
-	}
-
-	return null; // Return null if the input string doesn't match the expected format
-}
-
+/***
+ * Converts a number of minutes to a time string in the format HH:MM
+ * @param minutes - number of minutes
+ * @returns - time string in the format HH:MM
+ * @throws - Error if the input is not a valid number representing time in minutes
+ */
 export function convertMinutesToTimeString(minutes: number): string {
 	if (typeof minutes !== 'number' || minutes < 0 || minutes >= 24 * 60) {
 		throw new Error('Invalid input. Please provide a valid number representing time in minutes.');
@@ -384,6 +355,12 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
+/***
+ * Gets a pseudo-random squawk code deterministically based on a seed and an airspace ID
+ * @param seed - seed for the random number generator
+ * @param airspaceId - ID of the airspace
+ * @returns pseudo-random squawk code
+ */
 export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
 	const idHash = simpleHash(airspaceId);
 	let code: number = 0;
@@ -394,6 +371,13 @@ export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
 	return code.toString();
 }
 
+/***
+ * Gets a pseudo-random frequency in the format XXX.XXX deterministically based on a seed and an object ID
+ * @remarks Frequency range 118.000 -> 137.000
+ * @param seed - seed for the random number generator
+ * @param objectId - ID of the object
+ * @returns pseudo-random frequency
+ */
 export function getRandomFrequency(seed: number, objectId: string): string {
 	const idHash = simpleHash(objectId);
 	const prePointFrequency = (118 + ((7759 * seed * idHash) % 20)).toString();
@@ -496,23 +480,43 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 	return intersections;
 }
 
-export function isInAirspace(point: Position, airspace: Airspace): boolean {
-	if (airspace.lowerLimit > 30) return false;
+/***
+ * Checks if a point is inside an airspace using the Turf library
+ * @remarks The function first checks if the airspace's lower limit is greater than the max flight level, if so it returns false
+ * @param point - point to check
+ * @param airspace - airspace to check against
+ * @returns - true if the point is inside the airspace, false otherwise
+ */
+export function isInAirspace(
+	point: Position,
+	airspace: Airspace,
+	maxFlightLevel: number = 30
+): boolean {
+	if (airspace.lowerLimit > maxFlightLevel) return false;
 
 	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
+/***
+ * Checks if an airspace is included in a route using the Turf library
+ * @remarks The function first checks if the route has more than one point, if so it checks if the route intersects the airspace
+ * @remarks If the airspace's lower limit is greater than the max flight level, it returns false
+ * @param route - route defined as array of Positions
+ * @param airspace - airspace to check against
+ * @param maxFlightLevel - maximum flight level
+ * @returns - true if the airspace is included in the route, false otherwise
+ */
 export function isAirspaceIncludedInRoute(
 	route: Position[],
 	airspace: Airspace,
-	upperLimitFL: number
+	maxFlightLevel: number = 30
 ): boolean {
 	if (route.length > 1) {
 		const routeLine = turf.lineString(route);
 		if (turf.booleanIntersects(routeLine, turf.polygon(airspace.coordinates))) return true;
 	}
 
-	if (airspace.lowerLimit > upperLimitFL) return false;
+	if (airspace.lowerLimit > maxFlightLevel) return false;
 
 	for (let i = 0; i < route.length; i++) {
 		if (turf.booleanContains(turf.polygon(airspace.coordinates), turf.point(route[i]))) return true;
