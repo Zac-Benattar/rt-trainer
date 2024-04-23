@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SpeechSynthesis } from 'speech-synthesis';
 	import Radio from './SimulatorComponents/Radio.svelte';
 	import Transponder from './SimulatorComponents/Transponder.svelte';
 	import Map from './Leaflet/Map.svelte';
@@ -30,7 +31,10 @@
 		WaypointsStore,
 		OnRouteAirspacesStore,
 		CurrentScenarioPointStore,
-		CurrentScenarioContextStore
+		CurrentScenarioContextStore,
+
+		SpeechNoiseStore
+
 	} from '$lib/stores';
 	import type {
 		TransponderState,
@@ -55,7 +59,6 @@
 
 	// Simulator state and settings
 	let seed: string;
-	let hasEmergency: boolean;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
@@ -73,6 +76,7 @@
 
 	// Page settings
 	let speechRecognitionSupported: boolean = false; // Speech recognition is not supported in all browsers e.g. firefox
+	let speechNoiseLevel: number = 0;
 	let readRecievedCalls: boolean = false;
 	let liveFeedback: boolean = false;
 	let tutorialStep4: boolean = false;
@@ -107,7 +111,7 @@
 	}
 
 	$: if (readRecievedCalls && atcMessage) {
-		speakATCMessage();
+		speakATCMessageWithNoise(speechNoiseLevel);
 	}
 
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
@@ -120,6 +124,10 @@
 
 	SpeechOutputEnabledStore.subscribe((value) => {
 		readRecievedCalls = value;
+	});
+
+	SpeechNoiseStore.subscribe((value) => {
+		speechNoiseLevel = value;
 	});
 
 	LiveFeedbackStore.subscribe((value) => {
@@ -210,27 +218,59 @@
 	});
 
 	/**
-	 * Reads out the current atc message using the speech synthesis API
+	 * Reads out the current atc message using the speech synthesis API, with added static noise
 	 *
 	 * @remarks
 	 * If the speech synthesis API is not supported in the current browser, then an error is logged to the console.
 	 *
 	 * @returns void
 	 */
-	function speakATCMessage(): void {
+	function speakATCMessageWithNoise(noiseLevel: number): void {
 		if ('speechSynthesis' in window) {
-			var utterance = new SpeechSynthesisUtterance();
+			// Get the speech synthesis API and audio context
+			const synth = window.speechSynthesis;
+			const audioContext = new AudioContext();
 
-			utterance.text = atcMessage;
+			// Create speech synthesis utterance and noise buffer
+			const speech = new SpeechSynthesisUtterance(atcMessage);
+			const noiseBuffer = generateStaticNoise(45, speech.rate * 44100);
+			const noiseSource = new AudioBufferSourceNode(audioContext, { buffer: noiseBuffer });
+			const gainNode = new GainNode(audioContext);
+			synth.speak(speech);
 
-			// utterance.voice = ...
-			// utterance.rate = ...
-			// utterance.pitch = ...
+			// Adjust the gain based on the noise level
+			gainNode.gain.value = noiseLevel;
 
-			speechSynthesis.speak(utterance);
+			// Connect nodes
+			noiseSource.connect(gainNode).connect(audioContext.destination);
+			noiseSource.start();
+
+			// Stop the noise after the speech has finished
+			speech.onend = () => {
+				noiseSource.stop();
+			};
 		} else {
 			console.error('SpeechSynthesis API is not supported in this browser.');
 		}
+	}
+
+	/**
+	 * Generates static noise for the speech synthesis API in the form of an AudioBuffer
+	 * @param duration - The duration of the noise in seconds
+	 * @param sampleRate - The sample rate of the noise
+	 * 
+	 * @returns AudioBuffer
+	 */
+	function generateStaticNoise(duration: number, sampleRate: number) {
+		const bufferSize = sampleRate * duration;
+		const buffer = new AudioBuffer({ length: bufferSize, numberOfChannels: 1, sampleRate });
+		const data = buffer.getChannelData(0);
+
+		for (let i = 0; i < bufferSize; i++) {
+			data[i] = Math.random() * 2 - 1;
+		}
+
+		return buffer;
 	}
 
 	/**

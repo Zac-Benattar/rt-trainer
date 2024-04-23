@@ -4,12 +4,15 @@
 		MostRecentlyReceivedMessageStore,
 		SpeechOutputEnabledStore,
 		CurrentTargetFrequencyStore,
-		CurrentScenarioContextStore
+		CurrentScenarioContextStore,
+		SpeechNoiseStore
 	} from '$lib/stores';
 	import { SlideToggle, popup, type PopupSettings } from '@skeletonlabs/skeleton';
+
 	let currentTarget: string;
 	let currentTargetFrequency: string = '000.000';
 	let readReceivedCalls: boolean = false;
+	let speechNoiseLevel: number = 0;
 
 	CurrentTargetStore.subscribe((value) => {
 		currentTarget = value;
@@ -35,9 +38,17 @@
 
 	$: SpeechOutputEnabledStore.set(readReceivedCalls);
 
+	$: SpeechNoiseStore.set(speechNoiseLevel);
+
 	const audioMessagesInfoTooltip: PopupSettings = {
 		event: 'hover',
 		target: 'audioMessagesInfoPopupHover',
+		placement: 'bottom'
+	};
+
+	const audioMessagesNoiseInfoTooltip: PopupSettings = {
+		event: 'hover',
+		target: 'audioMessagesNoiseInfoPopupHover',
 		placement: 'bottom'
 	};
 </script>
@@ -56,24 +67,51 @@
 		<div class="toggle px-2 shrink-0">
 			<div class="flex flex-col py-2">
 				<div class="flex flex-row place-content-start gap-2">
-					<SlideToggle
-						id="enabled-audio-messages"
-						name="slider-label"
-						active="bg-primary-500"
-						size="sm"
-						on:click={() => {
-							readReceivedCalls = !readReceivedCalls;
-						}}
-					/>
-					<div class="[&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
-						Read Aloud Received Calls
+					<div class="flex flex-row place-content-start gap-2">
+						<SlideToggle
+							id="enabled-audio-messages"
+							name="slider-label"
+							active="bg-primary-500"
+							size="sm"
+							on:click={() => {
+								readReceivedCalls = !readReceivedCalls;
+							}}
+						/>
+						<div class="[&>*]:pointer-events-none" use:popup={audioMessagesInfoTooltip}>
+							Read Aloud Received Calls
+						</div>
+						<div
+							class="card p-4 variant-filled-secondary z-[3]"
+							data-popup="audioMessagesInfoPopupHover"
+						>
+							<p>Audio messages read aloud when you receive a call from ATC or another aircraft.</p>
+							<div class="arrow variant-filled-secondary" />
+						</div>
 					</div>
-					<div
-						class="card p-4 variant-filled-secondary z-[3]"
-						data-popup="audioMessagesInfoPopupHover"
-					>
-						<p>Audio messages read aloud when you receive a call from ATC or another aircraft.</p>
-						<div class="arrow variant-filled-secondary" />
+					<div class="flex flex-row place-content-start gap-2">
+						<SlideToggle
+							id="enabled-audio-messages-noise"
+							name="slider-label"
+							active="bg-primary-500"
+							size="sm"
+							disabled={!readReceivedCalls}
+							on:click={() => {
+								speechNoiseLevel = speechNoiseLevel === 0 ? 0.1 : 0;
+							}}
+						/>
+						<div class="[&>*]:pointer-events-none" use:popup={audioMessagesNoiseInfoTooltip}>
+							Interference Noise
+						</div>
+						<div
+							class="card p-4 variant-filled-secondary z-[3]"
+							data-popup="audioMessagesNoiseInfoPopupHover"
+						>
+							<p>
+								Adds static noise to read out calls. <br />Requires Read Aloud Recieved Calls to be
+								enabled.
+							</p>
+							<div class="arrow variant-filled-secondary" />
+						</div>
 					</div>
 				</div>
 			</div>
