@@ -23,7 +23,7 @@ export function generateFRTOLRouteFromSeed(
 	}
 
 	const seed: number = simpleHash(seedString);
-	const maxIterations: number = 1000;
+	const maxIterations: number = 2000;
 	let startAirport: Airport | undefined;
 	let startAirportIsControlled: boolean = false;
 	let destinationAirport: Airport | undefined;
@@ -39,8 +39,8 @@ export function generateFRTOLRouteFromSeed(
 		iterations++;
 		validRoute = true;
 
-		// Get start airport based on seed times a prime times iterations + 1 to get different start airports each iteration
-		startAirport = airports[(seed * 7919 * (iterations + 1)) % airports.length];
+		startAirport =
+			airports[Math.floor(Math.abs(seed * 987654321 + iterations * 123456789)) % airports.length];
 		if (startAirport.type == 3 || startAirport.type == 9) {
 			startAirportIsControlled = true;
 		}
@@ -59,8 +59,10 @@ export function generateFRTOLRouteFromSeed(
 		}
 
 		// Choose a MATZ to fly through
-		const numberOfMATZs: number = nearbyMATZs.length;
-		chosenMATZ = nearbyMATZs[(seed * 7919 * (iterations + 1)) % numberOfMATZs];
+		chosenMATZ =
+			nearbyMATZs[
+				Math.floor(Math.abs(seed * 876543219 + iterations * 234567891)) % nearbyMATZs.length
+			];
 
 		if (chosenMATZ.pointInsideATZ(startAirport.coordinates)) {
 			validRoute = false;
@@ -95,7 +97,10 @@ export function generateFRTOLRouteFromSeed(
 		while (!validDestinationAirport && destIterations < possibleDestinations.length) {
 			destIterations++;
 			destinationAirport =
-				possibleDestinations[(seed * (destIterations + 1)) % possibleDestinations.length];
+				possibleDestinations[
+					Math.floor(Math.abs(seed * 765432198 + iterations * 345678912)) %
+						possibleDestinations.length
+				];
 
 			if (!chosenMATZ.pointInsideATZ(destinationAirport.coordinates)) {
 				if (
@@ -134,6 +139,11 @@ export function generateFRTOLRouteFromSeed(
 			turf.point(destinationAirport.coordinates),
 			turf.featureCollection(matzCoords)
 		).geometry.coordinates as [number, number];
+
+		if (matzEntryPoint == matzExitPoint) {
+			validRoute = false;
+			continue;
+		}
 
 		// Get all airspace along the route
 		const route: [number, number][] = [

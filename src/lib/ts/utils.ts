@@ -2,17 +2,27 @@ import type { Position } from '@turf/turf';
 import type Airspace from './AeronauticalClasses/Airspace';
 import * as turf from '@turf/turf';
 
+/**
+ * Default coordinates for the map center
+ */
 export const wellesbourneMountfordCoords: [number, number] = [52.192, -1.614];
 
+/**
+ * Linear interpolation between two values
+ * @param x - first value
+ * @param y - second value
+ * @param a - interpolation factor
+ * @returns - interpolated value
+ */
 export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
 
-// Simple hash function: hash * 31 + char
+/**
+ * Generates a pseudo-random number based on a seed
+ * @param seed - seed for the random number generator
+ * @returns - pseudo-random number
+ */
 export function simpleHash(str: string): number {
 	let hash = 0;
-
-	if (str === undefined || str.length === 0) {
-		return hash;
-	}
 
 	for (let i = 0; i < str.length; i++) {
 		hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
@@ -21,11 +31,22 @@ export function simpleHash(str: string): number {
 	return Math.abs(hash >>> 0);
 }
 
+/**
+ * Generates a pseudo-random time of day in minutes based on a seed
+ * @param seed - seed for the random number generator
+ * @param min - minimum time in minutes 
+ * @param max - maximum time in minutes 
+ * @returns pseudo-random time in minutes
+ */
 export function getSeededTimeInMinutes(seed: number, min: number, max: number): number {
 	return min + (seed % (max - min)) - max;
 }
 
-// Splits a number into two halves and pads them with zeros to make sure they are the same length
+/**
+ * Splits a number into two halves and pads them with zeros to make sure they are the same length
+ * @param input - number to split
+ * @returns - tuple containing the two halves of the number
+ */
 export function splitAndPadNumber(input: number): [number, number] {
 	const numberString = input.toString();
 	const halfLength = Math.ceil(numberString.length / 2);
@@ -334,7 +355,7 @@ export function getCompassDirectionFromHeading(heading: number) {
 	return compassDirections[index];
 }
 
-/***
+/**
  * Converts a number of minutes to a time string in the format HH:MM
  * @param minutes - number of minutes
  * @returns - time string in the format HH:MM
@@ -355,7 +376,7 @@ export function convertMinutesToTimeString(minutes: number): string {
 	return timeString;
 }
 
-/***
+/**
  * Gets a pseudo-random squawk code deterministically based on a seed and an airspace ID
  * @param seed - seed for the random number generator
  * @param airspaceId - ID of the airspace
@@ -371,7 +392,7 @@ export function getRandomSqwuakCode(seed: number, airspaceId: string): string {
 	return code.toString();
 }
 
-/***
+/**
  * Gets a pseudo-random frequency in the format XXX.XXX deterministically based on a seed and an object ID
  * @remarks Frequency range 118.000 -> 137.000
  * @param seed - seed for the random number generator
@@ -480,7 +501,7 @@ export function findIntersections(route: Position[], airspaces: Airspace[]): Int
 	return intersections;
 }
 
-/***
+/**
  * Checks if a point is inside an airspace using the Turf library
  * @remarks The function first checks if the airspace's lower limit is greater than the max flight level, if so it returns false
  * @param point - point to check
@@ -497,7 +518,7 @@ export function isInAirspace(
 	return turf.booleanPointInPolygon(point, turf.polygon(airspace.coordinates));
 }
 
-/***
+/**
  * Checks if an airspace is included in a route using the Turf library
  * @remarks The function first checks if the route has more than one point, if so it checks if the route intersects the airspace
  * @remarks If the airspace's lower limit is greater than the max flight level, it returns false
