@@ -17,15 +17,15 @@ export const wellesbourneMountfordCoords: [number, number] = [52.192, -1.614];
 export const lerp = (x: number, y: number, a: number) => x * (1 - a) + y * a;
 
 /**
- * Generates a pseudo-random number based on a seed
+ * Generates a pseudo-random number based on a seed. Based on djb2 algorithm
  * @param seed - seed for the random number generator
  * @returns - pseudo-random number
  */
 export function simpleHash(str: string): number {
-	let hash = 0;
+	let hash = 5381;
 
 	for (let i = 0; i < str.length; i++) {
-		hash = ((hash << 5) - hash + str.charCodeAt(i)) | 0;
+		hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
 	}
 
 	return Math.abs(hash >>> 0);
