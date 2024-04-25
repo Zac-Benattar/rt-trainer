@@ -5,7 +5,6 @@
 	import 'leaflet/dist/leaflet.css';
 	import MessageInput from './SimulatorComponents/MessageInput.svelte';
 	import MessageOutput from './SimulatorComponents/MessageOutput.svelte';
-	import type { ParseResponse as ParseResult } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, Stepper, Step } from '@skeletonlabs/skeleton';
@@ -42,7 +41,6 @@
 	import { isCallsignStandardRegistration, replaceWithPhoneticAlphabet } from '$lib/ts/utils';
 	import { goto } from '$app/navigation';
 	import RadioCall from '$lib/ts/RadioCall';
-	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './SimulatorComponents/Altimeter.svelte';
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
@@ -52,8 +50,8 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import L from 'leaflet';
-	import Parser from '$lib/ts/Parser';
-	import type Scenario from '$lib/ts/Scenario';
+	import Parser, { type ParseResponse } from '$lib/ts/Parser';
+	import type Scenario from '$lib/ts/SceParseResult
 
 	// Simulator state and settings
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
@@ -334,7 +332,7 @@
 	 * @param parseResult - The result of parsing
 	 * @returns void
 	 */
-	function handleFeedback(parseResult: ParseResult): boolean {
+	function handleFeedback(parseResult: ParseResponse): boolean {
 		// Update stores with the radio call and feedback
 		const feedback = parseResult.feedback;
 
@@ -360,8 +358,7 @@
 				toastStore.trigger(t);
 			}
 		}
-
-		// Get whether there are severe mistakes, and record all minor ones
+ParseResult	// Get whether there are severe mistakes, and record all minor ones
 		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();
 		let minorMistakes: string[] = feedback.getMinorMistakes();
 		let severeMistakes: string[] = feedback.getSevereMistakes();
