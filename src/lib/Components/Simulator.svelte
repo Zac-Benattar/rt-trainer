@@ -1,12 +1,11 @@
 <script lang="ts">
-	import { SpeechSynthesis } from 'speech-synthesis';
 	import Radio from './SimulatorComponents/Radio.svelte';
 	import Transponder from './SimulatorComponents/Transponder.svelte';
 	import Map from './Leaflet/Map.svelte';
 	import 'leaflet/dist/leaflet.css';
 	import MessageInput from './SimulatorComponents/MessageInput.svelte';
 	import MessageOutput from './SimulatorComponents/MessageOutput.svelte';
-	import type { ServerResponse } from '$lib/ts/ServerClientTypes';
+	import type { ParseResponse as ParseResult } from '$lib/ts/ServerClientTypes';
 	import { onMount } from 'svelte';
 	import type { ModalSettings, ToastSettings } from '@skeletonlabs/skeleton';
 	import { getModalStore, getToastStore, Stepper, Step } from '@skeletonlabs/skeleton';
@@ -32,9 +31,7 @@
 		OnRouteAirspacesStore,
 		CurrentScenarioPointStore,
 		CurrentScenarioContextStore,
-
 		SpeechNoiseStore
-
 	} from '$lib/stores';
 	import type {
 		TransponderState,
@@ -47,7 +44,6 @@
 	import RadioCall from '$lib/ts/RadioCall';
 	import Feedback from '$lib/ts/Feedback';
 	import Altimeter from './SimulatorComponents/Altimeter.svelte';
-	import Scenario, { checkRadioCallByServer } from '$lib/ts/Scenario';
 	import Polyline from '$lib/Components/Leaflet/Polyline.svelte';
 	import Polygon from '$lib/Components/Leaflet/Polygon.svelte';
 	import Popup from '$lib/Components/Leaflet/Popup.svelte';
@@ -56,9 +52,10 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import L from 'leaflet';
+	import Parser from '$lib/ts/Parser';
+	import type Scenario from '$lib/ts/Scenario';
 
 	// Simulator state and settings
-	let seed: string;
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
 	let radioState: RadioState; // Current radio settings
 	let transponderState: TransponderState; // Current transponder settings
@@ -111,7 +108,7 @@
 	}
 
 	$: if (readRecievedCalls && atcMessage) {
-		speakATCMessageWithNoise(speechNoiseLevel);
+		TTSWithNoise(speechNoiseLevel);
 	}
 
 	$: tutorialStep2 = transponderState?.dialMode == 'SBY' && radioState?.dialMode == 'SBY';
@@ -225,7 +222,7 @@
 	 *
 	 * @returns void
 	 */
-	function speakATCMessageWithNoise(noiseLevel: number): void {
+	function TTSWithNoise(noiseLevel: number): void {
 		if ('speechSynthesis' in window) {
 			// Get the speech synthesis API and audio context
 			const synth = window.speechSynthesis;
@@ -258,7 +255,7 @@
 	 * Generates static noise for the speech synthesis API in the form of an AudioBuffer
 	 * @param duration - The duration of the noise in seconds
 	 * @param sampleRate - The sample rate of the noise
-	 * 
+	 *
 	 * @returns AudioBuffer
 	 */
 	function generateStaticNoise(duration: number, sampleRate: number) {
@@ -281,7 +278,7 @@
 	 *
 	 * @returns boolean
 	 */
-	function checkClientStateMatchesServerState(): boolean {
+	function checkClientSimStateCorrect(): boolean {
 		if (radioState.dialMode == 'OFF') {
 			modalStore.trigger({
 				type: 'alert',
@@ -328,25 +325,18 @@
 	}
 
 	/**
-	 * Handles the feedback from the server
+	 * Handles the feedback from the parser
 	 *
 	 * @remarks
-	 * This function handles the feedback from the server and adjusts the simulator state accordingly.
+	 * This function handles the feedback given by and adjusts the simulator state accordingly.
 	 * A modal is shown if the user has made 3 mistakes in a row, asking if they want to be given the correct call.
 	 *
-	 * @param serverResponse - The server response
+	 * @param parseResult - The result of parsing
 	 * @returns void
 	 */
-	function handleFeedback(serverResponse: ServerResponse): boolean {
+	function handleFeedback(parseResult: ParseResult): boolean {
 		// Update stores with the radio call and feedback
-		const feedbackData = JSON.parse(serverResponse.feedbackDataJSON);
-		const feedback = new Feedback();
-		feedbackData.minorMistakes.forEach((element: string) => {
-			feedback.pushMistake(element, false);
-		});
-		feedbackData.severeMistakes.forEach((element: string) => {
-			feedback.pushMistake(element, true);
-		});
+		const feedback = parseResult.feedback;
 
 		currentRadioCall.setFeedback(feedback);
 		RadioCallsHistoryStore.update((value) => {
@@ -389,7 +379,7 @@
 					response: (r: boolean) => {
 						if (r) {
 							// Put the correct call in the input box
-							ExpectedUserMessageStore.set(serverResponse.expectedUserCall);
+							ExpectedUserMessageStore.set(parseResult.expectedUserCall);
 						} else {
 							failedAttempts = -7;
 						}
@@ -443,15 +433,12 @@
 	 * Handles the submit radio message event
 	 *
 	 * @remarks
-	 * This function handles the submit event and sends the user message to the server for processing.
-	 * It also handles the feedback from the server and adjusts the simulator state accordingly.
+	 * This function handles the submit event and checks the user's radio call.
+	 * Gives feedback, adjusting the simulator state accordingly.
 	 *
 	 * @returns void
 	 */
-	async function handleSubmit() {
-		// Prevent race conditions from multiple calls
-		if (awaitingRadioCallCheck) return;
-
+	function handleSubmit() {
 		// Check the call is not empty
 		if (
 			userMessage == undefined ||
@@ -461,27 +448,28 @@
 			return;
 		}
 
-		// Check state matches expected state
+		// Check sim state matches expected state
 		if (scenario == undefined) {
 			console.log('Error: No route');
 			modalStore.trigger({
 				type: 'alert',
-				title: 'Connection to server failed',
-				body: 'This may be due to the server being offline. Come back later and try again.'
+				title: 'Scenario Error',
+				body: 'No scenario is loaded. Refresh the page to try again.'
 			});
 			return;
 		}
 
-		// Ensure the client state (adjustable UI elements such as transponder frequency) matches the server state
-		if (!checkClientStateMatchesServerState()) {
+		// Ensure the client state is correct for this call
+		// (adjustable elements e.g. transponder frequency)
+		if (!checkClientSimStateCorrect()) {
 			return;
 		}
 
-		// Send message to server, use a lock to prevent multiple calls
-		awaitingRadioCallCheck = true;
+		console.log('User message: ' + userMessage);
+
+		// Create radio call object
 		currentRadioCall = new RadioCall(
 			userMessage,
-			seed,
 			scenario,
 			aircraftDetails.prefix,
 			aircraftDetails.callsign,
@@ -493,22 +481,14 @@
 			transponderState.frequency,
 			aircraftDetails.aircraftType
 		);
-		let tempServerResponse = await checkRadioCallByServer(currentRadioCall);
-		if (tempServerResponse === undefined || tempServerResponse === null) {
-			// Handle error
-			serverNotResponding = true;
-			awaitingRadioCallCheck = false;
 
-			return;
-		}
+		console.log(currentRadioCall);
 
-		// Set server response and flags to false
-		const serverResponse = tempServerResponse;
-		awaitingRadioCallCheck = false;
-		serverNotResponding = false;
+		// Check the call is valid
+		const response = Parser.parseCall(currentRadioCall);
 
 		// Adjust the simulator state based on the feedback
-		if (!handleFeedback(serverResponse)) return;
+		if (!handleFeedback(response)) return;
 
 		// If the user has reached the end of the route, then show a modal asking if they want to view their feedback
 		if (currentRoutePointIndex == endPointIndex) {
@@ -532,7 +512,7 @@
 			value++;
 			return value;
 		});
-		MostRecentlyReceivedMessageStore.set(serverResponse.responseCall);
+		MostRecentlyReceivedMessageStore.set(response.responseCall);
 	}
 
 	function onStepHandler(e: {

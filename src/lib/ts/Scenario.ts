@@ -6,9 +6,6 @@ import {
 	StartPointIndexStore,
 	WaypointsStore
 } from '$lib/stores';
-import axios from 'axios';
-import type { ServerResponse } from './ServerClientTypes';
-import type RadioCall from './RadioCall';
 import Waypoint from './AeronauticalClasses/Waypoint';
 import ScenarioPoint from './ScenarioPoints';
 import { Type } from 'class-transformer';
@@ -80,10 +77,6 @@ let endPointIndex = 0;
 EndPointIndexStore.subscribe((value) => {
 	endPointIndex = value;
 });
-let routeGenerated = false;
-NullRouteStore.subscribe((value) => {
-	routeGenerated = !value;
-});
 
 export function ResetCurrentRoutePointIndex(): void {
 	CurrentScenarioPointIndexStore.set(startPointIndex);
@@ -113,28 +106,4 @@ export function loadRouteData(routeData: RouteData): void {
 	ClearSimulationStores();
 	NullRouteStore.set(false);
 	WaypointsStore.set(routeData.waypoints.sort((a, b) => a.index - b.index));
-}
-
-/**
- * Checks the radio call by the server. Gets back the radio call in response, the feedback and the expected user response.
- *
- * @param radioCall - The radio call to check
- * @returns Promise<ServerResponse | undefined>
- */
-export async function checkRadioCallByServer(
-	radioCall: RadioCall
-): Promise<ServerResponse | undefined> {
-	if (!routeGenerated) {
-		console.log('Error: No route');
-		return;
-	}
-	try {
-		const response = await axios.post(`/parse`, {
-			data: radioCall
-		});
-
-		return response.data;
-	} catch (error) {
-		console.error('Error: ', error);
-	}
 }

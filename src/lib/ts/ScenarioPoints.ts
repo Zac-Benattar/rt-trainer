@@ -1,4 +1,3 @@
-import type { SimulatorUpdateData } from './ServerClientTypes';
 import { EmergencyType, type Pose } from './ScenarioTypes';
 import {
 	ChangeZoneStage,
@@ -30,6 +29,18 @@ import type { Position } from '@turf/turf';
 const AIRCRAFT_AVERAGE_SPEED = 125; // knots
 const NAUTICAL_MILE = 1852;
 const FLIGHT_TIME_MULTIPLIER = 1.3;
+
+/* Data used to update the simulator */
+export type SimulatorUpdateData = {
+	currentContext: string;
+	callsignModified: boolean;
+	squark: boolean;
+	currentTarget: string | undefined;
+	currentTargetFrequency: string | undefined;
+	currentTransponderFrequency: string;
+	currentPressure: number;
+	emergency: EmergencyType;
+};
 
 /* A point on the route used in generation. Not necissarily visible to the user */
 export default class ScenarioPoint {

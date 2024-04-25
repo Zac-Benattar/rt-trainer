@@ -7,7 +7,6 @@ import {
 	isCallsignStandardRegistration,
 	processString,
 	removePunctuation,
-	replacePhoneticAlphabetWithChars,
 	replaceWithPhoneticAlphabet,
 	simpleHash,
 	trimSpaces
@@ -43,7 +42,6 @@ export default class RadioCall {
 
 	constructor(
 		message: string,
-		seedString: string,
 		scenario: Scenario,
 		prefix: string,
 		userCallsign: string,
@@ -56,7 +54,7 @@ export default class RadioCall {
 		aircraftType: string
 	) {
 		this.message = message;
-		this.seed = simpleHash(seedString);
+		this.seed = simpleHash(scenario.seed);
 		this.scenario = scenario;
 		this.prefix = prefix;
 		this.userCallsign = userCallsign;
