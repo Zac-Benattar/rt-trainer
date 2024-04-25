@@ -222,7 +222,18 @@ export default class Airport {
 		const stdWindSpeed = 8;
 		const meanPressure = 1013.25 * Math.pow(1 - (6.5 * elevation) / 288150, 5.255); // Formula from https://rechneronline.de/physics/air-pressure-altitude.php
 		const stdPressure = 0.5;
-		const meanTemperature = 15 - (lat - 48) * 0.5;
+
+		/* Based on a simple model of temperature used by David Waltham in his blog to 
+		illustrate the effects of global warming in a simple model.
+
+		T = To – a.sin^2λ
+		Where To = average equatorial temp, a = constant, λ = latitude 
+
+		More info:
+		https://davidwaltham.com/global-warming-model/
+		*/
+		const meanTemperature = 30 - 40 * Math.pow(Math.sin(lat), 2);
+
 		const stdTemperature = 5;
 		const meanDewpoint = meanTemperature - 3;
 		const stdDewpoint = 1;
