@@ -411,7 +411,7 @@ export function getRandomFrequency(seed: number, objectId: string): string {
 }
 
 /**
- * Calculates the distance along a route a given target point is in meters
+ * Calculates the distance along a route a given target point in meters
  * @param route - route defined as array of Positions
  * @param targetPoint - target point on route
  * @returns - distance along the route in meters

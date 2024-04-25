@@ -26,7 +26,7 @@ import type Waypoint from './AeronauticalClasses/Waypoint';
 import type Airspace from './AeronauticalClasses/Airspace';
 import type { Position } from '@turf/turf';
 
-const AIRCRAFT_AVERAGE_SPEED = 125; // knots
+const AIRCRAFT_AVERAGE_SPEED = 3.75; // km per minute. 225 km/h, 120 knots, 140 mph (Cessna 172 max cruise speed)
 const NAUTICAL_MILE = 1852;
 const FLIGHT_TIME_MULTIPLIER = 1.3;
 
@@ -470,7 +470,8 @@ export function getEndAirportScenarioPoints(
 	const previousPointTime = previousScenarioPoint.timeAtPoint;
 	const distanceToLandingAirportFromPrevPoint = turf.distance(
 		previousScenarioPoint.pose.position,
-		endAirport.coordinates
+		endAirport.coordinates,
+		{ units: 'kilometers' }
 	);
 
 	const waypointCoords = waypoints.map((waypoint) => waypoint.location);
@@ -479,8 +480,7 @@ export function getEndAirportScenarioPoints(
 		previousPointTime +
 		10 +
 		Math.round(
-			(distanceToLandingAirportFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) *
-				FLIGHT_TIME_MULTIPLIER
+			(distanceToLandingAirportFromPrevPoint / AIRCRAFT_AVERAGE_SPEED) * FLIGHT_TIME_MULTIPLIER
 		);
 	const landingRunway = endAirport.getLandingRunway(seed);
 
@@ -893,11 +893,11 @@ export function getAirborneScenarioPoints(
 				{ units: 'kilometers' }
 			);
 		}
+
+		// distance in m, speed in m/min, time in min
 		const timeAtCurrentPoint =
 			timeAtPreviousPoint +
-			Math.round(
-				(distanceFromPrevPoint / AIRCRAFT_AVERAGE_SPEED / NAUTICAL_MILE) * FLIGHT_TIME_MULTIPLIER
-			);
+			Math.round((distanceFromPrevPoint / AIRCRAFT_AVERAGE_SPEED) * FLIGHT_TIME_MULTIPLIER);
 
 		const heading = Math.round(
 			turf.bearingToAngle(turf.bearing(previousPosition, airspaceIntersectionPoints[i].position))
