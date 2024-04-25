@@ -50,8 +50,8 @@
 	import type Airspace from '$lib/ts/AeronauticalClasses/Airspace';
 	import { WaypointType } from '$lib/ts/AeronauticalClasses/Waypoint';
 	import L from 'leaflet';
-	import Parser, { type ParseResponse } from '$lib/ts/Parser';
-	import type Scenario from '$lib/ts/SceParseResult
+	import Parser, { type ParseResult } from '$lib/ts/Parser';
+	import type Scenario from '$lib/ts/Scenario';
 
 	// Simulator state and settings
 	let aircraftDetails: AircraftDetails; // Current settings of the simulator
@@ -332,7 +332,7 @@
 	 * @param parseResult - The result of parsing
 	 * @returns void
 	 */
-	function handleFeedback(parseResult: ParseResponse): boolean {
+	function handleFeedback(parseResult: ParseResult): boolean {
 		// Update stores with the radio call and feedback
 		const feedback = parseResult.feedback;
 
@@ -358,7 +358,8 @@
 				toastStore.trigger(t);
 			}
 		}
-ParseResult	// Get whether there are severe mistakes, and record all minor ones
+
+		// Get whether there are severe mistakes, and record all minor ones
 		let callsignMentioned: boolean = currentRadioCall.callContainsUserCallsign();
 		let minorMistakes: string[] = feedback.getMinorMistakes();
 		let severeMistakes: string[] = feedback.getSevereMistakes();
