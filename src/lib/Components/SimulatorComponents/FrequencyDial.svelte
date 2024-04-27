@@ -131,7 +131,7 @@
 	.frequency-dial {
 		transition: all 0.35s ease-in-out 0s;
 		justify-content: center;
-		boxshadow: rgb(255, 255, 255) 0px 0px 20px -5px;
+		box-shadow: rgb(255, 255, 255) 0px 0px 20px -5px;
 	}
 
 	:global(.enabled) {

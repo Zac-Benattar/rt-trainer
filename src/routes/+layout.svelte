@@ -66,7 +66,7 @@
 		classesAppBar = 'w-auto';
 		classesSidebar = 'w-0';
 		burgerButton = 'lg';
-	} else if ($page.url.pathname.includes('/scenarioplanner')) {
+	} else if ($page.url.pathname.includes('/scenario-planner')) {
 		// If on route planner page hide sidebar and show burger button
 		showTopAppBar = false;
 		showNavigation = false;

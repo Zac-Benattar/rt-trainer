@@ -122,7 +122,7 @@
 		</form>
 		<footer class="flex flex-row justify-between {parent.regionFooter}">
 			<div class="flex flex-col place-content-center">
-				<a href="/scenarioplanner" class="anchor">Scenario Planner</a>
+				<a href="/scenario-planner" class="anchor">Scenario Planner</a>
 			</div>
 			<button
 				class="btn text-sm {parent.buttonPositive}"

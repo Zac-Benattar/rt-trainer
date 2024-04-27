@@ -2,8 +2,6 @@
 	import { RadioCallsHistoryStore } from '$lib/stores';
 	import { TreeView, TreeViewItem } from '@skeletonlabs/skeleton';
 	import { Accordion, AccordionItem } from '@skeletonlabs/skeleton';
-	import type RadioCall from '$lib/ts/RadioCall';
-	import { Feedback } from '$lib/ts/Feedback';
 	import Results from '$lib/ts/Results';
 	let results: Results;
 
