@@ -39,7 +39,8 @@
 			marker = L.marker(latLng, {
 				icon,
 				rotationAngle: rotation,
-				rotationOrigin: 'center center'
+				rotationOrigin: 'center center',
+				title: aeroObject?.name,
 			}).addTo(map);
 
 			if (draggable) marker.dragging?.enable();

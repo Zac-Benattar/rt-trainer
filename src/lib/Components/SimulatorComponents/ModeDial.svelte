@@ -188,6 +188,7 @@
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						style="width: 50%; height: 100%;"
+						aria-label="Decrement Mode"
 						on:click={decrementMode}
 						on:keypress={decrementMode}
 					/>
@@ -195,6 +196,7 @@
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						style="width: 50%; height: 100%"
+						aria-label="Increment Mode"
 						on:click={incrementMode}
 						on:keypress={incrementMode}
 					/>

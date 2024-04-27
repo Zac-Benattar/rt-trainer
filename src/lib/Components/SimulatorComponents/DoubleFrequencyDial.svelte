@@ -88,7 +88,6 @@
 			onDialOuterClockwiseTurn();
 			updateIntervalDuration(startIncrementingOuterClockwiseHold);
 		}, intervalDuration);
-
 	}
 
 	function stopIncrementingOuterClockwiseHold() {
@@ -109,10 +108,7 @@
 	});
 </script>
 
-<div
-	id={'dial-and-frequency-container-' + internalName}
-	class="flex items-center justify-center"
->
+<div id={'dial-and-frequency-container-' + internalName} class="flex items-center justify-center">
 	<div id={'dial-container-' + internalName} class="relative">
 		<div
 			id={'frequency-center-div-' + internalName}
@@ -159,6 +155,7 @@
 				<div
 					class="relative"
 					style="width: 50%;"
+					aria-label="Outer Dial Anti-Clockwise"
 					on:mousedown={startIncrementingOuterAntiClockwiseHold}
 					on:mouseup={stopIncrementingOuterAntiClockwiseHold}
 					on:mouseleave={stopIncrementingOuterAntiClockwiseHold}
@@ -167,6 +164,7 @@
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					style="width: 50%;"
+					aria-label="Outer Dial Clockwise"
 					on:mousedown={startIncrementingOuterClockwiseHold}
 					on:mouseup={stopIncrementingOuterClockwiseHold}
 					on:mouseleave={stopIncrementingOuterClockwiseHold}
@@ -209,6 +207,7 @@
 					<div
 						class="relative"
 						style="width: 50%;"
+						aria-label="Inner Dial Anti-Clockwise"
 						on:mousedown={startIncrementingInnerAntiClockwiseHold}
 						on:mouseup={stopIncrementingInnerAntiClockwiseHold}
 						on:mouseleave={stopIncrementingInnerAntiClockwiseHold}
@@ -217,6 +216,7 @@
 					<div
 						class="relative"
 						style="width: 50%;"
+						aria-label="Inner Dial Clockwise"
 						on:mousedown={startIncrementingInnerClockwiseHold}
 						on:mouseup={stopIncrementingInnerClockwiseHold}
 						on:mouseleave={stopIncrementingInnerClockwiseHold}

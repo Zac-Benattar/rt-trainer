@@ -84,8 +84,8 @@
 </script>
 
 {#if $modalStore[0]}
-	<div class={cBase}>
-		<header class={cHeader}>Quick create a Scenario</header>
+	<div class={cBase} title="Quick Generation" aria-label="Quick Generation modal">
+		<header class={cHeader} id="title">Quick Generation</header>
 		<form class="modal-form {cForm}">
 			<label class="label"
 				><span class="text-sm">Route Seed (required)</span>

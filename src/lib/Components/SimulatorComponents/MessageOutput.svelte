@@ -73,6 +73,9 @@
 							name="slider-label"
 							active="bg-primary-500"
 							size="sm"
+							role="switch"
+							aria-checked={readReceivedCalls}
+							aria-label="Toggle text-to-speech audio messages"
 							on:click={() => {
 								readReceivedCalls = !readReceivedCalls;
 							}}
@@ -95,6 +98,9 @@
 							active="bg-primary-500"
 							size="sm"
 							disabled={!readReceivedCalls}
+							role="switch"
+							aria-checked={speechNoiseLevel > 0}
+							aria-label="Toggle interference noise"
 							on:click={() => {
 								speechNoiseLevel = speechNoiseLevel === 0 ? 0.1 : 0;
 							}}

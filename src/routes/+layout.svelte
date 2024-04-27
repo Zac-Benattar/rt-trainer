@@ -21,7 +21,7 @@
 	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
-	import NoScenarioDataModal from '$lib/Components/Modals/QuickCreateScenarioModal.svelte';
+	import NoScenarioDataModal from '$lib/Components/Modals/QuickGenerationModal.svelte';
 
 	inject({ mode: dev ? 'development' : 'production' });
 	injectSpeedInsights();

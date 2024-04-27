@@ -18,6 +18,8 @@
 		<svelte:fragment slot="lead">
 			<div class="flex items-center">
 				<button
+					id="burgerButton"
+					aria-label="Toggle Navigation Drawer"
 					class="{burgerButton} btn btn-sm mr-4"
 					on:click={burgerButtonClicked}
 					on:keypress={burgerButtonClicked}

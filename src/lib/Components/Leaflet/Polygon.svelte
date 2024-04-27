@@ -30,7 +30,7 @@
 				color: color,
 				fillColor: fillColor !== undefined ? fillColor : color,
 				fillOpacity: fillOpacity,
-				weight: weight
+				weight: weight,
 			}).addTo(map);
 			polygon?.on('click', (e) => {
 				dispatch('click', { event: e, waypoint: aeroObject, polygon: polygon });

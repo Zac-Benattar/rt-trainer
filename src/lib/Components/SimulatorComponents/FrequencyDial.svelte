@@ -105,6 +105,7 @@
 					<div
 						class="w-100 h-100 z-[3]"
 						style="width: 50%; height: 100%;"
+						aria-label="Frequency dial anticlockwise turn"
 						on:mousedown={startIncrementingAntiClockwiseHold}
 						on:mouseup={stopIncrementingAntiClockwiseHold}
 						on:mouseleave={stopIncrementingAntiClockwiseHold}
@@ -113,6 +114,7 @@
 					<div
 						class="w-100 h-100 z-[3]"
 						style="width: 50%; height: 100%;"
+						aria-label="Frequency dial clockwise turn"
 						on:mousedown={startIncrementingClockwiseHold}
 						on:mouseup={stopIncrementingClockwiseHold}
 						on:mouseleave={stopIncrementingClockwiseHold}

@@ -118,6 +118,9 @@
 					checked={liveFeedback}
 					active="bg-primary-500"
 					size="sm"
+					role="switch"
+					aria-checked={liveFeedback}
+					aria-label="Toggle live feedback"
 					on:click={() => {
 						liveFeedback = !liveFeedback;
 					}}
@@ -144,6 +147,9 @@
 						checked={speechInput}
 						active="bg-primary-500"
 						size="sm"
+						role="switch"
+						aria-checked={speechInput}
+						aria-label="Toggle speech input"
 						on:click={() => {
 							speechInput = !speechInput;
 							if (speechInput) {
