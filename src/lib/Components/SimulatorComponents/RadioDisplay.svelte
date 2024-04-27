@@ -63,18 +63,18 @@
 	.radio-segdisplay .mode-icon {
 		font-family: DSEG7ClassicMini;
 		font-size: 23px;
-		text-algin: left;
+		text-align: left;
 		padding: 2px;
 	}
 
 	.radio-segdisplay .rdigit {
 		font-family: DSEG7ClassicMini;
-		text-algin: right;
+		text-align: right;
 		padding: 8px 0px;
 	}
 
 	.radio-segdisplay .divider-pipe {
-		text-algin: right;
+		text-align: right;
 		padding: 8px 0px;
 	}
 </style>
