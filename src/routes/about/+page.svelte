@@ -1,9 +1,3 @@
-<script lang="ts">
-	import type { PageData } from './$types';
-
-	export let data: PageData;
-</script>
-
 <div class="flex flex-row place-content-center h-full w-full">
 	<div class="flex flex-col p-5 place-content-center h-full w-full gap-5 sm:w-8/12">
 		<div class="p-1 h2">About</div>
@@ -42,16 +36,6 @@
 				is licensed under the
 				<a class="anchor" href="https://opensource.org/licenses/MIT">MIT License</a>.
 			</p>
-		</div>
-
-		<div>
-			<div class="p-1 h3">Most recent GitHub commit</div>
-			<div class="p-3">
-				<div class="p-3 card pre">
-					<div class="">{data.commitDate}</div>
-					<div class="">{data.commitMessage}</div>
-				</div>
-			</div>
 		</div>
 
 		<div class="p-1 h3">Contact</div>
