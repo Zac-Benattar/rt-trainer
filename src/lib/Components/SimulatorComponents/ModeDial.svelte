@@ -15,7 +15,7 @@
 	export let Modes: ArrayMaxLength7MinLength2;
 	export let CurrentModeIndex: number = 0;
 	export let DialEnabled: boolean = false;
-	let internalName = Math.random().toString(36).substring(7);
+	export let id: string = '';
 	let mounted: boolean = false;
 	let width: string = Modes.length > 2 ? 'w-40' : 'w-28';
 
@@ -24,7 +24,7 @@
 	$: dispatch('modeChange', CurrentModeIndex);
 
 	$: if (mounted) {
-		const modeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
+		const modeDial = document.getElementById('mode-dial-' + id) as HTMLDivElement;
 		if (DialEnabled) {
 			modeDial.classList.add('enabled');
 		} else {
@@ -33,7 +33,7 @@
 	}
 
 	const handleDialClick = () => {
-		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
+		const ModeDial = document.getElementById('mode-dial-' + id) as HTMLDivElement;
 		if (ModeDial != null) {
 			/* If there are only two modes no need to check the side of dial to 
             / determine rotation direction */
@@ -48,7 +48,7 @@
 		var tgt = event.target as HTMLDivElement;
 		var mode = tgt.id.split('-')[1];
 		const ModeLabel = document.getElementById('mode-' + mode) as HTMLDivElement;
-		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
+		const ModeDial = document.getElementById('mode-dial-' + id) as HTMLDivElement;
 		if (ModeLabel != null && ModeDial != null) {
 			const ModeIndex = Modes.indexOf(mode);
 			if (ModeIndex > -1 && ModeIndex < Modes.length) {
@@ -71,7 +71,7 @@
 
 	function addModes() {
 		// Add mode clickable labels around dial from -150 to 150 degrees
-		var centerDiv = document.getElementById('mode-center-div-' + internalName) as HTMLDivElement;
+		var centerDiv = document.getElementById('mode-center-div-' + id) as HTMLDivElement;
 		var angle = 0.33 * Math.PI;
 		var step = (0.83 * 2 * Math.PI) / Modes.length;
 		var radius = 60;
@@ -104,7 +104,7 @@
 	function setMode(modeIndex: number) {
 		// goes from -150 to 150
 		const modesMultiplier = Math.round(300 / Modes.length);
-		const ModeDial = document.getElementById('mode-dial-' + internalName) as HTMLDivElement;
+		const ModeDial = document.getElementById('mode-dial-' + id) as HTMLDivElement;
 		if (ModeDial != null) {
 			if (Modes.length == 2) {
 				if (modeIndex == 0) {
@@ -136,18 +136,18 @@
 </script>
 
 <div
-	id={'dial-and-modes-container-' + internalName}
+	id={'dial-and-modes-container-' + id}
 	class="flex flex-row place-content-center {width}"
 	style="height:130px;"
 >
-	<div id={'dial-container-' + internalName} class="relative flex flex-col place-content-center">
+	<div id={'dial-container-' + id} class="relative flex flex-col place-content-center">
 		<div
-			id={'mode-center-div-' + internalName}
+			id={'mode-center-div-' + id}
 			class="absolute m-auto"
 			style="top: 50%; left: 50%;"
 		/>
 		<div
-			id={'mode-dial-' + internalName}
+			id={'mode-dial-' + id}
 			class="mode-dial w-20 h-20 flex border-2 rounded-full"
 			on:click={handleDialClick}
 			on:keydown={handleDialClick}

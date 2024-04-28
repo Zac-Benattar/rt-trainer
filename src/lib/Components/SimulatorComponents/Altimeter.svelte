@@ -76,6 +76,7 @@
 				on:dialAntiClockwiseTurn={onDecrementSideTurn}
 				on:dialClockwiseTurn={onIncrementSideTurn}
 				DialEnabled={true}
+				id="altimeter-pressure-dial"
 			/>
 		</div>
 		<div class="overlay">

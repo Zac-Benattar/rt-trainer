@@ -140,7 +140,12 @@
 <div
 	class="flex flex-row card gap-2 bg-neutral-600 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
 >
-	<Dial Modes={RadioDialModes} CurrentModeIndex={0} on:modeChange={onDialModeChange} />
+	<Dial
+		Modes={RadioDialModes}
+		CurrentModeIndex={0}
+		id="radio-mode-dial"
+		on:modeChange={onDialModeChange}
+	/>
 
 	<div class="flex flex-col place-content-end gap-1">
 		<div class="flex flex-row place-content-center">
@@ -170,6 +175,7 @@
 	<div class="flex flex-row mx-2 order-5">
 		<DoubleFrequencyDial
 			DialEnabled={frequencyDialEnabled}
+			id="radio-frequency-dial"
 			on:dialInnerAntiClockwiseTurn={onRadioFrequencyReduceSmall}
 			on:dialInnerClockwiseTurn={onRadioFrequencyIncreaseSmall}
 			on:dialOuterAntiClockwiseTurn={onRadioFrequencyReduceLarge}

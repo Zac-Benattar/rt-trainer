@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher, onMount } from 'svelte';
 	export let DialEnabled: boolean = false; // Dial not interactive if disabled
-	let internalName = Math.random().toString(36).substring(7); // like a uuid, useful if more than one instance used
+	export let id: string = '';
 	let mounted: boolean = false;
 	let intervalId: any;
 	let defaultIntervalDuration: number = 200;
@@ -12,7 +12,7 @@
 	// Ensures that dial is mounted before modifying its properties
 	$: if (mounted) {
 		const frequencyDial = document.getElementById(
-			'double-frequency-dial-outer-' + internalName
+			'double-frequency-dial-outer-' + id
 		) as HTMLDivElement;
 		if (DialEnabled) {
 			frequencyDial.classList.add('enabled');
@@ -108,15 +108,15 @@
 	});
 </script>
 
-<div id={'dial-and-frequency-container-' + internalName} class="flex items-center justify-center">
-	<div id={'dial-container-' + internalName} class="relative">
+<div id={id} class="flex items-center justify-center">
+	<div id={'dial-container-' + id} class="relative">
 		<div
-			id={'frequency-center-div-' + internalName}
+			id={'frequency-center-div-' + id}
 			class="absolute"
 			style="top: 50%; left: 50%; position: absolute; margin: auto;"
 		/>
 		<button
-			id={'double-frequency-dial-outer-' + internalName}
+			id={'double-frequency-dial-outer-' + id}
 			class="double-frequency-dial-outer flex"
 		>
 			<div class="absolute" style="left: 8px; top: 30%; width: 12px; pointer-events: none;">
@@ -146,7 +146,7 @@
 				>
 			</div>
 			<div
-				id={'click-container-' + internalName}
+				id={'click-container-' + id}
 				class="absolute flex flex-row"
 				style="top: 0px; left: 0px; width: 100%; height: 100%;"
 			>
@@ -171,7 +171,7 @@
 				/>
 			</div>
 			<button
-				id={'double-frequency-dial-inner-' + internalName}
+				id={'double-frequency-dial-inner-' + id}
 				class="double-frequency-dial-inner absolute flex"
 			>
 				<div class="absolute" style="left: 8px; top: 26%; width: 12px; pointer-events: none;">

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	export let DialEnabled: boolean = false;
-	let internalName = Math.random().toString(36).substring(7);
+	export let id: string = '';
 	var intervalId: any;
 	let intervalDuration: number = 250;
 
@@ -58,17 +58,17 @@
 
 <div class="flex flex-row {$$props.class}">
 	<div
-		id={'dial-and-frequency-container-' + internalName}
+		id={'dial-and-frequency-container-' + id}
 		class="flex flex-col place-content-center"
 	>
-		<div id={'dial-container-' + internalName} class="relative">
+		<div id={'dial-container-' + id} class="relative">
 			<div
-				id={'frequency-center-div-' + internalName}
+				id={'frequency-center-div-' + id}
 				class="w-0 h-0 absolute"
 				style="top: 50%; left: 50%; transform: rotate(0deg); position: absolute; margin: auto;"
 			/>
 			<button
-				id={'frequency-dial-' + internalName}
+				id={'frequency-dial-' + id}
 				class="frequency-dial flex w-20 h-20 flex border-2 rounded-full {enabledClass}"
 			>
 				<div style="position: absolute; left: 8px; top: 30%; width: 14px; pointer-events: none;">

@@ -151,7 +151,11 @@
 <div
 	class="flex flex-row card gap-2 bg-neutral-600 text-white grow place-content-evenly p-3 max-w-screen-lg flex-wrap"
 >
-	<Dial Modes={transponderDialModes} bind:CurrentModeIndex={dialModeIndex} />
+	<Dial
+		Modes={transponderDialModes}
+		id="transponder-mode-dial"
+		bind:CurrentModeIndex={dialModeIndex}
+	/>
 
 	<div class="display-panel flex flex-col justify-center items-center grow order-first sm:order-2">
 		<TransponderDisplay
@@ -173,6 +177,7 @@
 			on:dialAntiClockwiseTurn={onTransponderFrequencyReduce}
 			on:dialClockwiseTurn={onTransponderFrequencyIncrease}
 			DialEnabled={frequencyDialEnabled}
+			id="transponder-frequency-dial"
 		/>
 	</div>
 </div>
