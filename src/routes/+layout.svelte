@@ -16,15 +16,9 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import Navigation from '$lib/Components/NAVSidebar.svelte';
 	import ScenarioPlanSiderbar from '$lib/Components/ScenarioPlanSiderbar.svelte';
-	import { dev } from '$app/environment';
-	import { inject } from '@vercel/analytics';
-	import { injectSpeedInsights } from '@vercel/speed-insights/sveltekit';
 	import SvelteSeo from 'svelte-seo';
 	import 'reflect-metadata';
 	import NoScenarioDataModal from '$lib/Components/Modals/QuickGenerationModal.svelte';
-
-	inject({ mode: dev ? 'development' : 'production' });
-	injectSpeedInsights();
 
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 

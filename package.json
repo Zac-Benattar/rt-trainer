@@ -53,8 +53,6 @@
     "@types/dom-speech-recognition": "^0.0.4",
     "@types/geojson": "^7946.0.14",
     "@types/leaflet": "^1.9.8",
-    "@vercel/analytics": "^1.2.2",
-    "@vercel/speed-insights": "^1.0.10",
     "axios": "^1.6.2",
     "class-transformer": "^0.5.1",
     "leaflet": "^1.9.4",
