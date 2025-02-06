@@ -118,7 +118,7 @@ export async function getAllUKAirportsFromOpenAIP(): Promise<AirportData[]> {
 		const response = await axios.get(`https://api.core.openaip.net/api/airports`, {
 			headers: {
 				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
+				'x-openaip-api-key': OPENAIPKEY
 			},
 			params: {
 				country: 'GB',
@@ -141,7 +141,7 @@ export async function getAllUKAirspaceFromOpenAIP(): Promise<AirspaceData[]> {
 		const response1 = await axios.get(`https://api.core.openaip.net/api/airspaces`, {
 			headers: {
 				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
+				'x-openaip-api-key': OPENAIPKEY
 			},
 			params: {
 				page: 1,
@@ -175,7 +175,7 @@ export async function getAllUKAirportReportingPointsFromOpenAIP(): Promise<
 		const response = await axios.get(`https://api.core.openaip.net/api/reporting-points`, {
 			headers: {
 				'Content-Type': 'application/json',
-				'x-openaip-client-id': OPENAIPKEY
+				'x-openaip-api-key': OPENAIPKEY
 			},
 			params: {
 				country: 'GB',
