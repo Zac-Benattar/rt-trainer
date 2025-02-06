@@ -45,7 +45,7 @@
 			<LightSwitch />
 			<a
 				class="btn btn-icon"
-				href="https://github.com/Zac-Benattar/rt-trainer"
+				href="https://github.com/zcbntr/rt-trainer"
 				target="_blank"
 				rel="noreferrer"
 			>

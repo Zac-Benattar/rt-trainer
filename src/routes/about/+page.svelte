@@ -32,7 +32,7 @@
 				<a class="anchor" href="http://www.southwarwickshireflyingschool.com"
 					>South Warwickshire Flying School</a
 				>. The project is open source and can be found on
-				<a class="anchor" href="https://github.com/Zac-Benattar/rt-trainer">GitHub</a>, and
+				<a class="anchor" href="https://github.com/zcbntr/rt-trainer">GitHub</a>, and
 				is licensed under the
 				<a class="anchor" href="https://opensource.org/licenses/MIT">MIT License</a>.
 			</p>
